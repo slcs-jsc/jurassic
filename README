@@ -1,0 +1,54 @@
+
+======================================================================
+                               JURASSIC
+======================================================================
+
+Introduction
+------------
+
+The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast
+radiative transfer model for the mid-infrared spectral region
+developed at the Juelich Supercomputing Centre, Germany.
+
+JURASSIC has been developed to support the analysis of atmospheric
+remote sensing measurements. The model has been used to retrieve
+geophysical data such as pressure, temperature, and trace gas
+concentrations from ESA and NASA satellite measurements and
+observations of local aircraft experiments.
+
+
+Algorithms
+----------
+
+JURASSIC uses computationally efficient methods for the radiative
+transfer calculations. Radiative transfer calculations are based on
+the Curtis-Godson Approximation (CGA) and the Emissivity Growth
+Approximation (EGA). Band transmittances are obtained from
+pre-calculated look-up tables from line-by-line reference model
+calculations.
+
+JURASSIC features a 3-D raytracer to realize different observation
+geometries and to enable tomographic studies. JURASSIC has also been
+extended to perform Mie-scattering calculations for aerosol and ice
+particles. The model was carefully tested in intercomparisons with
+the Karlsruhe Optimized and Precise Radiative Transfer Algorithm
+(KOPRA) and the Oxford Reference Forward Model (RFM).
+
+
+Implementation
+--------------
+
+JURASSIC is written in the C programming language and consists of
+about 10,000 lines of code. It uses the GNU Scientific Library (GSL)
+for numerical operations. JURASSIC can be used on a desktop PC, but
+it also features an MPI/OpenMP hybrid-parallelization for efficient
+use on supercomputers.
+
+
+Contact
+-------
+
+We are interested in sharing JURASSIC for research applications.
+JURASSIC is distributed under the GNU GPL v3.
+
+Please contact us for further details.
