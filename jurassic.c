@@ -5452,38 +5452,34 @@ void write_matrix(
   i = j = 0;
   while (i < nr && j < nc) {
 
-    /* Check matrix value... */
-    if (gsl_matrix_get(matrix, i, j) != 0) {
-
-      /* Write info about the row... */
-      if (rowspace[0] == 'y')
-	fprintf(out, "%d %g %.2f %g %g %g",
-		(int) i, ctl->nu[rida[i]],
-		obs->time[rira[i]], obs->vpz[rira[i]],
-		obs->vplon[rira[i]], obs->vplat[rira[i]]);
-      else {
-	idx2name(ctl, riqa[i], quantity);
-	fprintf(out, "%d %s %.2f %g %g %g", (int) i, quantity,
-		atm->time[ripa[i]], atm->z[ripa[i]],
-		atm->lon[ripa[i]], atm->lat[ripa[i]]);
-      }
-
-      /* Write info about the column... */
-      if (colspace[0] == 'y')
-	fprintf(out, " %d %g %.2f %g %g %g",
-		(int) j, ctl->nu[cida[j]],
-		obs->time[cira[j]], obs->vpz[cira[j]],
-		obs->vplon[cira[j]], obs->vplat[cira[j]]);
-      else {
-	idx2name(ctl, ciqa[j], quantity);
-	fprintf(out, " %d %s %.2f %g %g %g", (int) j, quantity,
-		atm->time[cipa[j]], atm->z[cipa[j]],
-		atm->lon[cipa[j]], atm->lat[cipa[j]]);
-      }
-
-      /* Write matrix entry... */
-      fprintf(out, " %g\n", gsl_matrix_get(matrix, i, j));
+    /* Write info about the row... */
+    if (rowspace[0] == 'y')
+      fprintf(out, "%d %g %.2f %g %g %g",
+	      (int) i, ctl->nu[rida[i]],
+	      obs->time[rira[i]], obs->vpz[rira[i]],
+	      obs->vplon[rira[i]], obs->vplat[rira[i]]);
+    else {
+      idx2name(ctl, riqa[i], quantity);
+      fprintf(out, "%d %s %.2f %g %g %g", (int) i, quantity,
+	      atm->time[ripa[i]], atm->z[ripa[i]],
+	      atm->lon[ripa[i]], atm->lat[ripa[i]]);
     }
+
+    /* Write info about the column... */
+    if (colspace[0] == 'y')
+      fprintf(out, " %d %g %.2f %g %g %g",
+	      (int) j, ctl->nu[cida[j]],
+	      obs->time[cira[j]], obs->vpz[cira[j]],
+	      obs->vplon[cira[j]], obs->vplat[cira[j]]);
+    else {
+      idx2name(ctl, ciqa[j], quantity);
+      fprintf(out, " %d %s %.2f %g %g %g", (int) j, quantity,
+	      atm->time[cipa[j]], atm->z[cipa[j]],
+	      atm->lon[cipa[j]], atm->lat[cipa[j]]);
+    }
+
+    /* Write matrix entry... */
+    fprintf(out, " %g\n", gsl_matrix_get(matrix, i, j));
 
     /* Set matrix indices... */
     if (sort[0] == 'r') {

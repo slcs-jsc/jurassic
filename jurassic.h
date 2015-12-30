@@ -165,7 +165,7 @@
 #define NFOV 5
 
 /*! Maximum number of pressure levels in emissivity tables. */
-#define TBLNP 40
+#define TBLNP 41
 
 /*! Maximum number of temperatures in emissivity tables. */
 #define TBLNT 30
