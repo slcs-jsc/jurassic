@@ -66,7 +66,7 @@
 /*! Print error message and quit program. */
 #define ERRMSG(msg) {							\
     printf("\nError (%s, %s, l%d): %s\n\n",				\
-	   __FILE__, __FUNCTION__, __LINE__, msg);			\
+	   __FILE__, __func__, __LINE__, msg);				\
     exit(EXIT_FAILURE);							\
   }
 
@@ -86,11 +86,11 @@
 /*! Print macro for debugging. */
 #define PRINT(format, var)						\
   printf("Print (%s, %s, l%d): %s= "format"\n",				\
-	 __FILE__, __FUNCTION__, __LINE__, #var, var);
+	 __FILE__, __func__, __LINE__, #var, var);
 
 /*! Start or stop a timer. */
-#define TIMER(name, mode)					\
-  {timer(name, __FILE__, __FUNCTION__, __LINE__, mode);}
+#define TIMER(name, mode)				\
+  {timer(name, __FILE__, __func__, __LINE__, mode);}
 
 /*! Read string tokens. */
 #define TOK(line, tok, format, var) {			\
