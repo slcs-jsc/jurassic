@@ -4032,22 +4032,12 @@ void intpol_tbl_cga(
 	  eps11 =
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, los->cgu[ig][ip]);
 
-	  /* Check range of emissivites... */
-	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
-	  eps01 = GSL_MAX(GSL_MIN(eps01, 1), 0);
-	  eps10 = GSL_MAX(GSL_MIN(eps10, 1), 0);
-	  eps11 = GSL_MAX(GSL_MIN(eps11, 1), 0);
-
 	  /* Interpolate with respect to temperature... */
 	  eps00 = LIN(tbl->t[ig][id][ipr][it0], eps00,
 		      tbl->t[ig][id][ipr][it0 + 1], eps01, los->cgt[ig][ip]);
 	  eps11 = LIN(tbl->t[ig][id][ipr + 1][it1], eps10,
 		      tbl->t[ig][id][ipr + 1][it1 + 1], eps11,
 		      los->cgt[ig][ip]);
-
-	  /* Check range of emissivites... */
-	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
-	  eps11 = GSL_MAX(GSL_MIN(eps11, 1), 0);
 
 	  /* Interpolate with respect to pressure... */
 	  eps00 = LIN(tbl->p[ig][id][ipr], eps00,
@@ -4130,36 +4120,31 @@ void intpol_tbl_ega(
 	  /* Get emissivities of extended path... */
 	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, 1 - tau_path[ig][id]);
 	  eps00 = intpol_tbl_eps(tbl, ig, id, ipr, it0, u + los->u[ig][ip]);
-	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
 
 	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, 1 - tau_path[ig][id]);
 	  eps01 =
 	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, u + los->u[ig][ip]);
-	  eps01 = GSL_MAX(GSL_MIN(eps01, 1), 0);
 
 	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, 1 - tau_path[ig][id]);
 	  eps10 =
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, u + los->u[ig][ip]);
-	  eps10 = GSL_MAX(GSL_MIN(eps10, 1), 0);
 
 	  u =
 	    intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, 1 - tau_path[ig][id]);
 	  eps11 =
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, u + los->u[ig][ip]);
-	  eps11 = GSL_MAX(GSL_MIN(eps11, 1), 0);
 
 	  /* Interpolate with respect to temperature... */
 	  eps00 = LIN(tbl->t[ig][id][ipr][it0], eps00,
 		      tbl->t[ig][id][ipr][it0 + 1], eps01, los->t[ip]);
-	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
-
 	  eps11 = LIN(tbl->t[ig][id][ipr + 1][it1], eps10,
 		      tbl->t[ig][id][ipr + 1][it1 + 1], eps11, los->t[ip]);
-	  eps11 = GSL_MAX(GSL_MIN(eps11, 1), 0);
 
 	  /* Interpolate with respect to pressure... */
 	  eps00 = LIN(tbl->p[ig][id][ipr], eps00,
 		      tbl->p[ig][id][ipr + 1], eps11, los->p[ip]);
+
+	  /* Check emssivity range... */
 	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
 
 	  /* Determine segment emissivity... */
@@ -4188,14 +4173,29 @@ double intpol_tbl_eps(
 
   int idx;
 
-  /* Get index... */
-  idx = locate_tbl(tbl->u[ig][id][ip][it], tbl->nu[ig][id][ip][it], u);
+  /* Lower boundary... */
+  if (u < tbl->u[ig][id][ip][it][0])
+    return LIN(0, 0, tbl->u[ig][id][ip][it][0], tbl->eps[ig][id][ip][it][0],
+	       u);
 
-  /* Interpolate... */
-  return
-    LIN(tbl->u[ig][id][ip][it][idx], tbl->eps[ig][id][ip][it][idx],
-	tbl->u[ig][id][ip][it][idx + 1], tbl->eps[ig][id][ip][it][idx + 1],
-	u);
+  /* Upper boundary... */
+  else if (u > tbl->u[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1])
+    return LIN(tbl->u[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
+	       tbl->eps[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
+	       1e30, 1, u);
+
+  /* Interpolation... */
+  else {
+
+    /* Get index... */
+    idx = locate_tbl(tbl->u[ig][id][ip][it], tbl->nu[ig][id][ip][it], u);
+
+    /* Interpolate... */
+    return
+      LIN(tbl->u[ig][id][ip][it][idx], tbl->eps[ig][id][ip][it][idx],
+	  tbl->u[ig][id][ip][it][idx + 1], tbl->eps[ig][id][ip][it][idx + 1],
+	  u);
+  }
 }
 
 /*****************************************************************************/
@@ -4210,14 +4210,29 @@ double intpol_tbl_u(
 
   int idx;
 
-  /* Get index... */
-  idx = locate_tbl(tbl->eps[ig][id][ip][it], tbl->nu[ig][id][ip][it], eps);
+  /* Lower boundary... */
+  if (eps < tbl->eps[ig][id][ip][it][0])
+    return LIN(0, 0, tbl->eps[ig][id][ip][it][0], tbl->u[ig][id][ip][it][0],
+	       eps);
 
-  /* Interpolate... */
-  return
-    LIN(tbl->eps[ig][id][ip][it][idx], tbl->u[ig][id][ip][it][idx],
-	tbl->eps[ig][id][ip][it][idx + 1], tbl->u[ig][id][ip][it][idx + 1],
-	eps);
+  /* Upper boundary... */
+  else if (eps > tbl->eps[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1])
+    return LIN(tbl->eps[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
+	       tbl->u[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
+	       1, 1e30, eps);
+
+  /* Interpolation... */
+  else {
+
+    /* Get index... */
+    idx = locate_tbl(tbl->eps[ig][id][ip][it], tbl->nu[ig][id][ip][it], eps);
+
+    /* Interpolate... */
+    return
+      LIN(tbl->eps[ig][id][ip][it][idx], tbl->u[ig][id][ip][it][idx],
+	  tbl->eps[ig][id][ip][it][idx + 1], tbl->u[ig][id][ip][it][idx + 1],
+	  eps);
+  }
 }
 
 /*****************************************************************************/
