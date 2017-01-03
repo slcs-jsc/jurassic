@@ -31,6 +31,12 @@ int main(
   static atm_t atm_in, atm_pts;
   static ctl_t ctl;
 
+  double k[NW], q[NG];
+
+  int ig, ip, iw;
+
+  /* Interpolate atmospheric data... */
+
   /* Check arguments... */
   if (argc < 5)
     ERRMSG("Give parameters: <ctl> <atm_in> <atm_pts> <atm_out>");
@@ -43,7 +49,14 @@ int main(
   read_atm(NULL, argv[3], &ctl, &atm_pts);
 
   /* Interpolate atmospheric data... */
-  intpol_atm(&ctl, &atm_pts, &atm_in);
+  for (ip = 0; ip < atm_pts.np; ip++) {
+    intpol_atm(&ctl, &atm_in, atm_pts.z[ip], atm_pts.lon[ip],
+	       atm_pts.lat[ip], &atm_pts.p[ip], &atm_pts.t[ip], q, k);
+    for (ig = 0; ig < ctl.ng; ig++)
+      atm_pts.q[ig][ip] = q[ig];
+    for (iw = 0; iw < ctl.nw; iw++)
+      atm_pts.k[iw][ip] = k[iw];
+  }
 
   /* Save interpolated data... */
   write_atm(NULL, argv[4], &ctl, &atm_pts);

@@ -176,12 +176,6 @@
 /*! Maximum number of source function temperature levels. */
 #define TBLNS 1201
 
-/*! Maximum number of RFM spectral grid points. */
-#define RFMNPTS 10000000
-
-/*! Maximum length of RFM data lines. */
-#define RFMLINE 100000
-
 /* ------------------------------------------------------------
    Quantity indices...
    ------------------------------------------------------------ */
@@ -276,7 +270,7 @@ typedef struct {
   /*! Compute O2 continuum (0=no, 1=yes). */
   int ctm_o2;
 
-  /*! Interpolation method (1=profile, 2=satellite track, 3=Lagrangian grid). */
+  /*! Interpolation method (1=profile, 2=satellite track). */
   int ip;
 
   /*! Influence length for vertical interpolation [km]. */
@@ -327,17 +321,8 @@ typedef struct {
   /*! Write matrix file (0=no, 1=yes). */
   int write_matrix;
 
-  /*! Forward model (1=CGA, 2=EGA, 3=RFM). */
+  /*! Forward model (1=CGA, 2=EGA). */
   int formod;
-
-  /*! Path to RFM binary. */
-  char rfmbin[LEN];
-
-  /*! HITRAN file for RFM. */
-  char rfmhit[LEN];
-
-  /*! Emitter cross-section files for RFM. */
-  char rfmxsc[NG][LEN];
 
 } ctl_t;
 
@@ -576,12 +561,6 @@ void formod_pencil(
   obs_t * obs,
   int ir);
 
-/*! Apply RFM for radiative transfer calculations. */
-void formod_rfm(
-  ctl_t * ctl,
-  atm_t * atm,
-  obs_t * obs);
-
 /*! Compute Planck source function. */
 void formod_srcfunc(
   ctl_t * ctl,
@@ -624,14 +603,8 @@ void init_tbl(
   ctl_t * ctl,
   tbl_t * tbl);
 
-/*! Interpolate complete atmospheric data set. */
-void intpol_atm(
-  ctl_t * ctl,
-  atm_t * atm_dest,
-  atm_t * atm_src);
-
 /*! Interpolate atmospheric data for given geolocation. */
-void intpol_atm_geo(
+void intpol_atm(
   ctl_t * ctl,
   atm_t * atm,
   double z0,
@@ -656,18 +629,6 @@ void intpol_atm_1d(
 
 /*! Interpolate 2D atmospheric data (satellite track). */
 void intpol_atm_2d(
-  ctl_t * ctl,
-  atm_t * atm,
-  double z0,
-  double lon0,
-  double lat0,
-  double *p,
-  double *t,
-  double *q,
-  double *k);
-
-/*! Interpolate 3D atmospheric data (Lagrangian grid). */
-void intpol_atm_3d(
   ctl_t * ctl,
   atm_t * atm,
   double z0,
@@ -791,21 +752,6 @@ void read_obs(
   ctl_t * ctl,
   obs_t * obs);
 
-/*! Read observation data in RFM format. */
-double read_obs_rfm(
-  const char *basename,
-  double z,
-  double *nu,
-  double *f,
-  int n);
-
-/*! Read RFM spectrum. */
-void read_rfm_spec(
-  const char *filename,
-  double *nu,
-  double *rad,
-  int *npts);
-
 /*! Read shape function. */
 void read_shape(
   const char *filename,
@@ -856,12 +802,6 @@ void timer(
 /*! Write atmospheric data. */
 void write_atm(
   const char *dirname,
-  const char *filename,
-  ctl_t * ctl,
-  atm_t * atm);
-
-/*! Write atmospheric data in RFM format. */
-void write_atm_rfm(
   const char *filename,
   ctl_t * ctl,
   atm_t * atm);

@@ -2849,8 +2849,8 @@ double ctmn2(
   beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
-  return 0.1 * gsl_pow_2(p / P0) * gsl_pow_2(t0 / t) * exp(beta *
-							   (1 / tr - 1 / t))
+  return 0.1 * gsl_pow_2(p / P0) * gsl_pow_2(t0 / t)
+    * exp(beta * (1 / tr - 1 / t))
     * q_n2 * b * (q_n2 + (1 - q_n2) * (1.294 - 0.4545 * t / tr));
 }
 
@@ -2911,10 +2911,8 @@ double ctmo2(
   beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
-  return 0.1 * gsl_pow_2(p / P0) * gsl_pow_2(t0 / t) * exp(beta *
-							   (1 / tr -
-							    1 / t)) * q_o2 *
-    b;
+  return 0.1 * gsl_pow_2(p / P0) * gsl_pow_2(t0 / t)
+    * exp(beta * (1 / tr - 1 / t)) * q_o2 * b;
 }
 
 /*****************************************************************************/
@@ -3036,14 +3034,9 @@ void formod(
   /* Hydrostatic equilibrium... */
   hydrostatic(ctl, atm);
 
-  /* Internal forward model... */
-  if (ctl->formod == 1 || ctl->formod == 2)
-    for (ir = 0; ir < obs->nr; ir++)
-      formod_pencil(ctl, atm, obs, ir);
-
-  /* Call RFM... */
-  else if (ctl->formod == 3)
-    formod_rfm(ctl, atm, obs);
+  /* Claculate pencil beams... */
+  for (ir = 0; ir < obs->nr; ir++)
+    formod_pencil(ctl, atm, obs, ir);
 
   /* Apply field-of-view convolution... */
   formod_fov(ctl, obs);
@@ -3262,150 +3255,6 @@ void formod_pencil(
     for (id = 0; id < ctl->nd; id++)
       obs->rad[id][ir] += src_planck[id] * obs->tau[id][ir];
   }
-
-  /* Free... */
-  free(los);
-}
-
-/*****************************************************************************/
-
-void formod_rfm(
-  ctl_t * ctl,
-  atm_t * atm,
-  obs_t * obs) {
-
-  los_t *los;
-
-  FILE *out;
-
-  char cmd[LEN], filename[LEN], rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
-
-  double f[NSHAPE], nu[NSHAPE], nu0, nu1, obsz = -999, tsurf,
-    xd[3], xo[3], xv[3], z[NR], zmin, zmax;
-
-  int i, id, ig, ip, ir, iw, n, nadir = 0;
-
-  /* Allocate... */
-  ALLOC(los, los_t, 1);
-
-  /* Check interpolation flag... */
-  if (ctl->ip != 1)
-    ERRMSG("RFM interface requires 1D atmosphere!");
-
-  /* Check observer positions... */
-  for (ir = 1; ir < obs->nr; ir++)
-    if (obs->obsz[ir] != obs->obsz[0]
-	|| obs->obslon[ir] != obs->obslon[0]
-	|| obs->obslat[ir] != obs->obslat[0])
-      ERRMSG("RFM interface requires identical observer positions!");
-
-  /* Check extinction data... */
-  for (iw = 0; iw < ctl->nw; iw++)
-    for (ip = 0; ip < atm->np; ip++)
-      if (atm->k[iw][ip] != 0)
-	ERRMSG("RFM interface cannot handle extinction data!");
-
-  /* Get altitude range of atmospheric data... */
-  gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
-
-  /* Observer within atmosphere? */
-  if (obs->obsz[0] >= zmin && obs->obsz[0] <= zmax) {
-    obsz = obs->obsz[0];
-    sprintf(rfmflg, "%s OBS", rfmflg);
-  }
-
-  /* Determine tangent altitude or air mass factor... */
-  for (ir = 0; ir < obs->nr; ir++) {
-
-    /* Raytracing... */
-    raytrace(ctl, atm, obs, los, ir);
-
-    /* Nadir? */
-    if (obs->tpz[ir] <= zmin) {
-      geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xo);
-      geo2cart(obs->vpz[ir], obs->vplon[ir], obs->vplat[ir], xv);
-      for (i = 0; i < 3; i++)
-	xd[i] = xo[i] - xv[i];
-      z[ir] = NORM(xo) * NORM(xd) / DOTP(xo, xd);
-      nadir++;
-    } else
-      z[ir] = obs->tpz[ir];
-  }
-  if (nadir > 0 && nadir < obs->nr)
-    ERRMSG("Limb and nadir not simultaneously possible!");
-
-  /* Nadir? */
-  if (nadir)
-    sprintf(rfmflg, "%s NAD", rfmflg);
-
-  /* Get surface temperature... */
-  tsurf = atm->t[gsl_stats_min_index(atm->z, 1, (size_t) atm->np)];
-
-  /* Refraction? */
-  if (!nadir && !ctl->refrac)
-    sprintf(rfmflg, "%s GEO", rfmflg);
-
-  /* Continua? */
-  if (ctl->ctm_co2 || ctl->ctm_h2o || ctl->ctm_n2 || ctl->ctm_o2)
-    sprintf(rfmflg, "%s CTM", rfmflg);
-
-  /* Write atmospheric data file... */
-  write_atm_rfm("rfm.atm", ctl, atm);
-
-  /* Loop over channels... */
-  for (id = 0; id < ctl->nd; id++) {
-
-    /* Read filter function... */
-    sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
-    read_shape(filename, nu, f, &n);
-
-    /* Set spectral range... */
-    nu0 = nu[0];
-    nu1 = nu[n - 1];
-
-    /* Create RFM driver file... */
-    if (!(out = fopen("rfm.drv", "w")))
-      ERRMSG("Cannot create file!");
-    fprintf(out, "*HDR\nRFM call by JURASSIC.\n");
-    fprintf(out, "*FLG\n%s\n", rfmflg);
-    fprintf(out, "*SPC\n%.4f %.4f 0.0005\n", nu0, nu1);
-    fprintf(out, "*GAS\n");
-    for (ig = 0; ig < ctl->ng; ig++)
-      fprintf(out, "%s\n", ctl->emitter[ig]);
-    fprintf(out, "*ATM\nrfm.atm\n");
-    fprintf(out, "*TAN\n");
-    for (ir = 0; ir < obs->nr; ir++)
-      fprintf(out, "%g\n", z[ir]);
-    fprintf(out, "*SFC\n%g 1.0\n", tsurf);
-    if (obsz >= 0)
-      fprintf(out, "*OBS\n%g\n", obsz);
-    fprintf(out, "*HIT\n%s\n", ctl->rfmhit);
-    fprintf(out, "*XSC\n");
-    for (ig = 0; ig < ctl->ng; ig++)
-      if (ctl->rfmxsc[ig][0] != '-')
-	fprintf(out, "%s\n", ctl->rfmxsc[ig]);
-    fprintf(out, "*END\n");
-    fclose(out);
-
-    /* Remove temporary files... */
-    if (system("rm -f rfm.runlog rad_*.asc tra_*.asc"))
-      ERRMSG("Cannot remove temporary files!");
-
-    /* Call RFM... */
-    sprintf(cmd, "echo | %s", ctl->rfmbin);
-    if (system(cmd))
-      ERRMSG("Error while calling RFM!");
-
-    /* Read data... */
-    for (ir = 0; ir < obs->nr; ir++) {
-      obs->rad[id][ir] = read_obs_rfm("rad", z[ir], nu, f, n) * 1e-5;
-      obs->tau[id][ir] = read_obs_rfm("tra", z[ir], nu, f, n);
-    }
-  }
-
-  /* Remove temporary files... */
-  if (system("rm -f rfm.drv rfm.atm rfm.runlog rad_*.asc tra_*.asc"))
-    ERRMSG("Error while removing temporary files!");
 
   /* Free... */
   free(los);
@@ -3699,29 +3548,6 @@ void init_tbl(
 
 void intpol_atm(
   ctl_t * ctl,
-  atm_t * atm_dest,
-  atm_t * atm_src) {
-
-  double k[NW], q[NG];
-
-  int ig, ip, iw;
-
-  /* Interpolate atmospheric data... */
-  for (ip = 0; ip < atm_dest->np; ip++) {
-    intpol_atm_geo(ctl, atm_src, atm_dest->z[ip], atm_dest->lon[ip],
-		   atm_dest->lat[ip], &atm_dest->p[ip], &atm_dest->t[ip], q,
-		   k);
-    for (ig = 0; ig < ctl->ng; ig++)
-      atm_dest->q[ig][ip] = q[ig];
-    for (iw = 0; iw < ctl->nw; iw++)
-      atm_dest->k[iw][ip] = k[iw];
-  }
-}
-
-/*****************************************************************************/
-
-void intpol_atm_geo(
-  ctl_t * ctl,
   atm_t * atm,
   double z0,
   double lon0,
@@ -3738,10 +3564,6 @@ void intpol_atm_geo(
   /* 2D interpolation (satellite track)... */
   else if (ctl->ip == 2)
     intpol_atm_2d(ctl, atm, z0, lon0, lat0, p, t, q, k);
-
-  /* 3D interpolation (Lagrangian grid)... */
-  else if (ctl->ip == 3)
-    intpol_atm_3d(ctl, atm, z0, lon0, lat0, p, t, q, k);
 
   /* Wrong parameter... */
   else
@@ -3873,97 +3695,6 @@ void intpol_atm_2d(
     q[ig] = (1 - r) * q0[ig] + r * q1[ig];
   for (iw = 0; iw < ctl->nw; iw++)
     k[iw] = (1 - r) * k0[iw] + r * k1[iw];
-}
-
-/*****************************************************************************/
-
-void intpol_atm_3d(
-  ctl_t * ctl,
-  atm_t * atm,
-  double z0,
-  double lon0,
-  double lat0,
-  double *p,
-  double *t,
-  double *q,
-  double *k) {
-
-  static double rm2, x1[NP][3];
-
-  double dx2, dz, w, wsum, x0[3];
-
-  int ig, ip, iw;
-
-  /* Initialize.. */
-  if (!atm->init) {
-    atm->init = 1;
-
-    /* Get Cartesian coordinates... */
-    for (ip = 0; ip < atm->np; ip++)
-      geo2cart(0, atm->lon[ip], atm->lat[ip], x1[ip]);
-
-    /* Get squared influence radius... */
-    rm2 = gsl_pow_2(ctl->cx);
-  }
-
-  /* Initialize for interpolation.. */
-  *p = *t = wsum = 0;
-  for (ig = 0; ig < ctl->ng; ig++)
-    q[ig] = 0;
-  for (iw = 0; iw < ctl->nw; iw++)
-    k[iw] = 0;
-
-  /* Loop over grid points... */
-  for (ip = 0; ip < atm->np; ip++) {
-
-    /* Get vertical distance... */
-    dz = fabs(atm->z[ip] - z0);
-    if (dz >= ctl->cz)
-      continue;
-
-    /* Check latitude distance... */
-    if (fabs(atm->lat[ip] - lat0) * 111.13 >= ctl->cx)
-      continue;
-
-    /* Get horizontal distance... */
-    geo2cart(0, lon0, lat0, x0);
-    dx2 = DIST2(x0, x1[ip]);
-    if (dx2 >= rm2)
-      continue;
-
-    /* Set distance-based weighting factor... */
-    w = (1 - dz / ctl->cz) * (rm2 - dx2) / (rm2 + dx2);
-
-    /* Average data... */
-    wsum += w;
-    *p += w * atm->p[ip];
-    *t += w * atm->t[ip];
-    for (ig = 0; ig < ctl->ng; ig++)
-      q[ig] += w * atm->q[ig][ip];
-    for (iw = 0; iw < ctl->nw; iw++)
-      k[iw] += w * atm->k[iw][ip];
-  }
-
-  /* Check sum of weights... */
-  if (wsum >= 1e-6) {
-
-    /* Normalize... */
-    *p /= wsum;
-    *t /= wsum;
-    for (ig = 0; ig < ctl->ng; ig++)
-      q[ig] /= wsum;
-    for (iw = 0; iw < ctl->nw; iw++)
-      k[iw] /= wsum;
-
-  } else {
-
-    /* Set to nan... */
-    *p = *t = GSL_NAN;
-    for (ig = 0; ig < ctl->ng; ig++)
-      q[ig] = GSL_NAN;
-    for (iw = 0; iw < ctl->nw; iw++)
-      k[iw] = GSL_NAN;
-  }
 }
 
 /*****************************************************************************/
@@ -4558,7 +4289,7 @@ void raytrace(
     }
 
     /* Interpolate atmospheric data... */
-    intpol_atm_geo(ctl, atm, z, lon, lat, &p, &t, q, k);
+    intpol_atm(ctl, atm, z, lon, lat, &p, &t, q, k);
 
     /* Save data... */
     los->lon[los->np] = lon;
@@ -4597,12 +4328,12 @@ void raytrace(
       for (i = 0; i < 3; i++)
 	xh[i] = x[i] + 0.5 * ds * ex0[i];
       cart2geo(xh, &z, &lon, &lat);
-      intpol_atm_geo(ctl, atm, z, lon, lat, &p, &t, q, k);
+      intpol_atm(ctl, atm, z, lon, lat, &p, &t, q, k);
       n = refractivity(p, t);
       for (i = 0; i < 3; i++) {
 	xh[i] += h;
 	cart2geo(xh, &z, &lon, &lat);
-	intpol_atm_geo(ctl, atm, z, lon, lat, &p, &t, q, k);
+	intpol_atm(ctl, atm, z, lon, lat, &p, &t, q, k);
 	naux = refractivity(p, t);
 	ng[i] = (naux - n) / h;
 	xh[i] -= h;
@@ -4798,12 +4529,8 @@ void read_ctl(
   ctl->write_matrix =
     (int) scan_ctl(argc, argv, "WRITE_MATRIX", -1, "0", NULL);
 
-  /* External forward models... */
+  /* Forward model... */
   ctl->formod = (int) scan_ctl(argc, argv, "FORMOD", -1, "2", NULL);
-  scan_ctl(argc, argv, "RFMBIN", -1, "-", ctl->rfmbin);
-  scan_ctl(argc, argv, "RFMHIT", -1, "-", ctl->rfmhit);
-  for (ig = 0; ig < ctl->ng; ig++)
-    scan_ctl(argc, argv, "RFMXSC", ig, "-", ctl->rfmxsc[ig]);
 }
 
 /*****************************************************************************/
@@ -4906,115 +4633,6 @@ void read_obs(
   /* Check number of points... */
   if (obs->nr < 1)
     ERRMSG("Could not read any data!");
-}
-
-/*****************************************************************************/
-
-double read_obs_rfm(
-  const char *basename,
-  double z,
-  double *nu,
-  double *f,
-  int n) {
-
-  FILE *in;
-
-  char filename[LEN];
-
-  double filt, fsum = 0, nu2[NSHAPE], *nurfm, *rad, radsum = 0;
-
-  int i, idx, ipts, npts;
-
-  /* Allocate... */
-  ALLOC(nurfm, double,
-	RFMNPTS);
-  ALLOC(rad, double,
-	RFMNPTS);
-
-  /* Search RFM spectrum... */
-  sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000));
-  if (!(in = fopen(filename, "r"))) {
-    sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000) + 1);
-    if (!(in = fopen(filename, "r")))
-      ERRMSG("Cannot find RFM data file!");
-  }
-  fclose(in);
-
-  /* Read RFM spectrum... */
-  read_rfm_spec(filename, nurfm, rad, &npts);
-
-  /* Set wavenumbers... */
-  nu2[0] = nu[0];
-  nu2[n - 1] = nu[n - 1];
-  for (i = 1; i < n - 1; i++)
-    nu2[i] = LIN(0.0, nu2[0], n - 1.0, nu2[n - 1], i);
-
-  /* Convolute... */
-  for (ipts = 0; ipts < npts; ipts++)
-    if (nurfm[ipts] >= nu2[0] && nurfm[ipts] <= nu2[n - 1]) {
-      idx = locate(nu2, n, nurfm[ipts]);
-      filt = LIN(nu2[idx], f[idx], nu2[idx + 1], f[idx + 1], nurfm[ipts]);
-      fsum += filt;
-      radsum += filt * rad[ipts];
-    }
-
-  /* Free... */
-  free(nurfm);
-  free(rad);
-
-  /* Return radiance... */
-  return radsum / fsum;
-}
-
-/*****************************************************************************/
-
-void read_rfm_spec(
-  const char *filename,
-  double *nu,
-  double *rad,
-  int *npts) {
-
-  FILE *in;
-
-  char line[RFMLINE], *tok;
-
-  double dnu, nu0, nu1;
-
-  int i, ipts = 0;
-
-  /* Write info... */
-  printf("Read RFM data: %s\n", filename);
-
-  /* Open file... */
-  if (!(in = fopen(filename, "r")))
-    ERRMSG("Cannot open file!");
-
-  /* Read header...... */
-  for (i = 0; i < 4; i++)
-    if (fgets(line, RFMLINE, in) == NULL)
-      ERRMSG("Error while reading file header!");
-  sscanf(line, "%d %lg %lg %lg", npts, &nu0, &dnu, &nu1);
-  if (*npts > RFMNPTS)
-    ERRMSG("Too many spectral grid points!");
-
-  /* Read radiance data... */
-  while (fgets(line, RFMLINE, in) && ipts < *npts - 1) {
-    if ((tok = strtok(line, " \t\n")) != NULL)
-      if (sscanf(tok, "%lg", &rad[ipts]) == 1)
-	ipts++;
-    while ((tok = strtok(NULL, " \t\n")) != NULL)
-      if (sscanf(tok, "%lg", &rad[ipts]) == 1)
-	ipts++;
-  }
-  if (ipts != *npts)
-    ERRMSG("Error while reading RFM data!");
-
-  /* Compute wavenumbers... */
-  for (ipts = 0; ipts < *npts; ipts++)
-    nu[ipts] = LIN(0.0, nu0, (double) (*npts - 1), nu1, (double) ipts);
-
-  /* Close file... */
-  fclose(in);
 }
 
 /*****************************************************************************/
@@ -5306,46 +4924,6 @@ void write_atm(
       fprintf(out, " %g", atm->k[iw][ip]);
     fprintf(out, "\n");
   }
-
-  /* Close file... */
-  fclose(out);
-}
-
-/*****************************************************************************/
-
-void write_atm_rfm(
-  const char *filename,
-  ctl_t * ctl,
-  atm_t * atm) {
-
-  FILE *out;
-
-  int ig, ip;
-
-  /* Write info... */
-  printf("Write RFM data: %s\n", filename);
-
-  /* Create file... */
-  if (!(out = fopen(filename, "w")))
-    ERRMSG("Cannot create file!");
-
-  /* Write data... */
-  fprintf(out, "%d\n", atm->np);
-  fprintf(out, "*HGT [km]\n");
-  for (ip = 0; ip < atm->np; ip++)
-    fprintf(out, "%g\n", atm->z[ip]);
-  fprintf(out, "*PRE [mb]\n");
-  for (ip = 0; ip < atm->np; ip++)
-    fprintf(out, "%g\n", atm->p[ip]);
-  fprintf(out, "*TEM [K]\n");
-  for (ip = 0; ip < atm->np; ip++)
-    fprintf(out, "%g\n", atm->t[ip]);
-  for (ig = 0; ig < ctl->ng; ig++) {
-    fprintf(out, "*%s [ppmv]\n", ctl->emitter[ig]);
-    for (ip = 0; ip < atm->np; ip++)
-      fprintf(out, "%g\n", atm->q[ig][ip] * 1e6);
-  }
-  fprintf(out, "*END\n");
 
   /* Close file... */
   fclose(out);
