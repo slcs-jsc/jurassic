@@ -156,7 +156,7 @@
 #define NQ (2+NG+NW)
 
 /*! Maximum number of LOS points. */
-#define NLOS 10000
+#define NLOS 1000
 
 /*! Maximum number of shape function grid points. */
 #define NSHAPE 10000
@@ -174,7 +174,7 @@
 #define TBLNU 320
 
 /*! Maximum number of source function temperature levels. */
-#define TBLNS 1201
+#define TBLNS 1200
 
 /* ------------------------------------------------------------
    Quantity indices...
@@ -226,9 +226,6 @@ typedef struct {
   /*! Extinction [1/km]. */
   double k[NW][NP];
 
-  /*! Init flag for interpolation (0=no, 1=yes). */
-  int init;
-
 } atm_t;
 
 /*! Forward model control parameters. */
@@ -269,15 +266,6 @@ typedef struct {
 
   /*! Compute O2 continuum (0=no, 1=yes). */
   int ctm_o2;
-
-  /*! Interpolation method (1=profile, 2=satellite track). */
-  int ip;
-
-  /*! Influence length for vertical interpolation [km]. */
-  double cz;
-
-  /*! Influence length for horizontal interpolation [km]. */
-  double cx;
 
   /*! Take into account refractivity (0=no, 1=yes). */
   int refrac;
@@ -321,9 +309,6 @@ typedef struct {
   /*! Write matrix file (0=no, 1=yes). */
   int write_matrix;
 
-  /*! Forward model (1=CGA, 2=EGA). */
-  int formod;
-
 } ctl_t;
 
 /*! Line-of-sight data. */
@@ -361,15 +346,6 @@ typedef struct {
 
   /*! Column density [molecules/cm^2]. */
   double u[NG][NLOS];
-
-  /*! Curtis-Godson pressure [hPa]. */
-  double cgp[NG][NLOS];
-
-  /*! Curtis-Godson temperature [K]. */
-  double cgt[NG][NLOS];
-
-  /*! Curtis-Godson column density [molecules/cm^2]. */
-  double cgu[NG][NLOS];
 
 } los_t;
 
@@ -585,13 +561,6 @@ void hydrostatic(
   ctl_t * ctl,
   atm_t * atm);
 
-/*! Set hydrostatic equilibrium for individual profile. */
-void hydrostatic_1d(
-  ctl_t * ctl,
-  atm_t * atm,
-  int ip0,
-  int ip1);
-
 /*! Determine name of state vector quantity for given index. */
 void idx2name(
   ctl_t * ctl,
@@ -603,53 +572,18 @@ void init_tbl(
   ctl_t * ctl,
   tbl_t * tbl);
 
-/*! Interpolate atmospheric data for given geolocation. */
+/*! Interpolate atmospheric data. */
 void intpol_atm(
   ctl_t * ctl,
   atm_t * atm,
-  double z0,
-  double lon0,
-  double lat0,
+  double z,
   double *p,
   double *t,
   double *q,
   double *k);
 
-/*! Interpolate 1D atmospheric data (vertical profile). */
-void intpol_atm_1d(
-  ctl_t * ctl,
-  atm_t * atm,
-  int idx0,
-  int n,
-  double z0,
-  double *p,
-  double *t,
-  double *q,
-  double *k);
-
-/*! Interpolate 2D atmospheric data (satellite track). */
-void intpol_atm_2d(
-  ctl_t * ctl,
-  atm_t * atm,
-  double z0,
-  double lon0,
-  double lat0,
-  double *p,
-  double *t,
-  double *q,
-  double *k);
-
-/*! Get transmittance from look-up tables (CGA). */
-void intpol_tbl_cga(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  los_t * los,
-  int ip,
-  double tau_path[NG][ND],
-  double tau_seg[ND]);
-
-/*! Get transmittance from look-up tables (EGA). */
-void intpol_tbl_ega(
+/*! Get transmittance from look-up tables. */
+void intpol_tbl(
   ctl_t * ctl,
   tbl_t * tbl,
   los_t * los,

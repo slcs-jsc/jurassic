@@ -50,8 +50,8 @@ int main(
 
   /* Interpolate atmospheric data... */
   for (ip = 0; ip < atm_pts.np; ip++) {
-    intpol_atm(&ctl, &atm_in, atm_pts.z[ip], atm_pts.lon[ip],
-	       atm_pts.lat[ip], &atm_pts.p[ip], &atm_pts.t[ip], q, k);
+    intpol_atm(&ctl, &atm_in, atm_pts.z[ip],
+	       &atm_pts.p[ip], &atm_pts.t[ip], q, k);
     for (ig = 0; ig < ctl.ng; ig++)
       atm_pts.q[ig][ip] = q[ig];
     for (iw = 0; iw < ctl.nw; iw++)

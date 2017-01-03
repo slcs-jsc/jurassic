@@ -2942,7 +2942,6 @@ void copy_atm(
     memcpy(atm_dest->q[ig], atm_src->q[ig], s);
   for (iw = 0; iw < ctl->nw; iw++)
     memcpy(atm_dest->k[iw], atm_src->k[iw], s);
-  atm_dest->init = atm_src->init;
 
   /* Initialize... */
   if (init)
@@ -3223,10 +3222,7 @@ void formod_pencil(
   for (ip = 0; ip < los->np; ip++) {
 
     /* Get trace gas transmittance... */
-    if (ctl->formod == 1)
-      intpol_tbl_cga(ctl, tbl, los, ip, tau_path, tau_gas);
-    else
-      intpol_tbl_ega(ctl, tbl, los, ip, tau_path, tau_gas);
+    intpol_tbl(ctl, tbl, los, ip, tau_path, tau_gas);
 
     /* Get continuum absorption... */
     formod_continua(ctl, los, ip, beta_ctm);
@@ -3313,34 +3309,6 @@ void hydrostatic(
   ctl_t * ctl,
   atm_t * atm) {
 
-  double lat0 = -999, lon0 = -999;
-
-  int ip, ip0 = -999;
-
-  /* Check reference height... */
-  if (ctl->hydz < 0)
-    return;
-
-  /* Apply hydrostatic equation to individual profiles... */
-  for (ip = 0; ip < atm->np; ip++)
-    if (atm->lon[ip] != lon0 || atm->lat[ip] != lat0) {
-      if (ip > 0)
-	hydrostatic_1d(ctl, atm, ip0, ip);
-      lon0 = atm->lon[ip];
-      lat0 = atm->lat[ip];
-      ip0 = ip;
-    }
-  hydrostatic_1d(ctl, atm, ip0, atm->np);
-}
-
-/*****************************************************************************/
-
-void hydrostatic_1d(
-  ctl_t * ctl,
-  atm_t * atm,
-  int ip0,
-  int ip1) {
-
   static int ig_h2o = -999;
 
   double dzmin = 1e99, e = 0, mean, mmair = 28.96456e-3, mmh2o =
@@ -3348,19 +3316,23 @@ void hydrostatic_1d(
 
   int i, ip, ipref = 0, ipts = 20;
 
+  /* Check reference height... */
+  if (ctl->hydz < 0)
+    return;
+
   /* Determine emitter index of H2O... */
   if (ig_h2o == -999)
     ig_h2o = find_emitter(ctl, "H2O");
 
   /* Find air parcel next to reference height... */
-  for (ip = ip0; ip < ip1; ip++)
+  for (ip = 0; ip < atm->np; ip++)
     if (fabs(atm->z[ip] - ctl->hydz) < dzmin) {
       dzmin = fabs(atm->z[ip] - ctl->hydz);
       ipref = ip;
     }
 
   /* Upper part of profile... */
-  for (ip = ipref + 1; ip < ip1; ip++) {
+  for (ip = ipref + 1; ip < atm->np; ip++) {
     mean = 0;
     for (i = 0; i < ipts; i++) {
       z = LIN(0.0, atm->z[ip - 1], ipts - 1.0, atm->z[ip], (double) i);
@@ -3378,7 +3350,7 @@ void hydrostatic_1d(
   }
 
   /* Lower part of profile... */
-  for (ip = ipref - 1; ip >= ip0; ip--) {
+  for (ip = ipref - 1; ip >= 0; ip--) {
     mean = 0;
     for (i = 0; i < ipts; i++) {
       z = LIN(0.0, atm->z[ip + 1], ipts - 1.0, atm->z[ip], (double) i);
@@ -3549,35 +3521,7 @@ void init_tbl(
 void intpol_atm(
   ctl_t * ctl,
   atm_t * atm,
-  double z0,
-  double lon0,
-  double lat0,
-  double *p,
-  double *t,
-  double *q,
-  double *k) {
-
-  /* 1D interpolation (vertical profile)... */
-  if (ctl->ip == 1)
-    intpol_atm_1d(ctl, atm, 0, atm->np, z0, p, t, q, k);
-
-  /* 2D interpolation (satellite track)... */
-  else if (ctl->ip == 2)
-    intpol_atm_2d(ctl, atm, z0, lon0, lat0, p, t, q, k);
-
-  /* Wrong parameter... */
-  else
-    ERRMSG("Unknown interpolation method, check IP!");
-}
-
-/*****************************************************************************/
-
-void intpol_atm_1d(
-  ctl_t * ctl,
-  atm_t * atm,
-  int idx0,
-  int n,
-  double z0,
+  double z,
   double *p,
   double *t,
   double *q,
@@ -3586,214 +3530,22 @@ void intpol_atm_1d(
   int ig, ip, iw;
 
   /* Get array index... */
-  ip = idx0 + locate(&atm->z[idx0], n, z0);
+  ip = locate(atm->z, atm->np, z);
 
   /* Interpolate... */
-  *p = EXP(atm->z[ip], atm->p[ip], atm->z[ip + 1], atm->p[ip + 1], z0);
-  *t = LIN(atm->z[ip], atm->t[ip], atm->z[ip + 1], atm->t[ip + 1], z0);
+  *p = EXP(atm->z[ip], atm->p[ip], atm->z[ip + 1], atm->p[ip + 1], z);
+  *t = LIN(atm->z[ip], atm->t[ip], atm->z[ip + 1], atm->t[ip + 1], z);
   for (ig = 0; ig < ctl->ng; ig++)
     q[ig] =
-      LIN(atm->z[ip], atm->q[ig][ip], atm->z[ip + 1], atm->q[ig][ip + 1], z0);
+      LIN(atm->z[ip], atm->q[ig][ip], atm->z[ip + 1], atm->q[ig][ip + 1], z);
   for (iw = 0; iw < ctl->nw; iw++)
     k[iw] =
-      LIN(atm->z[ip], atm->k[iw][ip], atm->z[ip + 1], atm->k[iw][ip + 1], z0);
+      LIN(atm->z[ip], atm->k[iw][ip], atm->z[ip + 1], atm->k[iw][ip + 1], z);
 }
 
 /*****************************************************************************/
 
-void intpol_atm_2d(
-  ctl_t * ctl,
-  atm_t * atm,
-  double z0,
-  double lon0,
-  double lat0,
-  double *p,
-  double *t,
-  double *q,
-  double *k) {
-
-  static double x1[NP][3];
-
-  static int idx[NP], nx, nz[NP];
-
-  double dh, dhmin0 = 1e99, dhmin1 = 1e99, dlat = 10, k0[NW], k1[NW],
-    lat1 = -999, lon1 = -999, p0, p1, q0[NG], q1[NG], r, r0, r1,
-    t0, t1, x0[3], x, x2;
-
-  int ig, ip, ix, iw, ix0 = 0, ix1 = 0;
-
-  /* Initialize... */
-  if (!atm->init) {
-    atm->init = 1;
-
-    /* Determine grid dimensions... */
-    nx = 0;
-    for (ip = 0; ip < atm->np; ip++) {
-      if (atm->lon[ip] != lon1 || atm->lat[ip] != lat1) {
-	if ((++nx) > NP)
-	  ERRMSG("Too many profiles!");
-	nz[nx - 1] = 0;
-	lon1 = atm->lon[ip];
-	lat1 = atm->lat[ip];
-	geo2cart(0, lon1, lat1, x1[nx - 1]);
-	idx[nx - 1] = ip;
-      }
-      nz[nx - 1]++;
-    }
-
-    /* Check profiles... */
-    for (ix = 0; ix < nx; ix++) {
-      if (nz[ix] <= 1)
-	ERRMSG("Cannot identify profiles. Check ordering of data points!");
-      if (ix > 0)
-	if (fabs(atm->lat[idx[ix - 1]] - atm->lat[idx[ix]]) > dlat)
-	  ERRMSG("Distance of profiles is too large!");
-    }
-  }
-
-  /* Get Cartesian coordinates... */
-  geo2cart(0, lon0, lat0, x0);
-
-  /* Find next neighbours... */
-  for (ix = 0; ix < nx; ix++)
-    if (fabs(lat0 - atm->lat[idx[ix]]) <= dlat) {
-
-      /* Get squared horizontal distance... */
-      dh = DIST2(x0, x1[ix]);
-
-      /* Find neighbours... */
-      if (dh <= dhmin0) {
-	dhmin1 = dhmin0;
-	ix1 = ix0;
-	dhmin0 = dh;
-	ix0 = ix;
-      } else if (dh <= dhmin1) {
-	dhmin1 = dh;
-	ix1 = ix;
-      }
-    }
-
-  /* Interpolate vertically... */
-  intpol_atm_1d(ctl, atm, idx[ix0], nz[ix0], z0, &p0, &t0, q0, k0);
-  intpol_atm_1d(ctl, atm, idx[ix1], nz[ix1], z0, &p1, &t1, q1, k1);
-
-  /* Interpolate horizontally... */
-  x2 = DIST2(x1[ix0], x1[ix1]);
-  x = sqrt(x2);
-  r0 = (dhmin0 - dhmin1 + x2) / (2 * x);
-  r1 = x - r0;
-  if (r0 <= 0)
-    r = 0;
-  else if (r1 <= 0)
-    r = 1;
-  else
-    r = r0 / (r0 + r1);
-
-  *p = (1 - r) * p0 + r * p1;
-  *t = (1 - r) * t0 + r * t1;
-  for (ig = 0; ig < ctl->ng; ig++)
-    q[ig] = (1 - r) * q0[ig] + r * q1[ig];
-  for (iw = 0; iw < ctl->nw; iw++)
-    k[iw] = (1 - r) * k0[iw] + r * k1[iw];
-}
-
-/*****************************************************************************/
-
-void intpol_tbl_cga(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  los_t * los,
-  int ip,
-  double tau_path[NG][ND],
-  double tau_seg[ND]) {
-
-  double eps, eps00, eps01, eps10, eps11;
-
-  int id, ig, ipr, it0, it1;
-
-  /* Initialize path transmittance... */
-  if (ip <= 0)
-    for (ig = 0; ig < ctl->ng; ig++)
-      for (id = 0; id < ctl->nd; id++)
-	tau_path[ig][id] = 1;
-
-  /* Initialize segment transmittance... */
-  for (id = 0; id < ctl->nd; id++)
-    tau_seg[id] = 1;
-
-  /* Loop over emitters.... */
-  for (ig = 0; ig < ctl->ng; ig++) {
-
-    /* Loop over channels... */
-    for (id = 0; id < ctl->nd; id++) {
-
-      /* Check size of table and column density... */
-      if (tbl->np[ig][id] < 2 || los->cgu[ig][ip] <= 0)
-	eps = 0;
-
-      /* Check path transmittance... */
-      else if (tau_path[ig][id] < 1e-9)
-	eps = 1;
-
-      /* Interpolate... */
-      else {
-
-	/* Determine indices... */
-	ipr = locate(tbl->p[ig][id], tbl->np[ig][id], los->cgp[ig][ip]);
-
-	it0 = locate(tbl->t[ig][id][ipr],
-		     tbl->nt[ig][id][ipr], los->cgt[ig][ip]);
-	it1 = locate(tbl->t[ig][id][ipr + 1],
-		     tbl->nt[ig][id][ipr + 1], los->cgt[ig][ip]);
-
-	/* Check size of table... */
-	if (tbl->nt[ig][id][ipr] < 2 || tbl->nt[ig][id][ipr + 1] < 2
-	    || tbl->nu[ig][id][ipr][it0] < 2
-	    || tbl->nu[ig][id][ipr][it0 + 1] < 2
-	    || tbl->nu[ig][id][ipr + 1][it1] < 2
-	    || tbl->nu[ig][id][ipr + 1][it1 + 1] < 2)
-	  eps = 0;
-
-	else {
-
-	  /* Interpolate emissivities... */
-	  eps00 = intpol_tbl_eps(tbl, ig, id, ipr, it0, los->cgu[ig][ip]);
-	  eps01 = intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, los->cgu[ig][ip]);
-	  eps10 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, los->cgu[ig][ip]);
-	  eps11 =
-	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, los->cgu[ig][ip]);
-
-	  /* Interpolate with respect to temperature... */
-	  eps00 = LIN(tbl->t[ig][id][ipr][it0], eps00,
-		      tbl->t[ig][id][ipr][it0 + 1], eps01, los->cgt[ig][ip]);
-	  eps11 = LIN(tbl->t[ig][id][ipr + 1][it1], eps10,
-		      tbl->t[ig][id][ipr + 1][it1 + 1], eps11,
-		      los->cgt[ig][ip]);
-
-	  /* Interpolate with respect to pressure... */
-	  eps00 = LIN(tbl->p[ig][id][ipr], eps00,
-		      tbl->p[ig][id][ipr + 1], eps11, los->cgp[ig][ip]);
-
-	  /* Check range of emissivity... */
-	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
-
-	  /* Determine segment emissivity... */
-	  eps = 1 - (1 - eps00) / tau_path[ig][id];
-	}
-      }
-
-      /* Get transmittance of extended path... */
-      tau_path[ig][id] *= (1 - eps);
-
-      /* Get segment transmittance... */
-      tau_seg[id] *= (1 - eps);
-    }
-  }
-}
-
-/*****************************************************************************/
-
-void intpol_tbl_ega(
+void intpol_tbl(
   ctl_t * ctl,
   tbl_t * tbl,
   los_t * los,
@@ -4209,18 +3961,15 @@ void raytrace(
   obs->tplon[ir] = obs->vplon[ir];
   obs->tplat[ir] = obs->vplat[ir];
 
-  /* Get altitude range of atmospheric data (first profile)... */
-  for (ip = 1; ip < atm->np; ip++)
-    if (atm->lon[ip] != atm->lon[0] || atm->lat[ip] != atm->lat[0])
-      break;
-  gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) ip);
+  /* Get altitude range of atmospheric data... */
+  gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
 
   /* Check observer altitude... */
   if (obs->obsz[ir] < zmin)
     ERRMSG("Observer below surface!");
 
   /* Check view point altitude... */
-  if (obs->vpz[ir] > zmax - 0.001)
+  if (obs->vpz[ir] > zmax)
     return;
 
   /* Determine Cartesian coordinates for observer and view point... */
@@ -4289,7 +4038,7 @@ void raytrace(
     }
 
     /* Interpolate atmospheric data... */
-    intpol_atm(ctl, atm, z, lon, lat, &p, &t, q, k);
+    intpol_atm(ctl, atm, z, &p, &t, q, k);
 
     /* Save data... */
     los->lon[los->np] = lon;
@@ -4328,12 +4077,12 @@ void raytrace(
       for (i = 0; i < 3; i++)
 	xh[i] = x[i] + 0.5 * ds * ex0[i];
       cart2geo(xh, &z, &lon, &lat);
-      intpol_atm(ctl, atm, z, lon, lat, &p, &t, q, k);
+      intpol_atm(ctl, atm, z, &p, &t, q, k);
       n = refractivity(p, t);
       for (i = 0; i < 3; i++) {
 	xh[i] += h;
 	cart2geo(xh, &z, &lon, &lat);
-	intpol_atm(ctl, atm, z, lon, lat, &p, &t, q, k);
+	intpol_atm(ctl, atm, z, &p, &t, q, k);
 	naux = refractivity(p, t);
 	ng[i] = (naux - n) / h;
 	xh[i] -= h;
@@ -4373,22 +4122,6 @@ void raytrace(
     for (ig = 0; ig < ctl->ng; ig++)
       los->u[ig][ip] = 10 * los->q[ig][ip] * los->p[ip]
 	/ (GSL_CONST_MKSA_BOLTZMANN * los->t[ip]) * los->ds[ip];
-
-  /* Compute Curtis-Godson pressure and temperature... */
-  for (ig = 0; ig < ctl->ng; ig++) {
-    los->cgp[ig][0] = los->u[ig][0] * los->p[0];
-    los->cgt[ig][0] = los->u[ig][0] * los->t[0];
-    los->cgu[ig][0] = los->u[ig][0];
-    for (ip = 1; ip < los->np; ip++) {
-      los->cgp[ig][ip] = los->cgp[ig][ip - 1] + los->u[ig][ip] * los->p[ip];
-      los->cgt[ig][ip] = los->cgt[ig][ip - 1] + los->u[ig][ip] * los->t[ip];
-      los->cgu[ig][ip] = los->cgu[ig][ip - 1] + los->u[ig][ip];
-    }
-    for (ip = 0; ip < los->np; ip++) {
-      los->cgp[ig][ip] /= los->cgu[ig][ip];
-      los->cgt[ig][ip] /= los->cgu[ig][ip];
-    }
-  }
 }
 
 /*****************************************************************************/
@@ -4406,7 +4139,6 @@ void read_atm(
   int ig, iw;
 
   /* Init... */
-  atm->init = 0;
   atm->np = 0;
 
   /* Set filename... */
@@ -4497,11 +4229,6 @@ void read_ctl(
   ctl->ctm_n2 = (int) scan_ctl(argc, argv, "CTM_N2", -1, "1", NULL);
   ctl->ctm_o2 = (int) scan_ctl(argc, argv, "CTM_O2", -1, "1", NULL);
 
-  /* Interpolation of atmospheric data... */
-  ctl->ip = (int) scan_ctl(argc, argv, "IP", -1, "1", NULL);
-  ctl->cz = scan_ctl(argc, argv, "CZ", -1, "0", NULL);
-  ctl->cx = scan_ctl(argc, argv, "CX", -1, "0", NULL);
-
   /* Ray-tracing... */
   ctl->refrac = (int) scan_ctl(argc, argv, "REFRAC", -1, "1", NULL);
   ctl->rayds = scan_ctl(argc, argv, "RAYDS", -1, "10", NULL);
@@ -4528,9 +4255,6 @@ void read_ctl(
   ctl->write_bbt = (int) scan_ctl(argc, argv, "WRITE_BBT", -1, "0", NULL);
   ctl->write_matrix =
     (int) scan_ctl(argc, argv, "WRITE_MATRIX", -1, "0", NULL);
-
-  /* Forward model... */
-  ctl->formod = (int) scan_ctl(argc, argv, "FORMOD", -1, "2", NULL);
 }
 
 /*****************************************************************************/
