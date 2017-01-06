@@ -14,18 +14,16 @@ JURASSIC has been developed to support the analysis of atmospheric
 remote sensing measurements. The model has been used to retrieve
 geophysical data such as pressure, temperature, and trace gas
 concentrations from ESA and NASA satellite measurements and
-observations of local aircraft experiments.
+observations of aircraft experiments.
 
 
 Algorithms
 ----------
 
-JURASSIC uses computationally efficient methods for the radiative
-transfer calculations. Radiative transfer calculations are based on
-the Curtis-Godson Approximation (CGA) and the Emissivity Growth
-Approximation (EGA). Band transmittances are obtained from
-pre-calculated look-up tables from line-by-line reference model
-calculations.
+JURASSIC uses computationally efficient methods for the radiative transfer
+calculations. Radiative transfer calculations are based on the
+Emissivity Growth Approximation (EGA). Band transmittances are obtained
+from pre-calculated look-up tables from line-by-line calculations.
 
 JURASSIC features a 3-D raytracer to realize different observation
 geometries and to enable tomographic studies. JURASSIC has also been

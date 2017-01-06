@@ -6,10 +6,10 @@
 EXC = brightness climatology formod hydrostatic interpolate jsec2time kernel limb nadir planck raytrace retrieval time2jsec
 
 # Library directories...
-LIBDIR = -L ../lib/build/lib
+LIBDIR = 
 
 # Include directories...
-INCDIR = -I ../lib/build/include
+INCDIR = 
 
 # Linking...
 STATIC = 1
@@ -55,9 +55,6 @@ $(EXC): %: %.c jurassic.o
 jurassic.o: jurassic.c jurassic.h Makefile
 	$(CC) $(CFLAGS) -c -o jurassic.o jurassic.c
 
-bak:
-	mkdir -p ../bak && zip ../bak/jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
-
 clean:
 	rm -f $(EXC) *.o *~
 
@@ -66,3 +63,6 @@ doc:
 
 indent:
 	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h
+
+zip:
+	zip jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
