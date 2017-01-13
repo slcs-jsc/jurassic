@@ -135,10 +135,10 @@
 #define NG 20
 
 /*! Maximum number of atmospheric data points. */
-#define NP 1000
+#define NP 1000000
 
 /*! Maximum number of ray paths. */
-#define NR 1000
+#define NR 100000
 
 /*! Maximum number of spectral windows. */
 #define NW 5
