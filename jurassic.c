@@ -3403,12 +3403,13 @@ void init_tbl(
   char filename[LEN], line[LEN];
 
   double eps, eps_old, press, press_old, temp, temp_old, u, u_old,
-    f[NSHAPE], fsum, nu[NSHAPE], tmin = 100, tmax = 400;
+    f[NSHAPE], fsum, nu[NSHAPE];
 
   int i, id, ig, ip, it, n;
 
   /* Loop over trace gases and channels... */
   for (ig = 0; ig < ctl->ng; ig++)
+#pragma omp parallel for default(none) shared(ctl,tbl,ig) private(in,filename,line,eps,eps_old,press,press_old,temp,temp_old,u,u_old,id,ip,it)
     for (id = 0; id < ctl->nd; id++) {
 
       /* Initialize... */
@@ -3492,6 +3493,7 @@ void init_tbl(
   printf("Initialize source function table...\n");
 
   /* Loop over channels... */
+#pragma omp parallel for default(none) shared(ctl,tbl,ig) private(filename,it,i,n,f,fsum,nu)
   for (id = 0; id < ctl->nd; id++) {
 
     /* Read filter function... */
@@ -3502,7 +3504,7 @@ void init_tbl(
     for (it = 0; it < TBLNS; it++) {
 
       /* Set temperature... */
-      tbl->st[it] = LIN(0.0, tmin, TBLNS - 1.0, tmax, (double) it);
+      tbl->st[it] = LIN(0.0, TMIN, TBLNS - 1.0, TMAX, (double) it);
 
       /* Integrate Planck function... */
       fsum = 0;
@@ -3793,7 +3795,7 @@ void kernel(
   gsl_matrix_set_zero(k);
 
   /* Loop over state vector elements... */
-#pragma omp parallel for default(shared) private(i, j, h, x1, yy1, atm1, obs1)
+#pragma omp parallel for default(none) shared(ctl,atm,obs,k,x0,yy0,n,m,iqa) private(i, j, h, x1, yy1, atm1, obs1)
   for (j = 0; j < (int) n; j++) {
 
     /* Allocate... */

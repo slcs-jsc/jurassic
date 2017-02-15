@@ -109,6 +109,12 @@
 /*! Second spectroscopic constant (c_2 = h c / k) [K/cm^-1]. */
 #define C2 1.43877506
 
+/*! Minimum temperature for source function [K]. */
+#define TMIN 100.
+
+/*! Maximum temperature for source function [K]. */
+#define TMAX 400.
+
 /*! Standard gravity [m/s^2]. */
 #define G0 9.80665
 
