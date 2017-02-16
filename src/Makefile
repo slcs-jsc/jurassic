@@ -41,7 +41,7 @@ clean:
 	rm -f $(EXC) *.o *~
 
 doc:
-	mkdir -p ../doc && doxygen && cd ../doc/latex && make && mv refman.pdf ../refman.pdf
+	mkdir -p ../doc && doxygen && cd ../doc/latex && make && mv refman.pdf ..
 
 indent:
 	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h
