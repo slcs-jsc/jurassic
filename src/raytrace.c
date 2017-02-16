@@ -1,0 +1,83 @@
+/*
+  This file is part of JURASSIC.
+  
+  JURASSIC is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  JURASSIC is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
+  
+  Copright (C) 2003-2015 Forschungszentrum Juelich GmbH
+*/
+
+/*! 
+  \file
+  Determine atmospheric ray paths.
+*/
+
+#include "jurassic.h"
+
+int main(
+  int argc,
+  char *argv[]) {
+
+  static atm_t atm, atm2;
+  static ctl_t ctl;
+  static los_t los;
+  static obs_t obs;
+
+  char filename[LEN], losbase[LEN];
+
+  int ig, ip, ir, iw;
+
+  /* Check arguments... */
+  if (argc < 4)
+    ERRMSG("Give parameters: <ctl> <obs> <atm>");
+
+  /* Read control parameters... */
+  read_ctl(argc, argv, &ctl);
+
+  /* Get basenames... */
+  scan_ctl(argc, argv, "LOSBASE", -1, "los", losbase);
+
+  /* Read observation geometry... */
+  read_obs(NULL, argv[2], &ctl, &obs);
+
+  /* Read atmospheric data... */
+  read_atm(NULL, argv[3], &ctl, &atm);
+
+  /* Loop over rays... */
+  for (ir = 0; ir < obs.nr; ir++) {
+
+    /* Raytracing... */
+    raytrace(&ctl, &atm, &obs, &los, ir);
+
+    /* Copy data... */
+    atm2.np = los.np;
+    for (ip = 0; ip < los.np; ip++) {
+      atm2.time[ip] = obs.time[ir];
+      atm2.z[ip] = los.z[ip];
+      atm2.lon[ip] = los.lon[ip];
+      atm2.lat[ip] = los.lat[ip];
+      atm2.p[ip] = los.p[ip];
+      atm2.t[ip] = los.t[ip];
+      for (ig = 0; ig < ctl.ng; ig++)
+	atm2.q[ig][ip] = los.q[ig][ip];
+      for (iw = 0; iw < ctl.nw; iw++)
+	atm2.k[iw][ip] = los.k[iw][ip];
+    }
+
+    /* Save data... */
+    sprintf(filename, "los.%d", ir);
+    write_atm(NULL, filename, &ctl, &atm2);
+  }
+
+  return EXIT_SUCCESS;
+}

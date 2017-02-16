@@ -1,0 +1,50 @@
+# -----------------------------------------------------------------------------
+# Setup...
+# -----------------------------------------------------------------------------
+
+# Executables...
+EXC = brightness climatology formod hydrostatic interpolate jsec2time kernel limb nadir planck raytrace retrieval time2jsec
+
+# Library directories...
+LIBDIR = 
+
+# Include directories...
+INCDIR = 
+
+# -----------------------------------------------------------------------------
+# Set flags for GNU compiler...
+# -----------------------------------------------------------------------------
+
+# Compiler...
+CC = gcc
+
+# CFLAGS...
+CFLAGS = $(INCDIR) -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp -O3 -g -static
+
+# LDFLAGS...
+LDFLAGS = $(LIBDIR) -lgsl -lgslcblas -lm
+
+# -----------------------------------------------------------------------------
+# Targets...
+# -----------------------------------------------------------------------------
+
+all: $(EXC)
+	rm -f *~
+
+$(EXC): %: %.c jurassic.o
+	$(CC) $(CFLAGS) -o $@ $< jurassic.o $(LDFLAGS)
+
+jurassic.o: jurassic.c jurassic.h Makefile
+	$(CC) $(CFLAGS) -c -o jurassic.o jurassic.c
+
+clean:
+	rm -f $(EXC) *.o *~
+
+doc:
+	mkdir -p ../doc && doxygen && cd ../doc/latex && make && mv refman.pdf ../refman.pdf
+
+indent:
+	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h
+
+zip:
+	zip jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
