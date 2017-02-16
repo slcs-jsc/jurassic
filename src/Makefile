@@ -6,10 +6,10 @@
 EXC = brightness climatology formod hydrostatic interpolate jsec2time kernel limb nadir planck raytrace retrieval time2jsec
 
 # Library directories...
-LIBDIR = 
+LIBDIR = -L ../lib/build/lib
 
 # Include directories...
-INCDIR = 
+INCDIR = -I ../lib/build/include
 
 # -----------------------------------------------------------------------------
 # Set flags for GNU compiler...

@@ -1,4 +1,5 @@
-doc/latex
+doc/latex/
+lib/build/
 src/brightness
 src/climatology
 src/formod
