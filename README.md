@@ -48,7 +48,7 @@ your needs. In particular, check the paths to the libraries
     emacs Makefile
     make
 
-The binaries will linked statically, i.e., they can be copied and run
+The binaries will be linked statically, i.e., they can be copied and run
 on other machines. Sometimes this causes problems. In this case remove
 the '-static' flag from the CFLAGS in the Makefile and compile again.
 
@@ -65,7 +65,7 @@ The binaries will remain in the src/ directory.
 
 This script illustrates how to use JURASSIC:
 
-    cd example
+    cd ../example
     ./run.sh
 
 In this example we generate an observation geometry for an infrared nadir
