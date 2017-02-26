@@ -1710,18 +1710,17 @@ double ctmco2(
 
   double xw, dw, ew, cw296, cw260, cw230, dt230, dt260, dt296, ctw, ctmpth;
 
-  int iw, jw;
+  int iw;
 
   /* Get CO2 continuum absorption... */
   xw = nu / 2 + 1;
   if (xw >= 1 && xw < 2001) {
     iw = (int) xw;
-    jw = iw + 1;
     dw = xw - iw;
     ew = 1 - dw;
-    cw296 = ew * co2296[iw - 1] + dw * co2296[jw - 1];
-    cw260 = ew * co2260[iw - 1] + dw * co2260[jw - 1];
-    cw230 = ew * co2230[iw - 1] + dw * co2230[jw - 1];
+    cw296 = ew * co2296[iw - 1] + dw * co2296[iw];
+    cw260 = ew * co2260[iw - 1] + dw * co2260[iw];
+    cw230 = ew * co2230[iw - 1] + dw * co2230[iw];
     dt230 = t - 230;
     dt260 = t - 260;
     dt296 = t - 296;
@@ -2753,18 +2752,17 @@ double ctmh2o(
   double a1, a2, a3, dw, ew, dx, xw, xx, vf2, vf6, cw260, cw296,
     sfac, fscal, cwfrn, ctmpth, ctwfrn, ctwslf;
 
-  int iw, jw, ix;
+  int iw, ix;
 
   /* Get H2O continuum absorption... */
   xw = nu / 10 + 1;
   if (xw >= 1 && xw < 2001) {
     iw = (int) xw;
-    jw = iw + 1;
     dw = xw - iw;
     ew = 1 - dw;
-    cw296 = ew * h2o296[iw - 1] + dw * h2o296[jw - 1];
-    cw260 = ew * h2o260[iw - 1] + dw * h2o260[jw - 1];
-    cwfrn = ew * h2ofrn[iw - 1] + dw * h2ofrn[jw - 1];
+    cw296 = ew * h2o296[iw - 1] + dw * h2o296[iw];
+    cw260 = ew * h2o260[iw - 1] + dw * h2o260[iw];
+    cwfrn = ew * h2ofrn[iw - 1] + dw * h2ofrn[iw];
     if (nu <= 820 || nu >= 960) {
       sfac = 1;
     } else {
