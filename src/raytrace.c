@@ -33,7 +33,11 @@ int main(
   static los_t los;
   static obs_t obs;
 
+  FILE *out;
+
   char filename[LEN], losbase[LEN];
+
+  double u[NG], s;
 
   int ig, ip, ir, iw;
 
@@ -52,6 +56,31 @@ int main(
 
   /* Read atmospheric data... */
   read_atm(NULL, argv[3], &ctl, &atm);
+
+  /* Write info... */
+  printf("Write raytrace data: raytrace.tab\n");
+
+  /* Create file... */
+  if (!(out = fopen("raytrace.tab", "w")))
+    ERRMSG("Cannot create file!");
+
+  /* Write header... */
+  fprintf(out,
+	  "# $1 = time (seconds since 2000-01-01T00:00Z)\n"
+	  "# $2 = observer altitude [km]\n"
+	  "# $3 = observer longitude [deg]\n"
+	  "# $4 = observer latitude [deg]\n"
+	  "# $5 = view point altitude [km]\n"
+	  "# $6 = view point longitude [deg]\n"
+	  "# $7 = view point latitude [deg]\n"
+	  "# $8 = tangent point altitude [km]\n"
+	  "# $9 = tangent point longitude [deg]\n"
+	  "# $10 = tangent point latitude [deg]\n"
+	  "# $11 = ray path index\n" "# $12 = ray path length [km]\n");
+  for (ig = 0; ig < ctl.ng; ig++)
+    fprintf(out, "# $%d = %s column density [molec/cm^2]\n",
+	    13 + ig, ctl.emitter[ig]);
+  fprintf(out, "\n");
 
   /* Loop over rays... */
   for (ir = 0; ir < obs.nr; ir++) {
@@ -77,7 +106,29 @@ int main(
     /* Save data... */
     sprintf(filename, "los.%d", ir);
     write_atm(NULL, filename, &ctl, &atm2);
+
+    /* Get column densities... */
+    s = 0;
+    for (ig = 0; ig < ctl.ng; ig++)
+      u[ig] = 0;
+    for (ip = 0; ip < los.np; ip++) {
+      s += los.ds[ip];
+      for (ig = 0; ig < ctl.ng; ig++)
+	u[ig] += los.u[ig][ip];
+    }
+
+    /* Write summary data... */
+    fprintf(out, "%.2f %g %g %g %g %g %g %g %g %g %d %g",
+	    obs.time[ir], obs.obsz[ir], obs.obslon[ir], obs.obslat[ir],
+	    obs.vpz[ir], obs.vplon[ir], obs.vplat[ir],
+	    obs.tpz[ir], obs.tplon[ir], obs.tplat[ir], ir, s);
+    for (ig = 0; ig < ctl.ng; ig++)
+      fprintf(out, " %g", u[ig]);
+    fprintf(out, "\n");
   }
+
+  /* Close file... */
+  fclose(out);
 
   return EXIT_SUCCESS;
 }
