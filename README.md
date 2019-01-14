@@ -65,7 +65,7 @@ The binaries will remain in the src/ directory.
 
 This script illustrates how to use JURASSIC:
 
-    cd ../example
+    cd ../project/example
     ./run.sh
 
 In this example we generate an observation geometry for an infrared nadir
