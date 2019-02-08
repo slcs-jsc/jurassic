@@ -12,7 +12,7 @@ mkdir -p $target/src $target/bin $target/lib $target/man/man1 \
     || exit
 
 # GSL...
-dir=gsl-2.3
+dir=gsl-2.5
 cd $target/src/$dir \
     && ./configure --prefix=$target \
     && make -j$threads && make check && make install && make clean \
