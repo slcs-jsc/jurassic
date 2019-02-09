@@ -3398,7 +3398,7 @@ void init_tbl(
 
   FILE *in;
 
-  char filename[LEN], line[LEN];
+  char filename[2 * LEN], line[LEN];
 
   double eps, eps_old, press, press_old, temp, temp_old, u, u_old,
     f[NSHAPE], fsum, nu[NSHAPE];
@@ -4416,7 +4416,7 @@ double scan_ctl(
   FILE *in = NULL;
 
   char dummy[LEN], fullname1[LEN], fullname2[LEN], line[LEN],
-    msg[LEN], rvarname[LEN], rval[LEN];
+    msg[2 * LEN], rvarname[LEN], rval[LEN];
 
   int contain = 0, i;
 
