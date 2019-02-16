@@ -4560,16 +4560,13 @@ void timer(
   int line,
   int mode) {
 
-  static double dt_w, w0[10];
+  static double w0[10];
 
   static int l0[10], nt;
 
-  struct timeval tim;
-
   /* Start new timer... */
   if (mode == 1) {
-    gettimeofday(&tim, NULL);
-    w0[nt] = (double) tim.tv_sec + (double) tim.tv_usec / 1e6;
+    w0[nt] = omp_get_wtime();
     l0[nt] = line;
     if ((++nt) >= 10)
       ERRMSG("Too many timers!");
@@ -4582,13 +4579,9 @@ void timer(
     if (nt - 1 < 0)
       ERRMSG("Coding error!");
 
-    /* Get time differences... */
-    gettimeofday(&tim, NULL);
-    dt_w = (double) tim.tv_sec + (double) tim.tv_usec / 1e6 - w0[nt - 1];
-
     /* Write elapsed time... */
     printf("Timer '%s' (%s, %s, l%d-%d): %.3f sec\n",
-	   name, file, func, l0[nt - 1], line, dt_w);
+	   name, file, func, l0[nt - 1], line, omp_get_wtime() - w0[nt - 1]);
   }
 
   /* Stop timer... */
