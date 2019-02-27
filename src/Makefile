@@ -40,11 +40,14 @@ jurassic.o: jurassic.c jurassic.h Makefile
 clean:
 	rm -f $(EXC) *.o *~
 
+dist:
+	zip jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
+
 doc:
 	mkdir -p ../doc && doxygen && cd ../doc/latex && make && mv refman.pdf ..
 
 indent:
 	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h
 
-zip:
-	zip jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
+strip:
+	strip $(EXC)
