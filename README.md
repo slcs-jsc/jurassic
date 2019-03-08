@@ -1,7 +1,6 @@
 # Juelich Rapid Spectral Simulation Code
 
-The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast radiative transfer model for the mid-infrared spectral region.
-JURASSIC has been developed for the analysis of atmospheric remote sensing measurements.
+The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiative transfer model for the analysis of atmospheric remote sensing measurements.
 
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/slcs-jsc/jurassic.svg)
 ![GitHub top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)
