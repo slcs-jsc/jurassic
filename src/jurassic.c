@@ -3291,26 +3291,13 @@ void geo2cart(
 
 /*****************************************************************************/
 
-double gravity(
-  double z,
-  double lat) {
-
-  /* Compute gravity according to 1967 Geodetic Reference System... */
-  return 9.780318 * (1 + 0.0053024 * gsl_pow_2(sin(lat / 180 * M_PI))
-		     - 0.0000058 * gsl_pow_2(sin(2 * lat / 180 * M_PI))) -
-    3.086e-3 * z;
-}
-
-/*****************************************************************************/
-
 void hydrostatic(
   ctl_t * ctl,
   atm_t * atm) {
 
   static int ig_h2o = -999;
 
-  double dzmin = 1e99, e = 0, mean, mmair = 28.96456e-3, mmh2o =
-    18.0153e-3, z;
+  double dzmin = 1e99, e = 0, mean, mmair = 28.96456e-3, mmh2o = 18.0153e-3;
 
   int i, ip, ipref = 0, ipts = 20;
 
@@ -3333,12 +3320,11 @@ void hydrostatic(
   for (ip = ipref + 1; ip < atm->np; ip++) {
     mean = 0;
     for (i = 0; i < ipts; i++) {
-      z = LIN(0.0, atm->z[ip - 1], ipts - 1.0, atm->z[ip], (double) i);
       if (ig_h2o >= 0)
 	e = LIN(0.0, atm->q[ig_h2o][ip - 1],
 		ipts - 1.0, atm->q[ig_h2o][ip], (double) i);
       mean += (e * mmh2o + (1 - e) * mmair)
-	* gravity(z, atm->lat[ipref]) / GSL_CONST_MKSA_MOLAR_GAS
+	* G0 / GSL_CONST_MKSA_MOLAR_GAS
 	/ LIN(0.0, atm->t[ip - 1], ipts - 1.0, atm->t[ip], (double) i) / ipts;
     }
 
@@ -3351,12 +3337,11 @@ void hydrostatic(
   for (ip = ipref - 1; ip >= 0; ip--) {
     mean = 0;
     for (i = 0; i < ipts; i++) {
-      z = LIN(0.0, atm->z[ip + 1], ipts - 1.0, atm->z[ip], (double) i);
       if (ig_h2o >= 0)
 	e = LIN(0.0, atm->q[ig_h2o][ip + 1],
 		ipts - 1.0, atm->q[ig_h2o][ip], (double) i);
       mean += (e * mmh2o + (1 - e) * mmair)
-	* gravity(z, atm->lat[ipref]) / GSL_CONST_MKSA_MOLAR_GAS
+	* G0 / GSL_CONST_MKSA_MOLAR_GAS
 	/ LIN(0.0, atm->t[ip + 1], ipts - 1.0, atm->t[ip], (double) i) / ipts;
     }
 

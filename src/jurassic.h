@@ -557,11 +557,6 @@ void geo2cart(
   double lat,
   double *x);
 
-/*! Determine gravity of Earth. */
-double gravity(
-  double z,
-  double lat);
-
 /*! Set hydrostatic equilibrium. */
 void hydrostatic(
   ctl_t * ctl,
