@@ -840,7 +840,7 @@ void climatology(
   for (ip = 0; ip < atm->np; ip++) {
 
     /* Get altitude index... */
-    iz = locate(z, 121, atm->z[ip]);
+    iz = locate_reg(z, 121, atm->z[ip]);
 
     /* Interpolate pressure... */
     atm->p[ip] = EXP(z[iz], pre[iz], z[iz + 1], pre[iz + 1], atm->z[ip]);
@@ -2842,7 +2842,7 @@ double ctmn2(
     return 0;
 
   /* Interpolate B and beta... */
-  idx = locate(nua, 98, nu);
+  idx = locate_reg(nua, 98, nu);
   b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
   beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
@@ -2903,7 +2903,7 @@ double ctmo2(
     return 0;
 
   /* Interpolate B and beta... */
-  idx = locate(nua, 90, nu);
+  idx = locate_reg(nua, 90, nu);
   b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
   beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
@@ -3159,7 +3159,7 @@ void formod_fov(
     }
     for (i = 0; i < n; i++) {
       zfov = obs->vpz[ir] + dz[i];
-      idx = locate(z, nz, zfov);
+      idx = locate_irr(z, nz, zfov);
       for (id = 0; id < ctl->nd; id++) {
 	obs->rad[id][ir] += w[i]
 	  * LIN(z[idx], rad[id][idx], z[idx + 1], rad[id][idx + 1], zfov);
@@ -3264,7 +3264,7 @@ void formod_srcfunc(
   int id, it;
 
   /* Determine index in temperature array... */
-  it = locate(tbl->st, TBLNS, t);
+  it = locate_reg(tbl->st, TBLNS, t);
 
   /* Interpolate Planck function value... */
   for (id = 0; id < ctl->nd; id++)
@@ -3514,7 +3514,7 @@ void intpol_atm(
   int ig, ip, iw;
 
   /* Get array index... */
-  ip = locate(atm->z, atm->np, z);
+  ip = locate_irr(atm->z, atm->np, z);
 
   /* Interpolate... */
   *p = EXP(atm->z[ip], atm->p[ip], atm->z[ip + 1], atm->p[ip + 1], z);
@@ -3568,11 +3568,12 @@ void intpol_tbl(
       else {
 
 	/* Determine pressure and temperature indices... */
-	ipr = locate(tbl->p[ig][id], tbl->np[ig][id], los->p[ip]);
-	it0 = locate(tbl->t[ig][id][ipr], tbl->nt[ig][id][ipr], los->t[ip]);
+	ipr = locate_irr(tbl->p[ig][id], tbl->np[ig][id], los->p[ip]);
+	it0 =
+	  locate_irr(tbl->t[ig][id][ipr], tbl->nt[ig][id][ipr], los->t[ip]);
 	it1 =
-	  locate(tbl->t[ig][id][ipr + 1], tbl->nt[ig][id][ipr + 1],
-		 los->t[ip]);
+	  locate_reg(tbl->t[ig][id][ipr + 1], tbl->nt[ig][id][ipr + 1],
+		     los->t[ip]);
 
 	/* Check size of table (temperature and column density)... */
 	if (tbl->nt[ig][id][ipr] < 2 || tbl->nt[ig][id][ipr + 1] < 2
@@ -3831,7 +3832,7 @@ void kernel(
 
 /*****************************************************************************/
 
-int locate(
+int locate_irr(
   double *xx,
   int n,
   double x) {
@@ -3859,6 +3860,27 @@ int locate(
     }
 
   return ilo;
+}
+
+/*****************************************************************************/
+
+int locate_reg(
+  double *xx,
+  int n,
+  double x) {
+
+  int i;
+
+  /* Calculate index... */
+  i = (int) ((x - xx[0]) / (xx[1] - xx[0]));
+
+  /* Check range... */
+  if (i < 0)
+    i = 0;
+  else if (i >= n - 2)
+    i = n - 2;
+
+  return i;
 }
 
 /*****************************************************************************/
