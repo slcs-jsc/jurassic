@@ -33,8 +33,6 @@
 
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_blas.h>
-#include <gsl/gsl_const_mksa.h>
-#include <gsl/gsl_const_num.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_statistics.h>
 #include <math.h>
@@ -83,6 +81,12 @@
 /*! Compute norm of a vector. */
 #define NORM(a) sqrt(DOTP(a, a))
 
+/*! Compute x^2. */
+#define POW2(x) ((x)*(x))
+
+/*! Compute x^3. */
+#define POW3(x) ((x)*(x)*(x))
+
 /*! Print macro for debugging. */
 #define PRINT(format, var)						\
   printf("Print (%s, %s, l%d): %s= "format"\n",				\
@@ -103,20 +107,26 @@
    Constants...
    ------------------------------------------------------------ */
 
-/*! First spectroscopic constant (c_1 = 2 h c^2) [W/(m^2 sr cm^-4)]. */
-#define C1 1.19104259e-8
-
-/*! Second spectroscopic constant (c_2 = h c / k) [K/cm^-1]. */
-#define C2 1.43877506
-
 /*! Minimum temperature for source function [K]. */
 #define TMIN 100.
 
 /*! Maximum temperature for source function [K]. */
 #define TMAX 400.
 
+/*! First spectroscopic constant (c_1 = 2 h c^2) [W/(m^2 sr cm^-4)]. */
+#define C1 1.19104259e-8
+
+/*! Second spectroscopic constant (c_2 = h c / k) [K/cm^-1]. */
+#define C2 1.43877506
+
 /*! Standard gravity [m/s^2]. */
 #define G0 9.80665
+
+/*! Boltzmann constant [kg m^2/(K s^2)]. */
+#define KB 1.3806504e-23
+
+/*! Avogadro's number. */
+#define NA 6.02214199e23
 
 /*! Standard pressure [hPa]. */
 #define P0 1013.25
@@ -126,6 +136,9 @@
 
 /*! Mean radius of Earth [km]. */
 #define RE 6367.421
+
+/*! Ideal gas constant [J/(mol K)]. */
+#define RI 8.3144598
 
 /*! Mass of Earth [kg]. */
 #define ME 5.976e24

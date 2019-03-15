@@ -331,8 +331,7 @@ double cost_function(
   /* Determine normalized cost function...
      (chi^2 = 1/m * [dy^T * S_eps^{-1} * dy + dx^T * S_a^{-1} * dx]) */
   for (i = 0; i < m; i++)
-    chisq_m +=
-      gsl_pow_2(gsl_vector_get(dy, i) * gsl_vector_get(sig_eps_inv, i));
+    chisq_m += POW2(gsl_vector_get(dy, i) * gsl_vector_get(sig_eps_inv, i));
   gsl_blas_dgemv(CblasNoTrans, 1.0, s_a_inv, dx, 0.0, x_aux);
   gsl_blas_ddot(dx, x_aux, &chisq_a);
 
@@ -558,7 +557,7 @@ void optimal_estimation(
     /* Determine b = K_i^T * S_eps^{-1} * dy - S_a^{-1} * dx ... */
     for (i = 0; i < m; i++)
       gsl_vector_set(y_aux, i, gsl_vector_get(dy, i)
-		     * gsl_pow_2(gsl_vector_get(sig_eps_inv, i)));
+		     * POW2(gsl_vector_get(sig_eps_inv, i)));
     gsl_blas_dgemv(CblasTrans, 1.0, k_i, y_aux, 0.0, b);
     gsl_blas_dgemv(CblasNoTrans, -1.0, s_a_inv, dx, 1.0, b);
 
@@ -674,7 +673,7 @@ void optimal_estimation(
     for (i = 0; i < n; i++)
       for (j = 0; j < m; j++)
 	gsl_matrix_set(auxnm, i, j, gsl_matrix_get(k_i, j, i)
-		       * gsl_pow_2(gsl_vector_get(sig_eps_inv, j)));
+		       * POW2(gsl_vector_get(sig_eps_inv, j)));
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, cov, auxnm, 0.0, gain);
     write_matrix(ret->dir, "matrix_gain.tab", ctl, gain,
 		 atm_i, obs_i, "x", "y", "c");
@@ -812,13 +811,13 @@ void set_cov_apr(
 
   /* Check standard deviations... */
   for (i = 0; i < n; i++)
-    if (gsl_pow_2(gsl_vector_get(x_a, i)) <= 0)
+    if (POW2(gsl_vector_get(x_a, i)) <= 0)
       ERRMSG("Check a priori data (zero standard deviation)!");
 
   /* Initialize diagonal covariance... */
   gsl_matrix_set_zero(s_a);
   for (i = 0; i < n; i++)
-    gsl_matrix_set(s_a, i, i, gsl_pow_2(gsl_vector_get(x_a, i)));
+    gsl_matrix_set(s_a, i, i, POW2(gsl_vector_get(x_a, i)));
 
   /* Loop over matrix elements... */
   for (i = 0; i < n; i++)
@@ -913,9 +912,10 @@ void set_cov_meas(
 
   /* Total error... */
   for (i = 0; i < m; i++)
-    gsl_vector_set(sig_eps_inv, i,
-		   1 / sqrt(gsl_pow_2(gsl_vector_get(sig_noise, i))
-			    + gsl_pow_2(gsl_vector_get(sig_formod, i))));
+    gsl_vector_set(sig_eps_inv, i, 1 / sqrt(POW2(gsl_vector_get(sig_noise, i))
+					    +
+					    POW2(gsl_vector_get
+						 (sig_formod, i))));
 
   /* Check standard deviations... */
   for (i = 0; i < m; i++)

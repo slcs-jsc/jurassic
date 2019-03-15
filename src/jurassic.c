@@ -92,7 +92,7 @@ double brightness(
   double rad,
   double nu) {
 
-  return C2 * nu / gsl_log1p(C1 * gsl_pow_3(nu) / rad);
+  return C2 * nu / gsl_log1p(C1 * POW3(nu) / rad);
 }
 
 
@@ -1726,7 +1726,7 @@ double ctmco2(
     dt296 = t - 296;
     ctw = dt260 * 5.050505e-4 * dt296 * cw230 - dt230 * 9.259259e-4
       * dt296 * cw260 + dt230 * 4.208754e-4 * dt260 * cw296;
-    ctmpth = u / GSL_CONST_NUM_AVOGADRO / 1000 * p / P0 * ctw;
+    ctmpth = u / NA / 1000 * p / P0 * ctw;
   } else
     ctmpth = 0;
   return ctmpth;
@@ -2772,8 +2772,8 @@ double ctmh2o(
       sfac = (1 - dx) * xfcrev[ix] + dx * xfcrev[ix + 1];
     }
     ctwslf = sfac * cw296 * pow(cw260 / cw296, (296 - t) / (296 - 260));
-    vf2 = gsl_pow_2(nu - 370);
-    vf6 = gsl_pow_3(vf2);
+    vf2 = POW2(nu - 370);
+    vf6 = POW3(vf2);
     fscal = 36100 / (vf2 + vf6 * 1e-8 + 36100) * -.25 + 1;
     ctwfrn = cwfrn * fscal;
     a1 = nu * u * tanh(.7193876 / t * nu);
@@ -2847,8 +2847,7 @@ double ctmn2(
   beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
-  return 0.1 * gsl_pow_2(p / P0) * gsl_pow_2(t0 / t)
-    * exp(beta * (1 / tr - 1 / t))
+  return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t))
     * q_n2 * b * (q_n2 + (1 - q_n2) * (1.294 - 0.4545 * t / tr));
 }
 
@@ -2909,8 +2908,8 @@ double ctmo2(
   beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
-  return 0.1 * gsl_pow_2(p / P0) * gsl_pow_2(t0 / t)
-    * exp(beta * (1 / tr - 1 / t)) * q_o2 * b;
+  return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t)) * q_o2 *
+    b;
 }
 
 /*****************************************************************************/
@@ -3324,7 +3323,7 @@ void hydrostatic(
 	e = LIN(0.0, atm->q[ig_h2o][ip - 1],
 		ipts - 1.0, atm->q[ig_h2o][ip], (double) i);
       mean += (e * mmh2o + (1 - e) * mmair)
-	* G0 / GSL_CONST_MKSA_MOLAR_GAS
+	* G0 / RI
 	/ LIN(0.0, atm->t[ip - 1], ipts - 1.0, atm->t[ip], (double) i) / ipts;
     }
 
@@ -3341,7 +3340,7 @@ void hydrostatic(
 	e = LIN(0.0, atm->q[ig_h2o][ip + 1],
 		ipts - 1.0, atm->q[ig_h2o][ip], (double) i);
       mean += (e * mmh2o + (1 - e) * mmair)
-	* G0 / GSL_CONST_MKSA_MOLAR_GAS
+	* G0 / RI
 	/ LIN(0.0, atm->t[ip + 1], ipts - 1.0, atm->t[ip], (double) i) / ipts;
     }
 
@@ -3921,7 +3920,7 @@ double planck(
   double t,
   double nu) {
 
-  return C1 * gsl_pow_3(nu) / gsl_expm1(C2 * nu / t);
+  return C1 * POW3(nu) / gsl_expm1(C2 * nu / t);
 }
 
 /*****************************************************************************/
@@ -4106,7 +4105,7 @@ void raytrace(
   for (ip = 0; ip < los->np; ip++)
     for (ig = 0; ig < ctl->ng; ig++)
       los->u[ig][ip] = 10 * los->q[ig][ip] * los->p[ip]
-	/ (GSL_CONST_MKSA_BOLTZMANN * los->t[ip]) * los->ds[ip];
+	/ (KB * los->t[ip]) * los->ds[ip];
 }
 
 /*****************************************************************************/
@@ -4488,8 +4487,8 @@ void tangent_point(
     yy0 = los->z[ip - 1];
     yy1 = los->z[ip];
     yy2 = los->z[ip + 1];
-    x1 = sqrt(gsl_pow_2(los->ds[ip]) - gsl_pow_2(yy1 - yy0));
-    x2 = x1 + sqrt(gsl_pow_2(los->ds[ip + 1]) - gsl_pow_2(yy2 - yy1));
+    x1 = sqrt(POW2(los->ds[ip]) - POW2(yy1 - yy0));
+    x2 = x1 + sqrt(POW2(los->ds[ip + 1]) - POW2(yy2 - yy1));
     a = 1 / (x1 - x2) * (-(yy0 - yy1) / x1 + (yy0 - yy2) / x2);
     b = -(yy0 - yy1) / x1 - a * x1;
     c = yy0;
