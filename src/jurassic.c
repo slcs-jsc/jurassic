@@ -3030,7 +3030,7 @@ void formod(
   /* Hydrostatic equilibrium... */
   hydrostatic(ctl, atm);
 
-  /* Claculate pencil beams... */
+  /* Calculate pencil beams... */
   for (ir = 0; ir < obs->nr; ir++)
     formod_pencil(ctl, atm, obs, ir);
 
