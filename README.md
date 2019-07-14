@@ -21,13 +21,13 @@ The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiati
 
 This documentation describes the installation of JURASSIC on a Linux system. A number of standard tools (gcc, git, make) and software libraries are needed to install JURASSIC. The [GNU Scientific Library](https://www.gnu.org/software/gsl) is required for numerical calculations. A copy of this library can be found in the git repository.
 
-Start by downloading the source code from the github repository:
+Start by downloading the source code from the git repository:
 
-    git clone https://github.com/slcs-jsc/jurassic
+    git clone https://jugit.fz-juelich.de/slcs/jurassic
 
 To update an existing installation use:
 
-    git pull https://github.com/slcs-jsc/jurassic
+    git pull https://jugit.fz-juelich.de/slcs/jurassic
 
 ### Installation
 
