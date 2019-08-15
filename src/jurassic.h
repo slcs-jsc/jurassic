@@ -128,6 +128,9 @@
 /*! Avogadro's number. */
 #define NA 6.02214199e23
 
+/*! Standard scale height [km]. */
+#define H0 7.0
+
 /*! Standard pressure [hPa]. */
 #define P0 1013.25
 
