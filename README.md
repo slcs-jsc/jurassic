@@ -17,11 +17,11 @@ This documentation describes the installation of JURASSIC on a Linux system. A n
 
 Start by downloading the source code from the git repository:
 
-    git clone https://jugit.fz-juelich.de/slcs/jurassic
+    git clone https://github.com/slcs-jsc/jurassic.git
 
 To update an existing installation use:
 
-    git pull https://jugit.fz-juelich.de/slcs/jurassic
+    git pull https://github.com/slcs-jsc/jurassic.git
 
 ### Installation
 
