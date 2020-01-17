@@ -1,0 +1,4 @@
+# $1 = pressure [hPa]
+# $2 = temperature [K]
+# $3 = column density [molecules/cm^2]
+# $4 = emissivity
