@@ -31,7 +31,7 @@ int main(
   static atm_t atm;
   static ctl_t ctl;
 
-  double dz, t0, z, z0, z1;
+  double dt, dz, t, t0, t1, z, z0, z1;
 
   /* Check arguments... */
   if (argc < 3)
@@ -40,17 +40,20 @@ int main(
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
   t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
+  t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
+  dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
   z0 = scan_ctl(argc, argv, "Z0", -1, "0", NULL);
   z1 = scan_ctl(argc, argv, "Z1", -1, "90", NULL);
   dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
 
   /* Set atmospheric grid... */
-  for (z = z0; z <= z1; z += dz) {
-    atm.time[atm.np] = t0;
-    atm.z[atm.np] = z;
-    if ((++atm.np) >= NP)
-      ERRMSG("Too many atmospheric grid points!");
-  }
+  for (t = t0; t <= t1; t += dt)
+    for (z = z0; z <= z1; z += dz) {
+      atm.time[atm.np] = t;
+      atm.z[atm.np] = z;
+      if ((++atm.np) >= NP)
+	ERRMSG("Too many atmospheric grid points!");
+    }
 
   /* Interpolate climatological data... */
   climatology(&ctl, &atm);

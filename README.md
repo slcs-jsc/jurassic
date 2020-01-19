@@ -42,19 +42,24 @@ By default we use rather strict compiler warnings. All warning messages will be 
 
 The binaries will remain in the jurassic/src/ directory.
 
-### Try the example
+### Try the examples
 
-It is recommended that you create a project directory for testing the example and also to store other experiments:
+It is recommended that you create a project directory for testing the examples and also to store other experiments:
 
     mkdir -p jurassic/projects
 
-This shows how to run the example:
+This shows how to run the example for the nadir sounder:
 
     cp -a jurassic/example jurassic/projects
-    cd jurassic/projects/example
+    cd jurassic/projects/example/nadir
     ./run.sh
 
-In this example we generate an observation geometry for an infrared nadir sounder,
+This shows how to run the example for the limb sounder:
+
+    cd ../limb
+    ./run.sh
+
+In both examples, we generate an observation geometry file,
 
     cat obs.tab
 
@@ -62,11 +67,16 @@ a standard atmosphere for mid-latitudes,
 
     cat atm.tab
 
-and conduct radiative transfer calculations for two detector channels in the 15 micron CO2 waveband:
+and conduct radiative transfer calculations for two or three detector channels:
 
     cat rad.tab
 
 The output of the simulation is verified by comparing it to reference data.
+Additionally, gnuplot is used to create plots of the radiance data:
+
+<p align="center"><img src="example/limb/plot.png" width="60%"/></p>
+
+<p align="center"><img src="example/nadir/plot.png" width="60%"/></p>
 
 ## Further information
 

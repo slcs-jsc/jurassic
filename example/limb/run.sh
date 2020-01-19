@@ -7,7 +7,7 @@ jurassic=../../src
 $jurassic/climatology limb.ctl atm.tab
 
 # Create observation geomtry...
-$jurassic/limb limb.ctl obs.tab Z0 3 Z1 68 DZ 1.0
+$jurassic/limb limb.ctl obs.tab
 
 # Call forward model...
 $jurassic/formod limb.ctl obs.tab atm.tab rad.tab TASK time

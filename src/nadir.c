@@ -31,7 +31,7 @@ int main(
   static ctl_t ctl;
   static obs_t obs;
 
-  double dlat, lat, lat0, lat1, obsz;
+  double dlat, dt, lat, lat0, lat1, obsz, t, t0, t1;
 
   /* Check arguments... */
   if (argc < 3)
@@ -39,18 +39,23 @@ int main(
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
+  t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
+  t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
+  dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
   obsz = scan_ctl(argc, argv, "OBSZ", -1, "700", NULL);
   lat0 = scan_ctl(argc, argv, "LAT0", -1, "-8.01", NULL);
   lat1 = scan_ctl(argc, argv, "LAT1", -1, "8.01", NULL);
   dlat = scan_ctl(argc, argv, "DLAT", -1, "0.18", NULL);
 
   /* Create measurement geometry... */
-  for (lat = lat0; lat <= lat1; lat += dlat) {
-    obs.obsz[obs.nr] = obsz;
-    obs.vplat[obs.nr] = lat;
-    if ((++obs.nr) >= NR)
-      ERRMSG("Too many rays!");
-  }
+  for (t = t0; t <= t1; t += dt)
+    for (lat = lat0; lat <= lat1; lat += dlat) {
+      obs.time[obs.nr] = t;
+      obs.obsz[obs.nr] = obsz;
+      obs.vplat[obs.nr] = lat;
+      if ((++obs.nr) >= NR)
+	ERRMSG("Too many rays!");
+    }
 
   /* Write observation data... */
   write_obs(NULL, argv[2], &ctl, &obs);

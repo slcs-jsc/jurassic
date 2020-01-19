@@ -31,7 +31,7 @@ int main(
   static ctl_t ctl;
   static obs_t obs;
 
-  double dz, obsz, z, z0, z1;
+  double dt, dz, obsz, t, t0, t1, z, z0, z1;
 
   /* Check arguments... */
   if (argc < 3)
@@ -40,18 +40,23 @@ int main(
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
   obsz = scan_ctl(argc, argv, "OBSZ", -1, "780", NULL);
-  z0 = scan_ctl(argc, argv, "Z0", -1, "6", NULL);
-  z1 = scan_ctl(argc, argv, "Z1", -1, "70", NULL);
-  dz = scan_ctl(argc, argv, "DZ", -1, "1.5", NULL);
+  t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
+  t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
+  dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
+  z0 = scan_ctl(argc, argv, "Z0", -1, "3", NULL);
+  z1 = scan_ctl(argc, argv, "Z1", -1, "68", NULL);
+  dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
 
   /* Create measurement geometry... */
-  for (z = z0; z <= z1; z += dz) {
-    obs.obsz[obs.nr] = obsz;
-    obs.vpz[obs.nr] = z;
-    obs.vplat[obs.nr] = 180 / M_PI * acos((RE + z) / (RE + obsz));
-    if ((++obs.nr) >= NR)
-      ERRMSG("Too many rays!");
-  }
+  for (t = t0; t <= t1; t += dt)
+    for (z = z0; z <= z1; z += dz) {
+      obs.time[obs.nr] = t;
+      obs.obsz[obs.nr] = obsz;
+      obs.vpz[obs.nr] = z;
+      obs.vplat[obs.nr] = 180 / M_PI * acos((RE + z) / (RE + obsz));
+      if ((++obs.nr) >= NR)
+	ERRMSG("Too many rays!");
+    }
 
   /* Write observation data... */
   write_obs(NULL, argv[2], &ctl, &obs);

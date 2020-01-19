@@ -4636,8 +4636,7 @@ void write_atm(
 
   /* Write data... */
   for (ip = 0; ip < atm->np; ip++) {
-    if (ip == 0 || atm->lat[ip] != atm->lat[ip - 1]
-	|| atm->lon[ip] != atm->lon[ip - 1])
+    if (ip == 0 || atm->time[ip] != atm->time[ip - 1])
       fprintf(out, "\n");
     fprintf(out, "%.2f %g %g %g %g %g", atm->time[ip], atm->z[ip],
 	    atm->lon[ip], atm->lat[ip], atm->p[ip], atm->t[ip]);
