@@ -2,6 +2,12 @@
 
 The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiative transfer model for the analysis of atmospheric remote sensing measurements.
 
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/slcs-jsc/jurassic.svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)
+![GitHub top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)
+![GitHub](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)
+
 ## Features
 
 * JURASSIC uses the emissivity growth approximation (EGA) to conduct the radiative transfer calculations.
