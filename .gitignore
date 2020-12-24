@@ -1,5 +1,5 @@
-doc/latex/
-lib/build/
+docs/latex/
+libs/build/
 projects/
 src/brightness
 src/climatology
