@@ -6,6 +6,7 @@ src/climatology
 src/formod
 src/hydrostatic
 src/interpolate
+src/invert
 src/jsec2time
 src/jurassic.o
 src/kernel

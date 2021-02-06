@@ -108,8 +108,8 @@ void analyze_avk_quantity(
   gsl_matrix * avk,
   int iq,
   int *ipa,
-  size_t * n0,
-  size_t * n1,
+  size_t *n0,
+  size_t *n1,
   double *cont,
   double *res);
 
@@ -286,8 +286,8 @@ void analyze_avk_quantity(
   gsl_matrix * avk,
   int iq,
   int *ipa,
-  size_t * n0,
-  size_t * n1,
+  size_t *n0,
+  size_t *n1,
   double *cont,
   double *res) {
 
@@ -440,7 +440,7 @@ void optimal_estimation(
 
   FILE *out;
 
-  char filename[LEN];
+  char filename[2 * LEN];
 
   double chisq, chisq_old, disq = 0, lmpar = 0.001;
 

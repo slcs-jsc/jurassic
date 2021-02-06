@@ -69,7 +69,7 @@ void atm2x_help(
   gsl_vector * x,
   int *iqa,
   int *ipa,
-  size_t * n) {
+  size_t *n) {
 
   int ip;
 
@@ -4677,7 +4677,8 @@ void write_matrix(
     return;
 
   /* Allocate... */
-  ALLOC(cida, int, M);
+  ALLOC(cida, int,
+	M);
   ALLOC(ciqa, int,
 	N);
   ALLOC(cipa, int,
@@ -4928,7 +4929,7 @@ void x2atm_help(
   double zmax,
   double *value,
   gsl_vector * x,
-  size_t * n) {
+  size_t *n) {
 
   int ip;
 

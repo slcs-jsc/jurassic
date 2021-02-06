@@ -469,7 +469,7 @@ void atm2x_help(
   gsl_vector * x,
   int *iqa,
   int *ipa,
-  size_t * n);
+  size_t *n);
 
 /*! Compute brightness temperature. */
 double brightness(
@@ -795,7 +795,7 @@ void x2atm_help(
   double zmax,
   double *value,
   gsl_vector * x,
-  size_t * n);
+  size_t *n);
 
 /*! Decompose measurement vector. */
 void y2obs(
