@@ -53,9 +53,10 @@ int main(
   static char line[LEN];
 
   static double rtime, rz, rlon, rlat, rp, rt, rso2, rh2o, ro3, robs,
-    obs_min, obs_meas, obs_sim, scl = 1.0, scl_err, scl_old, c1, cov11,
-    sumsq, x[NMAX], x2[NMAX], y[NMAX], y2[NMAX], t0 = GSL_NAN, dt, tol;
-
+    obs_min, obs_meas, obs_sim, scl = 1.0, scl_err, scl_old, c0, c1,
+    cov00, cov01, cov11, sumsq, x[NMAX], x2[NMAX], y[NMAX], y2[NMAX],
+    t0 = GSL_NAN, dt, tol;
+  
   static int i, ig, ip, it, itmax, method, n, nmean[NMAX], nprof;
 
   static size_t mk, nk;
@@ -70,7 +71,7 @@ int main(
   itmax = (int) scan_ctl(argc, argv, "INVERT_ITMAX", -1, "10", NULL);
   tol = scan_ctl(argc, argv, "INVERT_TOL", -1, "1e-4", NULL);
   method = (int) scan_ctl(argc, argv, "INVERT_METHOD", -1, "1", NULL);
-  obs_min = scan_ctl(argc, argv, "INVERT_OBSMIN", -1, "0", NULL);
+  obs_min = scan_ctl(argc, argv, "INVERT_OBSMIN", -1, "-1e99", NULL);
 
   /* Check control parameters... */
   if (ctl.ng != 4)
@@ -103,15 +104,17 @@ int main(
 
     /* Initialize... */
     atm.np = n = 0;
-    if (method == 1)
+    if (method == 1 || method == 4)
       for (i = 0; i < NMAX; i++)
 	x[i] = y[i] = GSL_NAN;
-    else if (method == 2)
+    else if (method == 2 || method == 3 || method == 5 || method == 6)
       for (i = 0; i < NMAX; i++) {
 	x[i] = y[i] = 0;
 	nmean[i] = 0;
       }
-
+    else
+      ERRMSG("Check INVERT_METHOD!");
+    
     /* Read profile data... */
     printf("Read profile data: %s\n", argv[2]);
 
@@ -166,7 +169,7 @@ int main(
 	  ERRMSG("Index out of range!");
 
 	/* Get maxima... */
-	if (method == 1) {
+	if (method == 1 || method == 4) {
 	  if (gsl_finite(x[i]))
 	    x[i] = GSL_MAX(x[i], obs_sim);
 	  else
@@ -176,9 +179,10 @@ int main(
 	  else
 	    y[i] = obs_meas;
 	}
-
+	
 	/* Get means... */
-	if (method == 2 && (obs_meas >= obs_min || obs_sim >= obs_min)) {
+	else if ((method == 2 || method == 3 || method == 5 || method == 6)
+		 && (obs_meas >= obs_min || obs_sim >= obs_min)) {
 	  x[i] += obs_sim;
 	  y[i] += obs_meas;
 	  nmean[i]++;
@@ -220,11 +224,12 @@ int main(
     }
 
     /* Calculate means... */
-    for (i = 0; i < NMAX; i++) {
-      x[i] /= nmean[i];
-      y[i] /= nmean[i];
-    }
-
+    if(method == 2 || method == 5)
+      for (i = 0; i < NMAX; i++) {
+	x[i] /= nmean[i];
+	y[i] /= nmean[i];
+      }
+    
     /* Filter data... */
     n = 0;
     for (i = 0; i < NMAX; i++)
@@ -255,10 +260,14 @@ int main(
 	   sqrt(sumsq / n));
 
     /* Get new scaling factor... */
-    gsl_fit_mul(x2, 1, y2, 1, (size_t) n, &c1, &cov11, &sumsq);
+    if(method >=1 && method <= 3)
+      gsl_fit_mul(x2, 1, y2, 1, (size_t) n, &c1, &cov11, &sumsq);
+    else if(method >= 4 && method <= 6)
+      gsl_fit_linear(x2, 1, y2, 1, (size_t) n, &c0, &c1,
+		     &cov00, &cov01, &cov11, &sumsq);
     scl *= c1;
     scl_err = scl * sqrt(cov11 / POW2(c1));
-
+    
     /* Convergence test... */
     if (fabs(2.0 * (scl - scl_old) / (scl + scl_old)) < tol)
       break;
