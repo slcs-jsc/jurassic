@@ -29,6 +29,9 @@
    Constants...
    ------------------------------------------------------------ */
 
+/*! Maximum number of data lines... */
+#define NLMAX 30000000
+
 /*! Maximum number of data points... */
 #define NMAX 1000
 
@@ -52,12 +55,15 @@ int main(
 
   static char line[LEN];
 
-  static double rtime, rz, rlon, rlat, rp, rt, rso2, rh2o, ro3, robs,
-    obs_min, obs_meas, obs_sim, scl = 1.0, scl_err, scl_old, c0, c1,
-    cov00, cov01, cov11, sumsq, x[NMAX], x2[NMAX], y[NMAX], y2[NMAX],
-    t0 = GSL_NAN, dt, tol;
-  
-  static int i, ig, ip, it, itmax, method, n, nmean[NMAX], nprof;
+  static double rtime[NLMAX], rz[NLMAX], rlon[NLMAX], rlat[NLMAX], obs_meas,
+    obs_sim, scl = 1.0, scl_old, scl_err, c0, c1, cov00, cov01, cov11,
+    sumsq, x[NMAX], x2[NMAX], y[NMAX], y_err[NMAX], y2[NMAX], y2_err[NMAX],
+    y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX], dt, tol, obs_err;
+
+  static float rp[NLMAX], rt[NLMAX], rso2[NLMAX], rh2o[NLMAX],
+    ro3[NLMAX], robs[NLMAX];
+
+  static int data, fit, i, ig, il, ip, it, itmax, n, nl, ndata[NMAX], nprof;
 
   static size_t mk, nk;
 
@@ -68,10 +74,11 @@ int main(
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
   dt = scan_ctl(argc, argv, "INVERT_DT", -1, "86400", NULL);
+  obs_err = scan_ctl(argc, argv, "INVERT_OBS_ERR", -1, "1.0", NULL);
+  data = (int) scan_ctl(argc, argv, "INVERT_DATA", -1, "2", NULL);
+  fit = (int) scan_ctl(argc, argv, "INVERT_FIT", -1, "3", NULL);
   itmax = (int) scan_ctl(argc, argv, "INVERT_ITMAX", -1, "10", NULL);
   tol = scan_ctl(argc, argv, "INVERT_TOL", -1, "1e-4", NULL);
-  method = (int) scan_ctl(argc, argv, "INVERT_METHOD", -1, "1", NULL);
-  obs_min = scan_ctl(argc, argv, "INVERT_OBSMIN", -1, "-1e99", NULL);
 
   /* Check control parameters... */
   if (ctl.ng != 4)
@@ -96,96 +103,84 @@ int main(
   obs.obsz[0] = 705;
 
   /* ------------------------------------------------------------
+     Read profiles...
+     ------------------------------------------------------------ */
+
+  /* Read profile data... */
+  printf("Read profile data: %s\n", argv[2]);
+
+  /* Open file... */
+  if (!(in = fopen(argv[2], "r")))
+    ERRMSG("Cannot open file!");
+
+  /* Read file... */
+  while (fgets(line, LEN, in)) {
+
+    /* Read data... */
+    if (sscanf(line, "%lg %lg %lg %lg %g %g %g %g %g %g", &rtime[nl],
+	       &rz[nl], &rlon[nl], &rlat[nl], &rp[nl], &rt[nl], &rso2[nl],
+	       &rh2o[nl], &ro3[nl], &robs[nl]) != 10)
+      continue;
+    if ((++nl) > NLMAX)
+      ERRMSG("Too many profile data points!");
+  }
+
+  /* Close files... */
+  fclose(in);
+
+  /* ------------------------------------------------------------
      Fit scaling factor for total mass...
      ------------------------------------------------------------ */
 
   /* Iterations... */
   for (it = 0; it < itmax; it++) {
 
-    /* Initialize... */
+    /* Init... */
     atm.np = n = 0;
-    if (method == 1 || method == 4)
-      for (i = 0; i < NMAX; i++)
-	x[i] = y[i] = GSL_NAN;
-    else if (method == 2 || method == 3 || method == 5 || method == 6)
-      for (i = 0; i < NMAX; i++) {
-	x[i] = y[i] = 0;
-	nmean[i] = 0;
-      }
-    else
-      ERRMSG("Check INVERT_METHOD!");
-    
-    /* Read profile data... */
-    printf("Read profile data: %s\n", argv[2]);
+    for (i = 0; i < NMAX; i++) {
+      ndata[i] = 0;
+      x[i] = y[i] = GSL_NAN;
+    }
 
-    /* Open file... */
-    if (!(in = fopen(argv[2], "r")))
-      ERRMSG("Cannot open file!");
-
-    /* Write inversion data... */
-    printf("Write inversion data: %s\n", argv[3]);
-
-    /* Create file... */
-    if (!(out = fopen(argv[3], "w")))
-      ERRMSG("Cannot create file!");
-
-    /* Write header... */
-    fprintf(out,
-	    "# $1 = time (seconds since 2000-01-01T00:00Z)\n"
-	    "# $2 = altitude [km]\n"
-	    "# $3 = longitude [deg]\n"
-	    "# $4 = latitude [deg]\n"
-	    "# $5 = simulated SO2 index [K]\n"
-	    "# $6 = measured SO2 index [K]\n\n");
-
-    /* Read line... */
-    while (fgets(line, LEN, in)) {
-
-      /* Read data... */
-      if (sscanf
-	  (line, "%lg %lg %lg %lg %lg %lg %lg %lg %lg %lg", &rtime, &rz,
-	   &rlon, &rlat, &rp, &rt, &rso2, &rh2o, &ro3, &robs) != 10)
-	continue;
-
-      /* Save initial time... */
-      if (!gsl_finite(t0))
-	t0 = rtime;
+    /* Loop over lines... */
+    for (il = 0; il < nl; il++) {
 
       /* Check for new profile... */
-      if ((rtime != atm.time[0] || rlon != atm.lon[0] || rlat != atm.lat[0])
+      if ((rtime[il] != atm.time[0]
+	   || rlon[il] != atm.lon[0]
+	   || rlat[il] != atm.lat[0])
 	  && atm.np > 0) {
 
 	/* Call forward model... */
 	formod(&ctl, &atm, &obs);
 	obs_sim = obs.rad[0][0] - obs.rad[1][0];
 
-	/* Write output... */
-	fprintf(out, "%.2f %g %g %g %g %g\n", atm.time[0], 0.0, atm.lon[0],
-		atm.lat[0], obs_sim, obs_meas);
-
 	/* Get time index... */
-	i = (int) ((atm.time[0] - t0) / dt);
+	i = (int) ((atm.time[0] - rtime[0]) / dt);
 	if (i < 0 && i >= NMAX)
-	  ERRMSG("Index out of range!");
+	  ERRMSG("Time index out of range!");
 
 	/* Get maxima... */
-	if (method == 1 || method == 4) {
-	  if (gsl_finite(x[i]))
-	    x[i] = GSL_MAX(x[i], obs_sim);
-	  else
-	    x[i] = obs_sim;
-	  if (gsl_finite(y[i]))
-	    y[i] = GSL_MAX(y[i], obs_meas);
-	  else
-	    y[i] = obs_meas;
+	if (data == 1) {
+	  x[i] = (gsl_finite(x[i]) ? GSL_MAX(x[i], obs_sim) : obs_sim);
+	  y[i] = (gsl_finite(y[i]) ? GSL_MAX(y[i], obs_meas) : obs_meas);
+	  y_err[i] = obs_err;
+	  if (gsl_finite(x[i]) && gsl_finite(y[i]))
+	    ndata[i] = 1;
 	}
-	
+
 	/* Get means... */
-	else if ((method == 2 || method == 3 || method == 5 || method == 6)
-		 && (obs_meas >= obs_min || obs_sim >= obs_min)) {
-	  x[i] += obs_sim;
-	  y[i] += obs_meas;
-	  nmean[i]++;
+	else if (data == 2) {
+	  if (ndata[i] == 0) {
+	    x[i] = obs_sim;
+	    y[i] = obs_meas;
+	    y_err[i] = POW2(obs_meas);
+	  } else {
+	    x[i] += obs_sim;
+	    y[i] += obs_meas;
+	    y_err[i] += POW2(obs_meas);
+	  }
+	  ndata[i]++;
 	}
 
 	/* Calculate mean atmospheric profile... */
@@ -207,16 +202,16 @@ int main(
       }
 
       /* Save data... */
-      obs_meas = robs;
-      atm.time[atm.np] = rtime;
-      atm.z[atm.np] = rz;
-      atm.lon[atm.np] = rlon;
-      atm.lat[atm.np] = rlat;
-      atm.p[atm.np] = rp;
-      atm.t[atm.np] = rt;
-      atm.q[0][atm.np] = rso2 * scl;
-      atm.q[1][atm.np] = rh2o;
-      atm.q[2][atm.np] = ro3;
+      obs_meas = robs[il];
+      atm.time[atm.np] = rtime[il];
+      atm.z[atm.np] = rz[il];
+      atm.lon[atm.np] = rlon[il];
+      atm.lat[atm.np] = rlat[il];
+      atm.p[atm.np] = rp[il];
+      atm.t[atm.np] = rt[il];
+      atm.q[0][atm.np] = rso2[il] * scl;
+      atm.q[1][atm.np] = rh2o[il];
+      atm.q[2][atm.np] = ro3[il];
       atm.q[3][atm.np] = 371.789948e-6 + 2.026214e-6
 	* (atm.time[atm.np] - 63158400.) / 31557600.;
       if ((++atm.np) > NP)
@@ -224,55 +219,103 @@ int main(
     }
 
     /* Calculate means... */
-    if(method == 2 || method == 5)
-      for (i = 0; i < NMAX; i++) {
-	x[i] /= nmean[i];
-	y[i] /= nmean[i];
-      }
-    
+    if (data == 2)
+      for (i = 0; i < NMAX; i++)
+	if (ndata[i] > 0) {
+	  x[i] /= ndata[i];
+	  y[i] /= ndata[i];
+	  y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0));
+	}
+
     /* Filter data... */
     n = 0;
     for (i = 0; i < NMAX; i++)
-      if (gsl_finite(x[i]) && gsl_finite(y[i])) {
+      if (ndata[i] > 0 && gsl_finite(x[i]) && gsl_finite(y[i])
+	  && gsl_finite(y_err[i])) {
 	x2[n] = x[i];
 	y2[n] = y[i];
+	y2_err[n] = y_err[i];
+	w2[n] = 1. / POW2(y_err[i]);
 	n++;
       }
 
-    /* Report data... */
-    fprintf(out, "\n");
-    for (i = 0; i < n; i++)
-      fprintf(out, "# time= %.2f | si_sim= %g | si_obs= %g\n",
-	      t0 + (i + 0.5) * dt, x2[i], y2[i]);
-
-    /* Report statistics... */
-    fprintf(out, "\n");
-    fprintf(out, "# scl= %g +/- %g\n", scl, scl_err);
-    fprintf(out, "# RMSE= %g\n", sqrt(sumsq / n));
-    fprintf(out, "# n= %d\n", n);
-
-    /* Close files... */
-    fclose(out);
-    fclose(in);
-
-    /* Write info... */
-    printf("  it= %d | scl= %g +/- %g | RMSE= %g\n", it, scl, scl_err,
-	   sqrt(sumsq / n));
+    /* Fit radiance data... */
+    if (fit == 1)
+      gsl_fit_mul(x2, 1, y2, 1, (size_t) n, &c1, &cov11, &sumsq);
+    else if (fit == 2)
+      gsl_fit_wmul(x2, 1, w2, 1, y2, 1, (size_t) n, &c1, &cov11, &sumsq);
+    else if (fit == 3)
+      gsl_fit_linear(x2, 1, y2, 1, (size_t) n, &c0, &c1, &cov00, &cov01,
+		     &cov11, &sumsq);
+    else if (fit == 4)
+      gsl_fit_wlinear(x2, 1, w2, 1, y2, 1, (size_t) n, &c0, &c1, &cov00,
+		      &cov01, &cov11, &sumsq);
+    else
+      ERRMSG("Check INVERT_FIT!");
 
     /* Get new scaling factor... */
-    if(method >=1 && method <= 3)
-      gsl_fit_mul(x2, 1, y2, 1, (size_t) n, &c1, &cov11, &sumsq);
-    else if(method >= 4 && method <= 6)
-      gsl_fit_linear(x2, 1, y2, 1, (size_t) n, &c0, &c1,
-		     &cov00, &cov01, &cov11, &sumsq);
+    scl_old = scl;
+    scl_err = sqrt(cov11 * POW2(scl) + POW2(c1 * scl_err));
+    /* scl_err = scl * sqrt(cov11 / POW2(c1)); */
     scl *= c1;
-    scl_err = scl * sqrt(cov11 / POW2(c1));
-    
+
+    /* Write info... */
+    printf("  it= %d | scl= %g +/- %g | RMSE= %g\n",
+	   it, scl, scl_err, sqrt(sumsq / n));
+
     /* Convergence test... */
     if (fabs(2.0 * (scl - scl_old) / (scl + scl_old)) < tol)
       break;
-    scl_old = scl;
   }
+
+  /* ------------------------------------------------------------
+     Write inversion data...
+     ------------------------------------------------------------ */
+
+  /* Write info... */
+  printf("Write inversion data: %s\n", argv[3]);
+
+  /* Create file... */
+  if (!(out = fopen(argv[3], "w")))
+    ERRMSG("Cannot create file!");
+
+  /* Write header... */
+  fprintf(out,
+	  "# $1 = time (seconds since 2000-01-01T00:00Z)\n"
+	  "# $2 = simulated SO2 index [K]\n"
+	  "# $3 = scaled simulated SO2 index [K]\n"
+	  "# $4 = error of scaled simulated SO2 index [K]\n"
+	  "# $5 = observed SO2 index [K]\n"
+	  "# $6 = error of observed SO2 index [K]\n\n");
+
+  /* Write data... */
+  for (i = 0; i < n; i++) {
+
+    /* Calculate scaled SO2 index... */
+    if (fit == 1 || fit == 2)
+      gsl_fit_mul_est(x2[i], c1, cov11, &y2_sim[i], &y2_sim_err[i]);
+    else if (fit == 3 || fit == 4)
+      gsl_fit_linear_est(x2[i], c0, c1, cov00, cov01, cov11, &y2_sim[i],
+			 &y2_sim_err[i]);
+
+    /* Write output... */
+    fprintf(out, "%.2f %g %g %g %g %g\n", rtime[0] + (i + 0.5) * dt,
+	    x2[i], y2_sim[i], y2_sim_err[i], y2[i], y2_err[i]);
+  }
+
+  /* Report scaling factor for total mass... */
+  fprintf(out, "\n");
+  fprintf(out, "#    scl= %g +/- %g\n", scl, scl_err);
+  fprintf(out, "#     c1= %g +/- %g\n", c1, sqrt(cov11));
+  if (fit == 3 || fit == 4) {
+    fprintf(out, "#     c0= %g +/- %g\n", c0, sqrt(cov00));
+    fprintf(out, "#   corr= %g\n", sqrt(cov01) / (sqrt(cov00) * sqrt(cov11)));
+  }
+  fprintf(out, "#   RMSE= %g\n", sqrt(sumsq / n));
+  fprintf(out, "#      n= %d\n", n);
+
+  /* Close files... */
+  fclose(out);
 
   /* ------------------------------------------------------------
      Calculate kernel...
