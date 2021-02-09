@@ -224,9 +224,10 @@ int main(
 	if (ndata[i] > 0) {
 	  x[i] /= ndata[i];
 	  y[i] /= ndata[i];
-	  y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0));
+	  y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
+	    / sqrt(ndata[i]);   /* standard error! */
 	}
-
+    
     /* Filter data... */
     n = 0;
     for (i = 0; i < NMAX; i++)
@@ -255,9 +256,12 @@ int main(
 
     /* Get new scaling factor... */
     scl_old = scl;
-    scl_err = sqrt(cov11 * POW2(scl) + POW2(c1 * scl_err));
-    /* scl_err = scl * sqrt(cov11 / POW2(c1)); */
+    scl_err = scl * sqrt(cov11);
     scl *= c1;
+
+    
+    /* scl_err = scl * sqrt(cov11 / POW2(c1)); */
+    
 
     /* Write info... */
     printf("  it= %d | scl= %g +/- %g | RMSE= %g\n",
@@ -309,7 +313,7 @@ int main(
   fprintf(out, "#     c1= %g +/- %g\n", c1, sqrt(cov11));
   if (fit == 3 || fit == 4) {
     fprintf(out, "#     c0= %g +/- %g\n", c0, sqrt(cov00));
-    fprintf(out, "#   corr= %g\n", sqrt(cov01) / (sqrt(cov00) * sqrt(cov11)));
+    fprintf(out, "#   corr= %g\n", cov01 / (sqrt(cov00) * sqrt(cov11)));
   }
   fprintf(out, "#   RMSE= %g\n", sqrt(sumsq / n));
   fprintf(out, "#      n= %d\n", n);
