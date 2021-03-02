@@ -2,11 +2,13 @@
 
 The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiative transfer model for the analysis of atmospheric remote sensing measurements.
 
-![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/slcs-jsc/jurassic.svg)
-![GitHub last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)
-![GitHub top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)
-![GitHub](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/slcs-jsc/jurassic)](https://github.com/slcs-jsc/jurassic/releases)
+[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/slcs-jsc/jurassic/latest)](https://github.com/slcs-jsc/jurassic/commits/master)
+[![GitHub last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/master)
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
+[![GitHub top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
+[![GitHub](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/blob/master/COPYING)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4572890.svg)](https://doi.org/10.5281/zenodo.4572890)
 
 ## Features
 
@@ -91,6 +93,8 @@ These are the main references for citing the JURASSIC model in scientific public
 * Hoffmann, L., and M. J. Alexander, Retrieval of stratospheric temperatures from Atmospheric Infrared Sounder radiance measurements for gravity wave studies, J. Geophys. Res., 114, D07105, https://doi.org/10.1029/2008JD011241, 2009.
 
 * Hoffmann, L., Kaufmann, M., Spang, R., Müller, R., Remedios, J. J., Moore, D. P., Volk, C. M., von Clarmann, T., and Riese, M.: Envisat MIPAS measurements of CFC-11: retrieval, validation, and climatology, Atmos. Chem. Phys., 8, 3671-3688, https://doi.org/10.5194/acp-8-3671-2008, 2008.
+
+* You can cite the source code of JURASSIC by using the DOI https://doi.org/10.5281/zenodo.4572890. This DOI represents all versions, and will always resolve to the latest one. Specific DOIs for each release of JURASSIC can be found on the zenodo web site.
 
 More details on the data structures and algorithms can be found in the [JURASSIC reference manual](doc/refman.pdf)
 
