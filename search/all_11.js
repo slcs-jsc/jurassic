@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['rad_100',['rad',['../structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3',1,'obs_t']]],
+  ['rayds_101',['rayds',['../structctl__t.html#add30b1dee3914f1d1473df0fccabb364',1,'ctl_t']]],
+  ['raydz_102',['raydz',['../structctl__t.html#aee8d7ddf07ec801c7d4a2037cb23a6e7',1,'ctl_t']]],
+  ['raytrace_103',['raytrace',['../jurassic_8h.html#a3af9f213af23ca71015ccde4a2bb7e47',1,'raytrace(ctl_t *ctl, atm_t *atm, obs_t *obs, los_t *los, int ir):&#160;jurassic.c'],['../jurassic_8c.html#a3af9f213af23ca71015ccde4a2bb7e47',1,'raytrace(ctl_t *ctl, atm_t *atm, obs_t *obs, los_t *los, int ir):&#160;jurassic.c']]],
+  ['raytrace_2ec_104',['raytrace.c',['../raytrace_8c.html',1,'']]],
+  ['read_5fatm_105',['read_atm',['../jurassic_8c.html#a2a544008f87b520631abbe75ee4378b4',1,'read_atm(const char *dirname, const char *filename, ctl_t *ctl, atm_t *atm):&#160;jurassic.c'],['../jurassic_8h.html#a2a544008f87b520631abbe75ee4378b4',1,'read_atm(const char *dirname, const char *filename, ctl_t *ctl, atm_t *atm):&#160;jurassic.c']]],
+  ['read_5fctl_106',['read_ctl',['../jurassic_8h.html#a3635d1716488dea37d1176c1fb02675f',1,'read_ctl(int argc, char *argv[], ctl_t *ctl):&#160;jurassic.c'],['../jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f',1,'read_ctl(int argc, char *argv[], ctl_t *ctl):&#160;jurassic.c']]],
+  ['read_5fmatrix_107',['read_matrix',['../jurassic_8h.html#a1380c5f839b8a1cca792a83de445a4b3',1,'read_matrix(const char *dirname, const char *filename, gsl_matrix *matrix):&#160;jurassic.c'],['../jurassic_8c.html#a1380c5f839b8a1cca792a83de445a4b3',1,'read_matrix(const char *dirname, const char *filename, gsl_matrix *matrix):&#160;jurassic.c']]],
+  ['read_5fobs_108',['read_obs',['../jurassic_8h.html#abc77066cc0af3b212bc54fe88b2a62c4',1,'read_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs):&#160;jurassic.c'],['../jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4',1,'read_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs):&#160;jurassic.c']]],
+  ['read_5fret_109',['read_ret',['../retrieval_8c.html#a94bea18710fa76cda7b914289e35bd16',1,'retrieval.c']]],
+  ['read_5fshape_110',['read_shape',['../jurassic_8h.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd',1,'read_shape(const char *filename, double *x, double *y, int *n):&#160;jurassic.c'],['../jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd',1,'read_shape(const char *filename, double *x, double *y, int *n):&#160;jurassic.c']]],
+  ['refrac_111',['refrac',['../structctl__t.html#a840532f5c38a5b325317cede07b40990',1,'ctl_t']]],
+  ['refractivity_112',['refractivity',['../jurassic_8h.html#a7710061480fdf72b1bb1f35c3d7c2b95',1,'refractivity(double p, double t):&#160;jurassic.c'],['../jurassic_8c.html#a7710061480fdf72b1bb1f35c3d7c2b95',1,'refractivity(double p, double t):&#160;jurassic.c']]],
+  ['ret_5ft_113',['ret_t',['../structret__t.html',1,'']]],
+  ['retk_5fzmax_114',['retk_zmax',['../structctl__t.html#a26933d7ba71ac03f208a4c3b59c6c12a',1,'ctl_t']]],
+  ['retk_5fzmin_115',['retk_zmin',['../structctl__t.html#aab99fb086f49aee8e2aa5fd1c517a221',1,'ctl_t']]],
+  ['retp_5fzmax_116',['retp_zmax',['../structctl__t.html#afb1ec420b7e90ebf056640417572a225',1,'ctl_t']]],
+  ['retp_5fzmin_117',['retp_zmin',['../structctl__t.html#a1184388515bcde02af618c43495164a1',1,'ctl_t']]],
+  ['retq_5fzmax_118',['retq_zmax',['../structctl__t.html#a785678f0cb53cbf59f390ad671f262f3',1,'ctl_t']]],
+  ['retq_5fzmin_119',['retq_zmin',['../structctl__t.html#a7d487af5fe0e4d378d90865f589c7ddc',1,'ctl_t']]],
+  ['retrieval_2ec_120',['retrieval.c',['../retrieval_8c.html',1,'']]],
+  ['rett_5fzmax_121',['rett_zmax',['../structctl__t.html#a4ceaa6f495415c535223541d957491d3',1,'ctl_t']]],
+  ['rett_5fzmin_122',['rett_zmin',['../structctl__t.html#a8df8e6875b7fe5ab5e2805390b3f9c3f',1,'ctl_t']]]
+];

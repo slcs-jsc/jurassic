@@ -1,0 +1,9 @@
+<map id="raytrace" name="raytrace">
+<area shape="rect" id="node1" title="Do ray&#45;tracing to determine LOS." alt="" coords="5,107,73,133"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#afcebac771f3524363c18f14dd8791c27" title="Convert Cartesian coordinates to geolocation." alt="" coords="271,81,343,108"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ad97e04e82009975d18fa256cd977da76" title="Convert geolocation to Cartesian coordinates." alt="" coords="271,183,343,209"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a88dbf00d0a92f872bc7f79a6d4a04f73" title="Interpolate atmospheric data." alt="" coords="130,5,213,32"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a7710061480fdf72b1bb1f35c3d7c2b95" title="Compute refractivity (return value is n &#45; 1)." alt="" coords="130,157,213,184"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a6139da92e644377c885dab79690d893a" title="Find tangent point of a given LOS." alt="" coords="121,107,221,133"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="269,5,344,32"/>
+</map>

@@ -1,0 +1,25 @@
+<map id="formod_pencil" name="formod_pencil">
+<area shape="rect" id="node1" title="Compute radiative transfer for a pencil beam." alt="" coords="5,298,108,324"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#af1529ec408a59b2287f0806fa0492d1c" title="Compute absorption coefficient of continua." alt="" coords="156,158,275,184"/>
+<area shape="rect" id="node9" href="$jurassic_8c.html#a9d1c44b38726392d18d62b296ac772b6" title="Compute Planck source function." alt="" coords="159,44,271,71"/>
+<area shape="rect" id="node10" href="$jurassic_8c.html#ad385aba7a4fa75867ec066d2730b3088" title="Initialize look&#45;up tables." alt="" coords="185,298,245,324"/>
+<area shape="rect" id="node13" href="$jurassic_8c.html#a7be73c77a55977ee3528d3a4c23cf556" title="Get transmittance from look&#45;up tables." alt="" coords="335,386,410,412"/>
+<area shape="rect" id="node18" href="$jurassic_8c.html#a3af9f213af23ca71015ccde4a2bb7e47" title="Do ray&#45;tracing to determine LOS." alt="" coords="181,512,249,539"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#afdbfa04516650587c2b9493ccf59f34d" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="340,183,405,210"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#adfcdd259307ba6e4cd35884bb10b7891" title="Compute water vapor continuum (optical depth)." alt="" coords="340,31,405,58"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#ac5247ed3b351629634243ccc4b0421da" title="Compute nitrogen continuum (absorption coefficient)." alt="" coords="343,234,402,260"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a91d990872ec6ac854bf94117ccc38499" title="Compute oxygen continuum (absorption coefficient)." alt="" coords="343,82,402,108"/>
+<area shape="rect" id="node8" href="$jurassic_8c.html#acbce6bde5455c87766a1eede6ae05dc4" title="Find index of an emitter." alt="" coords="328,132,417,159"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a843622b433d83623ab59d6cb5021636b" title="Find array index for regular grid." alt="" coords="481,158,563,184"/>
+<area shape="rect" id="node11" href="$jurassic_8c.html#a0c76cf634aa20d85c81ad14cf9fb4276" title="Compute Planck function." alt="" coords="343,284,403,311"/>
+<area shape="rect" id="node12" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read shape function." alt="" coords="328,335,417,362"/>
+<area shape="rect" id="node14" href="$jurassic_8c.html#a51bf442b03bb6da93aecfde16809378c" title="Interpolate emissivity from look&#45;up tables." alt="" coords="471,335,573,362"/>
+<area shape="rect" id="node16" href="$jurassic_8c.html#af47645438b088aacce0e302414837ab3" title="Interpolate column density from look&#45;up tables." alt="" coords="478,386,566,412"/>
+<area shape="rect" id="node17" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="485,436,559,463"/>
+<area shape="rect" id="node15" href="$jurassic_8c.html#a121189f496bfbf2c9227674647965496" title="Find array index in float array." alt="" coords="621,360,700,387"/>
+<area shape="rect" id="node19" href="$jurassic_8c.html#afcebac771f3524363c18f14dd8791c27" title="Convert Cartesian coordinates to geolocation." alt="" coords="486,526,558,552"/>
+<area shape="rect" id="node20" href="$jurassic_8c.html#ad97e04e82009975d18fa256cd977da76" title="Convert geolocation to Cartesian coordinates." alt="" coords="486,614,558,640"/>
+<area shape="rect" id="node21" href="$jurassic_8c.html#a88dbf00d0a92f872bc7f79a6d4a04f73" title="Interpolate atmospheric data." alt="" coords="331,436,414,463"/>
+<area shape="rect" id="node22" href="$jurassic_8c.html#a7710061480fdf72b1bb1f35c3d7c2b95" title="Compute refractivity (return value is n &#45; 1)." alt="" coords="331,538,414,564"/>
+<area shape="rect" id="node23" href="$jurassic_8c.html#a6139da92e644377c885dab79690d893a" title="Find tangent point of a given LOS." alt="" coords="323,588,423,615"/>
+</map>

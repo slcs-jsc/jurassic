@@ -1,0 +1,5 @@
+<map id="tangent_point" name="tangent_point">
+<area shape="rect" id="node1" title="Find tangent point of a given LOS." alt="" coords="5,31,105,57"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#afcebac771f3524363c18f14dd8791c27" title="Convert Cartesian coordinates to geolocation." alt="" coords="153,5,225,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ad97e04e82009975d18fa256cd977da76" title="Convert geolocation to Cartesian coordinates." alt="" coords="153,56,225,83"/>
+</map>

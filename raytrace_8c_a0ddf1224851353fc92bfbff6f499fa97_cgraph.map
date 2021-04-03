@@ -1,0 +1,15 @@
+<map id="main" name="main">
+<area shape="rect" id="node1" title=" " alt="" coords="5,220,56,247"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a3af9f213af23ca71015ccde4a2bb7e47" title="Do ray&#45;tracing to determine LOS." alt="" coords="109,93,177,120"/>
+<area shape="rect" id="node9" href="$jurassic_8c.html#a2a544008f87b520631abbe75ee4378b4" title="Read atmospheric data." alt="" coords="105,144,181,171"/>
+<area shape="rect" id="node10" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read forward model control parameters." alt="" coords="109,195,177,221"/>
+<area shape="rect" id="node11" href="$jurassic_8c.html#ace274e4068072c682e6070021525b515" title="Search control parameter file for variable entry." alt="" coords="245,245,316,272"/>
+<area shape="rect" id="node12" href="$jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4" title="Read observation data." alt="" coords="106,296,181,323"/>
+<area shape="rect" id="node13" href="$jurassic_8c.html#a47a1cea1d9e3bf957e5959435b57c503" title="Write atmospheric data." alt="" coords="104,347,183,373"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#afcebac771f3524363c18f14dd8791c27" title="Convert Cartesian coordinates to geolocation." alt="" coords="380,5,452,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ad97e04e82009975d18fa256cd977da76" title="Convert geolocation to Cartesian coordinates." alt="" coords="380,68,452,95"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a88dbf00d0a92f872bc7f79a6d4a04f73" title="Interpolate atmospheric data." alt="" coords="239,144,322,171"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a7710061480fdf72b1bb1f35c3d7c2b95" title="Compute refractivity (return value is n &#45; 1)." alt="" coords="239,195,322,221"/>
+<area shape="rect" id="node8" href="$jurassic_8c.html#a6139da92e644377c885dab79690d893a" title="Find tangent point of a given LOS." alt="" coords="231,43,331,69"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="379,144,453,171"/>
+</map>
