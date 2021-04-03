@@ -17,10 +17,12 @@
   Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
 */
 
-/*! 
+/*!
   \file
   JURASSIC library declarations.
-  
+*/
+
+/*!
   \mainpage
   
   The JUelich RApid Spectral SImulation Code (JURASSIC) is a fast radiative
