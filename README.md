@@ -2,13 +2,15 @@
 
 The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiative transfer model for the analysis of atmospheric remote sensing measurements.
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/slcs-jsc/jurassic)](https://github.com/slcs-jsc/jurassic/releases)
-[![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/slcs-jsc/jurassic/latest)](https://github.com/slcs-jsc/jurassic/commits/master)
-[![GitHub last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/master)
-[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
-[![GitHub top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
-[![GitHub](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/blob/master/COPYING)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4572889.svg)](https://doi.org/10.5281/zenodo.4572889)
+[![release (latest by date)](https://img.shields.io/github/v/release/slcs-jsc/jurassic)](https://github.com/slcs-jsc/jurassic/releases)
+[![commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/slcs-jsc/jurassic/latest)](https://github.com/slcs-jsc/jurassic/commits/master)
+[![last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/master)
+[![code size in bytes](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
+[![top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
+[![test case](https://github.com/slcs-jsc/jurassic/actions/workflows/test_case.yml/badge.svg)](https://github.com/slcs-jsc/jurassic/actions)
+[![doxygen](https://github.com/slcs-jsc/jurassic/actions/workflows/doxygen.yml/badge.svg)](https://slcs-jsc.github.io/jurassic)
+[![license](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/blob/master/COPYING)
+[![doi](https://zenodo.org/badge/DOI/10.5281/zenodo.4572889.svg)](https://doi.org/10.5281/zenodo.4572889)
 
 ## Features
 
@@ -96,7 +98,7 @@ These are the main references for citing the JURASSIC model in scientific public
 
 * You can cite the source code of JURASSIC by using the DOI https://doi.org/10.5281/zenodo.4572889. This DOI represents all versions, and will always resolve to the latest one. Specific DOIs for each release of JURASSIC can be found on the zenodo web site.
 
-More details on the data structures and algorithms can be found in the [JURASSIC reference manual](doc/refman.pdf)
+More details on the data structures and algorithms can be found in the [reference manual](https://slcs-jsc.github.io/jurassic)
 
 ## Contributing
 

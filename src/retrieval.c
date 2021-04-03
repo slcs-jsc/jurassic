@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copright (C) 2003-2015 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -34,7 +34,7 @@ typedef struct {
   /*! Working directory. */
   char dir[LEN];
 
-  /*! Recomputation of kernel matrix (number of iterations). */
+  /*! Re-computation of kernel matrix (number of iterations). */
   int kernel_recomp;
 
   /*! Maximum number of iterations. */
@@ -297,7 +297,7 @@ void analyze_avk_quantity(
   if (n0[iq] < N)
     for (i = 0; i < n1[iq]; i++) {
 
-      /* Get area of averagig kernel... */
+      /* Get area of averaging kernel... */
       for (j = 0; j < n1[iq]; j++)
 	cont[ipa[n0[iq] + i]] += gsl_matrix_get(avk, n0[iq] + i, n0[iq] + j);
 

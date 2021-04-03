@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copright (C) 2003-2015 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
 */
 
 /*! 
