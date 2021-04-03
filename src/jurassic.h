@@ -17,7 +17,7 @@
   Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
 */
 
-/*!
+/*! 
   \file
   JURASSIC library declarations.
 */
@@ -29,8 +29,9 @@
   transfer model for the mid-infrared spectral region.
 
   This reference manual provides information on the algorithms
-  and data structures used in the code. Further information can be found at:
-  http://www.fz-juelich.de/ias/jsc/jurassic
+  and data structures used in the code.
+
+  Further information can be found at: https://github.com/slcs-jsc/jurassic
 */
 
 #include <gsl/gsl_math.h>
