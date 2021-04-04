@@ -7,8 +7,8 @@ The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiati
 [![last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/master)
 [![code size in bytes](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
 [![top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
-[![test case](https://github.com/slcs-jsc/jurassic/actions/workflows/test_case.yml/badge.svg)](https://github.com/slcs-jsc/jurassic/actions)
-[![doxygen](https://github.com/slcs-jsc/jurassic/actions/workflows/doxygen.yml/badge.svg)](https://slcs-jsc.github.io/jurassic)
+[![test case](https://img.shields.io/github/workflow/status/slcs-jsc/jurassic/testcase?label=test%20case)](https://github.com/slcs-jsc/jurassic/actions)
+[![doxygen](https://img.shields.io/github/workflow/status/slcs-jsc/jurassic/doxygen?label=doxygen)](https://slcs-jsc.github.io/jurassic)
 [![license](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/blob/master/COPYING)
 [![doi](https://zenodo.org/badge/DOI/10.5281/zenodo.4572889.svg)](https://doi.org/10.5281/zenodo.4572889)
 
