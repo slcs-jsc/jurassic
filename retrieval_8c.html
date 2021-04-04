@@ -101,7 +101,8 @@ $(document).ready(function(){initNavTree('retrieval_8c.html',''); initResizable(
 
 <p>JURASSIC retrieval processor.  
 <a href="#details">More...</a></p>
-
+<div class="textblock"><code>#include &quot;<a class="el" href="jurassic_8h_source.html">jurassic.h</a>&quot;</code><br />
+</div>
 <p><a href="retrieval_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -209,16 +210,16 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160; </div>
 <div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  <span class="keywordtype">int</span> ig, iq, iw;</div>
 <div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160; </div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  <span class="keywordtype">size_t</span> i, n, n0[NQ], n1[NQ];</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;  <span class="keywordtype">size_t</span> i, n, n0[<a class="code" href="jurassic_8h.html#a68c2775fc4d7385df9c7bb96d23b482b">NQ</a>], n1[<a class="code" href="jurassic_8h.html#a68c2775fc4d7385df9c7bb96d23b482b">NQ</a>];</div>
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160; </div>
 <div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  <span class="comment">/* Get sizes... */</span></div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  n = avk-&gt;size1;</div>
 <div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160; </div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;  <span class="comment">/* Find sub-matrices for different quantities... */</span></div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  <span class="keywordflow">for</span> (iq = 0; iq &lt; NQ; iq++) {</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;    n0[iq] = N;</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;  <span class="keywordflow">for</span> (iq = 0; iq &lt; <a class="code" href="jurassic_8h.html#a68c2775fc4d7385df9c7bb96d23b482b">NQ</a>; iq++) {</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;    n0[iq] = <a class="code" href="jurassic_8h.html#a0240ac851181b84ac374872dc5434ee4">N</a>;</div>
 <div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    <span class="keywordflow">for</span> (i = 0; i &lt; n; i++) {</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;      <span class="keywordflow">if</span> (iqa[i] == iq &amp;&amp; n0[iq] == N)</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;      <span class="keywordflow">if</span> (iqa[i] == iq &amp;&amp; n0[iq] == <a class="code" href="jurassic_8h.html#a0240ac851181b84ac374872dc5434ee4">N</a>)</div>
 <div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;        n0[iq] = i;</div>
 <div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;      <span class="keywordflow">if</span> (iqa[i] == iq)</div>
 <div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;        n1[iq] = i - n0[iq] + 1;</div>
@@ -230,13 +231,13 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;  <a class="code" href="jurassic_8c.html#af99ebcda83d49b5e454345a649abc5c7">copy_atm</a>(ctl, &amp;atm_res, atm, 1);</div>
 <div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160; </div>
 <div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;  <span class="comment">/* Analyze quantities... */</span></div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, IDXP, ipa, n0, n1, atm_cont.<a class="code" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>, atm_res.<a class="code" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>);</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, IDXT, ipa, n0, n1, atm_cont.<a class="code" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>, atm_res.<a class="code" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>);</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;  <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, <a class="code" href="jurassic_8h.html#a99c6798a64d9d5535a2b22b46ee31924">IDXP</a>, ipa, n0, n1, atm_cont.<a class="code" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>, atm_res.<a class="code" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>);</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;  <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, <a class="code" href="jurassic_8h.html#afb33f030ad4a44d5f638f3903d13fe70">IDXT</a>, ipa, n0, n1, atm_cont.<a class="code" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>, atm_res.<a class="code" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>);</div>
 <div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;  <span class="keywordflow">for</span> (ig = 0; ig &lt; ctl-&gt;<a class="code" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;    <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, IDXQ(ig), ipa, n0, n1,</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;    <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, <a class="code" href="jurassic_8h.html#af2f80a7a5ff9b54495c0c41d8571cafc">IDXQ</a>(ig), ipa, n0, n1,</div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;                         atm_cont.<a class="code" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig], atm_res.<a class="code" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig]);</div>
 <div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;  <span class="keywordflow">for</span> (iw = 0; iw &lt; ctl-&gt;<a class="code" href="structctl__t.html#a094e10d6d25abb248ee383a3da02181a">nw</a>; iw++)</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;    <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, IDXK(iw), ipa, n0, n1,</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;    <a class="code" href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a>(avk, <a class="code" href="jurassic_8h.html#a511d4808c85a5b5e1e600cf413eabbd6">IDXK</a>(iw), ipa, n0, n1,</div>
 <div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;                         atm_cont.<a class="code" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw], atm_res.<a class="code" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw]);</div>
 <div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160; </div>
 <div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  <span class="comment">/* Write results to disk... */</span></div>
@@ -245,6 +246,12 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;}</div>
 <div class="ttc" id="ajurassic_8c_html_a47a1cea1d9e3bf957e5959435b57c503"><div class="ttname"><a href="jurassic_8c.html#a47a1cea1d9e3bf957e5959435b57c503">write_atm</a></div><div class="ttdeci">void write_atm(const char *dirname, const char *filename, ctl_t *ctl, atm_t *atm)</div><div class="ttdoc">Write atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04600">jurassic.c:4600</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_af99ebcda83d49b5e454345a649abc5c7"><div class="ttname"><a href="jurassic_8c.html#af99ebcda83d49b5e454345a649abc5c7">copy_atm</a></div><div class="ttdeci">void copy_atm(ctl_t *ctl, atm_t *atm_dest, atm_t *atm_src, int init)</div><div class="ttdoc">Copy and initialize atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l02917">jurassic.c:2917</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a0240ac851181b84ac374872dc5434ee4"><div class="ttname"><a href="jurassic_8h.html#a0240ac851181b84ac374872dc5434ee4">N</a></div><div class="ttdeci">#define N</div><div class="ttdoc">Maximum size of state vector.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00178">jurassic.h:178</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a511d4808c85a5b5e1e600cf413eabbd6"><div class="ttname"><a href="jurassic_8h.html#a511d4808c85a5b5e1e600cf413eabbd6">IDXK</a></div><div class="ttdeci">#define IDXK(iw)</div><div class="ttdoc">Indices for extinction.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00218">jurassic.h:218</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a68c2775fc4d7385df9c7bb96d23b482b"><div class="ttname"><a href="jurassic_8h.html#a68c2775fc4d7385df9c7bb96d23b482b">NQ</a></div><div class="ttdeci">#define NQ</div><div class="ttdoc">Maximum number of quantities.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00181">jurassic.h:181</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a99c6798a64d9d5535a2b22b46ee31924"><div class="ttname"><a href="jurassic_8h.html#a99c6798a64d9d5535a2b22b46ee31924">IDXP</a></div><div class="ttdeci">#define IDXP</div><div class="ttdoc">Index for pressure.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00209">jurassic.h:209</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_af2f80a7a5ff9b54495c0c41d8571cafc"><div class="ttname"><a href="jurassic_8h.html#af2f80a7a5ff9b54495c0c41d8571cafc">IDXQ</a></div><div class="ttdeci">#define IDXQ(ig)</div><div class="ttdoc">Indices for volume mixing ratios.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00215">jurassic.h:215</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_afb33f030ad4a44d5f638f3903d13fe70"><div class="ttname"><a href="jurassic_8h.html#afb33f030ad4a44d5f638f3903d13fe70">IDXT</a></div><div class="ttdeci">#define IDXT</div><div class="ttdoc">Index for temperature.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00212">jurassic.h:212</a></div></div>
 <div class="ttc" id="aretrieval_8c_html_ae003c3ae1198f815d74e2246b9320eaa"><div class="ttname"><a href="retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa">analyze_avk_quantity</a></div><div class="ttdeci">void analyze_avk_quantity(gsl_matrix *avk, int iq, int *ipa, size_t *n0, size_t *n1, double *cont, double *res)</div><div class="ttdoc">Analyze averaging kernels for individual retrieval target.</div><div class="ttdef"><b>Definition:</b> <a href="retrieval_8c_source.html#l00285">retrieval.c:285</a></div></div>
 <div class="ttc" id="astructatm__t_html"><div class="ttname"><a href="structatm__t.html">atm_t</a></div><div class="ttdoc">Atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00225">jurassic.h:225</a></div></div>
 <div class="ttc" id="astructatm__t_html_a18d3460f12bb187e3ae50e9f2547ede3"><div class="ttname"><a href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">atm_t::k</a></div><div class="ttdeci">double k[NW][NP]</div><div class="ttdoc">Extinction [1/km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00252">jurassic.h:252</a></div></div>
@@ -332,7 +339,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="keywordtype">size_t</span> i, j;</div>
 <div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160; </div>
 <div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;  <span class="comment">/* Loop over state vector elements... */</span></div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  <span class="keywordflow">if</span> (n0[iq] &lt; N)</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  <span class="keywordflow">if</span> (n0[iq] &lt; <a class="code" href="jurassic_8h.html#a0240ac851181b84ac374872dc5434ee4">N</a>)</div>
 <div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    <span class="keywordflow">for</span> (i = 0; i &lt; n1[iq]; i++) {</div>
 <div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160; </div>
 <div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;      <span class="comment">/* Get area of averaging kernel... */</span></div>
@@ -406,7 +413,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  <span class="comment">/* Determine normalized cost function...</span></div>
 <div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;<span class="comment">     (chi^2 = 1/m * [dy^T * S_eps^{-1} * dy + dx^T * S_a^{-1} * dx]) */</span></div>
 <div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;  <span class="keywordflow">for</span> (i = 0; i &lt; m; i++)</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;    chisq_m += POW2(gsl_vector_get(dy, i) * gsl_vector_get(sig_eps_inv, i));</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;    chisq_m += <a class="code" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(gsl_vector_get(dy, i) * gsl_vector_get(sig_eps_inv, i));</div>
 <div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;  gsl_blas_dgemv(CblasNoTrans, 1.0, s_a_inv, dx, 0.0, x_aux);</div>
 <div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;  gsl_blas_ddot(dx, x_aux, &amp;chisq_a);</div>
 <div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160; </div>
@@ -417,6 +424,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;  <span class="comment">/* Return cost function value... */</span></div>
 <div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;  <span class="keywordflow">return</span> (chisq_m + chisq_a) / (double) m;</div>
 <div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;}</div>
+<div class="ttc" id="ajurassic_8h_html_a1ac0abc7c913167ecaf81778d57e7a17"><div class="ttname"><a href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a></div><div class="ttdeci">#define POW2(x)</div><div class="ttdoc">Compute x^2.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00088">jurassic.h:88</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -609,7 +617,7 @@ Here is the call graph for this function:</div>
 <p class="definition">Definition at line <a class="el" href="retrieval_8c_source.html#l00427">427</a> of file <a class="el" href="retrieval_8c_source.html">retrieval.c</a>.</p>
 <div class="fragment"><div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;                 {</div>
 <div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160; </div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">int</span> ipa[N], iqa[N];</div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">int</span> ipa[<a class="code" href="jurassic_8h.html#a0240ac851181b84ac374872dc5434ee4">N</a>], iqa[<a class="code" href="jurassic_8h.html#a0240ac851181b84ac374872dc5434ee4">N</a>];</div>
 <div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160; </div>
 <div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;  gsl_matrix *a, *auxnm, *corr, *cov, *gain, *k_i, *s_a_inv;</div>
 <div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;  gsl_vector *b, *dx, *dy, *sig_eps_inv, *sig_formod, *sig_noise,</div>
@@ -617,7 +625,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160; </div>
 <div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;  FILE *out;</div>
 <div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160; </div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;  <span class="keywordtype">char</span> filename[2 * LEN];</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;  <span class="keywordtype">char</span> filename[2 * <a class="code" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>];</div>
 <div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160; </div>
 <div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <span class="keywordtype">double</span> chisq, chisq_old, disq = 0, lmpar = 0.001;</div>
 <div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160; </div>
@@ -633,7 +641,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;  m = <a class="code" href="jurassic_8c.html#a5ce82e78c060ed68f6276ebefe6e9651">obs2y</a>(ctl, obs_meas, NULL, NULL, NULL);</div>
 <div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;  n = <a class="code" href="jurassic_8c.html#afb2d90bd3a6b3cce3d7965c465650de7">atm2x</a>(ctl, atm_apr, NULL, iqa, ipa);</div>
 <div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;  <span class="keywordflow">if</span> (m &lt;= 0 || n &lt;= 0)</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Check problem definition!&quot;</span>);</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Check problem definition!&quot;</span>);</div>
 <div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160; </div>
 <div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;  <span class="comment">/* Write info... */</span></div>
 <div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;  printf(<span class="stringliteral">&quot;Problem size: m= %d / n= %d &quot;</span></div>
@@ -642,7 +650,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;         (<span class="keywordtype">double</span>) (3 * m * n + 4 * n * n + 8 * m +</div>
 <div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;                   8 * n) * <span class="keyword">sizeof</span>(<span class="keywordtype">double</span>) / 1024. / 1024.,</div>
 <div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;         (<span class="keywordtype">double</span>) (5 * <span class="keyword">sizeof</span>(<a class="code" href="structatm__t.html">atm_t</a>) + 3 * <span class="keyword">sizeof</span>(<a class="code" href="structobs__t.html">obs_t</a>)</div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;                   + 2 * N * <span class="keyword">sizeof</span>(<span class="keywordtype">int</span>)) / 1024. / 1024.);</div>
+<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;                   + 2 * <a class="code" href="jurassic_8h.html#a0240ac851181b84ac374872dc5434ee4">N</a> * <span class="keyword">sizeof</span>(<span class="keywordtype">int</span>)) / 1024. / 1024.);</div>
 <div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160; </div>
 <div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;  <span class="comment">/* Allocate... */</span></div>
 <div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;  a = gsl_matrix_alloc(n, n);</div>
@@ -686,7 +694,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;  <span class="comment">/* Create cost function file... */</span></div>
 <div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;  sprintf(filename, <span class="stringliteral">&quot;%s/costs.tab&quot;</span>, ret-&gt;<a class="code" href="structret__t.html#ada64429504782319cf47ceb02e6ceb3f">dir</a>);</div>
 <div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;  <span class="keywordflow">if</span> (!(out = fopen(filename, <span class="stringliteral">&quot;w&quot;</span>)))</div>
-<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Cannot create cost function file!&quot;</span>);</div>
+<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Cannot create cost function file!&quot;</span>);</div>
 <div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160; </div>
 <div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;  <span class="comment">/* Write header... */</span></div>
 <div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;  fprintf(out,</div>
@@ -734,7 +742,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;    <span class="comment">/* Determine b = K_i^T * S_eps^{-1} * dy - S_a^{-1} * dx ... */</span></div>
 <div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;    <span class="keywordflow">for</span> (i = 0; i &lt; m; i++)</div>
 <div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;      gsl_vector_set(y_aux, i, gsl_vector_get(dy, i)</div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;                     * POW2(gsl_vector_get(sig_eps_inv, i)));</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;                     * <a class="code" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(gsl_vector_get(sig_eps_inv, i)));</div>
 <div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;    gsl_blas_dgemv(CblasTrans, 1.0, k_i, y_aux, 0.0, b);</div>
 <div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;    gsl_blas_dgemv(CblasNoTrans, -1.0, s_a_inv, dx, 1.0, b);</div>
 <div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160; </div>
@@ -850,7 +858,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;    <span class="keywordflow">for</span> (i = 0; i &lt; n; i++)</div>
 <div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;      <span class="keywordflow">for</span> (j = 0; j &lt; m; j++)</div>
 <div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160;        gsl_matrix_set(auxnm, i, j, gsl_matrix_get(k_i, j, i)</div>
-<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;                       * POW2(gsl_vector_get(sig_eps_inv, j)));</div>
+<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;                       * <a class="code" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(gsl_vector_get(sig_eps_inv, j)));</div>
 <div class="line"><a name="l00677"></a><span class="lineno">  677</span>&#160;    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, cov, auxnm, 0.0, gain);</div>
 <div class="line"><a name="l00678"></a><span class="lineno">  678</span>&#160;    <a class="code" href="jurassic_8c.html#a7207aafddb6356d7f93f2f795a242ead">write_matrix</a>(ret-&gt;<a class="code" href="structret__t.html#ada64429504782319cf47ceb02e6ceb3f">dir</a>, <span class="stringliteral">&quot;matrix_gain.tab&quot;</span>, ctl, gain,</div>
 <div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;                 atm_i, obs_i, <span class="stringliteral">&quot;x&quot;</span>, <span class="stringliteral">&quot;y&quot;</span>, <span class="stringliteral">&quot;c&quot;</span>);</div>
@@ -908,6 +916,8 @@ Here is the call graph for this function:</div>
 <div class="ttc" id="ajurassic_8c_html_ade98b629cc336a9c2f1a9563f0c9e5b4"><div class="ttname"><a href="jurassic_8c.html#ade98b629cc336a9c2f1a9563f0c9e5b4">formod</a></div><div class="ttdeci">void formod(ctl_t *ctl, atm_t *atm, obs_t *obs)</div><div class="ttdoc">Determine ray paths and compute radiative transfer.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l03014">jurassic.c:3014</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_aeefdc8136e69ccb8979eacf56bbb35e3"><div class="ttname"><a href="jurassic_8c.html#aeefdc8136e69ccb8979eacf56bbb35e3">kernel</a></div><div class="ttdeci">void kernel(ctl_t *ctl, atm_t *atm, obs_t *obs, gsl_matrix *k)</div><div class="ttdoc">Compute Jacobians.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l03743">jurassic.c:3743</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_afb2d90bd3a6b3cce3d7965c465650de7"><div class="ttname"><a href="jurassic_8c.html#afb2d90bd3a6b3cce3d7965c465650de7">atm2x</a></div><div class="ttdeci">size_t atm2x(ctl_t *ctl, atm_t *atm, gsl_vector *x, int *iqa, int *ipa)</div><div class="ttdoc">Compose state vector or parameter vector.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l00029">jurassic.c:29</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a05b49c662c073f89e86804f7856622a0"><div class="ttname"><a href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a></div><div class="ttdeci">#define LEN</div><div class="ttdoc">Maximum length of ASCII data lines.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00172">jurassic.h:172</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_aaf13ca5350992cd9c7c460a076d8fda9"><div class="ttname"><a href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(msg)</div><div class="ttdoc">Print error message and quit program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00068">jurassic.h:68</a></div></div>
 <div class="ttc" id="aretrieval_8c_html_a061658db2cabc72897fc539ebda4968c"><div class="ttname"><a href="retrieval_8c.html#a061658db2cabc72897fc539ebda4968c">matrix_product</a></div><div class="ttdeci">void matrix_product(gsl_matrix *a, gsl_vector *b, int transpose, gsl_matrix *c)</div><div class="ttdoc">Compute matrix product A^TBA or ABA^T for diagonal matrix B.</div><div class="ttdef"><b>Definition:</b> <a href="retrieval_8c_source.html#l00378">retrieval.c:378</a></div></div>
 <div class="ttc" id="aretrieval_8c_html_a26cdbbd65bf4cee84f18772c45d279be"><div class="ttname"><a href="retrieval_8c.html#a26cdbbd65bf4cee84f18772c45d279be">set_cov_apr</a></div><div class="ttdeci">void set_cov_apr(ret_t *ret, ctl_t *ctl, atm_t *atm, int *iqa, int *ipa, gsl_matrix *s_a)</div><div class="ttdoc">Set a priori covariance.</div><div class="ttdef"><b>Definition:</b> <a href="retrieval_8c_source.html#l00775">retrieval.c:775</a></div></div>
 <div class="ttc" id="aretrieval_8c_html_a790bf200d48cb94a1ebbba33983ff819"><div class="ttname"><a href="retrieval_8c.html#a790bf200d48cb94a1ebbba33983ff819">analyze_avk</a></div><div class="ttdeci">void analyze_avk(ret_t *ret, ctl_t *ctl, atm_t *atm, int *iqa, int *ipa, gsl_matrix *avk)</div><div class="ttdoc">Compute information content and resolution.</div><div class="ttdef"><b>Definition:</b> <a href="retrieval_8c_source.html#l00236">retrieval.c:236</a></div></div>
@@ -1159,27 +1169,27 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00797"></a><span class="lineno">  797</span>&#160;  <span class="comment">/* Get sigma vector... */</span></div>
 <div class="line"><a name="l00798"></a><span class="lineno">  798</span>&#160;  <a class="code" href="jurassic_8c.html#afb2d90bd3a6b3cce3d7965c465650de7">atm2x</a>(ctl, atm, x_a, NULL, NULL);</div>
 <div class="line"><a name="l00799"></a><span class="lineno">  799</span>&#160;  <span class="keywordflow">for</span> (i = 0; i &lt; n; i++) {</div>
-<div class="line"><a name="l00800"></a><span class="lineno">  800</span>&#160;    <span class="keywordflow">if</span> (iqa[i] == IDXP)</div>
+<div class="line"><a name="l00800"></a><span class="lineno">  800</span>&#160;    <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#a99c6798a64d9d5535a2b22b46ee31924">IDXP</a>)</div>
 <div class="line"><a name="l00801"></a><span class="lineno">  801</span>&#160;      gsl_vector_set(x_a, i, ret-&gt;<a class="code" href="structret__t.html#a37a4b935012a65da5c1ad692ee74cefe">err_press</a> / 100 * gsl_vector_get(x_a, i));</div>
-<div class="line"><a name="l00802"></a><span class="lineno">  802</span>&#160;    <span class="keywordflow">if</span> (iqa[i] == IDXT)</div>
+<div class="line"><a name="l00802"></a><span class="lineno">  802</span>&#160;    <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#afb33f030ad4a44d5f638f3903d13fe70">IDXT</a>)</div>
 <div class="line"><a name="l00803"></a><span class="lineno">  803</span>&#160;      gsl_vector_set(x_a, i, ret-&gt;<a class="code" href="structret__t.html#a616ca08dddf3dfd071d523f052966b12">err_temp</a>);</div>
 <div class="line"><a name="l00804"></a><span class="lineno">  804</span>&#160;    <span class="keywordflow">for</span> (ig = 0; ig &lt; ctl-&gt;<a class="code" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
-<div class="line"><a name="l00805"></a><span class="lineno">  805</span>&#160;      <span class="keywordflow">if</span> (iqa[i] == IDXQ(ig))</div>
+<div class="line"><a name="l00805"></a><span class="lineno">  805</span>&#160;      <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#af2f80a7a5ff9b54495c0c41d8571cafc">IDXQ</a>(ig))</div>
 <div class="line"><a name="l00806"></a><span class="lineno">  806</span>&#160;        gsl_vector_set(x_a, i, ret-&gt;<a class="code" href="structret__t.html#ad7a4d797ec29d85e0f9e4b6a0c153acb">err_q</a>[ig] / 100 * gsl_vector_get(x_a, i));</div>
 <div class="line"><a name="l00807"></a><span class="lineno">  807</span>&#160;    <span class="keywordflow">for</span> (iw = 0; iw &lt; ctl-&gt;<a class="code" href="structctl__t.html#a094e10d6d25abb248ee383a3da02181a">nw</a>; iw++)</div>
-<div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;      <span class="keywordflow">if</span> (iqa[i] == IDXK(iw))</div>
+<div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;      <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#a511d4808c85a5b5e1e600cf413eabbd6">IDXK</a>(iw))</div>
 <div class="line"><a name="l00809"></a><span class="lineno">  809</span>&#160;        gsl_vector_set(x_a, i, ret-&gt;<a class="code" href="structret__t.html#af4eb3f8fad1ee4d4bd4ff4176ad3575f">err_k</a>[iw]);</div>
 <div class="line"><a name="l00810"></a><span class="lineno">  810</span>&#160;  }</div>
 <div class="line"><a name="l00811"></a><span class="lineno">  811</span>&#160; </div>
 <div class="line"><a name="l00812"></a><span class="lineno">  812</span>&#160;  <span class="comment">/* Check standard deviations... */</span></div>
 <div class="line"><a name="l00813"></a><span class="lineno">  813</span>&#160;  <span class="keywordflow">for</span> (i = 0; i &lt; n; i++)</div>
-<div class="line"><a name="l00814"></a><span class="lineno">  814</span>&#160;    <span class="keywordflow">if</span> (POW2(gsl_vector_get(x_a, i)) &lt;= 0)</div>
-<div class="line"><a name="l00815"></a><span class="lineno">  815</span>&#160;      ERRMSG(<span class="stringliteral">&quot;Check a priori data (zero standard deviation)!&quot;</span>);</div>
+<div class="line"><a name="l00814"></a><span class="lineno">  814</span>&#160;    <span class="keywordflow">if</span> (<a class="code" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(gsl_vector_get(x_a, i)) &lt;= 0)</div>
+<div class="line"><a name="l00815"></a><span class="lineno">  815</span>&#160;      <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Check a priori data (zero standard deviation)!&quot;</span>);</div>
 <div class="line"><a name="l00816"></a><span class="lineno">  816</span>&#160; </div>
 <div class="line"><a name="l00817"></a><span class="lineno">  817</span>&#160;  <span class="comment">/* Initialize diagonal covariance... */</span></div>
 <div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;  gsl_matrix_set_zero(s_a);</div>
 <div class="line"><a name="l00819"></a><span class="lineno">  819</span>&#160;  <span class="keywordflow">for</span> (i = 0; i &lt; n; i++)</div>
-<div class="line"><a name="l00820"></a><span class="lineno">  820</span>&#160;    gsl_matrix_set(s_a, i, i, POW2(gsl_vector_get(x_a, i)));</div>
+<div class="line"><a name="l00820"></a><span class="lineno">  820</span>&#160;    gsl_matrix_set(s_a, i, i, <a class="code" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(gsl_vector_get(x_a, i)));</div>
 <div class="line"><a name="l00821"></a><span class="lineno">  821</span>&#160; </div>
 <div class="line"><a name="l00822"></a><span class="lineno">  822</span>&#160;  <span class="comment">/* Loop over matrix elements... */</span></div>
 <div class="line"><a name="l00823"></a><span class="lineno">  823</span>&#160;  <span class="keywordflow">for</span> (i = 0; i &lt; n; i++)</div>
@@ -1190,27 +1200,27 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00828"></a><span class="lineno">  828</span>&#160;        cz = ch = 0;</div>
 <div class="line"><a name="l00829"></a><span class="lineno">  829</span>&#160; </div>
 <div class="line"><a name="l00830"></a><span class="lineno">  830</span>&#160;        <span class="comment">/* Set correlation lengths for pressure... */</span></div>
-<div class="line"><a name="l00831"></a><span class="lineno">  831</span>&#160;        <span class="keywordflow">if</span> (iqa[i] == IDXP) {</div>
+<div class="line"><a name="l00831"></a><span class="lineno">  831</span>&#160;        <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#a99c6798a64d9d5535a2b22b46ee31924">IDXP</a>) {</div>
 <div class="line"><a name="l00832"></a><span class="lineno">  832</span>&#160;          cz = ret-&gt;<a class="code" href="structret__t.html#a28b6420599cf7a0012082165d131acd6">err_press_cz</a>;</div>
 <div class="line"><a name="l00833"></a><span class="lineno">  833</span>&#160;          ch = ret-&gt;<a class="code" href="structret__t.html#ab8c7a6e941f1b6e41c095d1efbfab387">err_press_ch</a>;</div>
 <div class="line"><a name="l00834"></a><span class="lineno">  834</span>&#160;        }</div>
 <div class="line"><a name="l00835"></a><span class="lineno">  835</span>&#160; </div>
 <div class="line"><a name="l00836"></a><span class="lineno">  836</span>&#160;        <span class="comment">/* Set correlation lengths for temperature... */</span></div>
-<div class="line"><a name="l00837"></a><span class="lineno">  837</span>&#160;        <span class="keywordflow">if</span> (iqa[i] == IDXT) {</div>
+<div class="line"><a name="l00837"></a><span class="lineno">  837</span>&#160;        <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#afb33f030ad4a44d5f638f3903d13fe70">IDXT</a>) {</div>
 <div class="line"><a name="l00838"></a><span class="lineno">  838</span>&#160;          cz = ret-&gt;<a class="code" href="structret__t.html#a55bb904242ed4b26f1c8f5a27a4ef50a">err_temp_cz</a>;</div>
 <div class="line"><a name="l00839"></a><span class="lineno">  839</span>&#160;          ch = ret-&gt;<a class="code" href="structret__t.html#a9d21bed9a5bbb7f044c0ed2c99c746ec">err_temp_ch</a>;</div>
 <div class="line"><a name="l00840"></a><span class="lineno">  840</span>&#160;        }</div>
 <div class="line"><a name="l00841"></a><span class="lineno">  841</span>&#160; </div>
 <div class="line"><a name="l00842"></a><span class="lineno">  842</span>&#160;        <span class="comment">/* Set correlation lengths for volume mixing ratios... */</span></div>
 <div class="line"><a name="l00843"></a><span class="lineno">  843</span>&#160;        <span class="keywordflow">for</span> (ig = 0; ig &lt; ctl-&gt;<a class="code" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
-<div class="line"><a name="l00844"></a><span class="lineno">  844</span>&#160;          <span class="keywordflow">if</span> (iqa[i] == IDXQ(ig)) {</div>
+<div class="line"><a name="l00844"></a><span class="lineno">  844</span>&#160;          <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#af2f80a7a5ff9b54495c0c41d8571cafc">IDXQ</a>(ig)) {</div>
 <div class="line"><a name="l00845"></a><span class="lineno">  845</span>&#160;            cz = ret-&gt;<a class="code" href="structret__t.html#a61899a5b81d134ceff4a527383a3c55d">err_q_cz</a>[ig];</div>
 <div class="line"><a name="l00846"></a><span class="lineno">  846</span>&#160;            ch = ret-&gt;<a class="code" href="structret__t.html#ac7074498033f17991268df8300b6553a">err_q_ch</a>[ig];</div>
 <div class="line"><a name="l00847"></a><span class="lineno">  847</span>&#160;          }</div>
 <div class="line"><a name="l00848"></a><span class="lineno">  848</span>&#160; </div>
 <div class="line"><a name="l00849"></a><span class="lineno">  849</span>&#160;        <span class="comment">/* Set correlation lengths for extinction... */</span></div>
 <div class="line"><a name="l00850"></a><span class="lineno">  850</span>&#160;        <span class="keywordflow">for</span> (iw = 0; iw &lt; ctl-&gt;<a class="code" href="structctl__t.html#a094e10d6d25abb248ee383a3da02181a">nw</a>; iw++)</div>
-<div class="line"><a name="l00851"></a><span class="lineno">  851</span>&#160;          <span class="keywordflow">if</span> (iqa[i] == IDXK(iw)) {</div>
+<div class="line"><a name="l00851"></a><span class="lineno">  851</span>&#160;          <span class="keywordflow">if</span> (iqa[i] == <a class="code" href="jurassic_8h.html#a511d4808c85a5b5e1e600cf413eabbd6">IDXK</a>(iw)) {</div>
 <div class="line"><a name="l00852"></a><span class="lineno">  852</span>&#160;            cz = ret-&gt;<a class="code" href="structret__t.html#a45f25383fd186884b8a51310837b43cd">err_k_cz</a>[iw];</div>
 <div class="line"><a name="l00853"></a><span class="lineno">  853</span>&#160;            ch = ret-&gt;<a class="code" href="structret__t.html#a53df3475ac7e045917bd54caef5058ee">err_k_ch</a>[iw];</div>
 <div class="line"><a name="l00854"></a><span class="lineno">  854</span>&#160;          }</div>
@@ -1224,7 +1234,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00862"></a><span class="lineno">  862</span>&#160; </div>
 <div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160;          <span class="comment">/* Compute correlations... */</span></div>
 <div class="line"><a name="l00864"></a><span class="lineno">  864</span>&#160;          rho =</div>
-<div class="line"><a name="l00865"></a><span class="lineno">  865</span>&#160;            exp(-DIST(x0, x1) / ch -</div>
+<div class="line"><a name="l00865"></a><span class="lineno">  865</span>&#160;            exp(-<a class="code" href="jurassic_8h.html#ae733a5a3a9e9a85474da2105655a0dc4">DIST</a>(x0, x1) / ch -</div>
 <div class="line"><a name="l00866"></a><span class="lineno">  866</span>&#160;                fabs(atm-&gt;<a class="code" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ipa[i]] - atm-&gt;<a class="code" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ipa[j]]) / cz);</div>
 <div class="line"><a name="l00867"></a><span class="lineno">  867</span>&#160; </div>
 <div class="line"><a name="l00868"></a><span class="lineno">  868</span>&#160;          <span class="comment">/* Set covariance... */</span></div>
@@ -1237,6 +1247,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00875"></a><span class="lineno">  875</span>&#160;  gsl_vector_free(x_a);</div>
 <div class="line"><a name="l00876"></a><span class="lineno">  876</span>&#160;}</div>
 <div class="ttc" id="ajurassic_8c_html_ad97e04e82009975d18fa256cd977da76"><div class="ttname"><a href="jurassic_8c.html#ad97e04e82009975d18fa256cd977da76">geo2cart</a></div><div class="ttdeci">void geo2cart(double z, double lon, double lat, double *x)</div><div class="ttdoc">Convert geolocation to Cartesian coordinates.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l03277">jurassic.c:3277</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_ae733a5a3a9e9a85474da2105655a0dc4"><div class="ttname"><a href="jurassic_8h.html#ae733a5a3a9e9a85474da2105655a0dc4">DIST</a></div><div class="ttdeci">#define DIST(a, b)</div><div class="ttdoc">Compute Cartesian distance between two vectors.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00058">jurassic.h:58</a></div></div>
 <div class="ttc" id="astructatm__t_html_a25ef7d304d5cfa54c5af30192620373b"><div class="ttname"><a href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">atm_t::lat</a></div><div class="ttdeci">double lat[NP]</div><div class="ttdoc">Latitude [deg].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00240">jurassic.h:240</a></div></div>
 <div class="ttc" id="astructatm__t_html_a2c8ffb598109120ed6d1f8e79aeb3ff8"><div class="ttname"><a href="structatm__t.html#a2c8ffb598109120ed6d1f8e79aeb3ff8">atm_t::lon</a></div><div class="ttdeci">double lon[NP]</div><div class="ttdoc">Longitude [deg].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00237">jurassic.h:237</a></div></div>
 <div class="ttc" id="astructatm__t_html_a84dad6b8069641faddf06baad38b82f8"><div class="ttname"><a href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">atm_t::z</a></div><div class="ttdeci">double z[NP]</div><div class="ttdoc">Altitude [km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00234">jurassic.h:234</a></div></div>
@@ -1336,15 +1347,15 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160; </div>
 <div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160;  <span class="comment">/* Total error... */</span></div>
 <div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;  <span class="keywordflow">for</span> (i = 0; i &lt; m; i++)</div>
-<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;    gsl_vector_set(sig_eps_inv, i, 1 / sqrt(POW2(gsl_vector_get(sig_noise, i))</div>
+<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;    gsl_vector_set(sig_eps_inv, i, 1 / sqrt(<a class="code" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(gsl_vector_get(sig_noise, i))</div>
 <div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160;                                            +</div>
-<div class="line"><a name="l00917"></a><span class="lineno">  917</span>&#160;                                            POW2(gsl_vector_get</div>
+<div class="line"><a name="l00917"></a><span class="lineno">  917</span>&#160;                                            <a class="code" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(gsl_vector_get</div>
 <div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;                                                 (sig_formod, i))));</div>
 <div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160; </div>
 <div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;  <span class="comment">/* Check standard deviations... */</span></div>
 <div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;  <span class="keywordflow">for</span> (i = 0; i &lt; m; i++)</div>
 <div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160;    <span class="keywordflow">if</span> (gsl_vector_get(sig_eps_inv, i) &lt;= 0)</div>
-<div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;      ERRMSG(<span class="stringliteral">&quot;Check measurement errors (zero standard deviation)!&quot;</span>);</div>
+<div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;      <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Check measurement errors (zero standard deviation)!&quot;</span>);</div>
 <div class="line"><a name="l00924"></a><span class="lineno">  924</span>&#160;}</div>
 <div class="ttc" id="astructobs__t_html_a3703f37920744c9d01cbc5c65b1dc7c3"><div class="ttname"><a href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">obs_t::rad</a></div><div class="ttdeci">double rad[ND][NR]</div><div class="ttdoc">Radiance [W/(m^2 sr cm^-1)].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00417">jurassic.h:417</a></div></div>
 <div class="ttc" id="astructobs__t_html_aebd5d0d6c2d1dba7a769c4d506570fa0"><div class="ttname"><a href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">obs_t::nr</a></div><div class="ttdeci">int nr</div><div class="ttdoc">Number of ray paths.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00381">jurassic.h:381</a></div></div>
@@ -1414,7 +1425,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00936"></a><span class="lineno">  936</span>&#160; </div>
 <div class="line"><a name="l00937"></a><span class="lineno">  937</span>&#160;  gsl_vector *x_aux;</div>
 <div class="line"><a name="l00938"></a><span class="lineno">  938</span>&#160; </div>
-<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160;  <span class="keywordtype">char</span> filename[LEN];</div>
+<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160;  <span class="keywordtype">char</span> filename[<a class="code" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>];</div>
 <div class="line"><a name="l00940"></a><span class="lineno">  940</span>&#160; </div>
 <div class="line"><a name="l00941"></a><span class="lineno">  941</span>&#160;  <span class="keywordtype">size_t</span> i, n;</div>
 <div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160; </div>
@@ -1490,10 +1501,10 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160; </div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="comment">/* Check arguments... */</span></div>
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  <span class="keywordflow">if</span> (argc &lt; 3)</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;dirlist&gt;&quot;</span>);</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;dirlist&gt;&quot;</span>);</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160; </div>
 <div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  <span class="comment">/* Measure CPU-time... */</span></div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  TIMER(<span class="stringliteral">&quot;total&quot;</span>, 1);</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <a class="code" href="jurassic_8h.html#a90f5818bdcd4c17727d704c141c7cca8">TIMER</a>(<span class="stringliteral">&quot;total&quot;</span>, 1);</div>
 <div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160; </div>
 <div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <span class="comment">/* Read control parameters... */</span></div>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;  <a class="code" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a>(argc, argv, &amp;ctl);</div>
@@ -1501,7 +1512,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160; </div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="comment">/* Open directory list... */</span></div>
 <div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;  <span class="keywordflow">if</span> (!(dirlist = fopen(argv[2], <span class="stringliteral">&quot;r&quot;</span>)))</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Cannot open directory list!&quot;</span>);</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Cannot open directory list!&quot;</span>);</div>
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160; </div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;  <span class="comment">/* Loop over directories... */</span></div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  <span class="keywordflow">while</span> (fscanf(dirlist, <span class="stringliteral">&quot;%s&quot;</span>, ret.<a class="code" href="structret__t.html#ada64429504782319cf47ceb02e6ceb3f">dir</a>) != EOF) {</div>
@@ -1519,20 +1530,21 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;    <a class="code" href="retrieval_8c.html#a3b9e4fa4b3ecae9478753def9d87918e">optimal_estimation</a>(&amp;ret, &amp;ctl, &amp;obs_meas, &amp;obs_i, &amp;atm_apr, &amp;atm_i);</div>
 <div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160; </div>
 <div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    <span class="comment">/* Measure CPU-time... */</span></div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    TIMER(<span class="stringliteral">&quot;total&quot;</span>, 2);</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    <a class="code" href="jurassic_8h.html#a90f5818bdcd4c17727d704c141c7cca8">TIMER</a>(<span class="stringliteral">&quot;total&quot;</span>, 2);</div>
 <div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;  }</div>
 <div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160; </div>
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  <span class="comment">/* Write info... */</span></div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;  printf(<span class="stringliteral">&quot;\nRetrieval done...\n&quot;</span>);</div>
 <div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
 <div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="comment">/* Measure CPU-time... */</span></div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  TIMER(<span class="stringliteral">&quot;total&quot;</span>, 3);</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;  <a class="code" href="jurassic_8h.html#a90f5818bdcd4c17727d704c141c7cca8">TIMER</a>(<span class="stringliteral">&quot;total&quot;</span>, 3);</div>
 <div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160; </div>
 <div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
 <div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;}</div>
 <div class="ttc" id="ajurassic_8c_html_a2a544008f87b520631abbe75ee4378b4"><div class="ttname"><a href="jurassic_8c.html#a2a544008f87b520631abbe75ee4378b4">read_atm</a></div><div class="ttdeci">void read_atm(const char *dirname, const char *filename, ctl_t *ctl, atm_t *atm)</div><div class="ttdoc">Read atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04135">jurassic.c:4135</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04193">jurassic.c:4193</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_abc77066cc0af3b212bc54fe88b2a62c4"><div class="ttname"><a href="jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4">read_obs</a></div><div class="ttdeci">void read_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs)</div><div class="ttdoc">Read observation data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04308">jurassic.c:4308</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a90f5818bdcd4c17727d704c141c7cca8"><div class="ttname"><a href="jurassic_8h.html#a90f5818bdcd4c17727d704c141c7cca8">TIMER</a></div><div class="ttdeci">#define TIMER(name, mode)</div><div class="ttdoc">Start or stop a timer.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00099">jurassic.h:99</a></div></div>
 <div class="ttc" id="aretrieval_8c_html_a3b9e4fa4b3ecae9478753def9d87918e"><div class="ttname"><a href="retrieval_8c.html#a3b9e4fa4b3ecae9478753def9d87918e">optimal_estimation</a></div><div class="ttdeci">void optimal_estimation(ret_t *ret, ctl_t *ctl, obs_t *obs_meas, obs_t *obs_i, atm_t *atm_apr, atm_t *atm_i)</div><div class="ttdoc">Carry out optimal estimation retrieval.</div><div class="ttdef"><b>Definition:</b> <a href="retrieval_8c_source.html#l00427">retrieval.c:427</a></div></div>
 <div class="ttc" id="aretrieval_8c_html_a94bea18710fa76cda7b914289e35bd16"><div class="ttname"><a href="retrieval_8c.html#a94bea18710fa76cda7b914289e35bd16">read_ret</a></div><div class="ttdeci">void read_ret(int argc, char *argv[], ctl_t *ctl, ret_t *ret)</div><div class="ttdoc">Read retrieval control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="retrieval_8c_source.html#l00729">retrieval.c:729</a></div></div>
 <div class="ttc" id="astructctl__t_html"><div class="ttname"><a href="structctl__t.html">ctl_t</a></div><div class="ttdoc">Forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00257">jurassic.h:257</a></div></div>
@@ -1603,7 +1615,7 @@ Here is the call graph for this function:</div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="retrieval_8c.html">retrieval.c</a></li>
-    <li class="footer">Generated on Sat Apr 3 2021 21:29:23 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 4 2021 10:43:47 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

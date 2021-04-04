@@ -100,7 +100,8 @@ $(document).ready(function(){initNavTree('formod_8c.html',''); initResizable(); 
 
 <p>JURASSIC forward model.  
 <a href="#details">More...</a></p>
-
+<div class="textblock"><code>#include &quot;<a class="el" href="jurassic_8h_source.html">jurassic.h</a>&quot;</code><br />
+</div>
 <p><a href="formod_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -174,7 +175,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <span class="keyword">static</span> <a class="code" href="structatm__t.html">atm_t</a> atm, atm2;</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  <span class="keyword">static</span> <a class="code" href="structobs__t.html">obs_t</a> obs, obs2;</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <span class="keywordtype">char</span> filename[LEN];</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  <span class="keywordtype">char</span> filename[<a class="code" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>];</div>
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  <span class="keywordtype">int</span> id, ig, ig2, ip, ir, iw;</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
@@ -296,9 +297,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
 <div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    <span class="comment">/* Measure CPU-time... */</span></div>
 <div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;t&#39;</span> || task[0] == <span class="charliteral">&#39;T&#39;</span>) {</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;      TIMER(<span class="stringliteral">&quot;formod&quot;</span>, 1);</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;      <a class="code" href="jurassic_8h.html#a90f5818bdcd4c17727d704c141c7cca8">TIMER</a>(<span class="stringliteral">&quot;formod&quot;</span>, 1);</div>
 <div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;      <a class="code" href="jurassic_8c.html#ade98b629cc336a9c2f1a9563f0c9e5b4">formod</a>(ctl, &amp;atm, &amp;obs);</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;      TIMER(<span class="stringliteral">&quot;formod&quot;</span>, 3);</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;      <a class="code" href="jurassic_8h.html#a90f5818bdcd4c17727d704c141c7cca8">TIMER</a>(<span class="stringliteral">&quot;formod&quot;</span>, 3);</div>
 <div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    }</div>
 <div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;  }</div>
 <div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;}</div>
@@ -307,6 +308,8 @@ Functions</h2></td></tr>
 <div class="ttc" id="ajurassic_8c_html_abc77066cc0af3b212bc54fe88b2a62c4"><div class="ttname"><a href="jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4">read_obs</a></div><div class="ttdeci">void read_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs)</div><div class="ttdoc">Read observation data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04308">jurassic.c:4308</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_ade98b629cc336a9c2f1a9563f0c9e5b4"><div class="ttname"><a href="jurassic_8c.html#ade98b629cc336a9c2f1a9563f0c9e5b4">formod</a></div><div class="ttdeci">void formod(ctl_t *ctl, atm_t *atm, obs_t *obs)</div><div class="ttdoc">Determine ray paths and compute radiative transfer.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l03014">jurassic.c:3014</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_af99ebcda83d49b5e454345a649abc5c7"><div class="ttname"><a href="jurassic_8c.html#af99ebcda83d49b5e454345a649abc5c7">copy_atm</a></div><div class="ttdeci">void copy_atm(ctl_t *ctl, atm_t *atm_dest, atm_t *atm_src, int init)</div><div class="ttdoc">Copy and initialize atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l02917">jurassic.c:2917</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a05b49c662c073f89e86804f7856622a0"><div class="ttname"><a href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a></div><div class="ttdeci">#define LEN</div><div class="ttdoc">Maximum length of ASCII data lines.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00172">jurassic.h:172</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_a90f5818bdcd4c17727d704c141c7cca8"><div class="ttname"><a href="jurassic_8h.html#a90f5818bdcd4c17727d704c141c7cca8">TIMER</a></div><div class="ttdeci">#define TIMER(name, mode)</div><div class="ttdoc">Start or stop a timer.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00099">jurassic.h:99</a></div></div>
 <div class="ttc" id="astructatm__t_html"><div class="ttname"><a href="structatm__t.html">atm_t</a></div><div class="ttdoc">Atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00225">jurassic.h:225</a></div></div>
 <div class="ttc" id="astructatm__t_html_a05da6b99657d420d7bf4b37a392b048c"><div class="ttname"><a href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">atm_t::time</a></div><div class="ttdeci">double time[NP]</div><div class="ttdoc">Time (seconds since 2000-01-01T00:00Z).</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00231">jurassic.h:231</a></div></div>
 <div class="ttc" id="astructatm__t_html_a18d3460f12bb187e3ae50e9f2547ede3"><div class="ttname"><a href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">atm_t::k</a></div><div class="ttdeci">double k[NW][NP]</div><div class="ttdoc">Extinction [1/km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00252">jurassic.h:252</a></div></div>
@@ -412,11 +415,11 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  FILE *in;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="keywordtype">char</span> dirlist[LEN], task[LEN], wrkdir[LEN];</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="keywordtype">char</span> dirlist[<a class="code" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>], task[<a class="code" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>], wrkdir[<a class="code" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>];</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <span class="comment">/* Check arguments... */</span></div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="keywordflow">if</span> (argc &lt; 5)</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;obs&gt; &lt;atm&gt; &lt;rad&gt;&quot;</span>);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;obs&gt; &lt;atm&gt; &lt;rad&gt;&quot;</span>);</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  <span class="comment">/* Read control parameters... */</span></div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <a class="code" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a>(argc, argv, &amp;ctl);</div>
@@ -436,7 +439,7 @@ Here is the call graph for this function:</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="comment">/* Open directory list... */</span></div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="keywordflow">if</span> (!(in = fopen(dirlist, <span class="stringliteral">&quot;r&quot;</span>)))</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;      ERRMSG(<span class="stringliteral">&quot;Cannot open directory list!&quot;</span>);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;      <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Cannot open directory list!&quot;</span>);</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="comment">/* Loop over directories... */</span></div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">while</span> (fscanf(in, <span class="stringliteral">&quot;%s&quot;</span>, wrkdir) != EOF) {</div>
@@ -457,6 +460,7 @@ Here is the call graph for this function:</div>
 <div class="ttc" id="aformod_8c_html_a256d498d44ab48d72d255adc359376a8"><div class="ttname"><a href="formod_8c.html#a256d498d44ab48d72d255adc359376a8">call_formod</a></div><div class="ttdeci">void call_formod(ctl_t *ctl, const char *wrkdir, const char *obsfile, const char *atmfile, const char *radfile, const char *task)</div><div class="ttdoc">Perform forward model calculations in a single directory.</div><div class="ttdef"><b>Definition:</b> <a href="formod_8c_source.html#l00097">formod.c:97</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04193">jurassic.c:4193</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_ace274e4068072c682e6070021525b515"><div class="ttname"><a href="jurassic_8c.html#ace274e4068072c682e6070021525b515">scan_ctl</a></div><div class="ttdeci">double scan_ctl(int argc, char *argv[], const char *varname, int arridx, const char *defvalue, char *value)</div><div class="ttdoc">Search control parameter file for variable entry.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04414">jurassic.c:4414</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_aaf13ca5350992cd9c7c460a076d8fda9"><div class="ttname"><a href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(msg)</div><div class="ttdoc">Print error message and quit program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00068">jurassic.h:68</a></div></div>
 <div class="ttc" id="astructctl__t_html"><div class="ttname"><a href="structctl__t.html">ctl_t</a></div><div class="ttdoc">Forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00257">jurassic.h:257</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -510,7 +514,7 @@ Here is the call graph for this function:</div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="formod_8c.html">formod.c</a></li>
-    <li class="footer">Generated on Sat Apr 3 2021 21:29:22 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 4 2021 10:43:47 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

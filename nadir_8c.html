@@ -100,7 +100,8 @@ $(document).ready(function(){initNavTree('nadir_8c.html',''); initResizable(); }
 
 <p>Create observation geometry for a nadir sounder.  
 <a href="#details">More...</a></p>
-
+<div class="textblock"><code>#include &quot;<a class="el" href="jurassic_8h_source.html">jurassic.h</a>&quot;</code><br />
+</div>
 <p><a href="nadir_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -149,7 +150,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <span class="comment">/* Check arguments... */</span></div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="keywordflow">if</span> (argc &lt; 3)</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;obs&gt;&quot;</span>);</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;obs&gt;&quot;</span>);</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="comment">/* Read control parameters... */</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <a class="code" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a>(argc, argv, &amp;ctl);</div>
@@ -167,8 +168,8 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;      obs.<a class="code" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[obs.<a class="code" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>] = t;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;      obs.<a class="code" href="structobs__t.html#a992d21aae832400874f3f6bc3e7d1981">obsz</a>[obs.<a class="code" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>] = obsz;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      obs.<a class="code" href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">vplat</a>[obs.<a class="code" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>] = lat;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;      <span class="keywordflow">if</span> ((++obs.<a class="code" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>) &gt;= NR)</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        ERRMSG(<span class="stringliteral">&quot;Too many rays!&quot;</span>);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;      <span class="keywordflow">if</span> ((++obs.<a class="code" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>) &gt;= <a class="code" href="jurassic_8h.html#af146485306ae74a2edf18636300fd107">NR</a>)</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Too many rays!&quot;</span>);</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    }</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="comment">/* Write observation data... */</span></div>
@@ -179,6 +180,8 @@ Functions</h2></td></tr>
 <div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04193">jurassic.c:4193</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a635b7838c93faadf4fd2736a7e9aabac"><div class="ttname"><a href="jurassic_8c.html#a635b7838c93faadf4fd2736a7e9aabac">write_obs</a></div><div class="ttdeci">void write_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs)</div><div class="ttdoc">Write observation data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04834">jurassic.c:4834</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_ace274e4068072c682e6070021525b515"><div class="ttname"><a href="jurassic_8c.html#ace274e4068072c682e6070021525b515">scan_ctl</a></div><div class="ttdeci">double scan_ctl(int argc, char *argv[], const char *varname, int arridx, const char *defvalue, char *value)</div><div class="ttdoc">Search control parameter file for variable entry.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04414">jurassic.c:4414</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_aaf13ca5350992cd9c7c460a076d8fda9"><div class="ttname"><a href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(msg)</div><div class="ttdoc">Print error message and quit program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00068">jurassic.h:68</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_af146485306ae74a2edf18636300fd107"><div class="ttname"><a href="jurassic_8h.html#af146485306ae74a2edf18636300fd107">NR</a></div><div class="ttdeci">#define NR</div><div class="ttdoc">Maximum number of ray paths.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00166">jurassic.h:166</a></div></div>
 <div class="ttc" id="astructctl__t_html"><div class="ttname"><a href="structctl__t.html">ctl_t</a></div><div class="ttdoc">Forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00257">jurassic.h:257</a></div></div>
 <div class="ttc" id="astructobs__t_html"><div class="ttname"><a href="structobs__t.html">obs_t</a></div><div class="ttdoc">Observation geometry and radiance data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00378">jurassic.h:378</a></div></div>
 <div class="ttc" id="astructobs__t_html_a62d326c0aa12f2f9208c6a5576e599da"><div class="ttname"><a href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">obs_t::vplat</a></div><div class="ttdeci">double vplat[NR]</div><div class="ttdoc">View point latitude [deg].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00402">jurassic.h:402</a></div></div>
@@ -205,7 +208,7 @@ Here is the call graph for this function:</div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="nadir_8c.html">nadir.c</a></li>
-    <li class="footer">Generated on Sat Apr 3 2021 21:29:23 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 4 2021 10:43:47 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -100,7 +100,8 @@ $(document).ready(function(){initNavTree('brightness_8c.html',''); initResizable
 
 <p>Convert radiance to brightness temperature.  
 <a href="#details">More...</a></p>
-
+<div class="textblock"><code>#include &quot;<a class="el" href="jurassic_8h_source.html">jurassic.h</a>&quot;</code><br />
+</div>
 <p><a href="brightness_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -146,7 +147,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <span class="comment">/* Check arguments... */</span></div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keywordflow">if</span> (argc &lt; 3)</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Give parameters: &lt;rad&gt; &lt;nu&gt;&quot;</span>);</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Give parameters: &lt;rad&gt; &lt;nu&gt;&quot;</span>);</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="comment">/* Read arguments... */</span></div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  rad = atof(argv[1]);</div>
@@ -158,6 +159,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div>
 <div class="ttc" id="ajurassic_8c_html_aaab9b5262db11d928639b5730f96e7c0"><div class="ttname"><a href="jurassic_8c.html#aaab9b5262db11d928639b5730f96e7c0">brightness</a></div><div class="ttdeci">double brightness(double rad, double nu)</div><div class="ttdoc">Compute brightness temperature.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l00091">jurassic.c:91</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_aaf13ca5350992cd9c7c460a076d8fda9"><div class="ttname"><a href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(msg)</div><div class="ttdoc">Print error message and quit program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00068">jurassic.h:68</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -176,7 +178,7 @@ Here is the call graph for this function:</div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="brightness_8c.html">brightness.c</a></li>
-    <li class="footer">Generated on Sat Apr 3 2021 21:29:22 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 4 2021 10:43:47 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

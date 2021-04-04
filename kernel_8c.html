@@ -100,7 +100,8 @@ $(document).ready(function(){initNavTree('kernel_8c.html',''); initResizable(); 
 
 <p>Calculate kernel functions.  
 <a href="#details">More...</a></p>
-
+<div class="textblock"><code>#include &quot;<a class="el" href="jurassic_8h_source.html">jurassic.h</a>&quot;</code><br />
+</div>
 <p><a href="kernel_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -152,7 +153,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="comment">/* Check arguments... */</span></div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="keywordflow">if</span> (argc &lt; 5)</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;obs&gt; &lt;atm&gt; &lt;kernel&gt;&quot;</span>);</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;obs&gt; &lt;atm&gt; &lt;kernel&gt;&quot;</span>);</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  <span class="comment">/* Read control parameters... */</span></div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <a class="code" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a>(argc, argv, &amp;ctl);</div>
@@ -172,9 +173,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  <span class="comment">/* Check sizes... */</span></div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="keywordflow">if</span> (n &lt;= 0)</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    ERRMSG(<span class="stringliteral">&quot;No state vector elements!&quot;</span>);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;No state vector elements!&quot;</span>);</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;  <span class="keywordflow">if</span> (m &lt;= 0)</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    ERRMSG(<span class="stringliteral">&quot;No measurement vector elements!&quot;</span>);</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;No measurement vector elements!&quot;</span>);</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="comment">/* Allocate... */</span></div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  k = gsl_matrix_alloc(m, n);</div>
@@ -197,6 +198,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="ajurassic_8c_html_abc77066cc0af3b212bc54fe88b2a62c4"><div class="ttname"><a href="jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4">read_obs</a></div><div class="ttdeci">void read_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs)</div><div class="ttdoc">Read observation data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04308">jurassic.c:4308</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_aeefdc8136e69ccb8979eacf56bbb35e3"><div class="ttname"><a href="jurassic_8c.html#aeefdc8136e69ccb8979eacf56bbb35e3">kernel</a></div><div class="ttdeci">void kernel(ctl_t *ctl, atm_t *atm, obs_t *obs, gsl_matrix *k)</div><div class="ttdoc">Compute Jacobians.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l03743">jurassic.c:3743</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_afb2d90bd3a6b3cce3d7965c465650de7"><div class="ttname"><a href="jurassic_8c.html#afb2d90bd3a6b3cce3d7965c465650de7">atm2x</a></div><div class="ttdeci">size_t atm2x(ctl_t *ctl, atm_t *atm, gsl_vector *x, int *iqa, int *ipa)</div><div class="ttdoc">Compose state vector or parameter vector.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l00029">jurassic.c:29</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_aaf13ca5350992cd9c7c460a076d8fda9"><div class="ttname"><a href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(msg)</div><div class="ttdoc">Print error message and quit program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00068">jurassic.h:68</a></div></div>
 <div class="ttc" id="astructatm__t_html"><div class="ttname"><a href="structatm__t.html">atm_t</a></div><div class="ttdoc">Atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00225">jurassic.h:225</a></div></div>
 <div class="ttc" id="astructctl__t_html"><div class="ttname"><a href="structctl__t.html">ctl_t</a></div><div class="ttdoc">Forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00257">jurassic.h:257</a></div></div>
 <div class="ttc" id="astructctl__t_html_a090c906958cc2f98fff69d4cc7c0f40c"><div class="ttname"><a href="structctl__t.html#a090c906958cc2f98fff69d4cc7c0f40c">ctl_t::write_matrix</a></div><div class="ttdeci">int write_matrix</div><div class="ttdoc">Write matrix file (0=no, 1=yes).</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00335">jurassic.h:335</a></div></div>
@@ -259,7 +261,7 @@ Here is the call graph for this function:</div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="kernel_8c.html">kernel.c</a></li>
-    <li class="footer">Generated on Sat Apr 3 2021 21:29:23 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 4 2021 10:43:47 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

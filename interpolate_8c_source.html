@@ -123,7 +123,7 @@ $(document).ready(function(){initNavTree('interpolate_8c_source.html',''); initR
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="keyword">static</span> <a class="code" href="structatm__t.html">atm_t</a> atm_in, atm_pts;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  <span class="keyword">static</span> <a class="code" href="structctl__t.html">ctl_t</a> ctl;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keywordtype">double</span> k[NW], q[NG];</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  <span class="keywordtype">double</span> k[<a class="code" href="jurassic_8h.html#af9cccf331f045b89a9f12366df5f7687">NW</a>], q[<a class="code" href="jurassic_8h.html#ac29517e805c6a27f76e87e634eaf2929">NG</a>];</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <span class="keywordtype">int</span> ig, ip, iw;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
@@ -131,7 +131,7 @@ $(document).ready(function(){initNavTree('interpolate_8c_source.html',''); initR
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="comment">/* Check arguments... */</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  <span class="keywordflow">if</span> (argc &lt; 5)</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    ERRMSG(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;atm_in&gt; &lt;atm_pts&gt; &lt;atm_out&gt;&quot;</span>);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <a class="code" href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a>(<span class="stringliteral">&quot;Give parameters: &lt;ctl&gt; &lt;atm_in&gt; &lt;atm_pts&gt; &lt;atm_out&gt;&quot;</span>);</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="comment">/* Read control parameters... */</span></div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  <a class="code" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a>(argc, argv, &amp;ctl);</div>
@@ -161,6 +161,9 @@ $(document).ready(function(){initNavTree('interpolate_8c_source.html',''); initR
 <div class="ttc" id="ajurassic_8c_html_a47a1cea1d9e3bf957e5959435b57c503"><div class="ttname"><a href="jurassic_8c.html#a47a1cea1d9e3bf957e5959435b57c503">write_atm</a></div><div class="ttdeci">void write_atm(const char *dirname, const char *filename, ctl_t *ctl, atm_t *atm)</div><div class="ttdoc">Write atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04600">jurassic.c:4600</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a88dbf00d0a92f872bc7f79a6d4a04f73"><div class="ttname"><a href="jurassic_8c.html#a88dbf00d0a92f872bc7f79a6d4a04f73">intpol_atm</a></div><div class="ttdeci">void intpol_atm(ctl_t *ctl, atm_t *atm, double z, double *p, double *t, double *q, double *k)</div><div class="ttdoc">Interpolate atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l03505">jurassic.c:3505</a></div></div>
 <div class="ttc" id="ajurassic_8h_html"><div class="ttname"><a href="jurassic_8h.html">jurassic.h</a></div><div class="ttdoc">JURASSIC library declarations.</div></div>
+<div class="ttc" id="ajurassic_8h_html_aaf13ca5350992cd9c7c460a076d8fda9"><div class="ttname"><a href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(msg)</div><div class="ttdoc">Print error message and quit program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00068">jurassic.h:68</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_ac29517e805c6a27f76e87e634eaf2929"><div class="ttname"><a href="jurassic_8h.html#ac29517e805c6a27f76e87e634eaf2929">NG</a></div><div class="ttdeci">#define NG</div><div class="ttdoc">Maximum number of emitters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00160">jurassic.h:160</a></div></div>
+<div class="ttc" id="ajurassic_8h_html_af9cccf331f045b89a9f12366df5f7687"><div class="ttname"><a href="jurassic_8h.html#af9cccf331f045b89a9f12366df5f7687">NW</a></div><div class="ttdeci">#define NW</div><div class="ttdoc">Maximum number of spectral windows.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00169">jurassic.h:169</a></div></div>
 <div class="ttc" id="astructatm__t_html"><div class="ttname"><a href="structatm__t.html">atm_t</a></div><div class="ttdoc">Atmospheric data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00225">jurassic.h:225</a></div></div>
 <div class="ttc" id="astructatm__t_html_a18d3460f12bb187e3ae50e9f2547ede3"><div class="ttname"><a href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">atm_t::k</a></div><div class="ttdeci">double k[NW][NP]</div><div class="ttdoc">Extinction [1/km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00252">jurassic.h:252</a></div></div>
 <div class="ttc" id="astructatm__t_html_a306826df6fe870ab371fb945544cc13a"><div class="ttname"><a href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">atm_t::t</a></div><div class="ttdeci">double t[NP]</div><div class="ttdoc">Temperature [K].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00246">jurassic.h:246</a></div></div>
@@ -177,7 +180,7 @@ $(document).ready(function(){initNavTree('interpolate_8c_source.html',''); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="interpolate_8c.html">interpolate.c</a></li>
-    <li class="footer">Generated on Sat Apr 3 2021 21:29:22 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 4 2021 10:43:47 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
