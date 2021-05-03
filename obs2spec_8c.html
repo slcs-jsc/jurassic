@@ -142,12 +142,12 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="obs2spec_8c_source.html#l00032">32</a> of file <a class="el" href="obs2spec_8c_source.html">obs2spec.c</a>.</p>
-<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;                       {</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  </div>
+<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;                {</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <span class="keyword">static</span> <a class="code" href="structctl__t.html">ctl_t</a> ctl;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <a class="code" href="structobs__t.html">obs_t</a> *obs;</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  FILE *out;</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;  <span class="comment">/* Check arguments... */</span></div>
@@ -156,10 +156,10 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="comment">/* Allocate... */</span></div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <a class="code" href="jurassic_8h.html#a9aee3e5daf3b1051597d21ab093adbd0">ALLOC</a>(obs, <a class="code" href="structobs__t.html">obs_t</a>, 1);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;  <span class="comment">/* Read control parameters... */</span></div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;  <a class="code" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a>(argc, argv, &amp;ctl);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  <span class="comment">/* Read observation geometry... */</span></div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <a class="code" href="jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4">read_obs</a>(<span class="stringliteral">&quot;.&quot;</span>, argv[2], &amp;ctl, obs);</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
@@ -185,28 +185,28 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;          <span class="stringliteral">&quot;# $11 = channel frequency [cm^-1]\n&quot;</span></div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;          <span class="stringliteral">&quot;# $12 = channel radiance [W/(m^2 sr cm^-1)]\n&quot;</span></div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;          <span class="stringliteral">&quot;# $13 = channel transmittance [1]\n&quot;</span>);</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  </div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="comment">/* Write data... */</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> ir=0; ir&lt;obs-&gt;<a class="code" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>; ir++) {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ir = 0; ir &lt; obs-&gt;<a class="code" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>; ir++) {</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    fprintf(out, <span class="stringliteral">&quot;\n&quot;</span>);</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> <span class="keywordtype">id</span>=0; <span class="keywordtype">id</span>&lt;ctl.<a class="code" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++)</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;      fprintf(out, <span class="stringliteral">&quot;%.2f %g %g %g %g %g %g %g %g %g %.4f %g %g\n&quot;</span>, obs-&gt;<a class="code" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[ir],</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;              obs-&gt;<a class="code" href="structobs__t.html#a992d21aae832400874f3f6bc3e7d1981">obsz</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a6623d4c4c139db8c86195751653ea716">obslon</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a8b9f2ae531c4d8693c7ce86f0387d290">obslat</a>[ir],</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;              obs-&gt;<a class="code" href="structobs__t.html#a5ad297ef892545d93168c57ed26f74b5">vpz</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#aba164760718f1c258c150ebbc93a39a9">vplon</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">vplat</a>[ir],</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;              obs-&gt;<a class="code" href="structobs__t.html#ae058b1684cd96b157b1796a5b9be6c38">tpz</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a4edcf8144a1c2babeae0f0c60b3ccb9e">tplon</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#ab6667e8396fbfe507ebc81545d390c66">tplat</a>[ir],</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;              ctl.<a class="code" href="structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044">nu</a>[<span class="keywordtype">id</span>], obs-&gt;<a class="code" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[<span class="keywordtype">id</span>][ir], obs-&gt;<a class="code" href="structobs__t.html#a0f8aac57859ceccb50b258d487e74670">tau</a>[<span class="keywordtype">id</span>][ir]);</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl.<a class="code" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++)</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;      fprintf(out, <span class="stringliteral">&quot;%.2f %g %g %g %g %g %g %g %g %g %.4f %g %g\n&quot;</span>,</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;              obs-&gt;<a class="code" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a992d21aae832400874f3f6bc3e7d1981">obsz</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a6623d4c4c139db8c86195751653ea716">obslon</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a8b9f2ae531c4d8693c7ce86f0387d290">obslat</a>[ir],</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;              obs-&gt;<a class="code" href="structobs__t.html#a5ad297ef892545d93168c57ed26f74b5">vpz</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#aba164760718f1c258c150ebbc93a39a9">vplon</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">vplat</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#ae058b1684cd96b157b1796a5b9be6c38">tpz</a>[ir],</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;              obs-&gt;<a class="code" href="structobs__t.html#a4edcf8144a1c2babeae0f0c60b3ccb9e">tplon</a>[ir], obs-&gt;<a class="code" href="structobs__t.html#ab6667e8396fbfe507ebc81545d390c66">tplat</a>[ir], ctl.<a class="code" href="structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044">nu</a>[<span class="keywordtype">id</span>], obs-&gt;<a class="code" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[<span class="keywordtype">id</span>][ir],</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;              obs-&gt;<a class="code" href="structobs__t.html#a0f8aac57859ceccb50b258d487e74670">tau</a>[<span class="keywordtype">id</span>][ir]);</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  }</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="comment">/* Close file... */</span></div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  fclose(out);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;  <span class="comment">/* Free... */</span></div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  free(obs);</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div>
-<div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04193">jurassic.c:4193</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_abc77066cc0af3b212bc54fe88b2a62c4"><div class="ttname"><a href="jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4">read_obs</a></div><div class="ttdeci">void read_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs)</div><div class="ttdoc">Read observation data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04308">jurassic.c:4308</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04199">jurassic.c:4199</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_abc77066cc0af3b212bc54fe88b2a62c4"><div class="ttname"><a href="jurassic_8c.html#abc77066cc0af3b212bc54fe88b2a62c4">read_obs</a></div><div class="ttdeci">void read_obs(const char *dirname, const char *filename, ctl_t *ctl, obs_t *obs)</div><div class="ttdoc">Read observation data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l04314">jurassic.c:4314</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a9aee3e5daf3b1051597d21ab093adbd0"><div class="ttname"><a href="jurassic_8h.html#a9aee3e5daf3b1051597d21ab093adbd0">ALLOC</a></div><div class="ttdeci">#define ALLOC(ptr, type, n)</div><div class="ttdoc">Allocate memory.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00053">jurassic.h:53</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_aaf13ca5350992cd9c7c460a076d8fda9"><div class="ttname"><a href="jurassic_8h.html#aaf13ca5350992cd9c7c460a076d8fda9">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(msg)</div><div class="ttdoc">Print error message and quit program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00068">jurassic.h:68</a></div></div>
 <div class="ttc" id="astructctl__t_html"><div class="ttname"><a href="structctl__t.html">ctl_t</a></div><div class="ttdoc">Forward model control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00257">jurassic.h:257</a></div></div>
@@ -246,7 +246,7 @@ Here is the call graph for this function:</div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="obs2spec_8c.html">obs2spec.c</a></li>
-    <li class="footer">Generated on Mon May 3 2021 20:28:41 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon May 3 2021 22:12:10 for JURASSIC by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
