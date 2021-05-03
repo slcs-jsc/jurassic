@@ -13,6 +13,7 @@ src/jurassic.o
 src/kernel
 src/limb
 src/nadir
+src/obs2spec
 src/planck
 src/raytrace
 src/retrieval
