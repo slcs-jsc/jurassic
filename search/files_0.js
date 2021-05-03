@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['brightness_2ec_210',['brightness.c',['../brightness_8c.html',1,'']]]
+  ['brightness_2ec_211',['brightness.c',['../brightness_8c.html',1,'']]]
 ];

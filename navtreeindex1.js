@@ -1,5 +1,8 @@
 var NAVTREEINDEX1 =
 {
+"structlos__t.html":[0,0,2],
+"structlos__t.html#a0699ee03023f12b348926fc8d6046c8e":[0,0,2,1],
+"structlos__t.html#a15141487bb19c050c9672ef63aab76b5":[0,0,2,6],
 "structlos__t.html#a1c8e7db2d3d89f4cccc6d07aa613df9e":[0,0,2,8],
 "structlos__t.html#a31f15fed56867303575c52f7d6065dca":[0,0,2,10],
 "structlos__t.html#a5f4f0f880e8649bd90459fe7c14811dc":[0,0,2,2],
@@ -53,7 +56,7 @@ var NAVTREEINDEX1 =
 "structtbl__t.html#ab89081522e0ae27b5a85dc89d13ff33e":[0,0,5,8],
 "structtbl__t.html#ac9a8a1ebb0a22447d8e18a5992f79558":[0,0,5,6],
 "structtbl__t.html#acbbff4883292be53dfee5ec3258e0bed":[0,0,5,7],
-"time2jsec_8c.html":[1,0,15],
-"time2jsec_8c.html#a0ddf1224851353fc92bfbff6f499fa97":[1,0,15,0],
-"time2jsec_8c_source.html":[1,0,15]
+"time2jsec_8c.html":[1,0,16],
+"time2jsec_8c.html#a0ddf1224851353fc92bfbff6f499fa97":[1,0,16,0],
+"time2jsec_8c_source.html":[1,0,16]
 };

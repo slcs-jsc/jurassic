@@ -12,6 +12,7 @@ var files_dup =
     [ "kernel.c", "kernel_8c.html", "kernel_8c" ],
     [ "limb.c", "limb_8c.html", "limb_8c" ],
     [ "nadir.c", "nadir_8c.html", "nadir_8c" ],
+    [ "obs2spec.c", "obs2spec_8c.html", "obs2spec_8c" ],
     [ "planck.c", "planck_8c.html", "planck_8c" ],
     [ "raytrace.c", "raytrace_8c.html", "raytrace_8c" ],
     [ "retrieval.c", "retrieval_8c.html", "retrieval_8c" ],
