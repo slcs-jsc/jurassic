@@ -225,9 +225,9 @@ int main(
 	  x[i] /= ndata[i];
 	  y[i] /= ndata[i];
 	  y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
-	    / sqrt(ndata[i]);   /* standard error! */
+	    / sqrt(ndata[i]);	/* standard error! */
 	}
-    
+
     /* Filter data... */
     n = 0;
     for (i = 0; i < NMAX; i++)
@@ -259,9 +259,9 @@ int main(
     scl_err = scl * sqrt(cov11);
     scl *= c1;
 
-    
+
     /* scl_err = scl * sqrt(cov11 / POW2(c1)); */
-    
+
 
     /* Write info... */
     printf("  it= %d | scl= %g +/- %g | RMSE= %g\n",

@@ -3417,6 +3417,12 @@ void init_tbl(
 	if (sscanf(line, "%lg %lg %lg %lg", &press, &temp, &u, &eps) != 4)
 	  continue;
 
+	/* Check ranges... */
+	if (u < 0 || u > 1e38)
+	  ERRMSG("Column density is out of range!");
+	if (eps < 0 || eps > 1)
+	  ERRMSG("Emissivity is out of range!");
+
 	/* Determine pressure index... */
 	if (press != press_old) {
 	  press_old = press;
@@ -3577,10 +3583,10 @@ void intpol_tbl(
 
 	/* Check size of table (temperature and column density)... */
 	if (tbl->nt[ig][id][ipr] < 2 || tbl->nt[ig][id][ipr + 1] < 2
-	    || tbl->nu[ig][id][ipr][it0] < 2
-	    || tbl->nu[ig][id][ipr][it0 + 1] < 2
-	    || tbl->nu[ig][id][ipr + 1][it1] < 2
-	    || tbl->nu[ig][id][ipr + 1][it1 + 1] < 2)
+	    || tbl->nu[ig][id][ipr][it0] < 100
+	    || tbl->nu[ig][id][ipr][it0 + 1] < 100
+	    || tbl->nu[ig][id][ipr + 1][it1] < 100
+	    || tbl->nu[ig][id][ipr + 1][it1 + 1] < 100)
 	  eps = 0;
 
 	else {
