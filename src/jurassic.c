@@ -3416,13 +3416,7 @@ void init_tbl(
 	/* Parse line... */
 	if (sscanf(line, "%lg %lg %lg %lg", &press, &temp, &u, &eps) != 4)
 	  continue;
-
-	/* Check ranges... */
-	if (u < 0 || u > 1e38)
-	  ERRMSG("Column density is out of range!");
-	if (eps < 0 || eps > 1)
-	  ERRMSG("Emissivity is out of range!");
-
+	
 	/* Determine pressure index... */
 	if (press != press_old) {
 	  press_old = press;
