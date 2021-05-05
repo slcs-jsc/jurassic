@@ -3416,7 +3416,11 @@ void init_tbl(
 	/* Parse line... */
 	if (sscanf(line, "%lg %lg %lg %lg", &press, &temp, &u, &eps) != 4)
 	  continue;
-	
+
+	/* Check ranges... */
+	if (u < 0 || u > 1e30 || eps < 0 || eps > 1)
+	  continue;
+
 	/* Determine pressure index... */
 	if (press != press_old) {
 	  press_old = press;
@@ -3557,7 +3561,7 @@ void intpol_tbl(
     for (ig = 0; ig < ctl->ng; ig++) {
 
       /* Check size of table (pressure)... */
-      if (tbl->np[ig][id] < 2)
+      if (tbl->np[ig][id] < 30)
 	eps = 0;
 
       /* Check transmittance... */
@@ -3577,10 +3581,10 @@ void intpol_tbl(
 
 	/* Check size of table (temperature and column density)... */
 	if (tbl->nt[ig][id][ipr] < 2 || tbl->nt[ig][id][ipr + 1] < 2
-	    || tbl->nu[ig][id][ipr][it0] < 100
-	    || tbl->nu[ig][id][ipr][it0 + 1] < 100
-	    || tbl->nu[ig][id][ipr + 1][it1] < 100
-	    || tbl->nu[ig][id][ipr + 1][it1 + 1] < 100)
+	    || tbl->nu[ig][id][ipr][it0] < 2
+	    || tbl->nu[ig][id][ipr][it0 + 1] < 2
+	    || tbl->nu[ig][id][ipr + 1][it1] < 2
+	    || tbl->nu[ig][id][ipr + 1][it1 + 1] < 2)
 	  eps = 0;
 
 	else {
