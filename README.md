@@ -52,7 +52,7 @@ By default we use rather strict compiler warnings. All warning messages will be 
 
 The binaries will remain in the jurassic/src/ directory.
 
-### Try the examples
+### Run the examples
 
 It is recommended that you create a project directory for testing the examples and also to store other experiments:
 
