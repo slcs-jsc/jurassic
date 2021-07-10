@@ -98,21 +98,19 @@ These are the main references for citing the JURASSIC model in scientific public
 
 * You can cite the source code of JURASSIC by using the DOI https://doi.org/10.5281/zenodo.4572889. This DOI represents all versions, and will always resolve to the latest one. Specific DOIs for each release of JURASSIC can be found on the zenodo web site.
 
-More details on the data structures and algorithms can be found in the [reference manual](https://slcs-jsc.github.io/jurassic)
+More detailed information for new users and developers of JURASSIC is collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
 
 ## Contributing
 
-We are interested in sharing JURASSIC for operational or research applications.
-
-Please do not hesitate to contact us, if you have any further questions or need support.
+We are interested in sharing JURASSIC for operational or research applications. Please do not hesitate to contact us, if you have any further questions or need support.
 
 ## License
 
-JURASSIC is distributed under the GNU GPL v3.
+JURASSIC is distributed under the [GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/master/COPYING).
 
 ## Contact
 
-Dr. Lars Hoffmann  
+Dr. Lars Hoffmann
 
 Jülich Supercomputing Centre, Forschungszentrum Jülich
 
