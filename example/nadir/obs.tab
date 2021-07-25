@@ -8,12 +8,12 @@
 # $8 = tangent point altitude [km]
 # $9 = tangent point longitude [deg]
 # $10 = tangent point latitude [deg]
-# $11 = channel 667.782: radiance [W/(m^2 sr cm^-1)]
-# $12 = channel 668.541: radiance [W/(m^2 sr cm^-1)]
-# $13 = channel 669.811: radiance [W/(m^2 sr cm^-1)]
-# $14 = channel 667.782: transmittance
-# $15 = channel 668.541: transmittance
-# $16 = channel 669.811: transmittance
+# $11 = radiance (667.7820 cm^-1) [W/(m^2 sr cm^-1)]
+# $12 = radiance (668.5410 cm^-1) [W/(m^2 sr cm^-1)]
+# $13 = radiance (669.8110 cm^-1) [W/(m^2 sr cm^-1)]
+# $14 = transmittance (667.7820 cm^-1) [-]
+# $15 = transmittance (668.5410 cm^-1) [-]
+# $16 = transmittance (669.8110 cm^-1) [-]
 
 0.00 700 0 0 0 0 -8.01 0 0 0 0 0 0 0 0 0
 0.00 700 0 0 0 0 -7.83 0 0 0 0 0 0 0 0 0

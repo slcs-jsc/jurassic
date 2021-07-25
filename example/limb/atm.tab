@@ -4,12 +4,12 @@
 # $4 = latitude [deg]
 # $5 = pressure [hPa]
 # $6 = temperature [K]
-# $7 = CO2 volume mixing ratio
-# $8 = H2O volume mixing ratio
-# $9 = O3 volume mixing ratio
-# $10 = F11 volume mixing ratio
-# $11 = CCl4 volume mixing ratio
-# $12 = window 0: extinction [1/km]
+# $7 = CO2 volume mixing ratio [ppv]
+# $8 = H2O volume mixing ratio [ppv]
+# $9 = O3 volume mixing ratio [ppv]
+# $10 = F11 volume mixing ratio [ppv]
+# $11 = CCl4 volume mixing ratio [ppv]
+# $12 = extinction (window 0) [1/km]
 
 0.00 0 0 0 1017 285.14 0.000367735 0.01166 2.218e-08 2.65e-10 1.075e-10 0
 0.00 1 0 0 901.083 279.34 0.000367735 0.008269 3.394e-08 2.65e-10 1.075e-10 0

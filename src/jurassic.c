@@ -33,7 +33,7 @@ size_t atm2x(
   int *iqa,
   int *ipa) {
 
-  int ig, iw;
+  int ic, ig, iw;
 
   size_t n = 0;
 
@@ -54,6 +54,36 @@ size_t atm2x(
   for (iw = 0; iw < ctl->nw; iw++)
     atm2x_help(atm, ctl->retk_zmin[iw], ctl->retk_zmax[iw],
 	       atm->k[iw], IDXK(iw), x, iqa, ipa, &n);
+
+  /* Add cloud parameters... */
+  if (ctl->retc_z) {
+    if (x != NULL)
+      gsl_vector_set(x, n, atm->clz);
+    if (iqa != NULL)
+      iqa[n] = IDXCZ;
+    if (ipa != NULL)
+      ipa[n] = 0;
+    n++;
+  }
+  if (ctl->retc_dz) {
+    if (x != NULL)
+      gsl_vector_set(x, n, atm->cldz);
+    if (iqa != NULL)
+      iqa[n] = IDXCDZ;
+    if (ipa != NULL)
+      ipa[n] = 0;
+    n++;
+  }
+  if (ctl->retc_ext)
+    for (ic = 0; ic < ctl->nc; ic++) {
+      if (x != NULL)
+	gsl_vector_set(x, n, atm->clk[ic]);
+      if (iqa != NULL)
+	iqa[n] = IDXCK(ic);
+      if (ipa != NULL)
+	ipa[n] = 0;
+      n++;
+    }
 
   return n;
 }
@@ -771,7 +801,7 @@ void climatology(
 
   double co2, *q[NG] = { NULL };
 
-  int ig, ip, iw, iz;
+  int ic, ig, ip, iw, iz;
 
   /* Find emitter index of CO2... */
   if (ig_co2 == -999)
@@ -866,6 +896,11 @@ void climatology(
     /* Set extinction to zero... */
     for (iw = 0; iw < ctl->nw; iw++)
       atm->k[iw][ip] = 0;
+
+    /* Set cloud layer to zero... */
+    atm->clz = atm->cldz = 0;
+    for (ic = 0; ic < ctl->nc; ic++)
+      atm->clk[ic] = 0;
   }
 }
 
@@ -2920,7 +2955,7 @@ void copy_atm(
   atm_t * atm_src,
   int init) {
 
-  int ig, ip, iw;
+  int ic, ig, ip, iw;
 
   size_t s;
 
@@ -2939,6 +2974,10 @@ void copy_atm(
     memcpy(atm_dest->q[ig], atm_src->q[ig], s);
   for (iw = 0; iw < ctl->nw; iw++)
     memcpy(atm_dest->k[iw], atm_src->k[iw], s);
+  atm_dest->clz = atm_src->clz;
+  atm_dest->cldz = atm_src->cldz;
+  for (ic = 0; ic < ctl->nc; ic++)
+    atm_dest->clk[ic] = atm_src->clk[ic];
 
   /* Initialize... */
   if (init)
@@ -2949,6 +2988,10 @@ void copy_atm(
 	atm_dest->q[ig][ip] = 0;
       for (iw = 0; iw < ctl->nw; iw++)
 	atm_dest->k[iw][ip] = 0;
+      atm_dest->clz = 0;
+      atm_dest->cldz = 0;
+      for (ic = 0; ic < ctl->nc; ic++)
+	atm_dest->clk[ic] = 0;
     }
 }
 
@@ -3067,7 +3110,7 @@ void formod_continua(
 
   /* Extinction... */
   for (id = 0; id < ctl->nd; id++)
-    beta[id] = los->k[ctl->window[id]][ip];
+    beta[id] = los->k[id][ip];
 
   /* CO2 continuum... */
   if (ctl->ctm_co2) {
@@ -3357,7 +3400,7 @@ void idx2name(
   int idx,
   char *quantity) {
 
-  int ig, iw;
+  int ic, ig, iw;
 
   if (idx == IDXP)
     sprintf(quantity, "PRESSURE");
@@ -3371,7 +3414,17 @@ void idx2name(
 
   for (iw = 0; iw < ctl->nw; iw++)
     if (idx == IDXK(iw))
-      sprintf(quantity, "EXTINCT_WINDOW%d", iw);
+      sprintf(quantity, "EXTINCT_WINDOW_%d", iw);
+
+  if (idx == IDXCZ)
+    sprintf(quantity, "CLOUD_HEIGHT");
+
+  if (idx == IDXCDZ)
+    sprintf(quantity, "CLOUD_DEPTH");
+
+  for (ic = 0; ic < ctl->nc; ic++)
+    if (idx == IDXCK(ic))
+      sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->clnu[ic]);
 }
 
 /*****************************************************************************/
@@ -3795,10 +3848,14 @@ void kernel(
     if (iqa[j] == IDXP)
       h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, (size_t) j)), 1e-7);
     else if (iqa[j] == IDXT)
-      h = 1;
+      h = 1.0;
     else if (iqa[j] >= IDXQ(0) && iqa[j] < IDXQ(ctl->ng))
       h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, (size_t) j)), 1e-15);
     else if (iqa[j] >= IDXK(0) && iqa[j] < IDXK(ctl->nw))
+      h = 1e-4;
+    else if (iqa[j] == IDXCZ || iqa[j] == IDXCDZ)
+      h = 1.0;
+    else if (iqa[j] >= IDXCK(0) && iqa[j] < IDXCK(ctl->nc))
       h = 1e-4;
     else
       ERRMSG("Cannot set perturbation size!");
@@ -3962,7 +4019,7 @@ void raytrace(
     lat, lon, n, naux, ng[3], norm, p, q[NG], t, x[3], xh[3],
     xobs[3], xvp[3], z = 1e99, zmax, zmin, zrefrac = 60;
 
-  int i, ig, ip, iw, stop = 0;
+  int i, ic, id, ig, ip, stop = 0;
 
   /* Initialize... */
   los->np = 0;
@@ -4058,9 +4115,19 @@ void raytrace(
     los->t[los->np] = t;
     for (ig = 0; ig < ctl->ng; ig++)
       los->q[ig][los->np] = q[ig];
-    for (iw = 0; iw < ctl->nw; iw++)
-      los->k[iw][los->np] = k[iw];
+    for (id = 0; id < ctl->nd; id++)
+      los->k[id][los->np] = k[ctl->window[id]];
     los->ds[los->np] = ds;
+
+    /* Add cloud extinction... */
+    if (ctl->nc > 0 && atm->cldz > 0)
+      for (id = 0; id < ctl->nd; id++) {
+	ic = locate_irr(ctl->clnu, ctl->nc, ctl->nu[id]);
+	los->k[id][los->np]
+	  += LIN(ctl->clnu[ic], atm->clk[ic],
+		 ctl->clnu[ic + 1], atm->clk[ic + 1], ctl->nu[id])
+	  * exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
+      }
 
     /* Increment and check number of LOS points... */
     if ((++los->np) > NLOS)
@@ -4146,7 +4213,7 @@ void read_atm(
 
   char file[LEN], line[LEN], *tok;
 
-  int ig, iw;
+  int ic, ig, iw;
 
   /* Init... */
   atm->np = 0;
@@ -4178,6 +4245,12 @@ void read_atm(
       TOK(NULL, tok, "%lg", atm->q[ig][atm->np]);
     for (iw = 0; iw < ctl->nw; iw++)
       TOK(NULL, tok, "%lg", atm->k[iw][atm->np]);
+    if (ctl->nc > 0 && atm->np == 0) {
+      TOK(NULL, tok, "%lg", atm->clz);
+      TOK(NULL, tok, "%lg", atm->cldz);
+      for (ic = 0; ic < ctl->nc; ic++)
+	TOK(NULL, tok, "%lg", atm->clk[ic]);
+    }
 
     /* Increment data point counter... */
     if ((++atm->np) > NP)
@@ -4199,7 +4272,7 @@ void read_ctl(
   char *argv[],
   ctl_t * ctl) {
 
-  int id, ig, iw;
+  int ic, id, ig, iw;
 
   /* Write info... */
   printf("\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
@@ -4226,6 +4299,15 @@ void read_ctl(
     ERRMSG("Set 0 <= NW <= MAX!");
   for (id = 0; id < ctl->nd; id++)
     ctl->window[id] = (int) scan_ctl(argc, argv, "WINDOW", id, "0", NULL);
+
+  /* Cloud data... */
+  ctl->nc = (int) scan_ctl(argc, argv, "NC", -1, "0", NULL);
+  if (ctl->nc < 0 || ctl->nc > NC)
+    ERRMSG("Set 0 <= NC <= MAX!");
+  if (ctl->nc == 1)
+    ERRMSG("Set NC > 1!");
+  for (ic = 0; ic < ctl->nc; ic++)
+    ctl->clnu[ic] = scan_ctl(argc, argv, "CLNU", ic, "", NULL);
 
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);
@@ -4260,6 +4342,9 @@ void read_ctl(
     ctl->retk_zmin[iw] = scan_ctl(argc, argv, "RETK_ZMIN", iw, "-999", NULL);
     ctl->retk_zmax[iw] = scan_ctl(argc, argv, "RETK_ZMAX", iw, "-999", NULL);
   }
+  ctl->retc_z = (int) scan_ctl(argc, argv, "RETC_HEIGHT", -1, "0", NULL);
+  ctl->retc_dz = (int) scan_ctl(argc, argv, "RETC_DEPTH", -1, "0", NULL);
+  ctl->retc_ext = (int) scan_ctl(argc, argv, "RETC_EXT", -1, "0", NULL);
 
   /* Output flags... */
   ctl->write_bbt = (int) scan_ctl(argc, argv, "WRITE_BBT", -1, "0", NULL);
@@ -4611,7 +4696,7 @@ void write_atm(
 
   char file[LEN];
 
-  int ig, ip, iw, n = 6;
+  int ic, ig, ip, iw, n = 6;
 
   /* Set filename... */
   if (dirname != NULL)
@@ -4634,9 +4719,17 @@ void write_atm(
 	  "# $4 = latitude [deg]\n"
 	  "# $5 = pressure [hPa]\n" "# $6 = temperature [K]\n");
   for (ig = 0; ig < ctl->ng; ig++)
-    fprintf(out, "# $%d = %s volume mixing ratio\n", ++n, ctl->emitter[ig]);
+    fprintf(out, "# $%d = %s volume mixing ratio [ppv]\n",
+	    ++n, ctl->emitter[ig]);
   for (iw = 0; iw < ctl->nw; iw++)
-    fprintf(out, "# $%d = window %d: extinction [1/km]\n", ++n, iw);
+    fprintf(out, "# $%d = extinction (window %d) [1/km]\n", ++n, iw);
+  if (ctl->nc > 0) {
+    fprintf(out, "# $%d = cloud layer height [km]\n", ++n);
+    fprintf(out, "# $%d = cloud layer depth [km]\n", ++n);
+    for (ic = 0; ic < ctl->nc; ic++)
+      fprintf(out, "# $%d = cloud layer extinction (%g cm^-1) [1/km]\n",
+	      ++n, ctl->clnu[ic]);
+  }
 
   /* Write data... */
   for (ip = 0; ip < atm->np; ip++) {
@@ -4648,6 +4741,11 @@ void write_atm(
       fprintf(out, " %g", atm->q[ig][ip]);
     for (iw = 0; iw < ctl->nw; iw++)
       fprintf(out, " %g", atm->k[iw][ip]);
+    if (ctl->nc > 0) {
+      fprintf(out, " %g %g", atm->clz, atm->cldz);
+      for (ic = 0; ic < ctl->nc; ic++)
+	fprintf(out, " %g", atm->clk[ic]);
+    }
     fprintf(out, "\n");
   }
 
@@ -4873,10 +4971,11 @@ void write_obs(
 	  "# $9 = tangent point longitude [deg]\n"
 	  "# $10 = tangent point latitude [deg]\n");
   for (id = 0; id < ctl->nd; id++)
-    fprintf(out, "# $%d = channel %g: radiance [W/(m^2 sr cm^-1)]\n",
+    fprintf(out, "# $%d = radiance (%.4f cm^-1) [W/(m^2 sr cm^-1)]\n",
 	    ++n, ctl->nu[id]);
   for (id = 0; id < ctl->nd; id++)
-    fprintf(out, "# $%d = channel %g: transmittance\n", ++n, ctl->nu[id]);
+    fprintf(out, "# $%d = transmittance (%.4f cm^-1) [-]\n", ++n,
+	    ctl->nu[id]);
 
   /* Write data... */
   for (ir = 0; ir < obs->nr; ir++) {
@@ -4904,7 +5003,7 @@ void x2atm(
   gsl_vector * x,
   atm_t * atm) {
 
-  int ig, iw;
+  int ic, ig, iw;
 
   size_t n = 0;
 
@@ -4923,6 +5022,21 @@ void x2atm(
   for (iw = 0; iw < ctl->nw; iw++)
     x2atm_help(atm, ctl->retk_zmin[iw], ctl->retk_zmax[iw],
 	       atm->k[iw], x, &n);
+
+  /* Set cloud data... */
+  if (ctl->retc_z) {
+    atm->clz = gsl_vector_get(x, n);
+    n++;
+  }
+  if (ctl->retc_dz) {
+    atm->cldz = gsl_vector_get(x, n);
+    n++;
+  }
+  if (ctl->retc_ext)
+    for (ic = 0; ic < ctl->nc; ic++) {
+      atm->clk[ic] = gsl_vector_get(x, n);
+      n++;
+    }
 }
 
 /*****************************************************************************/

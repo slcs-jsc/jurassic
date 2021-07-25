@@ -100,7 +100,7 @@ int main(
       for (ig = 0; ig < ctl.ng; ig++)
 	atm2.q[ig][ip] = los.q[ig][ip];
       for (iw = 0; iw < ctl.nw; iw++)
-	atm2.k[iw][ip] = los.k[iw][ip];
+	atm2.k[iw][ip] = GSL_NAN;
     }
 
     /* Save data... */

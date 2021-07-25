@@ -153,6 +153,9 @@
    Dimensions...
    ------------------------------------------------------------ */
 
+/*! Maximum number of cloud spectral grid points. */
+#define NC 10
+
 /*! Maximum number of radiance channels. */
 #define ND 50
 
@@ -175,13 +178,13 @@
 #define M (NR*ND)
 
 /*! Maximum size of state vector. */
-#define N (NQ*NP)
+#define N ((2+NG+NW)*NP+NC+2)
 
 /*! Maximum number of quantities. */
-#define NQ (2+NG+NW)
+#define NQ (4+NG+NW+NC)
 
 /*! Maximum number of LOS points. */
-#define NLOS 1000
+#define NLOS 2000
 
 /*! Maximum number of shape function grid points. */
 #define NSHAPE 10000
@@ -217,6 +220,15 @@
 /*! Indices for extinction. */
 #define IDXK(iw) (2+ctl->ng+iw)
 
+/*! Index for cloud height. */
+#define IDXCZ (2+ctl->ng+ctl->nw)
+
+/*! Index for cloud depth. */
+#define IDXCDZ (3+ctl->ng+ctl->nw)
+
+/*! Index for cloud extinction. */
+#define IDXCK(ic) (4+ctl->ng+ctl->nw+ic)
+
 /* ------------------------------------------------------------
    Structs...
    ------------------------------------------------------------ */
@@ -245,11 +257,20 @@ typedef struct {
   /*! Temperature [K]. */
   double t[NP];
 
-  /*! Volume mixing ratio. */
+  /*! Volume mixing ratio [ppv]. */
   double q[NG][NP];
 
   /*! Extinction [1/km]. */
   double k[NW][NP];
+
+  /*! Cloud layer height [km]. */
+  double clz;
+
+  /*! Cloud layer depth [km]. */
+  double cldz;
+
+  /*! Cloud layer extinction [1/km]. */
+  double clk[NC];
 
 } atm_t;
 
@@ -265,14 +286,20 @@ typedef struct {
   /*! Number of radiance channels. */
   int nd;
 
-  /*! Number of spectral windows. */
-  int nw;
-
   /*! Centroid wavenumber of each channel [cm^-1]. */
   double nu[ND];
 
+  /*! Number of spectral windows. */
+  int nw;
+
   /*! Window index of each channel. */
   int window[ND];
+
+  /*! Number of cloud spectral grid points. */
+  int nc;
+
+  /*! Cloud layer wavenumber [cm^-1]. */
+  double clnu[NC];
 
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];
@@ -328,6 +355,15 @@ typedef struct {
   /*! Maximum altitude for extinction retrieval [km]. */
   double retk_zmax[NW];
 
+  /*! Retrieve cloud height (0=no, 1=yes). */
+  int retc_z;
+
+  /*! Retrieve cloud depth (0=no, 1=yes). */
+  int retc_dz;
+
+  /*! Retrieve cloud extinction (0=no, 1=yes). */
+  int retc_ext;
+
   /*! Use brightness temperature instead of radiance (0=no, 1=yes). */
   int write_bbt;
 
@@ -357,11 +393,11 @@ typedef struct {
   /*! Temperature [K]. */
   double t[NLOS];
 
-  /*! Volume mixing ratio. */
+  /*! Volume mixing ratio [ppv]. */
   double q[NG][NLOS];
 
   /*! Extinction [1/km]. */
-  double k[NW][NLOS];
+  double k[ND][NLOS];
 
   /*! Surface temperature [K]. */
   double tsurf;
