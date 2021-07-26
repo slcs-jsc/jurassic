@@ -4301,11 +4301,11 @@ void read_ctl(
     ctl->window[id] = (int) scan_ctl(argc, argv, "WINDOW", id, "0", NULL);
 
   /* Cloud data... */
-  ctl->nc = (int) scan_ctl(argc, argv, "NC", -1, "0", NULL);
-  if (ctl->nc < 0 || ctl->nc > NC)
-    ERRMSG("Set 0 <= NC <= MAX!");
+  ctl->nc = (int) scan_ctl(argc, argv, "NCL", -1, "0", NULL);
+  if (ctl->nc < 0 || ctl->nc > NCL)
+    ERRMSG("Set 0 <= NCL <= MAX!");
   if (ctl->nc == 1)
-    ERRMSG("Set NC > 1!");
+    ERRMSG("Set NCL > 1!");
   for (ic = 0; ic < ctl->nc; ic++)
     ctl->clnu[ic] = scan_ctl(argc, argv, "CLNU", ic, "", NULL);
 

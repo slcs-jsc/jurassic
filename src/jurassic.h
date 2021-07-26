@@ -154,7 +154,7 @@
    ------------------------------------------------------------ */
 
 /*! Maximum number of cloud spectral grid points. */
-#define NC 10
+#define NCL 10
 
 /*! Maximum number of radiance channels. */
 #define ND 50
@@ -178,10 +178,10 @@
 #define M (NR*ND)
 
 /*! Maximum size of state vector. */
-#define N ((2+NG+NW)*NP+NC+2)
+#define N ((2+NG+NW)*NP+NCL+2)
 
 /*! Maximum number of quantities. */
-#define NQ (4+NG+NW+NC)
+#define NQ (4+NG+NW+NCL)
 
 /*! Maximum number of LOS points. */
 #define NLOS 2000
@@ -270,7 +270,7 @@ typedef struct {
   double cldz;
 
   /*! Cloud layer extinction [1/km]. */
-  double clk[NC];
+  double clk[NCL];
 
 } atm_t;
 
@@ -299,7 +299,7 @@ typedef struct {
   int nc;
 
   /*! Cloud layer wavenumber [cm^-1]. */
-  double clnu[NC];
+  double clnu[NCL];
 
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];
