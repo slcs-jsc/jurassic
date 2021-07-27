@@ -4120,14 +4120,15 @@ void raytrace(
     los->ds[los->np] = ds;
 
     /* Add cloud extinction... */
-    if (ctl->nc > 0 && atm->cldz > 0)
+    if (ctl->nc > 0 && atm->cldz > 0) {
+      double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (id = 0; id < ctl->nd; id++) {
 	ic = locate_irr(ctl->clnu, ctl->nc, ctl->nu[id]);
 	los->k[id][los->np]
-	  += LIN(ctl->clnu[ic], atm->clk[ic],
-		 ctl->clnu[ic + 1], atm->clk[ic + 1], ctl->nu[id])
-	  * exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
+	  += aux * LIN(ctl->clnu[ic], atm->clk[ic],
+		       ctl->clnu[ic + 1], atm->clk[ic + 1], ctl->nu[id]);
       }
+    }
 
     /* Increment and check number of LOS points... */
     if ((++los->np) > NLOS)

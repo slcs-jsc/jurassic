@@ -157,10 +157,10 @@
 #define NCL 10
 
 /*! Maximum number of radiance channels. */
-#define ND 50
+#define ND 256
 
 /*! Maximum number of emitters. */
-#define NG 20
+#define NG 4
 
 /*! Maximum number of atmospheric data points. */
 #define NP 1000
@@ -172,7 +172,7 @@
 #define NW 5
 
 /*! Maximum length of ASCII data lines. */
-#define LEN 5000
+#define LEN 10000
 
 /*! Maximum size of measurement vector. */
 #define M (NR*ND)

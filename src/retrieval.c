@@ -88,6 +88,15 @@ typedef struct {
   /*! Horizontal correlation length for extinction error [km]. */
   double err_k_ch[NW];
 
+  /*! Cloud height error [km]. */
+  double err_clz;
+
+  /*! Cloud depth error [km]. */
+  double err_cldz;
+
+  /*! Cloud extinction error [1/km]. */
+  double err_clk[NCL];
+  
 } ret_t;
 
 /* ------------------------------------------------------------
@@ -243,7 +252,7 @@ void analyze_avk(
 
   static atm_t atm_cont, atm_res;
 
-  int ig, iq, iw;
+  int ic, ig, iq, iw;
 
   size_t i, n, n0[NQ], n1[NQ];
 
@@ -274,6 +283,11 @@ void analyze_avk(
   for (iw = 0; iw < ctl->nw; iw++)
     analyze_avk_quantity(avk, IDXK(iw), ipa, n0, n1,
 			 atm_cont.k[iw], atm_res.k[iw]);
+  analyze_avk_quantity(avk, IDXCZ, ipa, n0, n1, &atm_cont.clz, &atm_res.clz);
+  analyze_avk_quantity(avk, IDXCDZ, ipa, n0, n1, &atm_cont.cldz, &atm_res.cldz);
+  for (ic = 0; ic < ctl->nc; ic++)
+    analyze_avk_quantity(avk, IDXCK(ic), ipa, n0, n1,
+			 &atm_cont.clk[ic], &atm_res.clk[ic]);
 
   /* Write results to disk... */
   write_atm(ret->dir, "atm_cont.tab", ctl, &atm_cont);
@@ -444,7 +458,7 @@ void optimal_estimation(
 
   double chisq, chisq_old, disq = 0, lmpar = 0.001;
 
-  int ig, ip, it = 0, it2, iw;
+  int ic, ig, ip, it = 0, it2, iw;
 
   size_t i, j, m, n;
 
@@ -588,7 +602,11 @@ void optimal_estimation(
 	for (iw = 0; iw < ctl->nw; iw++)
 	  atm_i->k[iw][ip] = GSL_MAX(atm_i->k[iw][ip], 0);
       }
-
+      atm_i->clz = GSL_MAX(atm_i->clz, 0);
+      atm_i->cldz = GSL_MAX(atm_i->cldz, 0.1);
+      for(ic=0; ic<ctl->nc; ic++)
+	atm_i->clk[ic] = GSL_MAX(atm_i->clk[ic], 0);
+      
       /* Forward calculation... */
       formod(ctl, atm_i, obs_i);
       obs2y(ctl, obs_i, y_i, NULL, NULL);
@@ -732,7 +750,7 @@ void read_ret(
   ctl_t * ctl,
   ret_t * ret) {
 
-  int id, ig, iw;
+  int ic, id, ig, iw;
 
   /* Iteration control... */
   ret->kernel_recomp =
@@ -768,6 +786,11 @@ void read_ret(
     ret->err_k_cz[iw] = scan_ctl(argc, argv, "ERR_K_CZ", iw, "-999", NULL);
     ret->err_k_ch[iw] = scan_ctl(argc, argv, "ERR_K_CH", iw, "-999", NULL);
   }
+
+  ret->err_clz = scan_ctl(argc, argv, "ERR_CLOUD_Z", -1, "0", NULL);
+  ret->err_cldz = scan_ctl(argc, argv, "ERR_CLOUD_DZ", -1, "0", NULL);
+  for(ic=0; ic<ctl->nc; ic++)
+    ret->err_clk[ic] = scan_ctl(argc, argv, "ERR_CLOUD_EXT", ic, "0", NULL);
 }
 
 /*****************************************************************************/
@@ -784,7 +807,7 @@ void set_cov_apr(
 
   double ch, cz, rho, x0[3], x1[3];
 
-  int ig, iw;
+  int ic, ig, iw;
 
   size_t i, j, n;
 
@@ -807,8 +830,15 @@ void set_cov_apr(
     for (iw = 0; iw < ctl->nw; iw++)
       if (iqa[i] == IDXK(iw))
 	gsl_vector_set(x_a, i, ret->err_k[iw]);
+    if (iqa[i] == IDXCZ)
+      gsl_vector_set(x_a, i, ret->err_clz);
+    if (iqa[i] == IDXCDZ)
+      gsl_vector_set(x_a, i, ret->err_cldz);
+    for (ic = 0; ic < ctl->nc; ic++)
+      if (iqa[i] == IDXCK(ic))
+	gsl_vector_set(x_a, i, ret->err_clk[iw]);
   }
-
+  
   /* Check standard deviations... */
   for (i = 0; i < n; i++)
     if (POW2(gsl_vector_get(x_a, i)) <= 0)
