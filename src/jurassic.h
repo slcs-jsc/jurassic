@@ -157,10 +157,10 @@
 #define NCL 10
 
 /*! Maximum number of radiance channels. */
-#define ND 256
+#define ND 128
 
 /*! Maximum number of emitters. */
-#define NG 4
+#define NG 10
 
 /*! Maximum number of atmospheric data points. */
 #define NP 1000

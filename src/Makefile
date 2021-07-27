@@ -45,6 +45,10 @@ $(EXC): %: %.c jurassic.o
 jurassic.o: jurassic.c jurassic.h Makefile
 	$(CC) $(CFLAGS) -c -o jurassic.o jurassic.c
 
+check: all
+	cd ../example/nadir && ./run.sh
+	cd ../example/limb && ./run.sh
+
 clean:
 	rm -f $(EXC) *.o *~
 
