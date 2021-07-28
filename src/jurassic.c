@@ -3243,7 +3243,8 @@ void formod_pencil(
   if (!init) {
     init = 1;
     ALLOC(tbl, tbl_t, 1);
-    init_tbl(ctl, tbl);
+    read_tbl(ctl, tbl);
+    init_srcfunc(ctl, tbl);
   }
 
   /* Allocate... */
@@ -3429,110 +3430,21 @@ void idx2name(
 
 /*****************************************************************************/
 
-void init_tbl(
+void init_srcfunc(
   ctl_t * ctl,
   tbl_t * tbl) {
 
-  FILE *in;
+  char filename[2 * LEN];
 
-  char filename[2 * LEN], line[LEN];
+  double f[NSHAPE], fsum, nu[NSHAPE];
 
-  double eps, eps_old, press, press_old, temp, temp_old, u, u_old,
-    f[NSHAPE], fsum, nu[NSHAPE];
-
-  int i, id, ig, ip, it, n;
-
-  /* Loop over trace gases and channels... */
-  for (ig = 0; ig < ctl->ng; ig++)
-#pragma omp parallel for default(none) shared(ctl,tbl,ig) private(in,filename,line,eps,eps_old,press,press_old,temp,temp_old,u,u_old,id,ip,it)
-    for (id = 0; id < ctl->nd; id++) {
-
-      /* Initialize... */
-      tbl->np[ig][id] = -1;
-      eps_old = -999;
-      press_old = -999;
-      temp_old = -999;
-      u_old = -999;
-
-      /* Try to open file... */
-      sprintf(filename, "%s_%.4f_%s.tab",
-	      ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
-      if (!(in = fopen(filename, "r"))) {
-	printf("Missing emissivity table: %s\n", filename);
-	continue;
-      }
-      printf("Read emissivity table: %s\n", filename);
-
-      /* Read data... */
-      while (fgets(line, LEN, in)) {
-
-	/* Parse line... */
-	if (sscanf(line, "%lg %lg %lg %lg", &press, &temp, &u, &eps) != 4)
-	  continue;
-
-	/* Check ranges... */
-	if (u < 0 || u > 1e30 || eps < 0 || eps > 1)
-	  continue;
-
-	/* Determine pressure index... */
-	if (press != press_old) {
-	  press_old = press;
-	  if ((++tbl->np[ig][id]) >= TBLNP)
-	    ERRMSG("Too many pressure levels!");
-	  tbl->nt[ig][id][tbl->np[ig][id]] = -1;
-	}
-
-	/* Determine temperature index... */
-	if (temp != temp_old) {
-	  temp_old = temp;
-	  if ((++tbl->nt[ig][id][tbl->np[ig][id]]) >= TBLNT)
-	    ERRMSG("Too many temperatures!");
-	  tbl->nu[ig][id][tbl->np[ig][id]]
-	    [tbl->nt[ig][id][tbl->np[ig][id]]] = -1;
-	}
-
-	/* Determine column density index... */
-	if ((eps > eps_old && u > u_old) || tbl->nu[ig][id][tbl->np[ig][id]]
-	    [tbl->nt[ig][id][tbl->np[ig][id]]] < 0) {
-	  eps_old = eps;
-	  u_old = u;
-	  if ((++tbl->nu[ig][id][tbl->np[ig][id]]
-	       [tbl->nt[ig][id][tbl->np[ig][id]]]) >= TBLNU) {
-	    tbl->nu[ig][id][tbl->np[ig][id]]
-	      [tbl->nt[ig][id][tbl->np[ig][id]]]--;
-	    continue;
-	  }
-	}
-
-	/* Store data... */
-	tbl->p[ig][id][tbl->np[ig][id]] = press;
-	tbl->t[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
-	  = temp;
-	tbl->u[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
-	  [tbl->nu[ig][id][tbl->np[ig][id]]
-	   [tbl->nt[ig][id][tbl->np[ig][id]]]] = (float) u;
-	tbl->eps[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
-	  [tbl->nu[ig][id][tbl->np[ig][id]]
-	   [tbl->nt[ig][id][tbl->np[ig][id]]]] = (float) eps;
-      }
-
-      /* Increment counters... */
-      tbl->np[ig][id]++;
-      for (ip = 0; ip < tbl->np[ig][id]; ip++) {
-	tbl->nt[ig][id][ip]++;
-	for (it = 0; it < tbl->nt[ig][id][ip]; it++)
-	  tbl->nu[ig][id][ip][it]++;
-      }
-
-      /* Close file... */
-      fclose(in);
-    }
+  int i, id, it, n;
 
   /* Write info... */
   printf("Initialize source function table...\n");
 
   /* Loop over channels... */
-#pragma omp parallel for default(none) shared(ctl,tbl,ig) private(filename,it,i,n,f,fsum,nu)
+#pragma omp parallel for default(none) shared(ctl,tbl) private(filename,it,i,n,f,fsum,nu)
   for (id = 0; id < ctl->nd; id++) {
 
     /* Read filter function... */
@@ -4312,6 +4224,7 @@ void read_ctl(
 
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);
+  ctl->tblfmt = (int) scan_ctl(argc, argv, "TBLFMT", -1, "1", NULL);
 
   /* Hydrostatic equilibrium... */
   ctl->hydz = scan_ctl(argc, argv, "HYDZ", -1, "-999", NULL);
@@ -4487,6 +4400,150 @@ void read_shape(
 
   /* Close file... */
   fclose(in);
+}
+
+/*****************************************************************************/
+
+void read_tbl(
+  ctl_t * ctl,
+  tbl_t * tbl) {
+
+  FILE *in;
+
+  char filename[2 * LEN], line[LEN];
+
+  double eps, eps_old, press, press_old, temp, temp_old, u, u_old;
+
+  int id, ig, ip, it;
+
+  /* Loop over trace gases and channels... */
+  for (ig = 0; ig < ctl->ng; ig++)
+#pragma omp parallel for default(none) shared(ctl,tbl,ig) private(in,filename,line,eps,eps_old,press,press_old,temp,temp_old,u,u_old,id,ip,it)
+    for (id = 0; id < ctl->nd; id++) {
+
+      /* Initialize... */
+      tbl->np[ig][id] = -1;
+      eps_old = -999;
+      press_old = -999;
+      temp_old = -999;
+      u_old = -999;
+
+      /* Set filename... */
+      sprintf(filename, "%s_%.4f_%s.tab",
+	      ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
+
+      /* Write info... */
+      printf("Read emissivity table: %s\n", filename);
+
+      /* Try to open file... */
+      if (!(in = fopen(filename, "r"))) {
+	printf("Missing emissivity table: %s\n", filename);
+	continue;
+      }
+
+      /* Read ASCII tables... */
+      if (ctl->tblfmt == 1) {
+
+	/* Read data... */
+	while (fgets(line, LEN, in)) {
+
+	  /* Parse line... */
+	  if (sscanf(line, "%lg %lg %lg %lg", &press, &temp, &u, &eps) != 4)
+	    continue;
+
+	  /* Check ranges... */
+	  if (u < 0 || u > 1e30 || eps < 0 || eps > 1)
+	    continue;
+
+	  /* Determine pressure index... */
+	  if (press != press_old) {
+	    press_old = press;
+	    if ((++tbl->np[ig][id]) >= TBLNP)
+	      ERRMSG("Too many pressure levels!");
+	    tbl->nt[ig][id][tbl->np[ig][id]] = -1;
+	  }
+
+	  /* Determine temperature index... */
+	  if (temp != temp_old) {
+	    temp_old = temp;
+	    if ((++tbl->nt[ig][id][tbl->np[ig][id]]) >= TBLNT)
+	      ERRMSG("Too many temperatures!");
+	    tbl->nu[ig][id][tbl->np[ig][id]]
+	      [tbl->nt[ig][id][tbl->np[ig][id]]] = -1;
+	  }
+
+	  /* Determine column density index... */
+	  if ((eps > eps_old && u > u_old) || tbl->nu[ig][id][tbl->np[ig][id]]
+	      [tbl->nt[ig][id][tbl->np[ig][id]]] < 0) {
+	    eps_old = eps;
+	    u_old = u;
+	    if ((++tbl->nu[ig][id][tbl->np[ig][id]]
+		 [tbl->nt[ig][id][tbl->np[ig][id]]]) >= TBLNU) {
+	      tbl->nu[ig][id][tbl->np[ig][id]]
+		[tbl->nt[ig][id][tbl->np[ig][id]]]--;
+	      continue;
+	    }
+	  }
+
+	  /* Store data... */
+	  tbl->p[ig][id][tbl->np[ig][id]] = press;
+	  tbl->t[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
+	    = temp;
+	  tbl->u[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
+	    [tbl->nu[ig][id][tbl->np[ig][id]]
+	     [tbl->nt[ig][id][tbl->np[ig][id]]]] = (float) u;
+	  tbl->eps[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
+	    [tbl->nu[ig][id][tbl->np[ig][id]]
+	     [tbl->nt[ig][id][tbl->np[ig][id]]]] = (float) eps;
+	}
+
+	/* Increment counters... */
+	tbl->np[ig][id]++;
+	for (ip = 0; ip < tbl->np[ig][id]; ip++) {
+	  tbl->nt[ig][id][ip]++;
+	  for (it = 0; it < tbl->nt[ig][id][ip]; it++)
+	    tbl->nu[ig][id][ip][it]++;
+	}
+      }
+
+      /* Read binary data... */
+      else if (ctl->tblfmt == 2) {
+
+	/* Read data... */
+	FREAD(&tbl->np[ig][id], int,
+	      1,
+	      in);
+	FREAD(tbl->p[ig][id], double,
+	        (size_t) tbl->np[ig][id],
+	      in);
+	for (ip = 0; ip < tbl->np[ig][id]; ip++) {
+	  FREAD(&tbl->nt[ig][id][ip], int,
+		1,
+		in);
+	  FREAD(tbl->t[ig][id][ip], double,
+		  (size_t) tbl->nt[ig][id][ip],
+		in);
+	  for (it = 0; it < tbl->nt[ig][id][ip]; it++) {
+	    FREAD(&tbl->nu[ig][id][ip][it], int,
+		  1,
+		  in);
+	    FREAD(tbl->u[ig][id][ip][it], float,
+		    (size_t) tbl->nu[ig][id][ip][it],
+		  in);
+	    FREAD(tbl->eps[ig][id][ip][it], float,
+		    (size_t) tbl->nu[ig][id][ip][it],
+		  in);
+	  }
+	}
+      }
+
+      /* Error message... */
+      else
+	ERRMSG("Unknown look-up table format!");
+
+      /* Close file... */
+      fclose(in);
+    }
 }
 
 /*****************************************************************************/
@@ -4995,6 +5052,93 @@ void write_obs(
 
   /* Close file... */
   fclose(out);
+}
+
+/*****************************************************************************/
+
+void write_tbl(
+  ctl_t * ctl,
+  tbl_t * tbl) {
+
+  FILE *out;
+
+  char filename[2 * LEN];
+
+  int id, ig, ip, it, iu;
+
+  /* Loop over emitters and detectors... */
+  for (ig = 0; ig < ctl->ng; ig++)
+    for (id = 0; id < ctl->nd; id++) {
+
+      /* Set filename... */
+      sprintf(filename, "%s_%.4f_%s.tab", ctl->tblbase,
+	      ctl->nu[id], ctl->emitter[ig]);
+
+      /* Write info... */
+      printf("Write emissivity table: %s\n", filename);
+
+      /* Create file... */
+      if (!(out = fopen(filename, "w")))
+	ERRMSG("Cannot create file!");
+
+      /* Write ASCII data... */
+      if (ctl->tblfmt == 1) {
+
+	/* Write header... */
+	fprintf(out,
+		"# $1 = pressure [hPa]\n"
+		"# $2 = temperature [K]\n"
+		"# $3 = column density [molecules/cm^2]\n"
+		"# $4 = emissivity [-]\n");
+
+	/* Save table file... */
+	for (ip = 0; ip < tbl->np[ig][id]; ip++)
+	  for (it = 0; it < tbl->nt[ig][id][ip]; it++) {
+	    fprintf(out, "\n");
+	    for (iu = 0; iu < tbl->nu[ig][id][ip][it]; iu++)
+	      fprintf(out, "%g %g %e %e\n",
+		      tbl->p[ig][id][ip], tbl->t[ig][id][ip][it],
+		      tbl->u[ig][id][ip][it][iu],
+		      tbl->eps[ig][id][ip][it][iu]);
+	  }
+      }
+
+      /* Write binary data... */
+      else if (ctl->tblfmt == 2) {
+	FWRITE(&tbl->np[ig][id], int,
+	       1,
+	       out);
+	FWRITE(tbl->p[ig][id], double,
+	         (size_t) tbl->np[ig][id],
+	       out);
+	for (ip = 0; ip < tbl->np[ig][id]; ip++) {
+	  FWRITE(&tbl->nt[ig][id][ip], int,
+		 1,
+		 out);
+	  FWRITE(tbl->t[ig][id][ip], double,
+		   (size_t) tbl->nt[ig][id][ip],
+		 out);
+	  for (it = 0; it < tbl->nt[ig][id][ip]; it++) {
+	    FWRITE(&tbl->nu[ig][id][ip][it], int,
+		   1,
+		   out);
+	    FWRITE(tbl->u[ig][id][ip][it], float,
+		     (size_t) tbl->nu[ig][id][ip][it],
+		   out);
+	    FWRITE(tbl->eps[ig][id][ip][it], float,
+		     (size_t) tbl->nu[ig][id][ip][it],
+		   out);
+	  }
+	}
+      }
+
+      /* Error message... */
+      else
+	ERRMSG("Unknown look-up table format!");
+
+      /* Close file... */
+      fclose(out);
+    }
 }
 
 /*****************************************************************************/

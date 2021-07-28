@@ -77,6 +77,18 @@
    ? ((y0)*exp(log((y1)/(y0))/((x1)-(x0))*((x)-(x0))))          \
    : LIN(x0, y0, x1, y1, x))
 
+/*! Read binary data. */
+#define FREAD(ptr, type, size, out) {					\
+    if(fread(ptr, sizeof(type), size, out)!=size)			\
+      ERRMSG("Error while reading!");					\
+  }
+
+/*! Write binary data. */
+#define FWRITE(ptr, type, size, out) {					\
+    if(fwrite(ptr, sizeof(type), size, out)!=size)			\
+      ERRMSG("Error while writing!");					\
+  }
+
 /*! Compute linear interpolation. */
 #define LIN(x0, y0, x1, y1, x)			\
   ((y0)+((y1)-(y0))/((x1)-(x0))*((x)-(x0)))
@@ -303,6 +315,9 @@ typedef struct {
 
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];
+
+  /*! Look-up table file format (1=ASCII, 2=binary). */
+  int tblfmt;
 
   /*! Reference height for hydrostatic pressure profile (-999 to skip) [km]. */
   double hydz;
@@ -623,8 +638,8 @@ void idx2name(
   int idx,
   char *quantity);
 
-/*! Initialize look-up tables. */
-void init_tbl(
+/*! Initialize source function table. */
+void init_srcfunc(
   ctl_t * ctl,
   tbl_t * tbl);
 
@@ -755,6 +770,11 @@ void read_shape(
   double *y,
   int *n);
 
+/*! Read look-up table data. */
+void read_tbl(
+  ctl_t * ctl,
+  tbl_t * tbl);
+
 /*! Compute refractivity (return value is n - 1). */
 double refractivity(
   double p,
@@ -820,6 +840,11 @@ void write_obs(
   const char *filename,
   ctl_t * ctl,
   obs_t * obs);
+
+/*! Write look-up table data. */
+void write_tbl(
+  ctl_t * ctl,
+  tbl_t * tbl);
 
 /*! Decompose parameter vector or state vector. */
 void x2atm(

@@ -17,5 +17,6 @@ src/obs2spec
 src/planck
 src/raytrace
 src/retrieval
+src/tblfmt
 src/time2jsec
 tab/
