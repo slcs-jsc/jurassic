@@ -11,7 +11,7 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
   
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU eneral Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
   Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
@@ -33,7 +33,7 @@ size_t atm2x(
   int *iqa,
   int *ipa) {
 
-  int ic, ig, iw;
+  int icl, ig, iw;
 
   size_t n = 0;
 
@@ -60,7 +60,7 @@ size_t atm2x(
     if (x != NULL)
       gsl_vector_set(x, n, atm->clz);
     if (iqa != NULL)
-      iqa[n] = IDXCZ;
+      iqa[n] = IDXCLZ;
     if (ipa != NULL)
       ipa[n] = 0;
     n++;
@@ -69,17 +69,17 @@ size_t atm2x(
     if (x != NULL)
       gsl_vector_set(x, n, atm->cldz);
     if (iqa != NULL)
-      iqa[n] = IDXCDZ;
+      iqa[n] = IDXCLDZ;
     if (ipa != NULL)
       ipa[n] = 0;
     n++;
   }
   if (ctl->ret_clk)
-    for (ic = 0; ic < ctl->nc; ic++) {
+    for (icl = 0; icl < ctl->ncl; icl++) {
       if (x != NULL)
-	gsl_vector_set(x, n, atm->clk[ic]);
+	gsl_vector_set(x, n, atm->clk[icl]);
       if (iqa != NULL)
-	iqa[n] = IDXCK(ic);
+	iqa[n] = IDXCLK(icl);
       if (ipa != NULL)
 	ipa[n] = 0;
       n++;
@@ -801,7 +801,7 @@ void climatology(
 
   double co2, *q[NG] = { NULL };
 
-  int ic, ig, ip, iw, iz;
+  int icl, ig, ip, iw, iz;
 
   /* Find emitter index of CO2... */
   if (ig_co2 == -999)
@@ -899,8 +899,8 @@ void climatology(
 
     /* Set cloud layer to zero... */
     atm->clz = atm->cldz = 0;
-    for (ic = 0; ic < ctl->nc; ic++)
-      atm->clk[ic] = 0;
+    for (icl = 0; icl < ctl->ncl; icl++)
+      atm->clk[icl] = 0;
   }
 }
 
@@ -2955,7 +2955,7 @@ void copy_atm(
   atm_t * atm_src,
   int init) {
 
-  int ic, ig, ip, iw;
+  int icl, ig, ip, iw;
 
   size_t s;
 
@@ -2976,8 +2976,8 @@ void copy_atm(
     memcpy(atm_dest->k[iw], atm_src->k[iw], s);
   atm_dest->clz = atm_src->clz;
   atm_dest->cldz = atm_src->cldz;
-  for (ic = 0; ic < ctl->nc; ic++)
-    atm_dest->clk[ic] = atm_src->clk[ic];
+  for (icl = 0; icl < ctl->ncl; icl++)
+    atm_dest->clk[icl] = atm_src->clk[icl];
 
   /* Initialize... */
   if (init)
@@ -2990,8 +2990,8 @@ void copy_atm(
 	atm_dest->k[iw][ip] = 0;
       atm_dest->clz = 0;
       atm_dest->cldz = 0;
-      for (ic = 0; ic < ctl->nc; ic++)
-	atm_dest->clk[ic] = 0;
+      for (icl = 0; icl < ctl->ncl; icl++)
+	atm_dest->clk[icl] = 0;
     }
 }
 
@@ -3400,7 +3400,7 @@ void idx2name(
   int idx,
   char *quantity) {
 
-  int ic, ig, iw;
+  int icl, ig, iw;
 
   if (idx == IDXP)
     sprintf(quantity, "PRESSURE");
@@ -3416,15 +3416,15 @@ void idx2name(
     if (idx == IDXK(iw))
       sprintf(quantity, "EXTINCT_WINDOW_%d", iw);
 
-  if (idx == IDXCZ)
+  if (idx == IDXCLZ)
     sprintf(quantity, "CLOUD_HEIGHT");
 
-  if (idx == IDXCDZ)
+  if (idx == IDXCLDZ)
     sprintf(quantity, "CLOUD_DEPTH");
 
-  for (ic = 0; ic < ctl->nc; ic++)
-    if (idx == IDXCK(ic))
-      sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->clnu[ic]);
+  for (icl = 0; icl < ctl->ncl; icl++)
+    if (idx == IDXCLK(icl))
+      sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->clnu[icl]);
 }
 
 /*****************************************************************************/
@@ -3853,9 +3853,9 @@ void kernel(
       h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, (size_t) j)), 1e-15);
     else if (iqa[j] >= IDXK(0) && iqa[j] < IDXK(ctl->nw))
       h = 1e-4;
-    else if (iqa[j] == IDXCZ || iqa[j] == IDXCDZ)
+    else if (iqa[j] == IDXCLZ || iqa[j] == IDXCLDZ)
       h = 1.0;
-    else if (iqa[j] >= IDXCK(0) && iqa[j] < IDXCK(ctl->nc))
+    else if (iqa[j] >= IDXCLK(0) && iqa[j] < IDXCLK(ctl->ncl))
       h = 1e-4;
     else
       ERRMSG("Cannot set perturbation size!");
@@ -4019,7 +4019,7 @@ void raytrace(
     lat, lon, n, naux, ng[3], norm, p, q[NG], t, x[3], xh[3],
     xobs[3], xvp[3], z = 1e99, zmax, zmin, zrefrac = 60;
 
-  int i, ic, id, ig, ip, stop = 0;
+  int i, icl, id, ig, ip, stop = 0;
 
   /* Initialize... */
   los->np = 0;
@@ -4120,13 +4120,13 @@ void raytrace(
     los->ds[los->np] = ds;
 
     /* Add cloud extinction... */
-    if (ctl->nc > 0 && atm->cldz > 0) {
+    if (ctl->ncl > 0 && atm->cldz > 0) {
       double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (id = 0; id < ctl->nd; id++) {
-	ic = locate_irr(ctl->clnu, ctl->nc, ctl->nu[id]);
+	icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
 	los->k[id][los->np]
-	  += aux * LIN(ctl->clnu[ic], atm->clk[ic],
-		       ctl->clnu[ic + 1], atm->clk[ic + 1], ctl->nu[id]);
+	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
+		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
       }
     }
 
@@ -4214,7 +4214,7 @@ void read_atm(
 
   char file[LEN], line[LEN], *tok;
 
-  int ic, ig, iw;
+  int icl, ig, iw;
 
   /* Init... */
   atm->np = 0;
@@ -4246,11 +4246,11 @@ void read_atm(
       TOK(NULL, tok, "%lg", atm->q[ig][atm->np]);
     for (iw = 0; iw < ctl->nw; iw++)
       TOK(NULL, tok, "%lg", atm->k[iw][atm->np]);
-    if (ctl->nc > 0 && atm->np == 0) {
+    if (ctl->ncl > 0 && atm->np == 0) {
       TOK(NULL, tok, "%lg", atm->clz);
       TOK(NULL, tok, "%lg", atm->cldz);
-      for (ic = 0; ic < ctl->nc; ic++)
-	TOK(NULL, tok, "%lg", atm->clk[ic]);
+      for (icl = 0; icl < ctl->ncl; icl++)
+	TOK(NULL, tok, "%lg", atm->clk[icl]);
     }
 
     /* Increment data point counter... */
@@ -4273,7 +4273,7 @@ void read_ctl(
   char *argv[],
   ctl_t * ctl) {
 
-  int ic, id, ig, iw;
+  int icl, id, ig, iw;
 
   /* Write info... */
   printf("\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
@@ -4302,13 +4302,13 @@ void read_ctl(
     ctl->window[id] = (int) scan_ctl(argc, argv, "WINDOW", id, "0", NULL);
 
   /* Cloud data... */
-  ctl->nc = (int) scan_ctl(argc, argv, "NCL", -1, "0", NULL);
-  if (ctl->nc < 0 || ctl->nc > NCL)
+  ctl->ncl = (int) scan_ctl(argc, argv, "NCL", -1, "0", NULL);
+  if (ctl->ncl < 0 || ctl->ncl > NCL)
     ERRMSG("Set 0 <= NCL <= MAX!");
-  if (ctl->nc == 1)
+  if (ctl->ncl == 1)
     ERRMSG("Set NCL > 1!");
-  for (ic = 0; ic < ctl->nc; ic++)
-    ctl->clnu[ic] = scan_ctl(argc, argv, "CLNU", ic, "", NULL);
+  for (icl = 0; icl < ctl->ncl; icl++)
+    ctl->clnu[icl] = scan_ctl(argc, argv, "CLNU", icl, "", NULL);
 
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);
@@ -4697,7 +4697,7 @@ void write_atm(
 
   char file[LEN];
 
-  int ic, ig, ip, iw, n = 6;
+  int icl, ig, ip, iw, n = 6;
 
   /* Set filename... */
   if (dirname != NULL)
@@ -4724,12 +4724,12 @@ void write_atm(
 	    ++n, ctl->emitter[ig]);
   for (iw = 0; iw < ctl->nw; iw++)
     fprintf(out, "# $%d = extinction (window %d) [1/km]\n", ++n, iw);
-  if (ctl->nc > 0) {
+  if (ctl->ncl > 0) {
     fprintf(out, "# $%d = cloud layer height [km]\n", ++n);
     fprintf(out, "# $%d = cloud layer depth [km]\n", ++n);
-    for (ic = 0; ic < ctl->nc; ic++)
+    for (icl = 0; icl < ctl->ncl; icl++)
       fprintf(out, "# $%d = cloud layer extinction (%g cm^-1) [1/km]\n",
-	      ++n, ctl->clnu[ic]);
+	      ++n, ctl->clnu[icl]);
   }
 
   /* Write data... */
@@ -4742,10 +4742,10 @@ void write_atm(
       fprintf(out, " %g", atm->q[ig][ip]);
     for (iw = 0; iw < ctl->nw; iw++)
       fprintf(out, " %g", atm->k[iw][ip]);
-    if (ctl->nc > 0) {
+    if (ctl->ncl > 0) {
       fprintf(out, " %g %g", atm->clz, atm->cldz);
-      for (ic = 0; ic < ctl->nc; ic++)
-	fprintf(out, " %g", atm->clk[ic]);
+      for (icl = 0; icl < ctl->ncl; icl++)
+	fprintf(out, " %g", atm->clk[icl]);
     }
     fprintf(out, "\n");
   }
@@ -5004,7 +5004,7 @@ void x2atm(
   gsl_vector * x,
   atm_t * atm) {
 
-  int ic, ig, iw;
+  int icl, ig, iw;
 
   size_t n = 0;
 
@@ -5034,8 +5034,8 @@ void x2atm(
     n++;
   }
   if (ctl->ret_clk)
-    for (ic = 0; ic < ctl->nc; ic++) {
-      atm->clk[ic] = gsl_vector_get(x, n);
+    for (icl = 0; icl < ctl->ncl; icl++) {
+      atm->clk[icl] = gsl_vector_get(x, n);
       n++;
     }
 }

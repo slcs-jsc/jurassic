@@ -221,13 +221,13 @@
 #define IDXK(iw) (2+ctl->ng+iw)
 
 /*! Index for cloud height. */
-#define IDXCZ (2+ctl->ng+ctl->nw)
+#define IDXCLZ (2+ctl->ng+ctl->nw)
 
 /*! Index for cloud depth. */
-#define IDXCDZ (3+ctl->ng+ctl->nw)
+#define IDXCLDZ (3+ctl->ng+ctl->nw)
 
 /*! Index for cloud extinction. */
-#define IDXCK(ic) (4+ctl->ng+ctl->nw+ic)
+#define IDXCLK(ic) (4+ctl->ng+ctl->nw+ic)
 
 /* ------------------------------------------------------------
    Structs...
@@ -296,7 +296,7 @@ typedef struct {
   int window[ND];
 
   /*! Number of cloud spectral grid points. */
-  int nc;
+  int ncl;
 
   /*! Cloud layer wavenumber [cm^-1]. */
   double clnu[NCL];
