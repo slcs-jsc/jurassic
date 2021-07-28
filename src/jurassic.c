@@ -56,7 +56,7 @@ size_t atm2x(
 	       atm->k[iw], IDXK(iw), x, iqa, ipa, &n);
 
   /* Add cloud parameters... */
-  if (ctl->retc_z) {
+  if (ctl->ret_clz) {
     if (x != NULL)
       gsl_vector_set(x, n, atm->clz);
     if (iqa != NULL)
@@ -65,7 +65,7 @@ size_t atm2x(
       ipa[n] = 0;
     n++;
   }
-  if (ctl->retc_dz) {
+  if (ctl->ret_cldz) {
     if (x != NULL)
       gsl_vector_set(x, n, atm->cldz);
     if (iqa != NULL)
@@ -74,7 +74,7 @@ size_t atm2x(
       ipa[n] = 0;
     n++;
   }
-  if (ctl->retc_ext)
+  if (ctl->ret_clk)
     for (ic = 0; ic < ctl->nc; ic++) {
       if (x != NULL)
 	gsl_vector_set(x, n, atm->clk[ic]);
@@ -4343,9 +4343,9 @@ void read_ctl(
     ctl->retk_zmin[iw] = scan_ctl(argc, argv, "RETK_ZMIN", iw, "-999", NULL);
     ctl->retk_zmax[iw] = scan_ctl(argc, argv, "RETK_ZMAX", iw, "-999", NULL);
   }
-  ctl->retc_z = (int) scan_ctl(argc, argv, "RETC_HEIGHT", -1, "0", NULL);
-  ctl->retc_dz = (int) scan_ctl(argc, argv, "RETC_DEPTH", -1, "0", NULL);
-  ctl->retc_ext = (int) scan_ctl(argc, argv, "RETC_EXT", -1, "0", NULL);
+  ctl->ret_clz = (int) scan_ctl(argc, argv, "RET_CLZ", -1, "0", NULL);
+  ctl->ret_cldz = (int) scan_ctl(argc, argv, "RET_CLDZ", -1, "0", NULL);
+  ctl->ret_clk = (int) scan_ctl(argc, argv, "RET_CLK", -1, "0", NULL);
 
   /* Output flags... */
   ctl->write_bbt = (int) scan_ctl(argc, argv, "WRITE_BBT", -1, "0", NULL);
@@ -5025,15 +5025,15 @@ void x2atm(
 	       atm->k[iw], x, &n);
 
   /* Set cloud data... */
-  if (ctl->retc_z) {
+  if (ctl->ret_clz) {
     atm->clz = gsl_vector_get(x, n);
     n++;
   }
-  if (ctl->retc_dz) {
+  if (ctl->ret_cldz) {
     atm->cldz = gsl_vector_get(x, n);
     n++;
   }
-  if (ctl->retc_ext)
+  if (ctl->ret_clk)
     for (ic = 0; ic < ctl->nc; ic++) {
       atm->clk[ic] = gsl_vector_get(x, n);
       n++;

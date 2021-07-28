@@ -157,7 +157,7 @@
 #define NCL 10
 
 /*! Maximum number of radiance channels. */
-#define ND 128
+#define ND 256
 
 /*! Maximum number of emitters. */
 #define NG 10
@@ -356,13 +356,13 @@ typedef struct {
   double retk_zmax[NW];
 
   /*! Retrieve cloud height (0=no, 1=yes). */
-  int retc_z;
+  int ret_clz;
 
   /*! Retrieve cloud depth (0=no, 1=yes). */
-  int retc_dz;
+  int ret_cldz;
 
   /*! Retrieve cloud extinction (0=no, 1=yes). */
-  int retc_ext;
+  int ret_clk;
 
   /*! Use brightness temperature instead of radiance (0=no, 1=yes). */
   int write_bbt;
