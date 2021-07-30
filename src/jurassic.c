@@ -3436,7 +3436,7 @@ void init_srcfunc(
 
   char filename[2 * LEN];
 
-  double f[NSHAPE], fsum, nu[NSHAPE];
+  double dnu, f[NSHAPE], ff, fnu, fsum, nu[NSHAPE];
 
   int i, id, it, n;
 
@@ -3444,12 +3444,17 @@ void init_srcfunc(
   printf("Initialize source function table...\n");
 
   /* Loop over channels... */
-#pragma omp parallel for default(none) shared(ctl,tbl) private(filename,f,fsum,nu,i,id,it,n)
+#pragma omp parallel for default(none) shared(ctl,tbl) private(filename,i,id,it,n,dnu,f,ff,fnu,fsum,nu)
   for (id = 0; id < ctl->nd; id++) {
 
     /* Read filter function... */
     sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
     read_shape(filename, nu, f, &n);
+
+    /* Get minimum grid spacing... */
+    dnu = 1.0;
+    for (i = 1; i < n; i++)
+      dnu = GSL_MIN(dnu, nu[i] - nu[i - 1]);
 
     /* Compute source function table... */
     for (it = 0; it < TBLNS; it++) {
@@ -3458,11 +3463,12 @@ void init_srcfunc(
       tbl->st[it] = LIN(0.0, TMIN, TBLNS - 1.0, TMAX, (double) it);
 
       /* Integrate Planck function... */
-      fsum = 0;
-      tbl->sr[id][it] = 0;
-      for (i = 0; i < n; i++) {
-	fsum += f[i];
-	tbl->sr[id][it] += f[i] * planck(tbl->st[it], nu[i]);
+      fsum = tbl->sr[id][it] = 0;
+      for (fnu = nu[0]; fnu <= nu[n - 1]; fnu += dnu) {
+	i = locate_irr(nu, n, fnu);
+	ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
+	fsum += ff;
+	tbl->sr[id][it] += ff * planck(tbl->st[it], fnu);
       }
       tbl->sr[id][it] /= fsum;
     }
