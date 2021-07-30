@@ -3444,7 +3444,7 @@ void init_srcfunc(
   printf("Initialize source function table...\n");
 
   /* Loop over channels... */
-#pragma omp parallel for default(none) shared(ctl,tbl) private(filename,it,i,n,f,fsum,nu)
+#pragma omp parallel for default(none) shared(ctl,tbl) private(filename,f,fsum,nu,i,id,it,n)
   for (id = 0; id < ctl->nd; id++) {
 
     /* Read filter function... */
