@@ -28,7 +28,7 @@
    Functions...
    ------------------------------------------------------------ */
 
-/*! Compute apodized instrument line shape (AILS). */
+/*! Compute apodized instrument line shape. */
 double ails(
   int apo,
   double opl,
@@ -52,7 +52,7 @@ int main(
 
   /* Write info... */
   if (argc < 3)
-    ERRMSG("Give parameters: <ctl> <filter.tab>");
+    ERRMSG("Give parameters: <ctl> <filter>");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);

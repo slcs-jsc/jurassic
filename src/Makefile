@@ -3,7 +3,10 @@
 # -----------------------------------------------------------------------------
 
 # Executables...
-EXC = brightness climatology filter formod hydrostatic interpolate invert jsec2time kernel limb nadir obs2spec planck raytrace retrieval tblfmt time2jsec
+EXC = brightness climatology filter formod hydrostatic interpolate invert jsec2time kernel limb nadir obs2spec planck raytrace retrieval tblfmt tblgen time2jsec
+
+# Installation directory...
+DESTDIR ?= ../bin
 
 # Library directories...
 LIBDIR ?= -L ../libs/build/lib
@@ -60,6 +63,9 @@ doc:
 
 indent:
 	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h
+
+install: all
+	mkdir -p $(DESTDIR) && cp $(EXC) $(DESTDIR)
 
 strip:
 	strip $(EXC)
