@@ -4,6 +4,7 @@ libs/build/
 projects/
 src/brightness
 src/climatology
+src/filter
 src/formod
 src/hydrostatic
 src/interpolate

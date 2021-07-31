@@ -841,6 +841,13 @@ void write_obs(
   ctl_t * ctl,
   obs_t * obs);
 
+/*! Write shape function. */
+void write_shape(
+  const char *filename,
+  double *x,
+  double *y,
+  int n);
+
 /*! Write look-up table data. */
 void write_tbl(
   ctl_t * ctl,

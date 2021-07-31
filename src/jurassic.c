@@ -5062,6 +5062,38 @@ void write_obs(
 
 /*****************************************************************************/
 
+void write_shape(
+  const char *filename,
+  double *x,
+  double *y,
+  int n) {
+
+  FILE *out;
+
+  int i;
+
+  /* Write info... */
+  printf("Write shape function: %s\n", filename);
+
+  /* Create file... */
+  if (!(out = fopen(filename, "w")))
+    ERRMSG("Cannot create file!");
+
+  /* Write header... */
+  fprintf(out,
+	  "# $1 = shape function x-value [-]\n"
+	  "# $2 = shape function y-value [-]\n\n");
+
+  /* Write data... */
+  for (i = 0; i < n; i++)
+    fprintf(out, "%.10g %.10g\n", x[i], y[i]);
+
+  /* Close file... */
+  fclose(out);
+}
+
+/*****************************************************************************/
+
 void write_tbl(
   ctl_t * ctl,
   tbl_t * tbl) {

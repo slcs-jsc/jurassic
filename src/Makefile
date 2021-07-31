@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 # Executables...
-EXC = brightness climatology formod hydrostatic interpolate invert jsec2time kernel limb nadir obs2spec planck raytrace retrieval tblfmt time2jsec
+EXC = brightness climatology filter formod hydrostatic interpolate invert jsec2time kernel limb nadir obs2spec planck raytrace retrieval tblfmt time2jsec
 
 # Library directories...
 LIBDIR ?= -L ../libs/build/lib
