@@ -19,7 +19,7 @@
 
 /*! 
   \file
-  Prepapre look-up tables from RFM monochromatic absorption spectra.
+  Prepapre look-up tables from monochromatic absorption spectra.
 */
 
 #include "jurassic.h"

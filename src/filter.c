@@ -46,7 +46,7 @@ int main(
 
   static double ff[NSHAPE], fnu[NSHAPE];
 
-  double nu, opd, center, width, samp, fwhm, fsum = 0.0;
+  double center, fsum = 0.0, fwhm, nu, opd, samp, sigma, width;
 
   int fn = 0, i, type;
 
@@ -79,12 +79,18 @@ int main(
       ff[fn] = GSL_MAX(ff[fn], 0.0);
     }
 
+    /* Gaussian... */
+    else if (type == 2) {
+      sigma = fwhm / 2.355;
+      ff[fn] = exp(-0.5 * POW2((nu - center) / sigma));
+    }
+
     /* Sinc function... */
-    else if (type == 2)
+    else if (type == 3)
       ff[fn] = ails(0, opd, nu - center);
 
     /* Norton-Beer strong apodization... */
-    else if (type == 3)
+    else if (type == 4)
       ff[fn] = ails(1, opd, nu - center);
 
     /* Error message... */
