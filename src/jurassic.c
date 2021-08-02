@@ -4435,8 +4435,9 @@ void read_tbl(
       u_old = -999;
 
       /* Set filename... */
-      sprintf(filename, "%s_%.4f_%s.tab",
-	      ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
+      sprintf(filename, "%s_%.4f_%s.%s", ctl->tblbase,
+	      ctl->nu[id], ctl->emitter[ig],
+	      ctl->tblfmt == 1 ? "tab" : "bin");
 
       /* Write info... */
       printf("Read emissivity table: %s\n", filename);
@@ -4519,6 +4520,8 @@ void read_tbl(
 	FREAD(&tbl->np[ig][id], int,
 	      1,
 	      in);
+	if (tbl->np[ig][id] > TBLNP)
+	  ERRMSG("Too many pressure levels!");
 	FREAD(tbl->p[ig][id], double,
 	        (size_t) tbl->np[ig][id],
 	      in);
@@ -4526,6 +4529,8 @@ void read_tbl(
 	  FREAD(&tbl->nt[ig][id][ip], int,
 		1,
 		in);
+	  if (tbl->nt[ig][id][ip] > TBLNT)
+	    ERRMSG("Too many temperatures!");
 	  FREAD(tbl->t[ig][id][ip], double,
 		  (size_t) tbl->nt[ig][id][ip],
 		in);
@@ -4533,6 +4538,8 @@ void read_tbl(
 	    FREAD(&tbl->nu[ig][id][ip][it], int,
 		  1,
 		  in);
+	    if (tbl->nu[ig][id][ip][it] > TBLNU)
+	      ERRMSG("Too many column densities!");
 	    FREAD(tbl->u[ig][id][ip][it], float,
 		    (size_t) tbl->nu[ig][id][ip][it],
 		  in);
@@ -5109,8 +5116,9 @@ void write_tbl(
     for (id = 0; id < ctl->nd; id++) {
 
       /* Set filename... */
-      sprintf(filename, "%s_%.4f_%s.tab", ctl->tblbase,
-	      ctl->nu[id], ctl->emitter[ig]);
+      sprintf(filename, "%s_%.4f_%s.%s", ctl->tblbase,
+	      ctl->nu[id], ctl->emitter[ig],
+	      ctl->tblfmt == 1 ? "tab" : "bin");
 
       /* Write info... */
       printf("Write emissivity table: %s\n", filename);
