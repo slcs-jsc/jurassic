@@ -4582,7 +4582,7 @@ double scan_ctl(
   FILE *in = NULL;
 
   char dummy[LEN], fullname1[LEN], fullname2[LEN], line[LEN],
-    msg[2 * LEN], rvarname[LEN], rval[LEN];
+    rvarname[LEN], rval[LEN];
 
   int contain = 0, i;
 
@@ -4625,10 +4625,8 @@ double scan_ctl(
   if (!contain) {
     if (strlen(defvalue) > 0)
       sprintf(rval, "%s", defvalue);
-    else {
-      sprintf(msg, "Missing variable %s!\n", fullname1);
-      ERRMSG(msg);
-    }
+    else
+      ERRMSG("Missing variable %s!\n", fullname1);
   }
 
   /* Write info... */

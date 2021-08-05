@@ -64,13 +64,6 @@
 /*! Compute dot product of two vectors. */
 #define DOTP(a, b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 
-/*! Print error message and quit program. */
-#define ERRMSG(msg) {							\
-    printf("\nError (%s, %s, l%d): %s\n\n",				\
-	   __FILE__, __func__, __LINE__, msg);				\
-    exit(EXIT_FAILURE);							\
-  }
-
 /*! Compute exponential interpolation. */
 #define EXP(x0, y0, x1, y1, x)					\
   (((y0)>0 && (y1)>0)						\
@@ -117,6 +110,43 @@
       if(sscanf(tok, format, &(var))!=1) continue;	\
     } else ERRMSG("Error while reading!");		\
   }
+
+/* ------------------------------------------------------------
+   Log messages...
+   ------------------------------------------------------------ */
+
+/*! Level of log messages (0=none, 1=basic, 2=detailed, 3=debug). */
+#ifndef LOGLEV
+#define LOGLEV 2
+#endif
+
+/*! Print log message. */
+#define LOG(level, ...) {						\
+    if(level >= 2)							\
+      printf("  ");							\
+    if(level <= LOGLEV) {						\
+      printf(__VA_ARGS__);						\
+      printf("\n");							\
+    }									\
+  }
+
+/*! Print warning message. */
+#define WARN(...) {							\
+    printf("\nWarning (%s, %s, l%d): ", __FILE__, __func__, __LINE__);	\
+    LOG(0, __VA_ARGS__);						\
+  }
+
+/*! Print error message and quit program. */
+#define ERRMSG(...) {							\
+    printf("\nError (%s, %s, l%d): ", __FILE__, __func__, __LINE__);	\
+    LOG(0, __VA_ARGS__);						\
+    exit(EXIT_FAILURE);							\
+  }
+
+/*! Print macro for debugging. */
+#define PRINT(format, var)						\
+  printf("Print (%s, %s, l%d): %s= "format"\n",				\
+	 __FILE__, __func__, __LINE__, #var, var);
 
 /* ------------------------------------------------------------
    Constants...
