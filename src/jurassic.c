@@ -3441,7 +3441,7 @@ void init_srcfunc(
   int i, id, it, n;
 
   /* Write info... */
-  printf("Initialize source function table...\n");
+  LOG(1, "Initialize source function table...");
 
   /* Loop over channels... */
 #pragma omp parallel for default(none) shared(ctl,tbl) private(filename,i,id,it,n,dnu,f,ff,fnu,fsum,nu)
@@ -4144,7 +4144,7 @@ void read_atm(
     sprintf(file, "%s", filename);
 
   /* Write info... */
-  printf("Read atmospheric data: %s\n", file);
+  LOG(1, "Read atmospheric data: %s", file);
 
   /* Open file... */
   if (!(in = fopen(file, "r")))
@@ -4194,9 +4194,9 @@ void read_ctl(
   int icl, id, ig, iw;
 
   /* Write info... */
-  printf("\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
-	 "(executable: %s | compiled: %s, %s)\n\n",
-	 argv[0], __DATE__, __TIME__);
+  LOG(1, "\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
+      "(executable: %s | compiled: %s, %s)\n",
+      argv[0], __DATE__, __TIME__);
 
   /* Emitters... */
   ctl->ng = (int) scan_ctl(argc, argv, "NG", -1, "0", NULL);
@@ -4294,7 +4294,7 @@ void read_matrix(
     sprintf(file, "%s", filename);
 
   /* Write info... */
-  printf("Read matrix: %s\n", file);
+  LOG(1, "Read matrix: %s", file);
 
   /* Open file... */
   if (!(in = fopen(file, "r")))
@@ -4336,8 +4336,8 @@ void read_obs(
     sprintf(file, "%s", filename);
 
   /* Write info... */
-  printf("Read observation data: %s\n", file);
-
+  LOG(1, "Read observation data: %s", file);
+  
   /* Open file... */
   if (!(in = fopen(file, "r")))
     ERRMSG("Cannot open file!");
@@ -4387,7 +4387,7 @@ void read_shape(
   char line[LEN];
 
   /* Write info... */
-  printf("Read shape function: %s\n", filename);
+  LOG(1, "Read shape function: %s", filename);
 
   /* Open file... */
   if (!(in = fopen(filename, "r")))
@@ -4440,14 +4440,14 @@ void read_tbl(
 	      ctl->tblfmt == 1 ? "tab" : "bin");
 
       /* Write info... */
-      printf("Read emissivity table: %s\n", filename);
+      LOG(1, "Read emissivity table: %s", filename);
 
       /* Try to open file... */
       if (!(in = fopen(filename, "r"))) {
-	printf("Missing emissivity table: %s\n", filename);
+	WARN("Missing emissivity table: %s", filename);
 	continue;
       }
-
+      
       /* Read ASCII tables... */
       if (ctl->tblfmt == 1) {
 
@@ -4630,7 +4630,7 @@ double scan_ctl(
   }
 
   /* Write info... */
-  printf("%s = %s\n", fullname1, rval);
+  LOG(1, "%s = %s", fullname1, rval);
 
   /* Return values... */
   if (value != NULL)
@@ -4744,8 +4744,8 @@ void timer(
       ERRMSG("Coding error!");
 
     /* Write elapsed time... */
-    printf("Timer '%s' (%s, %s, l%d-%d): %.3f sec\n",
-	   name, file, func, l0[nt - 1], line, omp_get_wtime() - w0[nt - 1]);
+    LOG(1, "Timer '%s' (%s, %s, l%d-%d): %.3f sec",
+	name, file, func, l0[nt - 1], line, omp_get_wtime() - w0[nt - 1]);
   }
 
   /* Stop timer... */
@@ -4774,7 +4774,7 @@ void write_atm(
     sprintf(file, "%s", filename);
 
   /* Write info... */
-  printf("Write atmospheric data: %s\n", file);
+  LOG(1, "Write atmospheric data: %s", file);
 
   /* Create file... */
   if (!(out = fopen(file, "w")))
@@ -4872,7 +4872,7 @@ void write_matrix(
     sprintf(file, "%s", filename);
 
   /* Write info... */
-  printf("Write matrix: %s\n", file);
+  LOG(1, "Write matrix: %s", file);
 
   /* Create file... */
   if (!(out = fopen(file, "w")))
@@ -5021,7 +5021,7 @@ void write_obs(
     sprintf(file, "%s", filename);
 
   /* Write info... */
-  printf("Write observation data: %s\n", file);
+  LOG(1, "Write observation data: %s", file);
 
   /* Create file... */
   if (!(out = fopen(file, "w")))
@@ -5078,7 +5078,7 @@ void write_shape(
   int i;
 
   /* Write info... */
-  printf("Write shape function: %s\n", filename);
+  LOG(1, "Write shape function: %s", filename);
 
   /* Create file... */
   if (!(out = fopen(filename, "w")))
@@ -5119,7 +5119,7 @@ void write_tbl(
 	      ctl->tblfmt == 1 ? "tab" : "bin");
 
       /* Write info... */
-      printf("Write emissivity table: %s\n", filename);
+      LOG(1, "Write emissivity table: %s", filename);
 
       /* Create file... */
       if (!(out = fopen(filename, "w")))

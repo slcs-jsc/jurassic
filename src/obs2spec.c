@@ -53,7 +53,7 @@ int main(
   read_obs(".", argv[2], &ctl, obs);
 
   /* Write info... */
-  printf("Write spectra: %s\n", argv[3]);
+  LOG(1, "Write spectra: %s", argv[3]);
 
   /* Create file... */
   if (!(out = fopen(argv[3], "w")))

@@ -216,7 +216,7 @@ int main(
   while (fscanf(dirlist, "%s", ret.dir) != EOF) {
 
     /* Write info... */
-    printf("\nRetrieve in directory %s...\n\n", ret.dir);
+    LOG(1, "\nRetrieve in directory %s...\n", ret.dir);
 
     /* Read atmospheric data... */
     read_atm(ret.dir, "atm_apr.tab", &ctl, &atm_apr);
@@ -232,7 +232,7 @@ int main(
   }
 
   /* Write info... */
-  printf("\nRetrieval done...\n");
+  LOG(1, "\nRetrieval done...");
 
   /* Measure CPU-time... */
   TIMER("total", 3);
@@ -474,14 +474,14 @@ void optimal_estimation(
     ERRMSG("Check problem definition!");
 
   /* Write info... */
-  printf("Problem size: m= %d / n= %d "
-	 "(alloc= %.4g MB / stat= %.4g MB)\n",
-	 (int) m, (int) n,
-	 (double) (3 * m * n + 4 * n * n + 8 * m +
-		   8 * n) * sizeof(double) / 1024. / 1024.,
-	 (double) (5 * sizeof(atm_t) + 3 * sizeof(obs_t)
-		   + 2 * N * sizeof(int)) / 1024. / 1024.);
-
+  LOG(1, "Problem size: m= %d / n= %d "
+      "(alloc= %.4g MB / stat= %.4g MB)",
+      (int) m, (int) n,
+      (double) (3 * m * n + 4 * n * n + 8 * m +
+		8 * n) * sizeof(double) / 1024. / 1024.,
+      (double) (5 * sizeof(atm_t) + 3 * sizeof(obs_t)
+		+ 2 * N * sizeof(int)) / 1024. / 1024.);
+  
   /* Allocate... */
   a = gsl_matrix_alloc(n, n);
   cov = gsl_matrix_alloc(n, n);
@@ -543,7 +543,7 @@ void optimal_estimation(
   chisq = cost_function(dx, dy, s_a_inv, sig_eps_inv);
 
   /* Write info... */
-  printf("it= %d / chi^2/m= %g\n", it, chisq);
+  LOG(1, "it= %d / chi^2/m= %g", it, chisq);
 
   /* Write to cost function file... */
   fprintf(out, "%d %g %d %d\n", it, chisq, (int) m, (int) n);
@@ -632,7 +632,7 @@ void optimal_estimation(
     }
 
     /* Write info... */
-    printf("it= %d / chi^2/m= %g\n", it, chisq);
+    LOG(1, "it= %d / chi^2/m= %g", it, chisq);
 
     /* Write to cost function file... */
     fprintf(out, "%d %g %d %d\n", it, chisq, (int) m, (int) n);

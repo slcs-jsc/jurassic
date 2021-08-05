@@ -79,7 +79,7 @@ int main(
     while (fscanf(in, "%s", wrkdir) != EOF) {
 
       /* Write info... */
-      printf("\nWorking directory: %s\n", wrkdir);
+      LOG(1, "\nWorking directory: %s", wrkdir);
 
       /* Call forward model... */
       call_formod(&ctl, wrkdir, argv[2], argv[3], argv[4], task);

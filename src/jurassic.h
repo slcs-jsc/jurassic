@@ -95,11 +95,6 @@
 /*! Compute x^3. */
 #define POW3(x) ((x)*(x)*(x))
 
-/*! Print macro for debugging. */
-#define PRINT(format, var)						\
-  printf("Print (%s, %s, l%d): %s= "format"\n",				\
-	 __FILE__, __func__, __LINE__, #var, var);
-
 /*! Start or stop a timer. */
 #define TIMER(name, mode)				\
   {timer(name, __FILE__, __func__, __LINE__, mode);}

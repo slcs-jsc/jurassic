@@ -58,7 +58,7 @@ int main(
   read_atm(NULL, argv[3], &ctl, &atm);
 
   /* Write info... */
-  printf("Write raytrace data: raytrace.tab\n");
+  LOG(1, "Write raytrace data: raytrace.tab");
 
   /* Create file... */
   if (!(out = fopen("raytrace.tab", "w")))

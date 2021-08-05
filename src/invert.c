@@ -107,7 +107,7 @@ int main(
      ------------------------------------------------------------ */
 
   /* Read profile data... */
-  printf("Read profile data: %s\n", argv[2]);
+  LOG(1, "Read profile data: %s", argv[2]);
 
   /* Open file... */
   if (!(in = fopen(argv[2], "r")))
@@ -264,8 +264,8 @@ int main(
 
 
     /* Write info... */
-    printf("  it= %d | scl= %g +/- %g | RMSE= %g\n",
-	   it, scl, scl_err, sqrt(sumsq / n));
+    LOG(1, "  it= %d | scl= %g +/- %g | RMSE= %g",
+	it, scl, scl_err, sqrt(sumsq / n));
 
     /* Convergence test... */
     if (fabs(2.0 * (scl - scl_old) / (scl + scl_old)) < tol)
@@ -277,7 +277,7 @@ int main(
      ------------------------------------------------------------ */
 
   /* Write info... */
-  printf("Write inversion data: %s\n", argv[3]);
+  LOG(1, "Write inversion data: %s", argv[3]);
 
   /* Create file... */
   if (!(out = fopen(argv[3], "w")))
