@@ -17,6 +17,15 @@ INCDIR ?= -I ../libs/build/include
 # Static compilation...
 STATIC ?= 1
 
+# Optimization flags...
+OPT ?= -O3
+
+# Optimization information...
+INFO ?= 0
+
+# Compile for profiling...
+PROF ?= 0
+
 # -----------------------------------------------------------------------------
 # Set flags for GNU compiler...
 # -----------------------------------------------------------------------------
@@ -25,10 +34,20 @@ STATIC ?= 1
 CC ?= gcc
 
 # CFLAGS...
-CFLAGS ?= $(INCDIR) -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp -O3 -g
+CFLAGS ?= $(INCDIR) $(DEFINES) -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
 
 # LDFLAGS...
 LDFLAGS ?= $(LIBDIR) -lgsl -lgslcblas -lm
+
+# Optimization information...
+ifeq ($(INFO),1)
+  CFLAGS += -fopt-info
+endif
+
+# Compile for profiling...
+ifeq ($(PROF),1)
+  CFLAGS += -pg
+endif
 
 # Static compilation...
 ifeq ($(STATIC),1)

@@ -166,55 +166,89 @@
    ------------------------------------------------------------ */
 
 /*! Maximum number of cloud spectral grid points. */
-#define NCL 10
+#ifndef NCL
+#define NCL 8
+#endif
 
 /*! Maximum number of radiance channels. */
-#define ND 256
+#ifndef ND
+#define ND 64
+#endif
 
 /*! Maximum number of emitters. */
-#define NG 10
+#ifndef NG
+#define NG 8
+#endif
 
 /*! Maximum number of atmospheric data points. */
-#define NP 1000
+#ifndef NP
+#define NP 256
+#endif
 
 /*! Maximum number of ray paths. */
-#define NR 1000
+#ifndef NR
+#define NR 256
+#endif
 
 /*! Maximum number of spectral windows. */
-#define NW 5
+#ifndef NW
+#define NW 4
+#endif
 
 /*! Maximum length of ASCII data lines. */
+#ifndef LEN
 #define LEN 10000
+#endif
 
 /*! Maximum size of measurement vector. */
+#ifndef M
 #define M (NR*ND)
+#endif
 
 /*! Maximum size of state vector. */
+#ifndef N
 #define N ((2+NG+NW)*NP+NCL+2)
+#endif
 
 /*! Maximum number of quantities. */
+#ifndef NQ
 #define NQ (4+NG+NW+NCL)
+#endif
 
 /*! Maximum number of LOS points. */
-#define NLOS 2000
+#ifndef NLOS
+#define NLOS 2048
+#endif
 
 /*! Maximum number of shape function grid points. */
+#ifndef NSHAPE
 #define NSHAPE 10000
+#endif
 
 /*! Number of ray paths used for FOV calculations. */
+#ifndef NFOV
 #define NFOV 5
+#endif
 
 /*! Maximum number of pressure levels in emissivity tables. */
+#ifndef TBLNP
 #define TBLNP 41
+#endif
 
 /*! Maximum number of temperatures in emissivity tables. */
+#ifndef TBLNT
 #define TBLNT 30
+#endif
 
 /*! Maximum number of column densities in emissivity tables. */
+#ifndef TBLNU
 #define TBLNU 320
+#endif
 
 /*! Maximum number of source function temperature levels. */
+#ifndef TBLNS
 #define TBLNS 1200
+#endif
 
 /* ------------------------------------------------------------
    Quantity indices...
