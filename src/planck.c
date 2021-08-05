@@ -28,18 +28,47 @@ int main(
   int argc,
   char *argv[]) {
 
-  double nu, t;
+  double nu, nu0, nu1, dnu, t, t0, t1, dt;
 
   /* Check arguments... */
-  if (argc < 3)
-    ERRMSG("Give parameters: <t> <nu>");
+  if (argc != 3 && argc != 7)
+    ERRMSG
+      ("Give parameters: [ <t> <nu> |  <t0> <t1> <dt> <nu0> <nu1> <dnu> ]");
 
-  /* Read arguments... */
-  t = atof(argv[1]);
-  nu = atof(argv[2]);
+  /* Calculate single value... */
+  if (argc == 3) {
 
-  /* Compute Planck function... */
-  printf("%.10g\n", planck(t, nu));
+    /* Read arguments... */
+    t = atof(argv[1]);
+    nu = atof(argv[2]);
+
+    /* Compute Planck function... */
+    printf("%.10g\n", planck(t, nu));
+  }
+
+  /* Calculate table... */
+  else if (argc == 7) {
+
+    /* Read arguments... */
+    t0 = atof(argv[1]);
+    t1 = atof(argv[2]);
+    dt = atof(argv[3]);
+    nu0 = atof(argv[4]);
+    nu1 = atof(argv[5]);
+    dnu = atof(argv[6]);
+
+    /* Write header... */
+    printf("# $1 = brightness temperature [K]\n"
+	   "# $2 = wavenumber [cm^-1]\n"
+	   "# $3 = radiance [W/(m^2 sr cm^-1)]\n");
+
+    /* Compute Planck function... */
+    for (t = t0; t <= t1; t += dt) {
+      printf("\n");
+      for (nu = nu0; nu <= nu1; nu += dnu)
+	printf("%.10g %.4f %.10g\n", t, nu, planck(t, nu));
+    }
+  }
 
   return EXIT_SUCCESS;
 }
