@@ -481,7 +481,7 @@ void optimal_estimation(
 		8 * n) * sizeof(double) / 1024. / 1024.,
       (double) (5 * sizeof(atm_t) + 3 * sizeof(obs_t)
 		+ 2 * N * sizeof(int)) / 1024. / 1024.);
-  
+
   /* Allocate... */
   a = gsl_matrix_alloc(n, n);
   cov = gsl_matrix_alloc(n, n);

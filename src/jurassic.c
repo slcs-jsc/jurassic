@@ -4195,8 +4195,7 @@ void read_ctl(
 
   /* Write info... */
   LOG(1, "\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
-      "(executable: %s | compiled: %s, %s)\n",
-      argv[0], __DATE__, __TIME__);
+      "(executable: %s | compiled: %s, %s)\n", argv[0], __DATE__, __TIME__);
 
   /* Emitters... */
   ctl->ng = (int) scan_ctl(argc, argv, "NG", -1, "0", NULL);
@@ -4337,7 +4336,7 @@ void read_obs(
 
   /* Write info... */
   LOG(1, "Read observation data: %s", file);
-  
+
   /* Open file... */
   if (!(in = fopen(file, "r")))
     ERRMSG("Cannot open file!");
@@ -4447,7 +4446,7 @@ void read_tbl(
 	WARN("Missing emissivity table: %s", filename);
 	continue;
       }
-      
+
       /* Read ASCII tables... */
       if (ctl->tblfmt == 1) {
 

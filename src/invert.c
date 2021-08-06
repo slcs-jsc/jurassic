@@ -58,24 +58,22 @@ int main(
   static double rtime[NLMAX], rz[NLMAX], rlon[NLMAX], rlat[NLMAX], obs_meas,
     obs_sim, scl = 1.0, scl_old, scl_err, c0, c1, cov00, cov01, cov11,
     sumsq, x[NMAX], x2[NMAX], y[NMAX], y_err[NMAX], y2[NMAX], y2_err[NMAX],
-    y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX], dt, tol, obs_err;
+    y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX], dt, tol;
 
   static float rp[NLMAX], rt[NLMAX], rso2[NLMAX], rh2o[NLMAX],
     ro3[NLMAX], robs[NLMAX];
 
-  static int data, fit, i, ig, il, ip, it, itmax, n, nl, ndata[NMAX], nprof;
+  static int fit, i, ig, il, ip, it, itmax, n, nl, ndata[NMAX], nprof;
 
   static size_t mk, nk;
 
   /* Check arguments... */
-  if (argc < 5)
-    ERRMSG("Give parameters: <ctl> <prof> <inv> <kernel>");
+  if (argc < 6)
+    ERRMSG("Give parameters: <ctl> <prof> <inv> <atm> <kernel>");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
   dt = scan_ctl(argc, argv, "INVERT_DT", -1, "86400", NULL);
-  obs_err = scan_ctl(argc, argv, "INVERT_OBS_ERR", -1, "1.0", NULL);
-  data = (int) scan_ctl(argc, argv, "INVERT_DATA", -1, "2", NULL);
   fit = (int) scan_ctl(argc, argv, "INVERT_FIT", -1, "3", NULL);
   itmax = (int) scan_ctl(argc, argv, "INVERT_ITMAX", -1, "10", NULL);
   tol = scan_ctl(argc, argv, "INVERT_TOL", -1, "1e-4", NULL);
@@ -160,17 +158,8 @@ int main(
 	if (i < 0 && i >= NMAX)
 	  ERRMSG("Time index out of range!");
 
-	/* Get maxima... */
-	if (data == 1) {
-	  x[i] = (gsl_finite(x[i]) ? GSL_MAX(x[i], obs_sim) : obs_sim);
-	  y[i] = (gsl_finite(y[i]) ? GSL_MAX(y[i], obs_meas) : obs_meas);
-	  y_err[i] = obs_err;
-	  if (gsl_finite(x[i]) && gsl_finite(y[i]))
-	    ndata[i] = 1;
-	}
-
 	/* Get means... */
-	else if (data == 2) {
+	if (gsl_finite(obs_meas) && gsl_finite(obs_sim)) {
 	  if (ndata[i] == 0) {
 	    x[i] = obs_sim;
 	    y[i] = obs_meas;
@@ -219,14 +208,13 @@ int main(
     }
 
     /* Calculate means... */
-    if (data == 2)
-      for (i = 0; i < NMAX; i++)
-	if (ndata[i] > 0) {
-	  x[i] /= ndata[i];
-	  y[i] /= ndata[i];
-	  y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
-	    / sqrt(ndata[i]);	/* standard error! */
-	}
+    for (i = 0; i < NMAX; i++)
+      if (ndata[i] > 0) {
+	x[i] /= ndata[i];
+	y[i] /= ndata[i];
+	y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
+	  / sqrt(ndata[i]);	/* standard error! */
+      }
 
     /* Filter data... */
     n = 0;
@@ -258,10 +246,6 @@ int main(
     scl_old = scl;
     scl_err = scl * sqrt(cov11);
     scl *= c1;
-
-
-    /* scl_err = scl * sqrt(cov11 / POW2(c1)); */
-
 
     /* Write info... */
     LOG(1, "  it= %d | scl= %g +/- %g | RMSE= %g",
@@ -347,8 +331,11 @@ int main(
   /* Compute kernel matrix... */
   kernel(&ctl, &atm2, &obs, k);
 
+  /* Write atmospheric data... */
+  write_atm(NULL, argv[4], &ctl, &atm);
+
   /* Write matrix to file... */
-  write_matrix(NULL, argv[4], &ctl, k, &atm2, &obs, "y", "x", "r");
+  write_matrix(NULL, argv[5], &ctl, k, &atm2, &obs, "y", "x", "r");
 
   /* Free... */
   gsl_matrix_free(k);
