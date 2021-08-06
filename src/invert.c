@@ -58,12 +58,12 @@ int main(
   static double rtime[NLMAX], rz[NLMAX], rlon[NLMAX], rlat[NLMAX], obs_meas,
     obs_sim, scl = 1.0, scl_old, scl_err, c0, c1, cov00, cov01, cov11,
     sumsq, x[NMAX], x2[NMAX], y[NMAX], y_err[NMAX], y2[NMAX], y2_err[NMAX],
-    y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX], dt, tol;
+    y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX], dt, tol, obs_err;
 
   static float rp[NLMAX], rt[NLMAX], rso2[NLMAX], rh2o[NLMAX],
     ro3[NLMAX], robs[NLMAX];
 
-  static int fit, i, ig, il, ip, it, itmax, n, nl, ndata[NMAX], nprof;
+  static int data, fit, i, ig, il, ip, it, itmax, n, nl, ndata[NMAX], nprof;
 
   static size_t mk, nk;
 
@@ -74,6 +74,8 @@ int main(
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
   dt = scan_ctl(argc, argv, "INVERT_DT", -1, "86400", NULL);
+  obs_err = scan_ctl(argc, argv, "INVERT_OBS_ERR", -1, "1.0", NULL);
+  data = (int) scan_ctl(argc, argv, "INVERT_DATA", -1, "2", NULL);
   fit = (int) scan_ctl(argc, argv, "INVERT_FIT", -1, "3", NULL);
   itmax = (int) scan_ctl(argc, argv, "INVERT_ITMAX", -1, "10", NULL);
   tol = scan_ctl(argc, argv, "INVERT_TOL", -1, "1e-4", NULL);
@@ -158,8 +160,17 @@ int main(
 	if (i < 0 && i >= NMAX)
 	  ERRMSG("Time index out of range!");
 
+	/* Get maxima... */
+	if (data == 1) {
+	  x[i] = (gsl_finite(x[i]) ? GSL_MAX(x[i], obs_sim) : obs_sim);
+	  y[i] = (gsl_finite(y[i]) ? GSL_MAX(y[i], obs_meas) : obs_meas);
+	  y_err[i] = obs_err;
+	  if (gsl_finite(x[i]) && gsl_finite(y[i]))
+	    ndata[i] = 1;
+	}
+
 	/* Get means... */
-	if (gsl_finite(obs_meas) && gsl_finite(obs_sim)) {
+	else if (data == 2) {
 	  if (ndata[i] == 0) {
 	    x[i] = obs_sim;
 	    y[i] = obs_meas;
@@ -208,13 +219,14 @@ int main(
     }
 
     /* Calculate means... */
-    for (i = 0; i < NMAX; i++)
-      if (ndata[i] > 0) {
-	x[i] /= ndata[i];
-	y[i] /= ndata[i];
-	y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
-	  / sqrt(ndata[i]);	/* standard error! */
-      }
+    if (data == 2)
+      for (i = 0; i < NMAX; i++)
+	if (ndata[i] > 0) {
+	  x[i] /= ndata[i];
+	  y[i] /= ndata[i];
+	  y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
+	    / sqrt(ndata[i]);	/* standard error! */
+	}
 
     /* Filter data... */
     n = 0;
