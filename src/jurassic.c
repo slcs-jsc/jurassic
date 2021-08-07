@@ -4322,6 +4322,10 @@ void read_ctl(
   ctl->ret_clz = (int) scan_ctl(argc, argv, "RET_CLZ", -1, "0", NULL);
   ctl->ret_cldz = (int) scan_ctl(argc, argv, "RET_CLDZ", -1, "0", NULL);
   ctl->ret_clk = (int) scan_ctl(argc, argv, "RET_CLK", -1, "0", NULL);
+  ctl->ret_sfz = (int) scan_ctl(argc, argv, "RET_SFZ", -1, "0", NULL);
+  ctl->ret_sfp = (int) scan_ctl(argc, argv, "RET_SFP", -1, "0", NULL);
+  ctl->ret_sft = (int) scan_ctl(argc, argv, "RET_SFT", -1, "0", NULL);
+  ctl->ret_sfeps = (int) scan_ctl(argc, argv, "RET_SFEPS", -1, "0", NULL);
 
   /* Output flags... */
   ctl->write_bbt = (int) scan_ctl(argc, argv, "WRITE_BBT", -1, "0", NULL);
@@ -4853,7 +4857,7 @@ void write_atm(
     fprintf(out, "# $%d = cloud layer height [km]\n", ++n);
     fprintf(out, "# $%d = cloud layer depth [km]\n", ++n);
     for (icl = 0; icl < ctl->ncl; icl++)
-      fprintf(out, "# $%d = cloud layer extinction (%g cm^-1) [1/km]\n",
+      fprintf(out, "# $%d = cloud layer extinction (%.4f cm^-1) [1/km]\n",
 	      ++n, ctl->clnu[icl]);
   }
   if (ctl->nsf > 0) {
@@ -4861,7 +4865,7 @@ void write_atm(
     fprintf(out, "# $%d = surface layer pressure [hPa]\n", ++n);
     fprintf(out, "# $%d = surface layer temperature [K]\n", ++n);
     for (isf = 0; isf < ctl->nsf; isf++)
-      fprintf(out, "# $%d = surface layer emissivity (%g cm^-1)\n",
+      fprintf(out, "# $%d = surface layer emissivity (%.4f cm^-1)\n",
 	      ++n, ctl->sfnu[isf]);
   }
 
@@ -5011,7 +5015,7 @@ void write_matrix(
 
     /* Write info about the row... */
     if (rowspace[0] == 'y')
-      fprintf(out, "%d %g %.2f %g %g %g",
+      fprintf(out, "%d %.4f %.2f %g %g %g",
 	      (int) i, ctl->nu[rida[i]],
 	      obs->time[rira[i]], obs->vpz[rira[i]],
 	      obs->vplon[rira[i]], obs->vplat[rira[i]]);
@@ -5024,7 +5028,7 @@ void write_matrix(
 
     /* Write info about the column... */
     if (colspace[0] == 'y')
-      fprintf(out, " %d %g %.2f %g %g %g",
+      fprintf(out, " %d %.4f %.2f %g %g %g",
 	      (int) j, ctl->nu[cida[j]],
 	      obs->time[cira[j]], obs->vpz[cira[j]],
 	      obs->vplon[cira[j]], obs->vplat[cira[j]]);
