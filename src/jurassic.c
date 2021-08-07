@@ -33,57 +33,53 @@ size_t atm2x(
   int *iqa,
   int *ipa) {
 
-  int icl, ig, iw;
+  int icl, ig, ip, isf, iw;
 
   size_t n = 0;
 
   /* Add pressure... */
-  atm2x_help(atm, ctl->retp_zmin, ctl->retp_zmax,
-	     atm->p, IDXP, x, iqa, ipa, &n);
+  for (ip = 0; ip < atm->np; ip++)
+    if (atm->z[ip] >= ctl->retp_zmin && atm->z[ip] <= ctl->retp_zmax)
+      atm2x_help(atm->p[ip], IDXP, ip, x, iqa, ipa, &n);
 
   /* Add temperature... */
-  atm2x_help(atm, ctl->rett_zmin, ctl->rett_zmax,
-	     atm->t, IDXT, x, iqa, ipa, &n);
+  for (ip = 0; ip < atm->np; ip++)
+    if (atm->z[ip] >= ctl->rett_zmin && atm->z[ip] <= ctl->rett_zmax)
+      atm2x_help(atm->t[ip], IDXT, ip, x, iqa, ipa, &n);
 
   /* Add volume mixing ratios... */
   for (ig = 0; ig < ctl->ng; ig++)
-    atm2x_help(atm, ctl->retq_zmin[ig], ctl->retq_zmax[ig],
-	       atm->q[ig], IDXQ(ig), x, iqa, ipa, &n);
+    for (ip = 0; ip < atm->np; ip++)
+      if (atm->z[ip] >= ctl->retq_zmin[ig]
+	  && atm->z[ip] <= ctl->retq_zmax[ig])
+	atm2x_help(atm->q[ig][ip], IDXQ(ig), ip, x, iqa, ipa, &n);
 
   /* Add extinction... */
   for (iw = 0; iw < ctl->nw; iw++)
-    atm2x_help(atm, ctl->retk_zmin[iw], ctl->retk_zmax[iw],
-	       atm->k[iw], IDXK(iw), x, iqa, ipa, &n);
+    for (ip = 0; ip < atm->np; ip++)
+      if (atm->z[ip] >= ctl->retk_zmin[iw]
+	  && atm->z[ip] <= ctl->retk_zmax[iw])
+	atm2x_help(atm->k[iw][ip], IDXK(iw), ip, x, iqa, ipa, &n);
 
   /* Add cloud parameters... */
-  if (ctl->ret_clz) {
-    if (x != NULL)
-      gsl_vector_set(x, n, atm->clz);
-    if (iqa != NULL)
-      iqa[n] = IDXCLZ;
-    if (ipa != NULL)
-      ipa[n] = 0;
-    n++;
-  }
-  if (ctl->ret_cldz) {
-    if (x != NULL)
-      gsl_vector_set(x, n, atm->cldz);
-    if (iqa != NULL)
-      iqa[n] = IDXCLDZ;
-    if (ipa != NULL)
-      ipa[n] = 0;
-    n++;
-  }
+  if (ctl->ret_clz)
+    atm2x_help(atm->clz, IDXCLZ, 0, x, iqa, ipa, &n);
+  if (ctl->ret_cldz)
+    atm2x_help(atm->cldz, IDXCLDZ, 0, x, iqa, ipa, &n);
   if (ctl->ret_clk)
-    for (icl = 0; icl < ctl->ncl; icl++) {
-      if (x != NULL)
-	gsl_vector_set(x, n, atm->clk[icl]);
-      if (iqa != NULL)
-	iqa[n] = IDXCLK(icl);
-      if (ipa != NULL)
-	ipa[n] = 0;
-      n++;
-    }
+    for (icl = 0; icl < ctl->ncl; icl++)
+      atm2x_help(atm->clk[icl], IDXCLK(icl), 0, x, iqa, ipa, &n);
+
+  /* Add surface parameters... */
+  if (ctl->ret_sfz)
+    atm2x_help(atm->sfz, IDXSFZ, 0, x, iqa, ipa, &n);
+  if (ctl->ret_sfp)
+    atm2x_help(atm->sfp, IDXSFP, 0, x, iqa, ipa, &n);
+  if (ctl->ret_sft)
+    atm2x_help(atm->sft, IDXSFT, 0, x, iqa, ipa, &n);
+  if (ctl->ret_sfeps)
+    for (isf = 0; isf < ctl->nsf; isf++)
+      atm2x_help(atm->sfeps[isf], IDXSFEPS(isf), 0, x, iqa, ipa, &n);
 
   return n;
 }
@@ -91,30 +87,24 @@ size_t atm2x(
 /*****************************************************************************/
 
 void atm2x_help(
-  atm_t * atm,
-  double zmin,
-  double zmax,
-  double *value,
-  int val_iqa,
+  double value,
+  int value_iqa,
+  int value_ip,
   gsl_vector * x,
   int *iqa,
   int *ipa,
   size_t *n) {
 
-  int ip;
-
-  /* Add elements to state vector... */
-  for (ip = 0; ip < atm->np; ip++)
-    if (atm->z[ip] >= zmin && atm->z[ip] <= zmax) {
-      if (x != NULL)
-	gsl_vector_set(x, *n, value[ip]);
-      if (iqa != NULL)
-	iqa[*n] = val_iqa;
-      if (ipa != NULL)
-	ipa[*n] = ip;
-      (*n)++;
-    }
+  /* Add element to state vector... */
+  if (x != NULL)
+    gsl_vector_set(x, *n, value);
+  if (iqa != NULL)
+    iqa[*n] = value_iqa;
+  if (ipa != NULL)
+    ipa[*n] = value_ip;
+  (*n)++;
 }
+
 
 /*****************************************************************************/
 
@@ -903,9 +893,9 @@ void climatology(
       atm->clk[icl] = 0;
 
     /* Set surface layer... */
-    atm->zsf = atm->psf = atm->tsf = 0;
+    atm->sfz = atm->sfp = atm->sft = 0;
     for (isf = 0; isf < ctl->nsf; isf++)
-      atm->epssf[isf] = 1.0;
+      atm->sfeps[isf] = 1.0;
   }
 }
 
@@ -3292,10 +3282,10 @@ void formod_pencil(
   }
 
   /* Add surface... */
-  if (los->ts > 0) {
-    formod_srcfunc(ctl, tbl, los->ts, src_planck);
+  if (los->sft > 0) {
+    formod_srcfunc(ctl, tbl, los->sft, src_planck);
     for (id = 0; id < ctl->nd; id++)
-      obs->rad[id][ir] += los->epssf[id] * src_planck[id] * obs->tau[id][ir];
+      obs->rad[id][ir] += los->sfeps[id] * src_planck[id] * obs->tau[id][ir];
   }
 
   /* Free... */
@@ -3406,7 +3396,7 @@ void idx2name(
   int idx,
   char *quantity) {
 
-  int icl, ig, iw;
+  int icl, ig, isf, iw;
 
   if (idx == IDXP)
     sprintf(quantity, "PRESSURE");
@@ -3430,7 +3420,20 @@ void idx2name(
 
   for (icl = 0; icl < ctl->ncl; icl++)
     if (idx == IDXCLK(icl))
-      sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->nucl[icl]);
+      sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->clnu[icl]);
+
+  if (idx == IDXSFZ)
+    sprintf(quantity, "SURFACE_HEIGHT");
+
+  if (idx == IDXSFP)
+    sprintf(quantity, "SURFACE_PRESSURE");
+
+  if (idx == IDXSFT)
+    sprintf(quantity, "SURFACE_TEMPERATURE");
+
+  for (isf = 0; isf < ctl->nsf; isf++)
+    if (idx == IDXSFEPS(isf))
+      sprintf(quantity, "SURFACE_EMISSIVITY_%.4f", ctl->sfnu[isf]);
 }
 
 /*****************************************************************************/
@@ -3780,6 +3783,14 @@ void kernel(
       h = 1.0;
     else if (iqa[j] >= IDXCLK(0) && iqa[j] < IDXCLK(ctl->ncl))
       h = 1e-4;
+    else if (iqa[j] == IDXSFZ)
+      h = 0.1;
+    else if (iqa[j] == IDXSFP)
+      h = 10.0;
+    else if (iqa[j] == IDXSFT)
+      h = 1.0;
+    else if (iqa[j] >= IDXSFEPS(0) && iqa[j] < IDXSFEPS(ctl->nsf))
+      h = 1e-2;
     else
       ERRMSG("Cannot set perturbation size!");
 
@@ -3946,7 +3957,7 @@ void raytrace(
 
   /* Initialize... */
   los->np = 0;
-  los->ts = -999;
+  los->sft = -999;
   obs->tpz[ir] = obs->vpz[ir];
   obs->tplon[ir] = obs->vplon[ir];
   obs->tplat[ir] = obs->vplat[ir];
@@ -3954,11 +3965,11 @@ void raytrace(
   /* Get altitude range of atmospheric data... */
   gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
   if (ctl->nsf > 0) {
-    zmin = GSL_MAX(atm->zsf, zmin);
-    if (atm->psf > 0) {
-      ip = locate_irr(atm->p, atm->np, atm->psf);
+    zmin = GSL_MAX(atm->sfz, zmin);
+    if (atm->sfp > 0) {
+      ip = locate_irr(atm->p, atm->np, atm->sfp);
       zip = LIN(log(atm->p[ip]), atm->z[ip],
-		log(atm->p[ip + 1]), atm->z[ip + 1], log(atm->psf));
+		log(atm->p[ip + 1]), atm->z[ip + 1], log(atm->sfp));
       zmin = GSL_MAX(zip, zmin);
     }
   }
@@ -4055,10 +4066,10 @@ void raytrace(
     if (ctl->ncl > 0 && atm->cldz > 0) {
       double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (id = 0; id < ctl->nd; id++) {
-	icl = locate_irr(ctl->nucl, ctl->ncl, ctl->nu[id]);
+	icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
 	los->k[id][los->np]
-	  += aux * LIN(ctl->nucl[icl], atm->clk[icl],
-		       ctl->nucl[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
+	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
+		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
       }
     }
 
@@ -4070,17 +4081,17 @@ void raytrace(
     if (stop) {
 
       /* Set surface temperature... */
-      if (ctl->nsf > 0 && atm->tsf > 0)
-	t = atm->tsf;
-      los->ts = (stop == 2 ? t : -999);
+      if (ctl->nsf > 0 && atm->sft > 0)
+	t = atm->sft;
+      los->sft = (stop == 2 ? t : -999);
 
       /* Set surface emissivity... */
       for (id = 0; id < ctl->nd; id++) {
-	los->epssf[id] = 1.0;
+	los->sfeps[id] = 1.0;
 	if (ctl->nsf > 0) {
-	  isf = locate_irr(ctl->nusf, ctl->nsf, ctl->nu[id]);
-	  los->epssf[id] = LIN(ctl->nusf[isf], atm->epssf[isf],
-			       ctl->nusf[isf + 1], atm->epssf[isf + 1],
+	  isf = locate_irr(ctl->sfnu, ctl->nsf, ctl->nu[id]);
+	  los->sfeps[id] = LIN(ctl->sfnu[isf], atm->sfeps[isf],
+			       ctl->sfnu[isf + 1], atm->sfeps[isf + 1],
 			       ctl->nu[id]);
 	}
       }
@@ -4202,11 +4213,11 @@ void read_atm(
 	TOK(NULL, tok, "%lg", atm->clk[icl]);
     }
     if (ctl->nsf > 0 && atm->np == 0) {
-      TOK(NULL, tok, "%lg", atm->zsf);
-      TOK(NULL, tok, "%lg", atm->psf);
-      TOK(NULL, tok, "%lg", atm->tsf);
+      TOK(NULL, tok, "%lg", atm->sfz);
+      TOK(NULL, tok, "%lg", atm->sfp);
+      TOK(NULL, tok, "%lg", atm->sft);
       for (isf = 0; isf < ctl->nsf; isf++)
-	TOK(NULL, tok, "%lg", atm->epssf[isf]);
+	TOK(NULL, tok, "%lg", atm->sfeps[isf]);
     }
 
     /* Increment data point counter... */
@@ -4263,7 +4274,7 @@ void read_ctl(
   if (ctl->ncl == 1)
     ERRMSG("Set NCL > 1!");
   for (icl = 0; icl < ctl->ncl; icl++)
-    ctl->nucl[icl] = scan_ctl(argc, argv, "NUCL", icl, "", NULL);
+    ctl->clnu[icl] = scan_ctl(argc, argv, "CLNU", icl, "", NULL);
 
   /* Surface data... */
   ctl->nsf = (int) scan_ctl(argc, argv, "NSF", -1, "0", NULL);
@@ -4272,7 +4283,7 @@ void read_ctl(
   if (ctl->nsf == 1)
     ERRMSG("Set NSF > 1!");
   for (isf = 0; isf < ctl->nsf; isf++)
-    ctl->nusf[isf] = scan_ctl(argc, argv, "NUSF", isf, "", NULL);
+    ctl->sfnu[isf] = scan_ctl(argc, argv, "SFNU", isf, "", NULL);
 
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);
@@ -4843,7 +4854,7 @@ void write_atm(
     fprintf(out, "# $%d = cloud layer depth [km]\n", ++n);
     for (icl = 0; icl < ctl->ncl; icl++)
       fprintf(out, "# $%d = cloud layer extinction (%g cm^-1) [1/km]\n",
-	      ++n, ctl->nucl[icl]);
+	      ++n, ctl->clnu[icl]);
   }
   if (ctl->nsf > 0) {
     fprintf(out, "# $%d = surface layer height [km]\n", ++n);
@@ -4851,7 +4862,7 @@ void write_atm(
     fprintf(out, "# $%d = surface layer temperature [K]\n", ++n);
     for (isf = 0; isf < ctl->nsf; isf++)
       fprintf(out, "# $%d = surface layer emissivity (%g cm^-1)\n",
-	      ++n, ctl->nusf[isf]);
+	      ++n, ctl->sfnu[isf]);
   }
 
   /* Write data... */
@@ -4870,9 +4881,9 @@ void write_atm(
 	fprintf(out, " %g", atm->clk[icl]);
     }
     if (ctl->nsf > 0) {
-      fprintf(out, " %g %g %g", atm->zsf, atm->psf, atm->tsf);
+      fprintf(out, " %g %g %g", atm->sfz, atm->sfp, atm->sft);
       for (isf = 0; isf < ctl->nsf; isf++)
-	fprintf(out, " %g", atm->epssf[isf]);
+	fprintf(out, " %g", atm->sfeps[isf]);
     }
     fprintf(out, "\n");
   }
@@ -5251,60 +5262,65 @@ void x2atm(
   gsl_vector * x,
   atm_t * atm) {
 
-  int icl, ig, iw;
+  int icl, ig, ip, isf, iw;
 
   size_t n = 0;
 
-  /* Set pressure... */
-  x2atm_help(atm, ctl->retp_zmin, ctl->retp_zmax, atm->p, x, &n);
+  /* Get pressure... */
+  for (ip = 0; ip < atm->np; ip++)
+    if (atm->z[ip] >= ctl->retp_zmin && atm->z[ip] <= ctl->retp_zmax)
+      x2atm_help(&atm->p[ip], x, &n);
 
-  /* Set temperature... */
-  x2atm_help(atm, ctl->rett_zmin, ctl->rett_zmax, atm->t, x, &n);
+  /* Get temperature... */
+  for (ip = 0; ip < atm->np; ip++)
+    if (atm->z[ip] >= ctl->rett_zmin && atm->z[ip] <= ctl->rett_zmax)
+      x2atm_help(&atm->t[ip], x, &n);
 
-  /* Set volume mixing ratio... */
+  /* Get volume mixing ratio... */
   for (ig = 0; ig < ctl->ng; ig++)
-    x2atm_help(atm, ctl->retq_zmin[ig], ctl->retq_zmax[ig],
-	       atm->q[ig], x, &n);
+    for (ip = 0; ip < atm->np; ip++)
+      if (atm->z[ip] >= ctl->retq_zmin[ig]
+	  && atm->z[ip] <= ctl->retq_zmax[ig])
+	x2atm_help(&atm->q[ig][ip], x, &n);
 
-  /* Set extinction... */
+  /* Get extinction... */
   for (iw = 0; iw < ctl->nw; iw++)
-    x2atm_help(atm, ctl->retk_zmin[iw], ctl->retk_zmax[iw],
-	       atm->k[iw], x, &n);
+    for (ip = 0; ip < atm->np; ip++)
+      if (atm->z[ip] >= ctl->retk_zmin[iw]
+	  && atm->z[ip] <= ctl->retk_zmax[iw])
+	x2atm_help(&atm->k[iw][ip], x, &n);
 
-  /* Set cloud data... */
-  if (ctl->ret_clz) {
-    atm->clz = gsl_vector_get(x, n);
-    n++;
-  }
-  if (ctl->ret_cldz) {
-    atm->cldz = gsl_vector_get(x, n);
-    n++;
-  }
+  /* Get cloud data... */
+  if (ctl->ret_clz)
+    x2atm_help(&atm->clz, x, &n);
+  if (ctl->ret_cldz)
+    x2atm_help(&atm->cldz, x, &n);
   if (ctl->ret_clk)
-    for (icl = 0; icl < ctl->ncl; icl++) {
-      atm->clk[icl] = gsl_vector_get(x, n);
-      n++;
-    }
+    for (icl = 0; icl < ctl->ncl; icl++)
+      x2atm_help(&atm->clk[icl], x, &n);
+
+  /* Get surface data... */
+  if (ctl->ret_sfz)
+    x2atm_help(&atm->sfz, x, &n);
+  if (ctl->ret_sfp)
+    x2atm_help(&atm->sfp, x, &n);
+  if (ctl->ret_sft)
+    x2atm_help(&atm->sft, x, &n);
+  if (ctl->ret_sfeps)
+    for (isf = 0; isf < ctl->nsf; isf++)
+      x2atm_help(&atm->sfeps[isf], x, &n);
 }
 
 /*****************************************************************************/
 
 void x2atm_help(
-  atm_t * atm,
-  double zmin,
-  double zmax,
   double *value,
   gsl_vector * x,
   size_t *n) {
 
-  int ip;
-
-  /* Extract state vector elements... */
-  for (ip = 0; ip < atm->np; ip++)
-    if (atm->z[ip] >= zmin && atm->z[ip] <= zmax) {
-      value[ip] = gsl_vector_get(x, *n);
-      (*n)++;
-    }
+  /* Get state vector element... */
+  *value = gsl_vector_get(x, *n);
+  (*n)++;
 }
 
 /*****************************************************************************/

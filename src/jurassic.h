@@ -190,7 +190,7 @@
    Dimensions...
    ------------------------------------------------------------ */
 
-/*! Maximum number of cloud spectral grid points. */
+/*! Maximum number of cloud layer spectral grid points. */
 #ifndef NCL
 #define NCL 8
 #endif
@@ -215,7 +215,7 @@
 #define NR 256
 #endif
 
-/*! Maximum number of surface spectral grid points. */
+/*! Maximum number of surface layer spectral grid points. */
 #ifndef NSF
 #define NSF 8
 #endif
@@ -237,12 +237,12 @@
 
 /*! Maximum size of state vector. */
 #ifndef N
-#define N ((2+NG+NW)*NP+NCL+2)
+#define N ((2+NG+NW)*NP+NCL+NSF+5)
 #endif
 
 /*! Maximum number of quantities. */
 #ifndef NQ
-#define NQ (4+NG+NW+NCL)
+#define NQ (7+NG+NW+NCL+NSF)
 #endif
 
 /*! Maximum number of LOS points. */
@@ -296,14 +296,26 @@
 /*! Indices for extinction. */
 #define IDXK(iw) (2+ctl->ng+iw)
 
-/*! Index for cloud height. */
+/*! Index for cloud layer height. */
 #define IDXCLZ (2+ctl->ng+ctl->nw)
 
-/*! Index for cloud depth. */
+/*! Index for cloud layer depth. */
 #define IDXCLDZ (3+ctl->ng+ctl->nw)
 
-/*! Index for cloud extinction. */
-#define IDXCLK(ic) (4+ctl->ng+ctl->nw+ic)
+/*! Indices for cloud layer extinction. */
+#define IDXCLK(icl) (4+ctl->ng+ctl->nw+icl)
+
+/*! Index for surface layer height. */
+#define IDXSFZ (4+ctl->ng+ctl->nw+ctl->ncl)
+
+/*! Index for surface layer pressure. */
+#define IDXSFP (5+ctl->ng+ctl->nw+ctl->ncl)
+
+/*! Index for surface layer temperature. */
+#define IDXSFT (6+ctl->ng+ctl->nw+ctl->ncl)
+
+/*! Indices for surface layer emissivity. */
+#define IDXSFEPS(isf) (7+ctl->ng+ctl->nw+ctl->ncl+isf)
 
 /* ------------------------------------------------------------
    Structs...
@@ -349,16 +361,16 @@ typedef struct {
   double clk[NCL];
 
   /*! Surface height [km]. */
-  double zsf;
+  double sfz;
 
   /*! Surface pressure [hPa]. */
-  double psf;
+  double sfp;
 
   /*! Surface temperature [K]. */
-  double tsf;
+  double sft;
 
   /*! Surface emissivity. */
-  double epssf[NCL];
+  double sfeps[NCL];
 
 } atm_t;
 
@@ -387,13 +399,13 @@ typedef struct {
   int ncl;
 
   /*! Cloud layer wavenumber [cm^-1]. */
-  double nucl[NCL];
+  double clnu[NCL];
 
   /*! Number of surface layer spectral grid points. */
   int nsf;
 
   /*! Surface layer wavenumber [cm^-1]. */
-  double nusf[NSF];
+  double sfnu[NSF];
 
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];
@@ -452,14 +464,26 @@ typedef struct {
   /*! Maximum altitude for extinction retrieval [km]. */
   double retk_zmax[NW];
 
-  /*! Retrieve cloud height (0=no, 1=yes). */
+  /*! Retrieve cloud layer height (0=no, 1=yes). */
   int ret_clz;
 
-  /*! Retrieve cloud depth (0=no, 1=yes). */
+  /*! Retrieve cloud layer depth (0=no, 1=yes). */
   int ret_cldz;
 
-  /*! Retrieve cloud extinction (0=no, 1=yes). */
+  /*! Retrieve cloud layer extinction (0=no, 1=yes). */
   int ret_clk;
+
+  /*! Retrieve surface layer height (0=no, 1=yes). */
+  int ret_sfz;
+
+  /*! Retrieve surface layer pressure (0=no, 1=yes). */
+  int ret_sfp;
+
+  /*! Retrieve surface layer temperature (0=no, 1=yes). */
+  int ret_sft;
+
+  /*! Retrieve surface layer emissivity (0=no, 1=yes). */
+  int ret_sfeps;
 
   /*! Use brightness temperature instead of radiance (0=no, 1=yes). */
   int write_bbt;
@@ -497,10 +521,10 @@ typedef struct {
   double k[ND][NLOS];
 
   /*! Surface temperature [K]. */
-  double ts;
+  double sft;
 
   /*! Surface emissivity. */
-  double epssf[NSF];
+  double sfeps[NSF];
 
   /*! Segment length [km]. */
   double ds[NLOS];
@@ -598,13 +622,11 @@ size_t atm2x(
   int *iqa,
   int *ipa);
 
-/*! Add elements to state vector. */
+/*! Add element to state vector. */
 void atm2x_help(
-  atm_t * atm,
-  double zmin,
-  double zmax,
-  double *value,
-  int val_iqa,
+  double value,
+  int value_iqa,
+  int value_ip,
   gsl_vector * x,
   int *iqa,
   int *ipa,
@@ -944,11 +966,8 @@ void x2atm(
   gsl_vector * x,
   atm_t * atm);
 
-/*! Extract elements from state vector. */
+/*! Get element from state vector. */
 void x2atm_help(
-  atm_t * atm,
-  double zmin,
-  double zmax,
   double *value,
   gsl_vector * x,
   size_t *n);
