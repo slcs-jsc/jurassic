@@ -215,6 +215,11 @@
 #define NR 256
 #endif
 
+/*! Maximum number of surface spectral grid points. */
+#ifndef NSF
+#define NSF 8
+#endif
+
 /*! Maximum number of spectral windows. */
 #ifndef NW
 #define NW 4
@@ -343,6 +348,18 @@ typedef struct {
   /*! Cloud layer extinction [1/km]. */
   double clk[NCL];
 
+  /*! Surface height [km]. */
+  double zsf;
+
+  /*! Surface pressure [hPa]. */
+  double psf;
+
+  /*! Surface temperature [K]. */
+  double tsf;
+
+  /*! Surface emissivity. */
+  double epssf[NCL];
+
 } atm_t;
 
 /*! Forward model control parameters. */
@@ -366,11 +383,17 @@ typedef struct {
   /*! Window index of each channel. */
   int window[ND];
 
-  /*! Number of cloud spectral grid points. */
+  /*! Number of cloud layer spectral grid points. */
   int ncl;
 
   /*! Cloud layer wavenumber [cm^-1]. */
-  double clnu[NCL];
+  double nucl[NCL];
+
+  /*! Number of surface layer spectral grid points. */
+  int nsf;
+
+  /*! Surface layer wavenumber [cm^-1]. */
+  double nusf[NSF];
 
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];
@@ -474,7 +497,10 @@ typedef struct {
   double k[ND][NLOS];
 
   /*! Surface temperature [K]. */
-  double tsurf;
+  double ts;
+
+  /*! Surface emissivity. */
+  double epssf[NSF];
 
   /*! Segment length [km]. */
   double ds[NLOS];

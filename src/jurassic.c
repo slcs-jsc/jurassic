@@ -801,7 +801,7 @@ void climatology(
 
   double co2, *q[NG] = { NULL };
 
-  int icl, ig, ip, iw, iz;
+  int icl, ig, ip, isf, iw, iz;
 
   /* Find emitter index of CO2... */
   if (ig_co2 == -999)
@@ -897,10 +897,15 @@ void climatology(
     for (iw = 0; iw < ctl->nw; iw++)
       atm->k[iw][ip] = 0;
 
-    /* Set cloud layer to zero... */
+    /* Set cloud layer... */
     atm->clz = atm->cldz = 0;
     for (icl = 0; icl < ctl->ncl; icl++)
       atm->clk[icl] = 0;
+
+    /* Set surface layer... */
+    atm->zsf = atm->psf = atm->tsf = 0;
+    for (isf = 0; isf < ctl->nsf; isf++)
+      atm->epssf[isf] = 1.0;
   }
 }
 
@@ -3287,10 +3292,10 @@ void formod_pencil(
   }
 
   /* Add surface... */
-  if (los->tsurf > 0) {
-    formod_srcfunc(ctl, tbl, los->tsurf, src_planck);
+  if (los->ts > 0) {
+    formod_srcfunc(ctl, tbl, los->ts, src_planck);
     for (id = 0; id < ctl->nd; id++)
-      obs->rad[id][ir] += src_planck[id] * obs->tau[id][ir];
+      obs->rad[id][ir] += los->epssf[id] * src_planck[id] * obs->tau[id][ir];
   }
 
   /* Free... */
@@ -3425,7 +3430,7 @@ void idx2name(
 
   for (icl = 0; icl < ctl->ncl; icl++)
     if (idx == IDXCLK(icl))
-      sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->clnu[icl]);
+      sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->nucl[icl]);
 }
 
 /*****************************************************************************/
@@ -3935,19 +3940,28 @@ void raytrace(
 
   double cosa, d, dmax, dmin = 0, ds, ex0[3], ex1[3], frac, h = 0.02, k[NW],
     lat, lon, n, naux, ng[3], norm, p, q[NG], t, x[3], xh[3],
-    xobs[3], xvp[3], z = 1e99, zmax, zmin, zrefrac = 60;
+    xobs[3], xvp[3], z = 1e99, zip, zmax, zmin, zrefrac = 60;
 
-  int i, icl, id, ig, ip, stop = 0;
+  int i, icl, id, ig, ip, isf, stop = 0;
 
   /* Initialize... */
   los->np = 0;
-  los->tsurf = -999;
+  los->ts = -999;
   obs->tpz[ir] = obs->vpz[ir];
   obs->tplon[ir] = obs->vplon[ir];
   obs->tplat[ir] = obs->vplat[ir];
 
   /* Get altitude range of atmospheric data... */
   gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
+  if (ctl->nsf > 0) {
+    zmin = GSL_MAX(atm->zsf, zmin);
+    if (atm->psf > 0) {
+      ip = locate_irr(atm->p, atm->np, atm->psf);
+      zip = LIN(log(atm->p[ip]), atm->z[ip],
+		log(atm->p[ip + 1]), atm->z[ip + 1], log(atm->psf));
+      zmin = GSL_MAX(zip, zmin);
+    }
+  }
 
   /* Check observer altitude... */
   if (obs->obsz[ir] < zmin)
@@ -4041,10 +4055,10 @@ void raytrace(
     if (ctl->ncl > 0 && atm->cldz > 0) {
       double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (id = 0; id < ctl->nd; id++) {
-	icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
+	icl = locate_irr(ctl->nucl, ctl->ncl, ctl->nu[id]);
 	los->k[id][los->np]
-	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
-		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
+	  += aux * LIN(ctl->nucl[icl], atm->clk[icl],
+		       ctl->nucl[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
       }
     }
 
@@ -4054,7 +4068,24 @@ void raytrace(
 
     /* Check stop flag... */
     if (stop) {
-      los->tsurf = (stop == 2 ? t : -999);
+
+      /* Set surface temperature... */
+      if (ctl->nsf > 0 && atm->tsf > 0)
+	t = atm->tsf;
+      los->ts = (stop == 2 ? t : -999);
+
+      /* Set surface emissivity... */
+      for (id = 0; id < ctl->nd; id++) {
+	los->epssf[id] = 1.0;
+	if (ctl->nsf > 0) {
+	  isf = locate_irr(ctl->nusf, ctl->nsf, ctl->nu[id]);
+	  los->epssf[id] = LIN(ctl->nusf[isf], atm->epssf[isf],
+			       ctl->nusf[isf + 1], atm->epssf[isf + 1],
+			       ctl->nu[id]);
+	}
+      }
+
+      /* Leave raytracer... */
       break;
     }
 
@@ -4132,7 +4163,7 @@ void read_atm(
 
   char file[LEN], line[LEN], *tok;
 
-  int icl, ig, iw;
+  int icl, ig, isf, iw;
 
   /* Init... */
   atm->np = 0;
@@ -4170,6 +4201,13 @@ void read_atm(
       for (icl = 0; icl < ctl->ncl; icl++)
 	TOK(NULL, tok, "%lg", atm->clk[icl]);
     }
+    if (ctl->nsf > 0 && atm->np == 0) {
+      TOK(NULL, tok, "%lg", atm->zsf);
+      TOK(NULL, tok, "%lg", atm->psf);
+      TOK(NULL, tok, "%lg", atm->tsf);
+      for (isf = 0; isf < ctl->nsf; isf++)
+	TOK(NULL, tok, "%lg", atm->epssf[isf]);
+    }
 
     /* Increment data point counter... */
     if ((++atm->np) > NP)
@@ -4191,7 +4229,7 @@ void read_ctl(
   char *argv[],
   ctl_t * ctl) {
 
-  int icl, id, ig, iw;
+  int icl, id, ig, isf, iw;
 
   /* Write info... */
   LOG(1, "\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
@@ -4225,7 +4263,16 @@ void read_ctl(
   if (ctl->ncl == 1)
     ERRMSG("Set NCL > 1!");
   for (icl = 0; icl < ctl->ncl; icl++)
-    ctl->clnu[icl] = scan_ctl(argc, argv, "CLNU", icl, "", NULL);
+    ctl->nucl[icl] = scan_ctl(argc, argv, "NUCL", icl, "", NULL);
+
+  /* Surface data... */
+  ctl->nsf = (int) scan_ctl(argc, argv, "NSF", -1, "0", NULL);
+  if (ctl->nsf < 0 || ctl->nsf > NSF)
+    ERRMSG("Set 0 <= NSF <= MAX!");
+  if (ctl->nsf == 1)
+    ERRMSG("Set NSF > 1!");
+  for (isf = 0; isf < ctl->nsf; isf++)
+    ctl->nusf[isf] = scan_ctl(argc, argv, "NUSF", isf, "", NULL);
 
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);
@@ -4764,7 +4811,7 @@ void write_atm(
 
   char file[LEN];
 
-  int icl, ig, ip, iw, n = 6;
+  int icl, ig, ip, isf, iw, n = 6;
 
   /* Set filename... */
   if (dirname != NULL)
@@ -4796,7 +4843,15 @@ void write_atm(
     fprintf(out, "# $%d = cloud layer depth [km]\n", ++n);
     for (icl = 0; icl < ctl->ncl; icl++)
       fprintf(out, "# $%d = cloud layer extinction (%g cm^-1) [1/km]\n",
-	      ++n, ctl->clnu[icl]);
+	      ++n, ctl->nucl[icl]);
+  }
+  if (ctl->nsf > 0) {
+    fprintf(out, "# $%d = surface layer height [km]\n", ++n);
+    fprintf(out, "# $%d = surface layer pressure [hPa]\n", ++n);
+    fprintf(out, "# $%d = surface layer temperature [K]\n", ++n);
+    for (isf = 0; isf < ctl->nsf; isf++)
+      fprintf(out, "# $%d = surface layer emissivity (%g cm^-1)\n",
+	      ++n, ctl->nusf[isf]);
   }
 
   /* Write data... */
@@ -4813,6 +4868,11 @@ void write_atm(
       fprintf(out, " %g %g", atm->clz, atm->cldz);
       for (icl = 0; icl < ctl->ncl; icl++)
 	fprintf(out, " %g", atm->clk[icl]);
+    }
+    if (ctl->nsf > 0) {
+      fprintf(out, " %g %g %g", atm->zsf, atm->psf, atm->tsf);
+      for (isf = 0; isf < ctl->nsf; isf++)
+	fprintf(out, " %g", atm->epssf[isf]);
     }
     fprintf(out, "\n");
   }
