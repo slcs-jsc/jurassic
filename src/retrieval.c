@@ -97,6 +97,18 @@ typedef struct {
   /*! Cloud extinction error [1/km]. */
   double err_clk[NCL];
 
+  /*! Surface height error [km]. */
+  double err_sfz;
+
+  /*! Surface pressure error [hPa]. */
+  double err_sfp;
+
+  /*! Surface temperature error [K]. */
+  double err_sft;
+
+  /*! Surface emissivity error. */
+  double err_sfeps[NSF];
+
 } ret_t;
 
 /* ------------------------------------------------------------
@@ -252,7 +264,7 @@ void analyze_avk(
 
   static atm_t atm_cont, atm_res;
 
-  int icl, ig, iq, iw;
+  int icl, ig, iq, isf, iw;
 
   size_t i, n, n0[NQ], n1[NQ];
 
@@ -289,6 +301,12 @@ void analyze_avk(
   for (icl = 0; icl < ctl->ncl; icl++)
     analyze_avk_quantity(avk, IDXCLK(icl), ipa, n0, n1,
 			 &atm_cont.clk[icl], &atm_res.clk[icl]);
+  analyze_avk_quantity(avk, IDXSFZ, ipa, n0, n1, &atm_cont.sfz, &atm_res.sfz);
+  analyze_avk_quantity(avk, IDXSFP, ipa, n0, n1, &atm_cont.sfp, &atm_res.sfp);
+  analyze_avk_quantity(avk, IDXSFT, ipa, n0, n1, &atm_cont.sft, &atm_res.sft);
+  for (isf = 0; isf < ctl->nsf; isf++)
+    analyze_avk_quantity(avk, IDXSFEPS(isf), ipa, n0, n1,
+			 &atm_cont.sfeps[isf], &atm_res.sfeps[isf]);
 
   /* Write results to disk... */
   write_atm(ret->dir, "atm_cont.tab", ctl, &atm_cont);
@@ -459,7 +477,7 @@ void optimal_estimation(
 
   double chisq, chisq_old, disq = 0, lmpar = 0.001;
 
-  int icl, ig, ip, it = 0, it2, iw;
+  int icl, ig, ip, isf, it = 0, it2, iw;
 
   size_t i, j, m, n;
 
@@ -607,6 +625,11 @@ void optimal_estimation(
       atm_i->cldz = GSL_MAX(atm_i->cldz, 0.1);
       for (icl = 0; icl < ctl->ncl; icl++)
 	atm_i->clk[icl] = GSL_MAX(atm_i->clk[icl], 0);
+      atm_i->sfz = GSL_MAX(atm_i->sfz, 0);
+      atm_i->sfp = GSL_MAX(atm_i->sfp, 0);
+      atm_i->sft = GSL_MIN(GSL_MAX(atm_i->sft, 100), 400);
+      for (isf = 0; isf < ctl->nsf; isf++)
+	atm_i->sfeps[isf] = GSL_MIN(GSL_MAX(atm_i->sfeps[isf], 0), 1);
 
       /* Forward calculation... */
       formod(ctl, atm_i, obs_i);
@@ -751,7 +774,7 @@ void read_ret(
   ctl_t * ctl,
   ret_t * ret) {
 
-  int icl, id, ig, iw;
+  int icl, id, ig, isf, iw;
 
   /* Iteration control... */
   ret->kernel_recomp =
@@ -792,6 +815,12 @@ void read_ret(
   ret->err_cldz = scan_ctl(argc, argv, "ERR_CLDZ", -1, "0", NULL);
   for (icl = 0; icl < ctl->ncl; icl++)
     ret->err_clk[icl] = scan_ctl(argc, argv, "ERR_CLK", icl, "0", NULL);
+
+  ret->err_sfz = scan_ctl(argc, argv, "ERR_SFZ", -1, "0", NULL);
+  ret->err_sfp = scan_ctl(argc, argv, "ERR_SFP", -1, "0", NULL);
+  ret->err_sft = scan_ctl(argc, argv, "ERR_SFT", -1, "0", NULL);
+  for (isf = 0; isf < ctl->nsf; isf++)
+    ret->err_sfeps[isf] = scan_ctl(argc, argv, "ERR_SFEPS", isf, "0", NULL);
 }
 
 /*****************************************************************************/
@@ -808,7 +837,7 @@ void set_cov_apr(
 
   double ch, cz, rho, x0[3], x1[3];
 
-  int icl, ig, iw;
+  int icl, ig, iw, isf;
 
   size_t i, j, n;
 
@@ -838,6 +867,15 @@ void set_cov_apr(
     for (icl = 0; icl < ctl->ncl; icl++)
       if (iqa[i] == IDXCLK(icl))
 	gsl_vector_set(x_a, i, ret->err_clk[icl]);
+    if (iqa[i] == IDXSFZ)
+      gsl_vector_set(x_a, i, ret->err_sfz);
+    if (iqa[i] == IDXSFP)
+      gsl_vector_set(x_a, i, ret->err_sfp);
+    if (iqa[i] == IDXSFT)
+      gsl_vector_set(x_a, i, ret->err_sft);
+    for (isf = 0; isf < ctl->nsf; isf++)
+      if (iqa[i] == IDXSFEPS(isf))
+	gsl_vector_set(x_a, i, ret->err_sfeps[isf]);
   }
 
   /* Check standard deviations... */
