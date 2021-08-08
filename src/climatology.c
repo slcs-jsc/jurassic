@@ -31,7 +31,10 @@ int main(
   static atm_t atm;
   static ctl_t ctl;
 
-  double dt, dz, t, t0, t1, z, z0, z1;
+  double clz, cldz, clk[NCL], dt, dz, sfp, sft, sfz, sfeps[NSF],
+    t, t0, t1, z, z0, z1;
+
+  int icl, isf;
 
   /* Check arguments... */
   if (argc < 3)
@@ -45,6 +48,15 @@ int main(
   z0 = scan_ctl(argc, argv, "Z0", -1, "0", NULL);
   z1 = scan_ctl(argc, argv, "Z1", -1, "90", NULL);
   dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
+  clz = scan_ctl(argc, argv, "CLZ", -1, "0", NULL);
+  cldz = scan_ctl(argc, argv, "CLDZ", -1, "0", NULL);
+  for (icl = 0; icl < ctl.ncl; icl++)
+    clk[icl] = scan_ctl(argc, argv, "CLK", icl, "0", NULL);
+  sfz = scan_ctl(argc, argv, "SFZ", -1, "0", NULL);
+  sfp = scan_ctl(argc, argv, "SFP", -1, "0", NULL);
+  sft = scan_ctl(argc, argv, "SFT", -1, "0", NULL);
+  for (isf = 0; isf < ctl.nsf; isf++)
+    sfeps[isf] = scan_ctl(argc, argv, "SFEPS", isf, "0", NULL);
 
   /* Set atmospheric grid... */
   for (t = t0; t <= t1; t += dt)
@@ -57,6 +69,19 @@ int main(
 
   /* Interpolate climatological data... */
   climatology(&ctl, &atm);
+
+  /* Set cloud layer... */
+  atm.clz = clz;
+  atm.cldz = cldz;
+  for (icl = 0; icl < ctl.ncl; icl++)
+    atm.clk[icl] = clk[icl];
+
+  /* Set surface layer... */
+  atm.sfz = sfz;
+  atm.sfp = sfp;
+  atm.sft = sft;
+  for (isf = 0; isf < ctl.nsf; isf++)
+    atm.sfeps[isf] = sfeps[isf];
 
   /* Write data to disk... */
   write_atm(NULL, argv[2], &ctl, &atm);

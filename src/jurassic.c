@@ -895,7 +895,7 @@ void climatology(
     /* Set surface layer... */
     atm->sfz = atm->sfp = atm->sft = 0;
     for (isf = 0; isf < ctl->nsf; isf++)
-      atm->sfeps[isf] = 1.0;
+      atm->sfeps[isf] = 1;
   }
 }
 
@@ -2950,7 +2950,7 @@ void copy_atm(
   atm_t * atm_src,
   int init) {
 
-  int icl, ig, ip, iw;
+  int icl, ig, ip, isf, iw;
 
   size_t s;
 
@@ -2973,6 +2973,11 @@ void copy_atm(
   atm_dest->cldz = atm_src->cldz;
   for (icl = 0; icl < ctl->ncl; icl++)
     atm_dest->clk[icl] = atm_src->clk[icl];
+  atm_dest->sfz = atm_src->sfz;
+  atm_dest->sfp = atm_src->sfp;
+  atm_dest->sft = atm_src->sft;
+  for (isf = 0; isf < ctl->nsf; isf++)
+    atm_dest->sfeps[isf] = atm_src->sfeps[isf];
 
   /* Initialize... */
   if (init)
@@ -2987,6 +2992,11 @@ void copy_atm(
       atm_dest->cldz = 0;
       for (icl = 0; icl < ctl->ncl; icl++)
 	atm_dest->clk[icl] = 0;
+      atm_dest->sfz = 0;
+      atm_dest->sfp = 0;
+      atm_dest->sft = 0;
+      for (isf = 0; isf < ctl->nsf; isf++)
+	atm_dest->sfeps[isf] = 1;
     }
 }
 
