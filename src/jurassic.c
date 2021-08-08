@@ -3462,7 +3462,6 @@ void init_srcfunc(
   LOG(1, "Initialize source function table...");
 
   /* Loop over channels... */
-#pragma omp parallel for default(none) shared(ctl,tbl) private(filename,i,id,it,n,dnu,f,ff,fnu,fsum,nu)
   for (id = 0; id < ctl->nd; id++) {
 
     /* Read filter function... */
@@ -3475,6 +3474,7 @@ void init_srcfunc(
       dnu = GSL_MIN(dnu, nu[i] - nu[i - 1]);
 
     /* Compute source function table... */
+#pragma omp parallel for default(none) shared(ctl,tbl,id,nu,f,n,dnu) private(it,fsum,fnu,i,ff)
     for (it = 0; it < TBLNS; it++) {
 
       /* Set temperature... */
@@ -4495,7 +4495,6 @@ void read_tbl(
 
   /* Loop over trace gases and channels... */
   for (ig = 0; ig < ctl->ng; ig++)
-#pragma omp parallel for default(none) shared(ctl,tbl,ig) private(in,filename,line,eps,eps_old,press,press_old,temp,temp_old,u,u_old,id,ip,it)
     for (id = 0; id < ctl->nd; id++) {
 
       /* Initialize... */
