@@ -3563,7 +3563,7 @@ void intpol_tbl(
 	/* Determine pressure and temperature indices... */
 	ipr = locate_irr(tbl->p[ig][id], tbl->np[ig][id], los->p[ip]);
 	it0 =
-	  locate_irr(tbl->t[ig][id][ipr], tbl->nt[ig][id][ipr], los->t[ip]);
+	  locate_reg(tbl->t[ig][id][ipr], tbl->nt[ig][id][ipr], los->t[ip]);
 	it1 =
 	  locate_reg(tbl->t[ig][id][ipr + 1], tbl->nt[ig][id][ipr + 1],
 		     los->t[ip]);
