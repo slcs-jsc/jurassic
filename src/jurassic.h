@@ -766,7 +766,7 @@ void intpol_tbl(
   tbl_t * tbl,
   los_t * los,
   int ip,
-  double tau_path[NG][ND],
+  double tau_path[ND][NG],
   double tau_seg[ND]);
 
 /*! Interpolate emissivity from look-up tables. */

@@ -3240,7 +3240,8 @@ void formod_pencil(
 
   los_t *los;
 
-  double beta_ctm[ND], eps, src_planck[ND], tau_path[NG][ND], tau_gas[ND];
+  double beta_ctm[ND], eps, rad[ND], src_planck[ND], tau[ND],
+    tau_path[ND][NG], tau_gas[ND];
 
   int id, ig, ip;
 
@@ -3257,12 +3258,12 @@ void formod_pencil(
 
   /* Initialize... */
   for (id = 0; id < ctl->nd; id++) {
-    obs->rad[id][ir] = 0;
-    obs->tau[id][ir] = 1;
+    rad[id] = 0;
+    tau[id] = 1;
     for (ig = 0; ig < ctl->ng; ig++)
-	tau_path[ig][id] = 1;
+      tau_path[id][ig] = 1;
   }
-  
+
   /* Raytracing... */
   raytrace(ctl, atm, obs, los, ir);
 
@@ -3286,10 +3287,10 @@ void formod_pencil(
 	eps = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
 
 	/* Compute radiance... */
-	obs->rad[id][ir] += src_planck[id] * eps * obs->tau[id][ir];
+	rad[id] += src_planck[id] * eps * tau[id];
 
 	/* Compute path transmittance... */
-	obs->tau[id][ir] *= (1 - eps);
+	tau[id] *= (1 - eps);
       }
   }
 
@@ -3297,7 +3298,13 @@ void formod_pencil(
   if (los->sft > 0) {
     formod_srcfunc(ctl, tbl, los->sft, src_planck);
     for (id = 0; id < ctl->nd; id++)
-      obs->rad[id][ir] += los->sfeps[id] * src_planck[id] * obs->tau[id][ir];
+      rad[id] += los->sfeps[id] * src_planck[id] * tau[id];
+  }
+
+  /* Copy results... */
+  for (id = 0; id < ctl->nd; id++) {
+    obs->rad[id][ir] = rad[id];
+    obs->tau[id][ir] = tau[id];
   }
 
   /* Free... */
@@ -3529,7 +3536,7 @@ void intpol_tbl(
   tbl_t * tbl,
   los_t * los,
   int ip,
-  double tau_path[NG][ND],
+  double tau_path[ND][NG],
   double tau_seg[ND]) {
 
   double eps, eps00, eps01, eps10, eps11, u;
@@ -3550,7 +3557,7 @@ void intpol_tbl(
 	eps = 0;
 
       /* Check transmittance... */
-      else if (tau_path[ig][id] < 1e-9)
+      else if (tau_path[id][ig] < 1e-9)
 	eps = 1;
 
       /* Interpolate... */
@@ -3575,19 +3582,19 @@ void intpol_tbl(
 	else {
 
 	  /* Get emissivities of extended path... */
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, 1 - tau_path[ig][id]);
+	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, 1 - tau_path[id][ig]);
 	  eps00 = intpol_tbl_eps(tbl, ig, id, ipr, it0, u + los->u[ig][ip]);
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, 1 - tau_path[ig][id]);
+	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, 1 - tau_path[id][ig]);
 	  eps01 =
 	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, u + los->u[ig][ip]);
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, 1 - tau_path[ig][id]);
+	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, 1 - tau_path[id][ig]);
 	  eps10 =
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, u + los->u[ig][ip]);
 
 	  u =
-	    intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, 1 - tau_path[ig][id]);
+	    intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, 1 - tau_path[id][ig]);
 	  eps11 =
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, u + los->u[ig][ip]);
 
@@ -3605,12 +3612,12 @@ void intpol_tbl(
 	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
 
 	  /* Determine segment emissivity... */
-	  eps = 1 - (1 - eps00) / tau_path[ig][id];
+	  eps = 1 - (1 - eps00) / tau_path[id][ig];
 	}
       }
 
       /* Get transmittance of extended path... */
-      tau_path[ig][id] *= (1 - eps);
+      tau_path[id][ig] *= (1 - eps);
 
       /* Get segment transmittance... */
       tau_seg[id] *= (1 - eps);
