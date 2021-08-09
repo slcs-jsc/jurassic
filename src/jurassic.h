@@ -153,6 +153,9 @@
 /*! Maximum temperature for source function [K]. */
 #define TMAX 400.
 
+/*! Effective temperature of the sun [K]. */
+#define TSUN 5780.
+
 /*! First spectroscopic constant (c_1 = 2 h c^2) [W/(m^2 sr cm^-4)]. */
 #define C1 1.19104259e-8
 
@@ -406,6 +409,9 @@ typedef struct {
 
   /*! Surface layer wavenumber [cm^-1]. */
   double sfnu[NSF];
+
+  /*! Surface treatment (0=none, 1=emissions, 2=downward, 3=solar). */
+  int sftype;
 
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];

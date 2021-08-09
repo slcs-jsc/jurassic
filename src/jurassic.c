@@ -3240,10 +3240,10 @@ void formod_pencil(
 
   los_t *los;
 
-  double beta_ctm[ND], eps, rad[ND], src_planck[ND], tau[ND],
+  double beta_ctm[ND], eps, rad[ND], src_planck[ND], tau[ND], tau_refl[ND],
     tau_path[ND][NG], tau_gas[ND];
 
-  int id, ig, ip;
+  int id, ig, ip, refl;
 
   /* Initialize look-up tables... */
   if (!init) {
@@ -3294,11 +3294,67 @@ void formod_pencil(
       }
   }
 
-  /* Add surface... */
-  if (los->sft > 0) {
+  /* Check whether LOS hit the ground... */
+  if (ctl->sftype >= 1 && los->sft > 0) {
+
+    /* Add surface emissions... */
     formod_srcfunc(ctl, tbl, los->sft, src_planck);
     for (id = 0; id < ctl->nd; id++)
       rad[id] += los->sfeps[id] * src_planck[id] * tau[id];
+
+    /* Check reflectivity... */
+    refl = 0;
+    if (ctl->sftype >= 2)
+      for (id = 0; id < ctl->nd; id++)
+	if (los->sfeps[id] < 1) {
+	  refl = 1;
+	  break;
+	}
+
+    /* Calculate specular reflection... */
+    if (refl) {
+
+      /* Initialize... */
+      for (id = 0; id < ctl->nd; id++) {
+	tau_refl[id] = 1;
+	for (ig = 0; ig < ctl->ng; ig++)
+	  tau_path[id][ig] = 1;
+      }
+
+      /* Loop over LOS points... */
+      for (ip = los->np - 1; ip >= 0; ip--) {
+
+	/* Get trace gas transmittance... */
+	intpol_tbl(ctl, tbl, los, ip, tau_path, tau_gas);
+
+	/* Get continuum absorption... */
+	formod_continua(ctl, los, ip, beta_ctm);
+
+	/* Compute Planck function... */
+	formod_srcfunc(ctl, tbl, los->t[ip], src_planck);
+
+	/* Loop over channels... */
+	for (id = 0; id < ctl->nd; id++)
+	  if (tau_gas[id] > 0) {
+
+	    /* Get segment emissivity... */
+	    eps = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
+
+	    /* Compute radiance... */
+	    rad[id] += src_planck[id] * eps * tau_refl[id]
+	      * tau[id] * (1 - los->sfeps[id]);
+
+	    /* Compute path transmittance... */
+	    tau_refl[id] *= (1 - eps);
+	  }
+      }
+
+      /* Add solar term... */
+      if (ctl->sftype >= 3)
+	for (id = 0; id < ctl->nd; id++)
+	  rad[id] += 6.764e-5 * planck(TSUN, ctl->nu[id])
+	    * tau_refl[id] * (1 - los->sfeps[id]) * tau[id];
+    }
   }
 
   /* Copy results... */
@@ -4297,6 +4353,9 @@ void read_ctl(
     ERRMSG("Set NSF > 1!");
   for (isf = 0; isf < ctl->nsf; isf++)
     ctl->sfnu[isf] = scan_ctl(argc, argv, "SFNU", isf, "", NULL);
+  ctl->sftype = (int) scan_ctl(argc, argv, "SFTYPE", -1, "2", NULL);
+  if (ctl->sftype < 0 || ctl->sftype > 3)
+    ERRMSG("Set 0 <= SFTYPE <= 3!");
 
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);

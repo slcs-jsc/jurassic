@@ -56,7 +56,7 @@ int main(
   sfp = scan_ctl(argc, argv, "SFP", -1, "0", NULL);
   sft = scan_ctl(argc, argv, "SFT", -1, "0", NULL);
   for (isf = 0; isf < ctl.nsf; isf++)
-    sfeps[isf] = scan_ctl(argc, argv, "SFEPS", isf, "0", NULL);
+    sfeps[isf] = scan_ctl(argc, argv, "SFEPS", isf, "1", NULL);
 
   /* Set atmospheric grid... */
   for (t = t0; t <= t1; t += dt)
