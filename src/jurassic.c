@@ -3242,7 +3242,7 @@ void formod_pencil(
 
   double beta_ctm[ND], eps, src_planck[ND], tau_path[NG][ND], tau_gas[ND];
 
-  int id, ip;
+  int id, ig, ip;
 
   /* Initialize look-up tables... */
   if (!init) {
@@ -3259,8 +3259,10 @@ void formod_pencil(
   for (id = 0; id < ctl->nd; id++) {
     obs->rad[id][ir] = 0;
     obs->tau[id][ir] = 1;
+    for (ig = 0; ig < ctl->ng; ig++)
+	tau_path[ig][id] = 1;
   }
-
+  
   /* Raytracing... */
   raytrace(ctl, atm, obs, los, ir);
 
@@ -3533,12 +3535,6 @@ void intpol_tbl(
   double eps, eps00, eps01, eps10, eps11, u;
 
   int id, ig, ipr, it0, it1;
-
-  /* Initialize... */
-  if (ip <= 0)
-    for (ig = 0; ig < ctl->ng; ig++)
-      for (id = 0; id < ctl->nd; id++)
-	tau_path[ig][id] = 1;
 
   /* Loop over channels... */
   for (id = 0; id < ctl->nd; id++) {
