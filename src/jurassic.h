@@ -413,6 +413,9 @@ typedef struct {
   /*! Surface treatment (0=none, 1=emissions, 2=downward, 3=solar). */
   int sftype;
 
+  /*! Solar zenith angle at the surface [deg] (-999=auto). */
+  double sfsza;
+
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];
 
@@ -901,6 +904,12 @@ double scan_ctl(
   int arridx,
   const char *defvalue,
   char *value);
+
+/*! Calculate solar zenith angle. */
+double sza(
+  double sec,
+  double lon,
+  double lat);
 
 /*! Find tangent point of a given LOS. */
 void tangent_point(

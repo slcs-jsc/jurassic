@@ -3240,10 +3240,11 @@ void formod_pencil(
 
   los_t *los;
 
-  double beta_ctm[ND], eps, rad[ND], src_planck[ND], tau[ND], tau_refl[ND],
-    tau_path[ND][NG], tau_gas[ND];
+  double beta_ctm[ND], cosa, eps[NLOS][ND], rad[ND], rcos, src_atm[NLOS][ND],
+    src_sf[ND], sza2, tau[ND], tau_refl[ND], tau_path[ND][NG], tau_gas[ND],
+    x0[3], x1[3];
 
-  int id, ig, ip, refl;
+  int i, id, ig, ip, refl;
 
   /* Initialize look-up tables... */
   if (!init) {
@@ -3277,20 +3278,20 @@ void formod_pencil(
     formod_continua(ctl, los, ip, beta_ctm);
 
     /* Compute Planck function... */
-    formod_srcfunc(ctl, tbl, los->t[ip], src_planck);
+    formod_srcfunc(ctl, tbl, los->t[ip], src_atm[ip]);
 
     /* Loop over channels... */
     for (id = 0; id < ctl->nd; id++)
       if (tau_gas[id] > 0) {
 
 	/* Get segment emissivity... */
-	eps = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
+	eps[ip][id] = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
 
 	/* Compute radiance... */
-	rad[id] += src_planck[id] * eps * tau[id];
+	rad[id] += src_atm[ip][id] * eps[ip][id] * tau[id];
 
 	/* Compute path transmittance... */
-	tau[id] *= (1 - eps);
+	tau[id] *= (1 - eps[ip][id]);
       }
   }
 
@@ -3298,9 +3299,9 @@ void formod_pencil(
   if (ctl->sftype >= 1 && los->sft > 0) {
 
     /* Add surface emissions... */
-    formod_srcfunc(ctl, tbl, los->sft, src_planck);
+    formod_srcfunc(ctl, tbl, los->sft, src_sf);
     for (id = 0; id < ctl->nd; id++)
-      rad[id] += los->sfeps[id] * src_planck[id] * tau[id];
+      rad[id] += los->sfeps[id] * src_sf[id] * tau[id];
 
     /* Check reflectivity... */
     refl = 0;
@@ -3311,49 +3312,51 @@ void formod_pencil(
 	  break;
 	}
 
-    /* Calculate specular reflection... */
+    /* Calculate reflection... */
     if (refl) {
 
       /* Initialize... */
-      for (id = 0; id < ctl->nd; id++) {
+      for (id = 0; id < ctl->nd; id++)
 	tau_refl[id] = 1;
-	for (ig = 0; ig < ctl->ng; ig++)
-	  tau_path[id][ig] = 1;
-      }
 
-      /* Loop over LOS points... */
-      for (ip = los->np - 1; ip >= 0; ip--) {
-
-	/* Get trace gas transmittance... */
-	intpol_tbl(ctl, tbl, los, ip, tau_path, tau_gas);
-
-	/* Get continuum absorption... */
-	formod_continua(ctl, los, ip, beta_ctm);
-
-	/* Compute Planck function... */
-	formod_srcfunc(ctl, tbl, los->t[ip], src_planck);
-
-	/* Loop over channels... */
-	for (id = 0; id < ctl->nd; id++)
-	  if (tau_gas[id] > 0) {
-
-	    /* Get segment emissivity... */
-	    eps = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
-
-	    /* Compute radiance... */
-	    rad[id] += src_planck[id] * eps * tau_refl[id]
-	      * tau[id] * (1 - los->sfeps[id]);
-
-	    /* Compute path transmittance... */
-	    tau_refl[id] *= (1 - eps);
-	  }
-      }
+      /* Add down-welling radiance... */
+      for (ip = los->np - 1; ip >= 0; ip--)
+	for (id = 0; id < ctl->nd; id++) {
+	  rad[id] += src_atm[ip][id] * eps[ip][id] * tau_refl[id]
+	    * tau[id] * (1 - los->sfeps[id]);
+	  tau_refl[id] *= (1 - eps[ip][id]);
+	}
 
       /* Add solar term... */
-      if (ctl->sftype >= 3)
-	for (id = 0; id < ctl->nd; id++)
-	  rad[id] += 6.764e-5 * planck(TSUN, ctl->nu[id])
-	    * tau_refl[id] * (1 - los->sfeps[id]) * tau[id];
+      if (ctl->sftype >= 3) {
+
+	/* Get solar zenith angle... */
+	if (ctl->sfsza < 0)
+	  sza2 =
+	    sza(obs->time[ir], los->lon[los->np - 1], los->lat[los->np - 1]);
+	else
+	  sza2 = ctl->sfsza;
+
+	/* Check solar zenith angle... */
+	if (sza2 < 89.999) {
+
+	  /* Get angle of incidence... */
+	  geo2cart(los->z[los->np - 1], los->lon[los->np - 1],
+		   los->lat[los->np - 1], x0);
+	  geo2cart(los->z[0], los->lon[0], los->lat[0], x1);
+	  for (i = 0; i < 3; i++)
+	    x1[i] -= x0[i];
+	  cosa = DOTP(x0, x1) / NORM(x0) / NORM(x1);
+
+	  /* Get ratio of SZA and incident radiation... */
+	  rcos = cosa / cos(sza2 * M_PI / 180.);
+
+	  /* Add solar radiation... */
+	  for (id = 0; id < ctl->nd; id++)
+	    rad[id] += 6.764e-5 * planck(TSUN, ctl->nu[id])
+	      * tau_refl[id] * (1 - los->sfeps[id]) * tau[id] * rcos;
+	}
+      }
     }
   }
 
@@ -4356,6 +4359,7 @@ void read_ctl(
   ctl->sftype = (int) scan_ctl(argc, argv, "SFTYPE", -1, "2", NULL);
   if (ctl->sftype < 0 || ctl->sftype > 3)
     ERRMSG("Set 0 <= SFTYPE <= 3!");
+  ctl->sfsza = scan_ctl(argc, argv, "SFSZA", -1, "-999", NULL);
 
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);
@@ -4768,6 +4772,49 @@ double scan_ctl(
   if (value != NULL)
     sprintf(value, "%s", rval);
   return atof(rval);
+}
+
+/*****************************************************************************/
+
+double sza(
+  double sec,
+  double lon,
+  double lat) {
+
+  double D, dec, e, g, GMST, h, L, LST, q, ra;
+
+  /* Number of days and fraction with respect to 2000-01-01T12:00Z... */
+  D = sec / 86400 - 0.5;
+
+  /* Geocentric apparent ecliptic longitude [rad]... */
+  g = (357.529 + 0.98560028 * D) * M_PI / 180;
+  q = 280.459 + 0.98564736 * D;
+  L = (q + 1.915 * sin(g) + 0.020 * sin(2 * g)) * M_PI / 180;
+
+  /* Mean obliquity of the ecliptic [rad]... */
+  e = (23.439 - 0.00000036 * D) * M_PI / 180;
+
+  /* Declination [rad]... */
+  dec = asin(sin(e) * sin(L));
+
+  /* Right ascension [rad]... */
+  ra = atan2(cos(e) * sin(L), cos(L));
+
+  /* Greenwich Mean Sidereal Time [h]... */
+  GMST = 18.697374558 + 24.06570982441908 * D;
+
+  /* Local Sidereal Time [h]... */
+  LST = GMST + lon / 15;
+
+  /* Hour angle [rad]... */
+  h = LST / 12 * M_PI - ra;
+
+  /* Convert latitude... */
+  lat *= M_PI / 180;
+
+  /* Return solar zenith angle [deg]... */
+  return acos(sin(lat) * sin(dec) +
+	      cos(lat) * cos(dec) * cos(h)) * 180 / M_PI;
 }
 
 /*****************************************************************************/
