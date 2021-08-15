@@ -3353,7 +3353,7 @@ void formod_pencil(
 
 	  /* Add solar radiation... */
 	  for (id = 0; id < ctl->nd; id++)
-	    rad[id] += 6.764e-5 * planck(TSUN, ctl->nu[id])
+	    rad[id] += 6.764e-5 / (2. * M_PI) * planck(TSUN, ctl->nu[id])
 	      * tau_refl[id] * (1 - los->sfeps[id]) * tau[id] * rcos;
 	}
       }
