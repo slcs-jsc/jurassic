@@ -786,7 +786,7 @@ void climatology(
 
   static int ig_co2 = -999;
 
-  double co2, *q[NG] = { NULL };
+  double *q[NG] = { NULL };
 
   /* Find emitter index of CO2... */
   if (ig_co2 == -999)
@@ -872,11 +872,9 @@ void climatology(
 	atm->q[ig][ip] = 0;
 
     /* Set CO2... */
-    if (ig_co2 >= 0) {
-      co2 =
+    if (ig_co2 >= 0)
+      atm->q[ig_co2][ip] =
 	371.789948e-6 + 2.026214e-6 * (atm->time[ip] - 63158400.) / 31557600.;
-      atm->q[ig_co2][ip] = co2;
-    }
 
     /* Set extinction to zero... */
     for (int iw = 0; iw < ctl->nw; iw++)
@@ -1733,26 +1731,23 @@ double ctmco2(
     .12584
   };
 
-  double xw, dw, ew, cw296, cw260, cw230, dt230, dt260, dt296, ctw, ctmpth;
-
   /* Get CO2 continuum absorption... */
-  xw = nu / 2 + 1;
+  double xw = nu / 2 + 1;
   if (xw >= 1 && xw < 2001) {
     int iw = (int) xw;
-    dw = xw - iw;
-    ew = 1 - dw;
-    cw296 = ew * co2296[iw - 1] + dw * co2296[iw];
-    cw260 = ew * co2260[iw - 1] + dw * co2260[iw];
-    cw230 = ew * co2230[iw - 1] + dw * co2230[iw];
-    dt230 = t - 230;
-    dt260 = t - 260;
-    dt296 = t - 296;
-    ctw = dt260 * 5.050505e-4 * dt296 * cw230 - dt230 * 9.259259e-4
+    double dw = xw - iw;
+    double ew = 1 - dw;
+    double cw296 = ew * co2296[iw - 1] + dw * co2296[iw];
+    double cw260 = ew * co2260[iw - 1] + dw * co2260[iw];
+    double cw230 = ew * co2230[iw - 1] + dw * co2230[iw];
+    double dt230 = t - 230;
+    double dt260 = t - 260;
+    double dt296 = t - 296;
+    double ctw = dt260 * 5.050505e-4 * dt296 * cw230 - dt230 * 9.259259e-4
       * dt296 * cw260 + dt230 * 4.208754e-4 * dt260 * cw296;
-    ctmpth = u / NA / 1000 * p / P0 * ctw;
+    return u / NA / 1000 * p / P0 * ctw;
   } else
-    ctmpth = 0;
-  return ctmpth;
+    return 0;
 }
 
 /*****************************************************************************/
@@ -2772,40 +2767,37 @@ double ctmh2o(
     1.039, 1.04, 1.046, 1.036, 1.027, 1.01, 1.002, 1.
   };
 
-  double a1, a2, a3, dw, ew, dx, xw, xx, vf2, vf6, cw260, cw296,
-    sfac, fscal, cwfrn, ctmpth, ctwfrn, ctwslf;
-
-  int iw, ix;
+  double sfac;
 
   /* Get H2O continuum absorption... */
-  xw = nu / 10 + 1;
+  double xw = nu / 10 + 1;
   if (xw >= 1 && xw < 2001) {
-    iw = (int) xw;
-    dw = xw - iw;
-    ew = 1 - dw;
-    cw296 = ew * h2o296[iw - 1] + dw * h2o296[iw];
-    cw260 = ew * h2o260[iw - 1] + dw * h2o260[iw];
-    cwfrn = ew * h2ofrn[iw - 1] + dw * h2ofrn[iw];
+    int iw = (int) xw;
+    double dw = xw - iw;
+    double ew = 1 - dw;
+    double cw296 = ew * h2o296[iw - 1] + dw * h2o296[iw];
+    double cw260 = ew * h2o260[iw - 1] + dw * h2o260[iw];
+    double cwfrn = ew * h2ofrn[iw - 1] + dw * h2ofrn[iw];
     if (nu <= 820 || nu >= 960) {
       sfac = 1;
     } else {
-      xx = (nu - 820) / 10;
-      ix = (int) xx;
-      dx = xx - ix;
+      double xx = (nu - 820) / 10;
+      int ix = (int) xx;
+      double dx = xx - ix;
       sfac = (1 - dx) * xfcrev[ix] + dx * xfcrev[ix + 1];
     }
-    ctwslf = sfac * cw296 * pow(cw260 / cw296, (296 - t) / (296 - 260));
-    vf2 = POW2(nu - 370);
-    vf6 = POW3(vf2);
-    fscal = 36100 / (vf2 + vf6 * 1e-8 + 36100) * -.25 + 1;
-    ctwfrn = cwfrn * fscal;
-    a1 = nu * u * tanh(.7193876 / t * nu);
-    a2 = 296 / t;
-    a3 = p / P0 * (q * ctwslf + (1 - q) * ctwfrn) * 1e-20;
-    ctmpth = a1 * a2 * a3;
+    double ctwslf =
+      sfac * cw296 * pow(cw260 / cw296, (296 - t) / (296 - 260));
+    double vf2 = POW2(nu - 370);
+    double vf6 = POW3(vf2);
+    double fscal = 36100 / (vf2 + vf6 * 1e-8 + 36100) * -.25 + 1;
+    double ctwfrn = cwfrn * fscal;
+    double a1 = nu * u * tanh(.7193876 / t * nu);
+    double a2 = 296 / t;
+    double a3 = p / P0 * (q * ctwslf + (1 - q) * ctwfrn) * 1e-20;
+    return a1 * a2 * a3;
   } else
-    ctmpth = 0;
-  return ctmpth;
+    return 0;
 }
 
 /*****************************************************************************/
@@ -2915,18 +2907,16 @@ double ctmo2(
     1800., 1805.
   };
 
-  double b, beta, q_o2 = 0.21, t0 = 273, tr = 296;
-
-  int idx;
+  const double q_o2 = 0.21, t0 = 273, tr = 296;
 
   /* Check wavenumber range... */
   if (nu < nua[0] || nu > nua[89])
     return 0;
 
   /* Interpolate B and beta... */
-  idx = locate_reg(nua, 90, nu);
-  b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
-  beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+  int idx = locate_reg(nua, 90, nu);
+  double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
+  double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t)) * q_o2 *
@@ -3382,11 +3372,15 @@ void hydrostatic(
   ctl_t * ctl,
   atm_t * atm) {
 
+  const double mmair = 28.96456e-3, mmh2o = 18.0153e-3;
+
+  const int ipts = 20;
+
   static int ig_h2o = -999;
 
-  double dzmin = 1e99, e = 0, mmair = 28.96456e-3, mmh2o = 18.0153e-3;
+  double dzmin = 1e99, e = 0;
 
-  int ipref = 0, ipts = 20;
+  int ipref = 0;
 
   /* Check reference height... */
   if (ctl->hydz < 0)
@@ -3491,7 +3485,7 @@ void init_srcfunc(
 
   char filename[2 * LEN];
 
-  double dnu, f[NSHAPE], nu[NSHAPE];
+  double f[NSHAPE], nu[NSHAPE];
 
   int n;
 
@@ -3506,7 +3500,7 @@ void init_srcfunc(
     read_shape(filename, nu, f, &n);
 
     /* Get minimum grid spacing... */
-    dnu = 1.0;
+    double dnu = 1.0;
     for (int i = 1; i < n; i++)
       dnu = GSL_MIN(dnu, nu[i] - nu[i - 1]);
 
@@ -3735,8 +3729,6 @@ void jsec2time(
 
   struct tm t0, *t1;
 
-  time_t jsec0;
-
   t0.tm_year = 100;
   t0.tm_mon = 0;
   t0.tm_mday = 1;
@@ -3744,7 +3736,7 @@ void jsec2time(
   t0.tm_min = 0;
   t0.tm_sec = 0;
 
-  jsec0 = (time_t) jsec + timegm(&t0);
+  time_t jsec0 = (time_t) jsec + timegm(&t0);
   t1 = gmtime(&jsec0);
 
   *year = t1->tm_year + 1900;
@@ -3771,8 +3763,6 @@ void kernel(
 
   int *iqa;
 
-  double h;
-
   /* Get sizes... */
   size_t m = k->size1;
   size_t n = k->size2;
@@ -3794,7 +3784,7 @@ void kernel(
   gsl_matrix_set_zero(k);
 
   /* Loop over state vector elements... */
-#pragma omp parallel for default(none) shared(ctl,atm,obs,k,x0,yy0,n,m,iqa) private(h, x1, yy1, atm1, obs1)
+#pragma omp parallel for default(none) shared(ctl,atm,obs,k,x0,yy0,n,m,iqa) private(x1, yy1, atm1, obs1)
   for (size_t j = 0; j < n; j++) {
 
     /* Allocate... */
@@ -3804,6 +3794,7 @@ void kernel(
     ALLOC(obs1, obs_t, 1);
 
     /* Set perturbation size... */
+    double h;
     if (iqa[j] == IDXP)
       h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-7);
     else if (iqa[j] == IDXT)

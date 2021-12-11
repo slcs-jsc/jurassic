@@ -28,8 +28,6 @@ int main(
   int argc,
   char *argv[]) {
 
-  double nu, nu0, nu1, dnu, rad, rad0, rad1, drad;
-
   /* Check arguments... */
   if (argc != 3 && argc != 7)
     ERRMSG
@@ -40,8 +38,8 @@ int main(
   if (argc == 3) {
 
     /* Read arguments... */
-    rad = atof(argv[1]);
-    nu = atof(argv[2]);
+    double rad = atof(argv[1]);
+    double nu = atof(argv[2]);
 
     /* Compute brightness temperature... */
     printf("%.10g\n", brightness(rad, nu));
@@ -52,12 +50,12 @@ int main(
   else if (argc == 7) {
 
     /* Read arguments... */
-    rad0 = atof(argv[1]);
-    rad1 = atof(argv[2]);
-    drad = atof(argv[3]);
-    nu0 = atof(argv[4]);
-    nu1 = atof(argv[5]);
-    dnu = atof(argv[6]);
+    double rad0 = atof(argv[1]);
+    double rad1 = atof(argv[2]);
+    double drad = atof(argv[3]);
+    double nu0 = atof(argv[4]);
+    double nu1 = atof(argv[5]);
+    double dnu = atof(argv[6]);
 
     /* Write header... */
     printf("# $1 = radiance [W/(m^2 sr cm^-1)]\n"
@@ -65,9 +63,9 @@ int main(
 	   "# $3 = brightness temperature [K]\n");
 
     /* Compute brightness temperature... */
-    for (rad = rad0; rad <= rad1; rad += drad) {
+    for (double rad = rad0; rad <= rad1; rad += drad) {
       printf("\n");
-      for (nu = nu0; nu <= nu1; nu += dnu)
+      for (double nu = nu0; nu <= nu1; nu += dnu)
 	printf("%.10g %.4f %.10g\n", rad, nu, brightness(rad, nu));
     }
   }

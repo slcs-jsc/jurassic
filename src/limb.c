@@ -31,25 +31,23 @@ int main(
   static ctl_t ctl;
   static obs_t obs;
 
-  double dt, dz, obsz, t, t0, t1, z, z0, z1;
-
   /* Check arguments... */
   if (argc < 3)
     ERRMSG("Give parameters: <ctl> <obs>");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
-  obsz = scan_ctl(argc, argv, "OBSZ", -1, "780", NULL);
-  t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
-  t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
-  dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
-  z0 = scan_ctl(argc, argv, "Z0", -1, "3", NULL);
-  z1 = scan_ctl(argc, argv, "Z1", -1, "68", NULL);
-  dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
+  double obsz = scan_ctl(argc, argv, "OBSZ", -1, "780", NULL);
+  double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
+  double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
+  double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
+  double z0 = scan_ctl(argc, argv, "Z0", -1, "3", NULL);
+  double z1 = scan_ctl(argc, argv, "Z1", -1, "68", NULL);
+  double dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
 
   /* Create measurement geometry... */
-  for (t = t0; t <= t1; t += dt)
-    for (z = z0; z <= z1; z += dz) {
+  for (double t = t0; t <= t1; t += dt)
+    for (double z = z0; z <= z1; z += dz) {
       obs.time[obs.nr] = t;
       obs.obsz[obs.nr] = obsz;
       obs.vpz[obs.nr] = z;

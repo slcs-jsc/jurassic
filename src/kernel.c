@@ -34,8 +34,6 @@ int main(
 
   gsl_matrix *k;
 
-  size_t m, n;
-
   /* Check arguments... */
   if (argc < 5)
     ERRMSG("Give parameters: <ctl> <obs> <atm> <kernel>");
@@ -53,8 +51,8 @@ int main(
   read_atm(NULL, argv[3], &ctl, &atm);
 
   /* Get sizes... */
-  n = atm2x(&ctl, &atm, NULL, NULL, NULL);
-  m = obs2y(&ctl, &obs, NULL, NULL, NULL);
+  size_t n = atm2x(&ctl, &atm, NULL, NULL, NULL);
+  size_t m = obs2y(&ctl, &obs, NULL, NULL, NULL);
 
   /* Check sizes... */
   if (n <= 0)

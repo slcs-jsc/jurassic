@@ -28,7 +28,7 @@ int main(
   int argc,
   char *argv[]) {
 
-  double jsec, remain;
+  double remain;
 
   int day, hour, min, mon, sec, year;
 
@@ -37,7 +37,7 @@ int main(
     ERRMSG("Give parameters: <jsec>");
 
   /* Read arguments... */
-  jsec = atof(argv[1]);
+  double jsec = atof(argv[1]);
 
   /* Convert time... */
   jsec2time(jsec, &year, &mon, &day, &hour, &min, &sec, &remain);

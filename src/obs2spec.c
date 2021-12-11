@@ -23,7 +23,7 @@
 */
 
 #include <omp.h>
-#include "jurassic.h"		// ctl_t, obs_t, atm_t, read_*, write_*, formod_*PU
+#include "jurassic.h"
 
 /* ------------------------------------------------------------
    Main...

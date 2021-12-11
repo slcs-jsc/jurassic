@@ -46,9 +46,9 @@ int main(
 
   static double ff[NSHAPE], fnu[NSHAPE];
 
-  double center, fsum = 0.0, fwhm, nu, opd, samp, sigma, width;
+  double fsum = 0.0;
 
-  int fn = 0, i, type;
+  int fn = 0;
 
   /* Write info... */
   if (argc < 3)
@@ -56,15 +56,16 @@ int main(
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
-  type = (int) scan_ctl(argc, argv, "FILTER_TYPE", -1, "1", NULL);
-  opd = scan_ctl(argc, argv, "FILTER_OPD", -1, "10.0", NULL);
-  fwhm = scan_ctl(argc, argv, "FILTER_FWHM", -1, "1.0", NULL);
-  center = scan_ctl(argc, argv, "FILTER_CENTER", -1, "1000.0", NULL);
-  width = scan_ctl(argc, argv, "FILTER_WIDTH", -1, "2.1", NULL);
-  samp = scan_ctl(argc, argv, "FILTER_SAMP", -1, "0.0005", NULL);
+  int type = (int) scan_ctl(argc, argv, "FILTER_TYPE", -1, "1", NULL);
+  double opd = scan_ctl(argc, argv, "FILTER_OPD", -1, "10.0", NULL);
+  double fwhm = scan_ctl(argc, argv, "FILTER_FWHM", -1, "1.0", NULL);
+  double center = scan_ctl(argc, argv, "FILTER_CENTER", -1, "1000.0", NULL);
+  double width = scan_ctl(argc, argv, "FILTER_WIDTH", -1, "2.1", NULL);
+  double samp = scan_ctl(argc, argv, "FILTER_SAMP", -1, "0.0005", NULL);
 
   /* Compute filter function... */
-  for (nu = center - 0.5 * width; nu <= center + 0.5 * width; nu += samp) {
+  for (double nu = center - 0.5 * width;
+       nu <= center + 0.5 * width; nu += samp) {
 
     /* Set frequency... */
     fnu[fn] = nu;
@@ -81,7 +82,7 @@ int main(
 
     /* Gaussian... */
     else if (type == 2) {
-      sigma = fwhm / 2.355;
+      double sigma = fwhm / 2.355;
       ff[fn] = exp(-0.5 * POW2((nu - center) / sigma));
     }
 
@@ -103,9 +104,9 @@ int main(
   }
 
   /* Normalize filter function... */
-  for (i = 0; i < fn; i++)
+  for (int i = 0; i < fn; i++)
     fsum += ff[i];
-  for (i = 0; i < fn; i++)
+  for (int i = 0; i < fn; i++)
     ff[i] /= (fsum * samp);
 
   /* Write to file... */

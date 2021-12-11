@@ -107,8 +107,6 @@ void call_formod(
 
   char filename[LEN];
 
-  int id, ig, ig2, ip, ir, iw;
-
   /* Read observation geometry... */
   read_obs(wrkdir, obsfile, ctl, &obs);
 
@@ -119,11 +117,11 @@ void call_formod(
   if (task[0] == 'p' || task[0] == 'P') {
 
     /* Loop over ray paths... */
-    for (ir = 0; ir < obs.nr; ir++) {
+    for (int ir = 0; ir < obs.nr; ir++) {
 
       /* Get atmospheric data... */
       atm2.np = 0;
-      for (ip = 0; ip < atm.np; ip++)
+      for (int ip = 0; ip < atm.np; ip++)
 	if (atm.time[ip] == obs.time[ir]) {
 	  atm2.time[atm2.np] = atm.time[ip];
 	  atm2.z[atm2.np] = atm.z[ip];
@@ -131,9 +129,9 @@ void call_formod(
 	  atm2.lat[atm2.np] = atm.lat[ip];
 	  atm2.p[atm2.np] = atm.p[ip];
 	  atm2.t[atm2.np] = atm.t[ip];
-	  for (ig = 0; ig < ctl->ng; ig++)
+	  for (int ig = 0; ig < ctl->ng; ig++)
 	    atm2.q[ig][atm2.np] = atm.q[ig][ip];
-	  for (iw = 0; iw < ctl->nw; iw++)
+	  for (int iw = 0; iw < ctl->nw; iw++)
 	    atm2.k[iw][atm2.np] = atm.k[iw][ip];
 	  atm2.np++;
 	}
@@ -155,7 +153,7 @@ void call_formod(
 	formod(ctl, &atm2, &obs2);
 
 	/* Save radiance data... */
-	for (id = 0; id < ctl->nd; id++) {
+	for (int id = 0; id < ctl->nd; id++) {
 	  obs.rad[id][ir] = obs2.rad[id][0];
 	  obs.tau[id][ir] = obs2.tau[id][0];
 	}
@@ -185,20 +183,20 @@ void call_formod(
       ctl->ctm_o2 = 0;
 
       /* Loop over emitters... */
-      for (ig = 0; ig < ctl->ng; ig++) {
+      for (int ig = 0; ig < ctl->ng; ig++) {
 
 	/* Copy atmospheric data... */
 	copy_atm(ctl, &atm2, &atm, 0);
 
 	/* Set extinction to zero... */
-	for (iw = 0; iw < ctl->nw; iw++)
-	  for (ip = 0; ip < atm2.np; ip++)
+	for (int iw = 0; iw < ctl->nw; iw++)
+	  for (int ip = 0; ip < atm2.np; ip++)
 	    atm2.k[iw][ip] = 0;
 
 	/* Set volume mixing ratios to zero... */
-	for (ig2 = 0; ig2 < ctl->ng; ig2++)
+	for (int ig2 = 0; ig2 < ctl->ng; ig2++)
 	  if (ig2 != ig)
-	    for (ip = 0; ip < atm2.np; ip++)
+	    for (int ip = 0; ip < atm2.np; ip++)
 	      atm2.q[ig2][ip] = 0;
 
 	/* Call forward model... */
@@ -213,8 +211,8 @@ void call_formod(
       copy_atm(ctl, &atm2, &atm, 0);
 
       /* Set volume mixing ratios to zero... */
-      for (ig = 0; ig < ctl->ng; ig++)
-	for (ip = 0; ip < atm2.np; ip++)
+      for (int ig = 0; ig < ctl->ng; ig++)
+	for (int ip = 0; ip < atm2.np; ip++)
 	  atm2.q[ig][ip] = 0;
 
       /* Call forward model... */

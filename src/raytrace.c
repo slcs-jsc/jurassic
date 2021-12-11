@@ -37,9 +37,7 @@ int main(
 
   char filename[LEN], losbase[LEN];
 
-  double u[NG], s;
-
-  int ig, ip, ir, iw;
+  double u[NG];
 
   /* Check arguments... */
   if (argc < 4)
@@ -77,29 +75,29 @@ int main(
 	  "# $9 = tangent point longitude [deg]\n"
 	  "# $10 = tangent point latitude [deg]\n"
 	  "# $11 = ray path index\n" "# $12 = ray path length [km]\n");
-  for (ig = 0; ig < ctl.ng; ig++)
+  for (int ig = 0; ig < ctl.ng; ig++)
     fprintf(out, "# $%d = %s column density [molec/cm^2]\n",
 	    13 + ig, ctl.emitter[ig]);
   fprintf(out, "\n");
 
   /* Loop over rays... */
-  for (ir = 0; ir < obs.nr; ir++) {
+  for (int ir = 0; ir < obs.nr; ir++) {
 
     /* Raytracing... */
     raytrace(&ctl, &atm, &obs, &los, ir);
 
     /* Copy data... */
     atm2.np = los.np;
-    for (ip = 0; ip < los.np; ip++) {
+    for (int ip = 0; ip < los.np; ip++) {
       atm2.time[ip] = obs.time[ir];
       atm2.z[ip] = los.z[ip];
       atm2.lon[ip] = los.lon[ip];
       atm2.lat[ip] = los.lat[ip];
       atm2.p[ip] = los.p[ip];
       atm2.t[ip] = los.t[ip];
-      for (ig = 0; ig < ctl.ng; ig++)
+      for (int ig = 0; ig < ctl.ng; ig++)
 	atm2.q[ig][ip] = los.q[ig][ip];
-      for (iw = 0; iw < ctl.nw; iw++)
+      for (int iw = 0; iw < ctl.nw; iw++)
 	atm2.k[iw][ip] = GSL_NAN;
     }
 
@@ -108,12 +106,12 @@ int main(
     write_atm(NULL, filename, &ctl, &atm2);
 
     /* Get column densities... */
-    s = 0;
-    for (ig = 0; ig < ctl.ng; ig++)
+    double s = 0;
+    for (int ig = 0; ig < ctl.ng; ig++)
       u[ig] = 0;
-    for (ip = 0; ip < los.np; ip++) {
+    for (int ip = 0; ip < los.np; ip++) {
       s += los.ds[ip];
-      for (ig = 0; ig < ctl.ng; ig++)
+      for (int ig = 0; ig < ctl.ng; ig++)
 	u[ig] += los.u[ig][ip];
     }
 
@@ -122,7 +120,7 @@ int main(
 	    obs.time[ir], obs.obsz[ir], obs.obslon[ir], obs.obslat[ir],
 	    obs.vpz[ir], obs.vplon[ir], obs.vplat[ir],
 	    obs.tpz[ir], obs.tplon[ir], obs.tplat[ir], ir, s);
-    for (ig = 0; ig < ctl.ng; ig++)
+    for (int ig = 0; ig < ctl.ng; ig++)
       fprintf(out, " %g", u[ig]);
     fprintf(out, "\n");
   }

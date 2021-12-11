@@ -31,25 +31,23 @@ int main(
   static ctl_t ctl;
   static obs_t obs;
 
-  double dlat, dt, lat, lat0, lat1, obsz, t, t0, t1;
-
   /* Check arguments... */
   if (argc < 3)
     ERRMSG("Give parameters: <ctl> <obs>");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
-  t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
-  t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
-  dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
-  obsz = scan_ctl(argc, argv, "OBSZ", -1, "700", NULL);
-  lat0 = scan_ctl(argc, argv, "LAT0", -1, "-8.01", NULL);
-  lat1 = scan_ctl(argc, argv, "LAT1", -1, "8.01", NULL);
-  dlat = scan_ctl(argc, argv, "DLAT", -1, "0.18", NULL);
+  double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
+  double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
+  double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
+  double obsz = scan_ctl(argc, argv, "OBSZ", -1, "700", NULL);
+  double lat0 = scan_ctl(argc, argv, "LAT0", -1, "-8.01", NULL);
+  double lat1 = scan_ctl(argc, argv, "LAT1", -1, "8.01", NULL);
+  double dlat = scan_ctl(argc, argv, "DLAT", -1, "0.18", NULL);
 
   /* Create measurement geometry... */
-  for (t = t0; t <= t1; t += dt)
-    for (lat = lat0; lat <= lat1; lat += dlat) {
+  for (double t = t0; t <= t1; t += dt)
+    for (double lat = lat0; lat <= lat1; lat += dlat) {
       obs.time[obs.nr] = t;
       obs.obsz[obs.nr] = obsz;
       obs.vplat[obs.nr] = lat;

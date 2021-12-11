@@ -33,8 +33,6 @@ int main(
 
   double k[NW], q[NG];
 
-  int ig, ip, iw;
-
   /* Interpolate atmospheric data... */
 
   /* Check arguments... */
@@ -49,12 +47,12 @@ int main(
   read_atm(NULL, argv[3], &ctl, &atm_pts);
 
   /* Interpolate atmospheric data... */
-  for (ip = 0; ip < atm_pts.np; ip++) {
+  for (int ip = 0; ip < atm_pts.np; ip++) {
     intpol_atm(&ctl, &atm_in, atm_pts.z[ip],
 	       &atm_pts.p[ip], &atm_pts.t[ip], q, k);
-    for (ig = 0; ig < ctl.ng; ig++)
+    for (int ig = 0; ig < ctl.ng; ig++)
       atm_pts.q[ig][ip] = q[ig];
-    for (iw = 0; iw < ctl.nw; iw++)
+    for (int iw = 0; iw < ctl.nw; iw++)
       atm_pts.k[iw][ip] = k[iw];
   }
 
