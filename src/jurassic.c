@@ -33,30 +33,28 @@ size_t atm2x(
   int *iqa,
   int *ipa) {
 
-  int icl, ig, ip, isf, iw;
-
   size_t n = 0;
 
   /* Add pressure... */
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     if (atm->z[ip] >= ctl->retp_zmin && atm->z[ip] <= ctl->retp_zmax)
       atm2x_help(atm->p[ip], IDXP, ip, x, iqa, ipa, &n);
 
   /* Add temperature... */
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     if (atm->z[ip] >= ctl->rett_zmin && atm->z[ip] <= ctl->rett_zmax)
       atm2x_help(atm->t[ip], IDXT, ip, x, iqa, ipa, &n);
 
   /* Add volume mixing ratios... */
-  for (ig = 0; ig < ctl->ng; ig++)
-    for (ip = 0; ip < atm->np; ip++)
+  for (int ig = 0; ig < ctl->ng; ig++)
+    for (int ip = 0; ip < atm->np; ip++)
       if (atm->z[ip] >= ctl->retq_zmin[ig]
 	  && atm->z[ip] <= ctl->retq_zmax[ig])
 	atm2x_help(atm->q[ig][ip], IDXQ(ig), ip, x, iqa, ipa, &n);
 
   /* Add extinction... */
-  for (iw = 0; iw < ctl->nw; iw++)
-    for (ip = 0; ip < atm->np; ip++)
+  for (int iw = 0; iw < ctl->nw; iw++)
+    for (int ip = 0; ip < atm->np; ip++)
       if (atm->z[ip] >= ctl->retk_zmin[iw]
 	  && atm->z[ip] <= ctl->retk_zmax[iw])
 	atm2x_help(atm->k[iw][ip], IDXK(iw), ip, x, iqa, ipa, &n);
@@ -67,7 +65,7 @@ size_t atm2x(
   if (ctl->ret_cldz)
     atm2x_help(atm->cldz, IDXCLDZ, 0, x, iqa, ipa, &n);
   if (ctl->ret_clk)
-    for (icl = 0; icl < ctl->ncl; icl++)
+    for (int icl = 0; icl < ctl->ncl; icl++)
       atm2x_help(atm->clk[icl], IDXCLK(icl), 0, x, iqa, ipa, &n);
 
   /* Add surface parameters... */
@@ -78,7 +76,7 @@ size_t atm2x(
   if (ctl->ret_sft)
     atm2x_help(atm->sft, IDXSFT, 0, x, iqa, ipa, &n);
   if (ctl->ret_sfeps)
-    for (isf = 0; isf < ctl->nsf; isf++)
+    for (int isf = 0; isf < ctl->nsf; isf++)
       atm2x_help(atm->sfeps[isf], IDXSFEPS(isf), 0, x, iqa, ipa, &n);
 
   return n;
@@ -124,9 +122,8 @@ void cart2geo(
   double *lon,
   double *lat) {
 
-  double radius;
+  double radius = NORM(x);
 
-  radius = NORM(x);
   *lat = asin(x[2] / radius) * 180 / M_PI;
   *lon = atan2(x[1], x[0]) * 180 / M_PI;
   *z = radius - RE;
@@ -791,14 +788,12 @@ void climatology(
 
   double co2, *q[NG] = { NULL };
 
-  int icl, ig, ip, isf, iw, iz;
-
   /* Find emitter index of CO2... */
   if (ig_co2 == -999)
     ig_co2 = find_emitter(ctl, "CO2");
 
   /* Identify variable... */
-  for (ig = 0; ig < ctl->ng; ig++) {
+  for (int ig = 0; ig < ctl->ng; ig++) {
     q[ig] = NULL;
     if (strcasecmp(ctl->emitter[ig], "C2H2") == 0)
       q[ig] = c2h2;
@@ -857,10 +852,10 @@ void climatology(
   }
 
   /* Loop over atmospheric data points... */
-  for (ip = 0; ip < atm->np; ip++) {
+  for (int ip = 0; ip < atm->np; ip++) {
 
     /* Get altitude index... */
-    iz = locate_reg(z, 121, atm->z[ip]);
+    int iz = locate_reg(z, 121, atm->z[ip]);
 
     /* Interpolate pressure... */
     atm->p[ip] = EXP(z[iz], pre[iz], z[iz + 1], pre[iz + 1], atm->z[ip]);
@@ -869,7 +864,7 @@ void climatology(
     atm->t[ip] = LIN(z[iz], tem[iz], z[iz + 1], tem[iz + 1], atm->z[ip]);
 
     /* Interpolate trace gases... */
-    for (ig = 0; ig < ctl->ng; ig++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       if (q[ig] != NULL)
 	atm->q[ig][ip] =
 	  LIN(z[iz], q[ig][iz], z[iz + 1], q[ig][iz + 1], atm->z[ip]);
@@ -884,17 +879,17 @@ void climatology(
     }
 
     /* Set extinction to zero... */
-    for (iw = 0; iw < ctl->nw; iw++)
+    for (int iw = 0; iw < ctl->nw; iw++)
       atm->k[iw][ip] = 0;
 
     /* Set cloud layer... */
     atm->clz = atm->cldz = 0;
-    for (icl = 0; icl < ctl->ncl; icl++)
+    for (int icl = 0; icl < ctl->ncl; icl++)
       atm->clk[icl] = 0;
 
     /* Set surface layer... */
     atm->sfz = atm->sfp = atm->sft = 0;
-    for (isf = 0; isf < ctl->nsf; isf++)
+    for (int isf = 0; isf < ctl->nsf; isf++)
       atm->sfeps[isf] = 1;
   }
 }
@@ -1740,12 +1735,10 @@ double ctmco2(
 
   double xw, dw, ew, cw296, cw260, cw230, dt230, dt260, dt296, ctw, ctmpth;
 
-  int iw;
-
   /* Get CO2 continuum absorption... */
   xw = nu / 2 + 1;
   if (xw >= 1 && xw < 2001) {
-    iw = (int) xw;
+    int iw = (int) xw;
     dw = xw - iw;
     ew = 1 - dw;
     cw296 = ew * co2296[iw - 1] + dw * co2296[iw];
@@ -2863,18 +2856,16 @@ double ctmn2(
     2560., 2565., 2570., 2575., 2580., 2585., 2590., 2595., 2600., 2605.
   };
 
-  double b, beta, q_n2 = 0.79, t0 = 273, tr = 296;
-
-  int idx;
+  const double q_n2 = 0.79, t0 = 273.0, tr = 296.0;
 
   /* Check wavenumber range... */
   if (nu < nua[0] || nu > nua[97])
     return 0;
 
   /* Interpolate B and beta... */
-  idx = locate_reg(nua, 98, nu);
-  b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
-  beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+  int idx = locate_reg(nua, 98, nu);
+  double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
+  double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t))
@@ -2950,12 +2941,8 @@ void copy_atm(
   atm_t * atm_src,
   int init) {
 
-  int icl, ig, ip, isf, iw;
-
-  size_t s;
-
   /* Data size... */
-  s = (size_t) atm_src->np * sizeof(double);
+  size_t s = (size_t) atm_src->np * sizeof(double);
 
   /* Copy data... */
   atm_dest->np = atm_src->np;
@@ -2965,37 +2952,37 @@ void copy_atm(
   memcpy(atm_dest->lat, atm_src->lat, s);
   memcpy(atm_dest->p, atm_src->p, s);
   memcpy(atm_dest->t, atm_src->t, s);
-  for (ig = 0; ig < ctl->ng; ig++)
+  for (int ig = 0; ig < ctl->ng; ig++)
     memcpy(atm_dest->q[ig], atm_src->q[ig], s);
-  for (iw = 0; iw < ctl->nw; iw++)
+  for (int iw = 0; iw < ctl->nw; iw++)
     memcpy(atm_dest->k[iw], atm_src->k[iw], s);
   atm_dest->clz = atm_src->clz;
   atm_dest->cldz = atm_src->cldz;
-  for (icl = 0; icl < ctl->ncl; icl++)
+  for (int icl = 0; icl < ctl->ncl; icl++)
     atm_dest->clk[icl] = atm_src->clk[icl];
   atm_dest->sfz = atm_src->sfz;
   atm_dest->sfp = atm_src->sfp;
   atm_dest->sft = atm_src->sft;
-  for (isf = 0; isf < ctl->nsf; isf++)
+  for (int isf = 0; isf < ctl->nsf; isf++)
     atm_dest->sfeps[isf] = atm_src->sfeps[isf];
 
   /* Initialize... */
   if (init)
-    for (ip = 0; ip < atm_dest->np; ip++) {
+    for (int ip = 0; ip < atm_dest->np; ip++) {
       atm_dest->p[ip] = 0;
       atm_dest->t[ip] = 0;
-      for (ig = 0; ig < ctl->ng; ig++)
+      for (int ig = 0; ig < ctl->ng; ig++)
 	atm_dest->q[ig][ip] = 0;
-      for (iw = 0; iw < ctl->nw; iw++)
+      for (int iw = 0; iw < ctl->nw; iw++)
 	atm_dest->k[iw][ip] = 0;
       atm_dest->clz = 0;
       atm_dest->cldz = 0;
-      for (icl = 0; icl < ctl->ncl; icl++)
+      for (int icl = 0; icl < ctl->ncl; icl++)
 	atm_dest->clk[icl] = 0;
       atm_dest->sfz = 0;
       atm_dest->sfp = 0;
       atm_dest->sft = 0;
-      for (isf = 0; isf < ctl->nsf; isf++)
+      for (int isf = 0; isf < ctl->nsf; isf++)
 	atm_dest->sfeps[isf] = 1;
     }
 }
@@ -3008,12 +2995,8 @@ void copy_obs(
   obs_t * obs_src,
   int init) {
 
-  int id, ir;
-
-  size_t s;
-
   /* Data size... */
-  s = (size_t) obs_src->nr * sizeof(double);
+  size_t s = (size_t) obs_src->nr * sizeof(double);
 
   /* Copy data... */
   obs_dest->nr = obs_src->nr;
@@ -3027,15 +3010,15 @@ void copy_obs(
   memcpy(obs_dest->tpz, obs_src->tpz, s);
   memcpy(obs_dest->tplon, obs_src->tplon, s);
   memcpy(obs_dest->tplat, obs_src->tplat, s);
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     memcpy(obs_dest->rad[id], obs_src->rad[id], s);
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     memcpy(obs_dest->tau[id], obs_src->tau[id], s);
 
   /* Initialize... */
   if (init)
-    for (id = 0; id < ctl->nd; id++)
-      for (ir = 0; ir < obs_dest->nr; ir++)
+    for (int id = 0; id < ctl->nd; id++)
+      for (int ir = 0; ir < obs_dest->nr; ir++)
 	if (gsl_finite(obs_dest->rad[id][ir])) {
 	  obs_dest->rad[id][ir] = 0;
 	  obs_dest->tau[id][ir] = 0;
@@ -3048,9 +3031,7 @@ int find_emitter(
   ctl_t * ctl,
   const char *emitter) {
 
-  int ig;
-
-  for (ig = 0; ig < ctl->ng; ig++)
+  for (int ig = 0; ig < ctl->ng; ig++)
     if (strcasecmp(ctl->emitter[ig], emitter) == 0)
       return ig;
 
@@ -3064,22 +3045,22 @@ void formod(
   atm_t * atm,
   obs_t * obs) {
 
-  int id, ir, *mask;
+  int *mask;
 
   /* Allocate... */
   ALLOC(mask, int,
 	ND * NR);
 
   /* Save observation mask... */
-  for (id = 0; id < ctl->nd; id++)
-    for (ir = 0; ir < obs->nr; ir++)
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ir = 0; ir < obs->nr; ir++)
       mask[id * NR + ir] = !gsl_finite(obs->rad[id][ir]);
 
   /* Hydrostatic equilibrium... */
   hydrostatic(ctl, atm);
 
   /* Calculate pencil beams... */
-  for (ir = 0; ir < obs->nr; ir++)
+  for (int ir = 0; ir < obs->nr; ir++)
     formod_pencil(ctl, atm, obs, ir);
 
   /* Apply field-of-view convolution... */
@@ -3087,13 +3068,13 @@ void formod(
 
   /* Convert radiance to brightness temperature... */
   if (ctl->write_bbt)
-    for (id = 0; id < ctl->nd; id++)
-      for (ir = 0; ir < obs->nr; ir++)
+    for (int id = 0; id < ctl->nd; id++)
+      for (int ir = 0; ir < obs->nr; ir++)
 	obs->rad[id][ir] = brightness(obs->rad[id][ir], ctl->nu[id]);
 
   /* Apply observation mask... */
-  for (id = 0; id < ctl->nd; id++)
-    for (ir = 0; ir < obs->nr; ir++)
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ir = 0; ir < obs->nr; ir++)
       if (mask[id * NR + ir])
 	obs->rad[id][ir] = GSL_NAN;
 
@@ -3111,10 +3092,8 @@ void formod_continua(
 
   static int ig_co2 = -999, ig_h2o = -999;
 
-  int id;
-
   /* Extinction... */
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     beta[id] = los->k[id][ip];
 
   /* CO2 continuum... */
@@ -3122,7 +3101,7 @@ void formod_continua(
     if (ig_co2 == -999)
       ig_co2 = find_emitter(ctl, "CO2");
     if (ig_co2 >= 0)
-      for (id = 0; id < ctl->nd; id++)
+      for (int id = 0; id < ctl->nd; id++)
 	beta[id] += ctmco2(ctl->nu[id], los->p[ip], los->t[ip],
 			   los->u[ig_co2][ip]) / los->ds[ip];
   }
@@ -3132,7 +3111,7 @@ void formod_continua(
     if (ig_h2o == -999)
       ig_h2o = find_emitter(ctl, "H2O");
     if (ig_h2o >= 0)
-      for (id = 0; id < ctl->nd; id++)
+      for (int id = 0; id < ctl->nd; id++)
 	beta[id] += ctmh2o(ctl->nu[id], los->p[ip], los->t[ip],
 			   los->q[ig_h2o][ip],
 			   los->u[ig_h2o][ip]) / los->ds[ip];
@@ -3140,12 +3119,12 @@ void formod_continua(
 
   /* N2 continuum... */
   if (ctl->ctm_n2)
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmn2(ctl->nu[id], los->p[ip], los->t[ip]);
 
   /* O2 continuum... */
   if (ctl->ctm_o2)
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmo2(ctl->nu[id], los->p[ip], los->t[ip]);
 }
 
@@ -3161,9 +3140,7 @@ void formod_fov(
 
   obs_t *obs2;
 
-  double rad[ND][NR], tau[ND][NR], wsum, z[NR], zfov;
-
-  int i, id, idx, ir, ir2, nz;
+  double rad[ND][NR], tau[ND][NR], z[NR];
 
   /* Do not take into account FOV... */
   if (ctl->fov[0] == '-')
@@ -3182,15 +3159,15 @@ void formod_fov(
   copy_obs(ctl, obs2, obs, 0);
 
   /* Loop over ray paths... */
-  for (ir = 0; ir < obs->nr; ir++) {
+  for (int ir = 0; ir < obs->nr; ir++) {
 
     /* Get radiance and transmittance profiles... */
-    nz = 0;
-    for (ir2 = GSL_MAX(ir - NFOV, 0); ir2 < GSL_MIN(ir + 1 + NFOV, obs->nr);
-	 ir2++)
+    int nz = 0;
+    for (int ir2 = GSL_MAX(ir - NFOV, 0);
+	 ir2 < GSL_MIN(ir + 1 + NFOV, obs->nr); ir2++)
       if (obs->time[ir2] == obs->time[ir]) {
 	z[nz] = obs2->vpz[ir2];
-	for (id = 0; id < ctl->nd; id++) {
+	for (int id = 0; id < ctl->nd; id++) {
 	  rad[id][nz] = obs2->rad[id][ir2];
 	  tau[id][nz] = obs2->tau[id][ir2];
 	}
@@ -3200,15 +3177,15 @@ void formod_fov(
       ERRMSG("Cannot apply FOV convolution!");
 
     /* Convolute profiles with FOV... */
-    wsum = 0;
-    for (id = 0; id < ctl->nd; id++) {
+    double wsum = 0;
+    for (int id = 0; id < ctl->nd; id++) {
       obs->rad[id][ir] = 0;
       obs->tau[id][ir] = 0;
     }
-    for (i = 0; i < n; i++) {
-      zfov = obs->vpz[ir] + dz[i];
-      idx = locate_irr(z, nz, zfov);
-      for (id = 0; id < ctl->nd; id++) {
+    for (int i = 0; i < n; i++) {
+      double zfov = obs->vpz[ir] + dz[i];
+      int idx = locate_irr(z, nz, zfov);
+      for (int id = 0; id < ctl->nd; id++) {
 	obs->rad[id][ir] += w[i]
 	  * LIN(z[idx], rad[id][idx], z[idx + 1], rad[id][idx + 1], zfov);
 	obs->tau[id][ir] += w[i]
@@ -3216,7 +3193,7 @@ void formod_fov(
       }
       wsum += w[i];
     }
-    for (id = 0; id < ctl->nd; id++) {
+    for (int id = 0; id < ctl->nd; id++) {
       obs->rad[id][ir] /= wsum;
       obs->tau[id][ir] /= wsum;
     }
@@ -3240,11 +3217,8 @@ void formod_pencil(
 
   los_t *los;
 
-  double beta_ctm[ND], cosa, eps[NLOS][ND], rad[ND], rcos, src_atm[NLOS][ND],
-    src_sf[ND], sza2, tau[ND], tau_refl[ND], tau_path[ND][NG], tau_gas[ND],
-    x0[3], x1[3];
-
-  int i, id, ig, ip, refl;
+  double beta_ctm[ND], eps[NLOS][ND], rad[ND], src_atm[NLOS][ND], src_sf[ND],
+    sza2, tau[ND], tau_refl[ND], tau_path[ND][NG], tau_gas[ND], x0[3], x1[3];
 
   /* Initialize look-up tables... */
   if (!init) {
@@ -3258,10 +3232,10 @@ void formod_pencil(
   ALLOC(los, los_t, 1);
 
   /* Initialize... */
-  for (id = 0; id < ctl->nd; id++) {
+  for (int id = 0; id < ctl->nd; id++) {
     rad[id] = 0;
     tau[id] = 1;
-    for (ig = 0; ig < ctl->ng; ig++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       tau_path[id][ig] = 1;
   }
 
@@ -3269,7 +3243,7 @@ void formod_pencil(
   raytrace(ctl, atm, obs, los, ir);
 
   /* Loop over LOS points... */
-  for (ip = 0; ip < los->np; ip++) {
+  for (int ip = 0; ip < los->np; ip++) {
 
     /* Get trace gas transmittance... */
     intpol_tbl(ctl, tbl, los, ip, tau_path, tau_gas);
@@ -3281,7 +3255,7 @@ void formod_pencil(
     formod_srcfunc(ctl, tbl, los->t[ip], src_atm[ip]);
 
     /* Loop over channels... */
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       if (tau_gas[id] > 0) {
 
 	/* Get segment emissivity... */
@@ -3300,13 +3274,13 @@ void formod_pencil(
 
     /* Add surface emissions... */
     formod_srcfunc(ctl, tbl, los->sft, src_sf);
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       rad[id] += los->sfeps[id] * src_sf[id] * tau[id];
 
     /* Check reflectivity... */
-    refl = 0;
+    int refl = 0;
     if (ctl->sftype >= 2)
-      for (id = 0; id < ctl->nd; id++)
+      for (int id = 0; id < ctl->nd; id++)
 	if (los->sfeps[id] < 1) {
 	  refl = 1;
 	  break;
@@ -3316,12 +3290,12 @@ void formod_pencil(
     if (refl) {
 
       /* Initialize... */
-      for (id = 0; id < ctl->nd; id++)
+      for (int id = 0; id < ctl->nd; id++)
 	tau_refl[id] = 1;
 
       /* Add down-welling radiance... */
-      for (ip = los->np - 1; ip >= 0; ip--)
-	for (id = 0; id < ctl->nd; id++) {
+      for (int ip = los->np - 1; ip >= 0; ip--)
+	for (int id = 0; id < ctl->nd; id++) {
 	  rad[id] += src_atm[ip][id] * eps[ip][id] * tau_refl[id]
 	    * tau[id] * (1 - los->sfeps[id]);
 	  tau_refl[id] *= (1 - eps[ip][id]);
@@ -3344,15 +3318,15 @@ void formod_pencil(
 	  geo2cart(los->z[los->np - 1], los->lon[los->np - 1],
 		   los->lat[los->np - 1], x0);
 	  geo2cart(los->z[0], los->lon[0], los->lat[0], x1);
-	  for (i = 0; i < 3; i++)
+	  for (int i = 0; i < 3; i++)
 	    x1[i] -= x0[i];
-	  cosa = DOTP(x0, x1) / NORM(x0) / NORM(x1);
+	  double cosa = DOTP(x0, x1) / NORM(x0) / NORM(x1);
 
 	  /* Get ratio of SZA and incident radiation... */
-	  rcos = cosa / cos(sza2 * M_PI / 180.);
+	  double rcos = cosa / cos(sza2 * M_PI / 180.);
 
 	  /* Add solar radiation... */
-	  for (id = 0; id < ctl->nd; id++)
+	  for (int id = 0; id < ctl->nd; id++)
 	    rad[id] += 6.764e-5 / (2. * M_PI) * planck(TSUN, ctl->nu[id])
 	      * tau_refl[id] * (1 - los->sfeps[id]) * tau[id] * rcos;
 	}
@@ -3361,7 +3335,7 @@ void formod_pencil(
   }
 
   /* Copy results... */
-  for (id = 0; id < ctl->nd; id++) {
+  for (int id = 0; id < ctl->nd; id++) {
     obs->rad[id][ir] = rad[id];
     obs->tau[id][ir] = tau[id];
   }
@@ -3378,13 +3352,11 @@ void formod_srcfunc(
   double t,
   double *src) {
 
-  int id, it;
-
   /* Determine index in temperature array... */
-  it = locate_reg(tbl->st, TBLNS, t);
+  int it = locate_reg(tbl->st, TBLNS, t);
 
   /* Interpolate Planck function value... */
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     src[id] = LIN(tbl->st[it], tbl->sr[id][it],
 		  tbl->st[it + 1], tbl->sr[id][it + 1], t);
 }
@@ -3397,9 +3369,8 @@ void geo2cart(
   double lat,
   double *x) {
 
-  double radius;
+  double radius = z + RE;
 
-  radius = z + RE;
   x[0] = radius * cos(lat / 180 * M_PI) * cos(lon / 180 * M_PI);
   x[1] = radius * cos(lat / 180 * M_PI) * sin(lon / 180 * M_PI);
   x[2] = radius * sin(lat / 180 * M_PI);
@@ -3413,9 +3384,9 @@ void hydrostatic(
 
   static int ig_h2o = -999;
 
-  double dzmin = 1e99, e = 0, mean, mmair = 28.96456e-3, mmh2o = 18.0153e-3;
+  double dzmin = 1e99, e = 0, mmair = 28.96456e-3, mmh2o = 18.0153e-3;
 
-  int i, ip, ipref = 0, ipts = 20;
+  int ipref = 0, ipts = 20;
 
   /* Check reference height... */
   if (ctl->hydz < 0)
@@ -3426,16 +3397,16 @@ void hydrostatic(
     ig_h2o = find_emitter(ctl, "H2O");
 
   /* Find air parcel next to reference height... */
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     if (fabs(atm->z[ip] - ctl->hydz) < dzmin) {
       dzmin = fabs(atm->z[ip] - ctl->hydz);
       ipref = ip;
     }
 
   /* Upper part of profile... */
-  for (ip = ipref + 1; ip < atm->np; ip++) {
-    mean = 0;
-    for (i = 0; i < ipts; i++) {
+  for (int ip = ipref + 1; ip < atm->np; ip++) {
+    double mean = 0;
+    for (int i = 0; i < ipts; i++) {
       if (ig_h2o >= 0)
 	e = LIN(0.0, atm->q[ig_h2o][ip - 1],
 		ipts - 1.0, atm->q[ig_h2o][ip], (double) i);
@@ -3450,9 +3421,9 @@ void hydrostatic(
   }
 
   /* Lower part of profile... */
-  for (ip = ipref - 1; ip >= 0; ip--) {
-    mean = 0;
-    for (i = 0; i < ipts; i++) {
+  for (int ip = ipref - 1; ip >= 0; ip--) {
+    double mean = 0;
+    for (int i = 0; i < ipts; i++) {
       if (ig_h2o >= 0)
 	e = LIN(0.0, atm->q[ig_h2o][ip + 1],
 		ipts - 1.0, atm->q[ig_h2o][ip], (double) i);
@@ -3474,19 +3445,17 @@ void idx2name(
   int idx,
   char *quantity) {
 
-  int icl, ig, isf, iw;
-
   if (idx == IDXP)
     sprintf(quantity, "PRESSURE");
 
   if (idx == IDXT)
     sprintf(quantity, "TEMPERATURE");
 
-  for (ig = 0; ig < ctl->ng; ig++)
+  for (int ig = 0; ig < ctl->ng; ig++)
     if (idx == IDXQ(ig))
       sprintf(quantity, "%s", ctl->emitter[ig]);
 
-  for (iw = 0; iw < ctl->nw; iw++)
+  for (int iw = 0; iw < ctl->nw; iw++)
     if (idx == IDXK(iw))
       sprintf(quantity, "EXTINCT_WINDOW_%d", iw);
 
@@ -3496,7 +3465,7 @@ void idx2name(
   if (idx == IDXCLDZ)
     sprintf(quantity, "CLOUD_DEPTH");
 
-  for (icl = 0; icl < ctl->ncl; icl++)
+  for (int icl = 0; icl < ctl->ncl; icl++)
     if (idx == IDXCLK(icl))
       sprintf(quantity, "CLOUD_EXTINCT_%.4f", ctl->clnu[icl]);
 
@@ -3509,7 +3478,7 @@ void idx2name(
   if (idx == IDXSFT)
     sprintf(quantity, "SURFACE_TEMPERATURE");
 
-  for (isf = 0; isf < ctl->nsf; isf++)
+  for (int isf = 0; isf < ctl->nsf; isf++)
     if (idx == IDXSFEPS(isf))
       sprintf(quantity, "SURFACE_EMISSIVITY_%.4f", ctl->sfnu[isf]);
 }
@@ -3522,15 +3491,15 @@ void init_srcfunc(
 
   char filename[2 * LEN];
 
-  double dnu, f[NSHAPE], ff, fnu, fsum, nu[NSHAPE];
+  double dnu, f[NSHAPE], nu[NSHAPE];
 
-  int i, id, it, n;
+  int n;
 
   /* Write info... */
   LOG(1, "Initialize source function table...");
 
   /* Loop over channels... */
-  for (id = 0; id < ctl->nd; id++) {
+  for (int id = 0; id < ctl->nd; id++) {
 
     /* Read filter function... */
     sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
@@ -3538,21 +3507,21 @@ void init_srcfunc(
 
     /* Get minimum grid spacing... */
     dnu = 1.0;
-    for (i = 1; i < n; i++)
+    for (int i = 1; i < n; i++)
       dnu = GSL_MIN(dnu, nu[i] - nu[i - 1]);
 
     /* Compute source function table... */
-#pragma omp parallel for default(none) shared(ctl,tbl,id,nu,f,n,dnu) private(it,fsum,fnu,i,ff)
-    for (it = 0; it < TBLNS; it++) {
+#pragma omp parallel for default(none) shared(ctl,tbl,id,nu,f,n,dnu)
+    for (int it = 0; it < TBLNS; it++) {
 
       /* Set temperature... */
       tbl->st[it] = LIN(0.0, TMIN, TBLNS - 1.0, TMAX, (double) it);
 
       /* Integrate Planck function... */
-      fsum = tbl->sr[id][it] = 0;
-      for (fnu = nu[0]; fnu <= nu[n - 1]; fnu += dnu) {
-	i = locate_irr(nu, n, fnu);
-	ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
+      double fsum = tbl->sr[id][it] = 0;
+      for (double fnu = nu[0]; fnu <= nu[n - 1]; fnu += dnu) {
+	int i = locate_irr(nu, n, fnu);
+	double ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
 	fsum += ff;
 	tbl->sr[id][it] += ff * planck(tbl->st[it], fnu);
       }
@@ -3572,18 +3541,16 @@ void intpol_atm(
   double *q,
   double *k) {
 
-  int ig, ip, iw;
-
   /* Get array index... */
-  ip = locate_irr(atm->z, atm->np, z);
+  int ip = locate_irr(atm->z, atm->np, z);
 
   /* Interpolate... */
   *p = EXP(atm->z[ip], atm->p[ip], atm->z[ip + 1], atm->p[ip + 1], z);
   *t = LIN(atm->z[ip], atm->t[ip], atm->z[ip + 1], atm->t[ip + 1], z);
-  for (ig = 0; ig < ctl->ng; ig++)
+  for (int ig = 0; ig < ctl->ng; ig++)
     q[ig] =
       LIN(atm->z[ip], atm->q[ig][ip], atm->z[ip + 1], atm->q[ig][ip + 1], z);
-  for (iw = 0; iw < ctl->nw; iw++)
+  for (int iw = 0; iw < ctl->nw; iw++)
     k[iw] =
       LIN(atm->z[ip], atm->k[iw][ip], atm->z[ip + 1], atm->k[iw][ip + 1], z);
 }
@@ -3598,18 +3565,16 @@ void intpol_tbl(
   double tau_path[ND][NG],
   double tau_seg[ND]) {
 
-  double eps, eps00, eps01, eps10, eps11, u;
-
-  int id, ig, ipr, it0, it1;
+  double eps, u;
 
   /* Loop over channels... */
-  for (id = 0; id < ctl->nd; id++) {
+  for (int id = 0; id < ctl->nd; id++) {
 
     /* Initialize... */
     tau_seg[id] = 1;
 
     /* Loop over emitters.... */
-    for (ig = 0; ig < ctl->ng; ig++) {
+    for (int ig = 0; ig < ctl->ng; ig++) {
 
       /* Check size of table (pressure)... */
       if (tbl->np[ig][id] < 30)
@@ -3623,10 +3588,10 @@ void intpol_tbl(
       else {
 
 	/* Determine pressure and temperature indices... */
-	ipr = locate_irr(tbl->p[ig][id], tbl->np[ig][id], los->p[ip]);
-	it0 =
+	int ipr = locate_irr(tbl->p[ig][id], tbl->np[ig][id], los->p[ip]);
+	int it0 =
 	  locate_reg(tbl->t[ig][id][ipr], tbl->nt[ig][id][ipr], los->t[ip]);
-	it1 =
+	int it1 =
 	  locate_reg(tbl->t[ig][id][ipr + 1], tbl->nt[ig][id][ipr + 1],
 		     los->t[ip]);
 
@@ -3642,19 +3607,20 @@ void intpol_tbl(
 
 	  /* Get emissivities of extended path... */
 	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, 1 - tau_path[id][ig]);
-	  eps00 = intpol_tbl_eps(tbl, ig, id, ipr, it0, u + los->u[ig][ip]);
+	  double eps00
+	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, u + los->u[ig][ip]);
 
 	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, 1 - tau_path[id][ig]);
-	  eps01 =
+	  double eps01 =
 	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, u + los->u[ig][ip]);
 
 	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, 1 - tau_path[id][ig]);
-	  eps10 =
+	  double eps10 =
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, u + los->u[ig][ip]);
 
 	  u =
 	    intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, 1 - tau_path[id][ig]);
-	  eps11 =
+	  double eps11 =
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, u + los->u[ig][ip]);
 
 	  /* Interpolate with respect to temperature... */
@@ -3694,8 +3660,6 @@ double intpol_tbl_eps(
   int it,
   double u) {
 
-  int idx;
-
   /* Lower boundary... */
   if (u < tbl->u[ig][id][ip][it][0])
     return LIN(0, 0, tbl->u[ig][id][ip][it][0], tbl->eps[ig][id][ip][it][0],
@@ -3711,7 +3675,7 @@ double intpol_tbl_eps(
   else {
 
     /* Get index... */
-    idx = locate_tbl(tbl->u[ig][id][ip][it], tbl->nu[ig][id][ip][it], u);
+    int idx = locate_tbl(tbl->u[ig][id][ip][it], tbl->nu[ig][id][ip][it], u);
 
     /* Interpolate... */
     return
@@ -3731,8 +3695,6 @@ double intpol_tbl_u(
   int it,
   double eps) {
 
-  int idx;
-
   /* Lower boundary... */
   if (eps < tbl->eps[ig][id][ip][it][0])
     return LIN(0, 0, tbl->eps[ig][id][ip][it][0], tbl->u[ig][id][ip][it][0],
@@ -3748,7 +3710,8 @@ double intpol_tbl_u(
   else {
 
     /* Get index... */
-    idx = locate_tbl(tbl->eps[ig][id][ip][it], tbl->nu[ig][id][ip][it], eps);
+    int idx
+      = locate_tbl(tbl->eps[ig][id][ip][it], tbl->nu[ig][id][ip][it], eps);
 
     /* Interpolate... */
     return
@@ -3806,15 +3769,13 @@ void kernel(
 
   gsl_vector *x0, *x1, *yy0, *yy1;
 
-  int *iqa, j;
+  int *iqa;
 
   double h;
 
-  size_t i, n, m;
-
   /* Get sizes... */
-  m = k->size1;
-  n = k->size2;
+  size_t m = k->size1;
+  size_t n = k->size2;
 
   /* Allocate... */
   x0 = gsl_vector_alloc(n);
@@ -3833,8 +3794,8 @@ void kernel(
   gsl_matrix_set_zero(k);
 
   /* Loop over state vector elements... */
-#pragma omp parallel for default(none) shared(ctl,atm,obs,k,x0,yy0,n,m,iqa) private(i, j, h, x1, yy1, atm1, obs1)
-  for (j = 0; j < (int) n; j++) {
+#pragma omp parallel for default(none) shared(ctl,atm,obs,k,x0,yy0,n,m,iqa) private(h, x1, yy1, atm1, obs1)
+  for (size_t j = 0; j < n; j++) {
 
     /* Allocate... */
     x1 = gsl_vector_alloc(n);
@@ -3844,11 +3805,11 @@ void kernel(
 
     /* Set perturbation size... */
     if (iqa[j] == IDXP)
-      h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, (size_t) j)), 1e-7);
+      h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-7);
     else if (iqa[j] == IDXT)
       h = 1.0;
     else if (iqa[j] >= IDXQ(0) && iqa[j] < IDXQ(ctl->ng))
-      h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, (size_t) j)), 1e-15);
+      h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-15);
     else if (iqa[j] >= IDXK(0) && iqa[j] < IDXK(ctl->nw))
       h = 1e-4;
     else if (iqa[j] == IDXCLZ || iqa[j] == IDXCLDZ)
@@ -3868,7 +3829,7 @@ void kernel(
 
     /* Disturb state vector element... */
     gsl_vector_memcpy(x1, x0);
-    gsl_vector_set(x1, (size_t) j, gsl_vector_get(x1, (size_t) j) + h);
+    gsl_vector_set(x1, j, gsl_vector_get(x1, j) + h);
     copy_atm(ctl, atm1, atm, 0);
     copy_obs(ctl, obs1, obs, 0);
     x2atm(ctl, x1, atm1);
@@ -3880,8 +3841,8 @@ void kernel(
     obs2y(ctl, obs1, yy1, NULL, NULL);
 
     /* Compute derivatives... */
-    for (i = 0; i < m; i++)
-      gsl_matrix_set(k, i, (size_t) j,
+    for (size_t i = 0; i < m; i++)
+      gsl_matrix_set(k, i, j,
 		     (gsl_vector_get(yy1, i) - gsl_vector_get(yy0, i)) / h);
 
     /* Free... */
@@ -3904,11 +3865,9 @@ int locate_irr(
   int n,
   double x) {
 
-  int i, ilo, ihi;
-
-  ilo = 0;
-  ihi = n - 1;
-  i = (ihi + ilo) >> 1;
+  int ilo = 0;
+  int ihi = n - 1;
+  int i = (ihi + ilo) >> 1;
 
   if (xx[i] < xx[i + 1])
     while (ihi > ilo + 1) {
@@ -3936,15 +3895,13 @@ int locate_reg(
   int n,
   double x) {
 
-  int i;
-
   /* Calculate index... */
-  i = (int) ((x - xx[0]) / (xx[1] - xx[0]));
+  int i = (int) ((x - xx[0]) / (xx[1] - xx[0]));
 
   /* Check range... */
   if (i < 0)
     i = 0;
-  else if (i >= n - 2)
+  else if (i > n - 2)
     i = n - 2;
 
   return i;
@@ -3957,11 +3914,9 @@ int locate_tbl(
   int n,
   double x) {
 
-  int i, ilo, ihi;
-
-  ilo = 0;
-  ihi = n - 1;
-  i = (ihi + ilo) >> 1;
+  int ilo = 0;
+  int ihi = n - 1;
+  int i = (ihi + ilo) >> 1;
 
   while (ihi > ilo + 1) {
     i = (ihi + ilo) >> 1;
@@ -3983,13 +3938,11 @@ size_t obs2y(
   int *ida,
   int *ira) {
 
-  int id, ir;
-
   size_t m = 0;
 
   /* Determine measurement vector... */
-  for (ir = 0; ir < obs->nr; ir++)
-    for (id = 0; id < ctl->nd; id++)
+  for (int ir = 0; ir < obs->nr; ir++)
+    for (int id = 0; id < ctl->nd; id++)
       if (gsl_finite(obs->rad[id][ir])) {
 	if (y != NULL)
 	  gsl_vector_set(y, m, obs->rad[id][ir]);
@@ -4021,11 +3974,12 @@ void raytrace(
   los_t * los,
   int ir) {
 
-  double cosa, d, dmax, dmin = 0, ds, ex0[3], ex1[3], frac, h = 0.02, k[NW],
-    lat, lon, n, naux, ng[3], norm, p, q[NG], t, x[3], xh[3],
-    xobs[3], xvp[3], z = 1e99, zip, zmax, zmin, zrefrac = 60;
+  const double h = 0.02, zrefrac = 60;
 
-  int i, icl, id, ig, ip, isf, stop = 0;
+  double ds, ex0[3], ex1[3], k[NW], lat, lon, n, ng[3], norm,
+    p, q[NG], t, x[3], xh[3], xobs[3], xvp[3], z = 1e99, zmax, zmin;
+
+  int stop = 0;
 
   /* Initialize... */
   los->np = 0;
@@ -4039,9 +3993,9 @@ void raytrace(
   if (ctl->nsf > 0) {
     zmin = GSL_MAX(atm->sfz, zmin);
     if (atm->sfp > 0) {
-      ip = locate_irr(atm->p, atm->np, atm->sfp);
-      zip = LIN(log(atm->p[ip]), atm->z[ip],
-		log(atm->p[ip + 1]), atm->z[ip + 1], log(atm->sfp));
+      int ip = locate_irr(atm->p, atm->np, atm->sfp);
+      double zip = LIN(log(atm->p[ip]), atm->z[ip],
+		       log(atm->p[ip + 1]), atm->z[ip + 1], log(atm->sfp));
       zmin = GSL_MAX(zip, zmin);
     }
   }
@@ -4059,22 +4013,22 @@ void raytrace(
   geo2cart(obs->vpz[ir], obs->vplon[ir], obs->vplat[ir], xvp);
 
   /* Determine initial tangent vector... */
-  for (i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++)
     ex0[i] = xvp[i] - xobs[i];
   norm = NORM(ex0);
-  for (i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++)
     ex0[i] /= norm;
 
   /* Observer within atmosphere... */
-  for (i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++)
     x[i] = xobs[i];
 
   /* Observer above atmosphere (search entry point)... */
   if (obs->obsz[ir] > zmax) {
-    dmax = norm;
+    double dmax = norm, dmin = 0;
     while (fabs(dmin - dmax) > 0.001) {
-      d = (dmax + dmin) / 2;
-      for (i = 0; i < 3; i++)
+      double d = (dmax + dmin) / 2;
+      for (int i = 0; i < 3; i++)
 	x[i] = xobs[i] + d * ex0[i];
       cart2geo(x, &z, &lon, &lat);
       if (z <= zmax && z > zmax - 0.001)
@@ -4093,9 +4047,9 @@ void raytrace(
     ds = ctl->rayds;
     if (ctl->raydz > 0) {
       norm = NORM(x);
-      for (i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
 	xh[i] = x[i] / norm;
-      cosa = fabs(DOTP(ex0, xh));
+      double cosa = fabs(DOTP(ex0, xh));
       if (cosa != 0)
 	ds = GSL_MIN(ctl->rayds, ctl->raydz / cosa);
     }
@@ -4106,13 +4060,13 @@ void raytrace(
     /* Check if LOS hits the ground or has left atmosphere... */
     if (z < zmin || z > zmax) {
       stop = (z < zmin ? 2 : 1);
-      frac =
+      double frac =
 	((z <
 	  zmin ? zmin : zmax) - los->z[los->np - 1]) / (z - los->z[los->np -
 								   1]);
       geo2cart(los->z[los->np - 1], los->lon[los->np - 1],
 	       los->lat[los->np - 1], xh);
-      for (i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
 	x[i] = xh[i] + frac * (x[i] - xh[i]);
       cart2geo(x, &z, &lon, &lat);
       los->ds[los->np - 1] = ds * frac;
@@ -4128,17 +4082,17 @@ void raytrace(
     los->z[los->np] = z;
     los->p[los->np] = p;
     los->t[los->np] = t;
-    for (ig = 0; ig < ctl->ng; ig++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       los->q[ig][los->np] = q[ig];
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       los->k[id][los->np] = k[ctl->window[id]];
     los->ds[los->np] = ds;
 
     /* Add cloud extinction... */
     if (ctl->ncl > 0 && atm->cldz > 0) {
       double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
-      for (id = 0; id < ctl->nd; id++) {
-	icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
+      for (int id = 0; id < ctl->nd; id++) {
+	int icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
 	los->k[id][los->np]
 	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
 		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
@@ -4158,10 +4112,10 @@ void raytrace(
       los->sft = (stop == 2 ? t : -999);
 
       /* Set surface emissivity... */
-      for (id = 0; id < ctl->nd; id++) {
+      for (int id = 0; id < ctl->nd; id++) {
 	los->sfeps[id] = 1.0;
 	if (ctl->nsf > 0) {
-	  isf = locate_irr(ctl->sfnu, ctl->nsf, ctl->nu[id]);
+	  int isf = locate_irr(ctl->sfnu, ctl->nsf, ctl->nu[id]);
 	  los->sfeps[id] = LIN(ctl->sfnu[isf], atm->sfeps[isf],
 			       ctl->sfnu[isf + 1], atm->sfeps[isf + 1],
 			       ctl->nu[id]);
@@ -4179,43 +4133,42 @@ void raytrace(
       n = 1;
 
     /* Construct new tangent vector (first term)... */
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       ex1[i] = ex0[i] * n;
 
     /* Compute gradient of refractivity... */
     if (ctl->refrac && z <= zrefrac) {
-      for (i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
 	xh[i] = x[i] + 0.5 * ds * ex0[i];
       cart2geo(xh, &z, &lon, &lat);
       intpol_atm(ctl, atm, z, &p, &t, q, k);
       n = refractivity(p, t);
-      for (i = 0; i < 3; i++) {
+      for (int i = 0; i < 3; i++) {
 	xh[i] += h;
 	cart2geo(xh, &z, &lon, &lat);
 	intpol_atm(ctl, atm, z, &p, &t, q, k);
-	naux = refractivity(p, t);
-	ng[i] = (naux - n) / h;
+	ng[i] = (refractivity(p, t) - n) / h;
 	xh[i] -= h;
       }
     } else
-      for (i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
 	ng[i] = 0;
 
     /* Construct new tangent vector (second term)... */
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       ex1[i] += ds * ng[i];
 
     /* Normalize new tangent vector... */
     norm = NORM(ex1);
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       ex1[i] /= norm;
 
     /* Determine next point of LOS... */
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       x[i] += 0.5 * ds * (ex0[i] + ex1[i]);
 
     /* Copy tangent vector... */
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       ex0[i] = ex1[i];
   }
 
@@ -4223,13 +4176,13 @@ void raytrace(
   tangent_point(los, &obs->tpz[ir], &obs->tplon[ir], &obs->tplat[ir]);
 
   /* Change segment lengths according to trapezoid rule... */
-  for (ip = los->np - 1; ip >= 1; ip--)
+  for (int ip = los->np - 1; ip >= 1; ip--)
     los->ds[ip] = 0.5 * (los->ds[ip - 1] + los->ds[ip]);
   los->ds[0] *= 0.5;
 
   /* Compute column density... */
-  for (ip = 0; ip < los->np; ip++)
-    for (ig = 0; ig < ctl->ng; ig++)
+  for (int ip = 0; ip < los->np; ip++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       los->u[ig][ip] = 10 * los->q[ig][ip] * los->p[ip]
 	/ (KB * los->t[ip]) * los->ds[ip];
 }
@@ -4245,8 +4198,6 @@ void read_atm(
   FILE *in;
 
   char file[LEN], line[LEN], *tok;
-
-  int icl, ig, isf, iw;
 
   /* Init... */
   atm->np = 0;
@@ -4274,21 +4225,21 @@ void read_atm(
     TOK(NULL, tok, "%lg", atm->lat[atm->np]);
     TOK(NULL, tok, "%lg", atm->p[atm->np]);
     TOK(NULL, tok, "%lg", atm->t[atm->np]);
-    for (ig = 0; ig < ctl->ng; ig++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       TOK(NULL, tok, "%lg", atm->q[ig][atm->np]);
-    for (iw = 0; iw < ctl->nw; iw++)
+    for (int iw = 0; iw < ctl->nw; iw++)
       TOK(NULL, tok, "%lg", atm->k[iw][atm->np]);
     if (ctl->ncl > 0 && atm->np == 0) {
       TOK(NULL, tok, "%lg", atm->clz);
       TOK(NULL, tok, "%lg", atm->cldz);
-      for (icl = 0; icl < ctl->ncl; icl++)
+      for (int icl = 0; icl < ctl->ncl; icl++)
 	TOK(NULL, tok, "%lg", atm->clk[icl]);
     }
     if (ctl->nsf > 0 && atm->np == 0) {
       TOK(NULL, tok, "%lg", atm->sfz);
       TOK(NULL, tok, "%lg", atm->sfp);
       TOK(NULL, tok, "%lg", atm->sft);
-      for (isf = 0; isf < ctl->nsf; isf++)
+      for (int isf = 0; isf < ctl->nsf; isf++)
 	TOK(NULL, tok, "%lg", atm->sfeps[isf]);
     }
 
@@ -4312,8 +4263,6 @@ void read_ctl(
   char *argv[],
   ctl_t * ctl) {
 
-  int icl, id, ig, isf, iw;
-
   /* Write info... */
   LOG(1, "\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
       "(executable: %s | compiled: %s, %s)\n", argv[0], __DATE__, __TIME__);
@@ -4322,21 +4271,21 @@ void read_ctl(
   ctl->ng = (int) scan_ctl(argc, argv, "NG", -1, "0", NULL);
   if (ctl->ng < 0 || ctl->ng > NG)
     ERRMSG("Set 0 <= NG <= MAX!");
-  for (ig = 0; ig < ctl->ng; ig++)
+  for (int ig = 0; ig < ctl->ng; ig++)
     scan_ctl(argc, argv, "EMITTER", ig, "", ctl->emitter[ig]);
 
   /* Radiance channels... */
   ctl->nd = (int) scan_ctl(argc, argv, "ND", -1, "0", NULL);
   if (ctl->nd < 0 || ctl->nd > ND)
     ERRMSG("Set 0 <= ND <= MAX!");
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     ctl->nu[id] = scan_ctl(argc, argv, "NU", id, "", NULL);
 
   /* Spectral windows... */
   ctl->nw = (int) scan_ctl(argc, argv, "NW", -1, "1", NULL);
   if (ctl->nw < 0 || ctl->nw > NW)
     ERRMSG("Set 0 <= NW <= MAX!");
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     ctl->window[id] = (int) scan_ctl(argc, argv, "WINDOW", id, "0", NULL);
 
   /* Cloud data... */
@@ -4345,7 +4294,7 @@ void read_ctl(
     ERRMSG("Set 0 <= NCL <= MAX!");
   if (ctl->ncl == 1)
     ERRMSG("Set NCL > 1!");
-  for (icl = 0; icl < ctl->ncl; icl++)
+  for (int icl = 0; icl < ctl->ncl; icl++)
     ctl->clnu[icl] = scan_ctl(argc, argv, "CLNU", icl, "", NULL);
 
   /* Surface data... */
@@ -4354,7 +4303,7 @@ void read_ctl(
     ERRMSG("Set 0 <= NSF <= MAX!");
   if (ctl->nsf == 1)
     ERRMSG("Set NSF > 1!");
-  for (isf = 0; isf < ctl->nsf; isf++)
+  for (int isf = 0; isf < ctl->nsf; isf++)
     ctl->sfnu[isf] = scan_ctl(argc, argv, "SFNU", isf, "", NULL);
   ctl->sftype = (int) scan_ctl(argc, argv, "SFTYPE", -1, "2", NULL);
   if (ctl->sftype < 0 || ctl->sftype > 3)
@@ -4387,11 +4336,11 @@ void read_ctl(
   ctl->retp_zmax = scan_ctl(argc, argv, "RETP_ZMAX", -1, "-999", NULL);
   ctl->rett_zmin = scan_ctl(argc, argv, "RETT_ZMIN", -1, "-999", NULL);
   ctl->rett_zmax = scan_ctl(argc, argv, "RETT_ZMAX", -1, "-999", NULL);
-  for (ig = 0; ig < ctl->ng; ig++) {
+  for (int ig = 0; ig < ctl->ng; ig++) {
     ctl->retq_zmin[ig] = scan_ctl(argc, argv, "RETQ_ZMIN", ig, "-999", NULL);
     ctl->retq_zmax[ig] = scan_ctl(argc, argv, "RETQ_ZMAX", ig, "-999", NULL);
   }
-  for (iw = 0; iw < ctl->nw; iw++) {
+  for (int iw = 0; iw < ctl->nw; iw++) {
     ctl->retk_zmin[iw] = scan_ctl(argc, argv, "RETK_ZMIN", iw, "-999", NULL);
     ctl->retk_zmax[iw] = scan_ctl(argc, argv, "RETK_ZMAX", iw, "-999", NULL);
   }
@@ -4461,8 +4410,6 @@ void read_obs(
 
   char file[LEN], line[LEN], *tok;
 
-  int id;
-
   /* Init... */
   obs->nr = 0;
 
@@ -4493,9 +4440,9 @@ void read_obs(
     TOK(NULL, tok, "%lg", obs->tpz[obs->nr]);
     TOK(NULL, tok, "%lg", obs->tplon[obs->nr]);
     TOK(NULL, tok, "%lg", obs->tplat[obs->nr]);
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       TOK(NULL, tok, "%lg", obs->rad[id][obs->nr]);
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       TOK(NULL, tok, "%lg", obs->tau[id][obs->nr]);
 
     /* Increment counter... */
@@ -4555,20 +4502,18 @@ void read_tbl(
 
   char filename[2 * LEN], line[LEN];
 
-  double eps, eps_old, press, press_old, temp, temp_old, u, u_old;
-
-  int id, ig, ip, it;
+  double eps, press, temp, u;
 
   /* Loop over trace gases and channels... */
-  for (ig = 0; ig < ctl->ng; ig++)
-    for (id = 0; id < ctl->nd; id++) {
+  for (int ig = 0; ig < ctl->ng; ig++)
+    for (int id = 0; id < ctl->nd; id++) {
 
       /* Initialize... */
       tbl->np[ig][id] = -1;
-      eps_old = -999;
-      press_old = -999;
-      temp_old = -999;
-      u_old = -999;
+      double eps_old = -999;
+      double press_old = -999;
+      double temp_old = -999;
+      double u_old = -999;
 
       /* Set filename... */
       sprintf(filename, "%s_%.4f_%s.%s", ctl->tblbase,
@@ -4642,9 +4587,9 @@ void read_tbl(
 
 	/* Increment counters... */
 	tbl->np[ig][id]++;
-	for (ip = 0; ip < tbl->np[ig][id]; ip++) {
+	for (int ip = 0; ip < tbl->np[ig][id]; ip++) {
 	  tbl->nt[ig][id][ip]++;
-	  for (it = 0; it < tbl->nt[ig][id][ip]; it++)
+	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++)
 	    tbl->nu[ig][id][ip][it]++;
 	}
       }
@@ -4661,7 +4606,7 @@ void read_tbl(
 	FREAD(tbl->p[ig][id], double,
 	        (size_t) tbl->np[ig][id],
 	      in);
-	for (ip = 0; ip < tbl->np[ig][id]; ip++) {
+	for (int ip = 0; ip < tbl->np[ig][id]; ip++) {
 	  FREAD(&tbl->nt[ig][id][ip], int,
 		1,
 		in);
@@ -4670,7 +4615,7 @@ void read_tbl(
 	  FREAD(tbl->t[ig][id][ip], double,
 		  (size_t) tbl->nt[ig][id][ip],
 		in);
-	  for (it = 0; it < tbl->nt[ig][id][ip]; it++) {
+	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++) {
 	    FREAD(&tbl->nu[ig][id][ip][it], int,
 		  1,
 		  in);
@@ -4720,7 +4665,7 @@ double scan_ctl(
   char dummy[LEN], fullname1[LEN], fullname2[LEN], line[LEN],
     rvarname[LEN], rval[LEN];
 
-  int contain = 0, i;
+  int contain = 0;
 
   /* Open file... */
   if (argv[1][0] != '-')
@@ -4745,7 +4690,7 @@ double scan_ctl(
 	  contain = 1;
 	  break;
 	}
-  for (i = 1; i < argc - 1; i++)
+  for (int i = 1; i < argc - 1; i++)
     if (strcasecmp(argv[i], fullname1) == 0 ||
 	strcasecmp(argv[i], fullname2) == 0) {
       sprintf(rval, "%s", argv[i + 1]);
@@ -4781,33 +4726,31 @@ double sza(
   double lon,
   double lat) {
 
-  double D, dec, e, g, GMST, h, L, LST, q, ra;
-
   /* Number of days and fraction with respect to 2000-01-01T12:00Z... */
-  D = sec / 86400 - 0.5;
+  double D = sec / 86400 - 0.5;
 
   /* Geocentric apparent ecliptic longitude [rad]... */
-  g = (357.529 + 0.98560028 * D) * M_PI / 180;
-  q = 280.459 + 0.98564736 * D;
-  L = (q + 1.915 * sin(g) + 0.020 * sin(2 * g)) * M_PI / 180;
+  double g = (357.529 + 0.98560028 * D) * M_PI / 180;
+  double q = 280.459 + 0.98564736 * D;
+  double L = (q + 1.915 * sin(g) + 0.020 * sin(2 * g)) * M_PI / 180;
 
   /* Mean obliquity of the ecliptic [rad]... */
-  e = (23.439 - 0.00000036 * D) * M_PI / 180;
+  double e = (23.439 - 0.00000036 * D) * M_PI / 180;
 
   /* Declination [rad]... */
-  dec = asin(sin(e) * sin(L));
+  double dec = asin(sin(e) * sin(L));
 
   /* Right ascension [rad]... */
-  ra = atan2(cos(e) * sin(L), cos(L));
+  double ra = atan2(cos(e) * sin(L), cos(L));
 
   /* Greenwich Mean Sidereal Time [h]... */
-  GMST = 18.697374558 + 24.06570982441908 * D;
+  double GMST = 18.697374558 + 24.06570982441908 * D;
 
   /* Local Sidereal Time [h]... */
-  LST = GMST + lon / 15;
+  double LST = GMST + lon / 15;
 
   /* Hour angle [rad]... */
-  h = LST / 12 * M_PI - ra;
+  double h = LST / 12 * M_PI - ra;
 
   /* Convert latitude... */
   lat *= M_PI / 180;
@@ -4825,12 +4768,10 @@ void tangent_point(
   double *tplon,
   double *tplat) {
 
-  double a, b, c, dummy, v[3], v0[3], v2[3], x, x1, x2, yy0, yy1, yy2;
-
-  size_t i, ip;
+  double dummy, v[3], v0[3], v2[3];
 
   /* Find minimum altitude... */
-  ip = gsl_stats_min_index(los->z, 1, (size_t) los->np);
+  size_t ip = gsl_stats_min_index(los->z, 1, (size_t) los->np);
 
   /* Nadir or zenith... */
   if (ip <= 0 || ip >= (size_t) los->np - 1) {
@@ -4843,21 +4784,21 @@ void tangent_point(
   else {
 
     /* Determine interpolating polynomial y=a*x^2+b*x+c... */
-    yy0 = los->z[ip - 1];
-    yy1 = los->z[ip];
-    yy2 = los->z[ip + 1];
-    x1 = sqrt(POW2(los->ds[ip]) - POW2(yy1 - yy0));
-    x2 = x1 + sqrt(POW2(los->ds[ip + 1]) - POW2(yy2 - yy1));
-    a = 1 / (x1 - x2) * (-(yy0 - yy1) / x1 + (yy0 - yy2) / x2);
-    b = -(yy0 - yy1) / x1 - a * x1;
-    c = yy0;
+    double yy0 = los->z[ip - 1];
+    double yy1 = los->z[ip];
+    double yy2 = los->z[ip + 1];
+    double x1 = sqrt(POW2(los->ds[ip]) - POW2(yy1 - yy0));
+    double x2 = x1 + sqrt(POW2(los->ds[ip + 1]) - POW2(yy2 - yy1));
+    double a = 1 / (x1 - x2) * (-(yy0 - yy1) / x1 + (yy0 - yy2) / x2);
+    double b = -(yy0 - yy1) / x1 - a * x1;
+    double c = yy0;
 
     /* Get tangent point location... */
-    x = -b / (2 * a);
+    double x = -b / (2 * a);
     *tpz = a * x * x + b * x + c;
     geo2cart(los->z[ip - 1], los->lon[ip - 1], los->lat[ip - 1], v0);
     geo2cart(los->z[ip + 1], los->lon[ip + 1], los->lat[ip + 1], v2);
-    for (i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
       v[i] = LIN(0.0, v0[i], x2, v2[i], x);
     cart2geo(v, &dummy, tplon, tplat);
   }
@@ -4944,7 +4885,7 @@ void write_atm(
 
   char file[LEN];
 
-  int icl, ig, ip, isf, iw, n = 6;
+  int n = 6;
 
   /* Set filename... */
   if (dirname != NULL)
@@ -4966,15 +4907,15 @@ void write_atm(
 	  "# $3 = longitude [deg]\n"
 	  "# $4 = latitude [deg]\n"
 	  "# $5 = pressure [hPa]\n" "# $6 = temperature [K]\n");
-  for (ig = 0; ig < ctl->ng; ig++)
+  for (int ig = 0; ig < ctl->ng; ig++)
     fprintf(out, "# $%d = %s volume mixing ratio [ppv]\n",
 	    ++n, ctl->emitter[ig]);
-  for (iw = 0; iw < ctl->nw; iw++)
+  for (int iw = 0; iw < ctl->nw; iw++)
     fprintf(out, "# $%d = extinction (window %d) [1/km]\n", ++n, iw);
   if (ctl->ncl > 0) {
     fprintf(out, "# $%d = cloud layer height [km]\n", ++n);
     fprintf(out, "# $%d = cloud layer depth [km]\n", ++n);
-    for (icl = 0; icl < ctl->ncl; icl++)
+    for (int icl = 0; icl < ctl->ncl; icl++)
       fprintf(out, "# $%d = cloud layer extinction (%.4f cm^-1) [1/km]\n",
 	      ++n, ctl->clnu[icl]);
   }
@@ -4982,29 +4923,29 @@ void write_atm(
     fprintf(out, "# $%d = surface layer height [km]\n", ++n);
     fprintf(out, "# $%d = surface layer pressure [hPa]\n", ++n);
     fprintf(out, "# $%d = surface layer temperature [K]\n", ++n);
-    for (isf = 0; isf < ctl->nsf; isf++)
+    for (int isf = 0; isf < ctl->nsf; isf++)
       fprintf(out, "# $%d = surface layer emissivity (%.4f cm^-1)\n",
 	      ++n, ctl->sfnu[isf]);
   }
 
   /* Write data... */
-  for (ip = 0; ip < atm->np; ip++) {
+  for (int ip = 0; ip < atm->np; ip++) {
     if (ip == 0 || atm->time[ip] != atm->time[ip - 1])
       fprintf(out, "\n");
     fprintf(out, "%.2f %g %g %g %g %g", atm->time[ip], atm->z[ip],
 	    atm->lon[ip], atm->lat[ip], atm->p[ip], atm->t[ip]);
-    for (ig = 0; ig < ctl->ng; ig++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       fprintf(out, " %g", atm->q[ig][ip]);
-    for (iw = 0; iw < ctl->nw; iw++)
+    for (int iw = 0; iw < ctl->nw; iw++)
       fprintf(out, " %g", atm->k[iw][ip]);
     if (ctl->ncl > 0) {
       fprintf(out, " %g %g", atm->clz, atm->cldz);
-      for (icl = 0; icl < ctl->ncl; icl++)
+      for (int icl = 0; icl < ctl->ncl; icl++)
 	fprintf(out, " %g", atm->clk[icl]);
     }
     if (ctl->nsf > 0) {
       fprintf(out, " %g %g %g", atm->sfz, atm->sfp, atm->sft);
-      for (isf = 0; isf < ctl->nsf; isf++)
+      for (int isf = 0; isf < ctl->nsf; isf++)
 	fprintf(out, " %g", atm->sfeps[isf]);
     }
     fprintf(out, "\n");
@@ -5204,7 +5145,7 @@ void write_obs(
 
   char file[LEN];
 
-  int id, ir, n = 10;
+  int n = 10;
 
   /* Set filename... */
   if (dirname != NULL)
@@ -5231,24 +5172,24 @@ void write_obs(
 	  "# $8 = tangent point altitude [km]\n"
 	  "# $9 = tangent point longitude [deg]\n"
 	  "# $10 = tangent point latitude [deg]\n");
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     fprintf(out, "# $%d = radiance (%.4f cm^-1) [W/(m^2 sr cm^-1)]\n",
 	    ++n, ctl->nu[id]);
-  for (id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++)
     fprintf(out, "# $%d = transmittance (%.4f cm^-1) [-]\n", ++n,
 	    ctl->nu[id]);
 
   /* Write data... */
-  for (ir = 0; ir < obs->nr; ir++) {
+  for (int ir = 0; ir < obs->nr; ir++) {
     if (ir == 0 || obs->time[ir] != obs->time[ir - 1])
       fprintf(out, "\n");
     fprintf(out, "%.2f %g %g %g %g %g %g %g %g %g", obs->time[ir],
 	    obs->obsz[ir], obs->obslon[ir], obs->obslat[ir],
 	    obs->vpz[ir], obs->vplon[ir], obs->vplat[ir],
 	    obs->tpz[ir], obs->tplon[ir], obs->tplat[ir]);
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       fprintf(out, " %g", obs->rad[id][ir]);
-    for (id = 0; id < ctl->nd; id++)
+    for (int id = 0; id < ctl->nd; id++)
       fprintf(out, " %g", obs->tau[id][ir]);
     fprintf(out, "\n");
   }
@@ -5267,8 +5208,6 @@ void write_shape(
 
   FILE *out;
 
-  int i;
-
   /* Write info... */
   LOG(1, "Write shape function: %s", filename);
 
@@ -5282,7 +5221,7 @@ void write_shape(
 	  "# $2 = shape function y-value [-]\n\n");
 
   /* Write data... */
-  for (i = 0; i < n; i++)
+  for (int i = 0; i < n; i++)
     fprintf(out, "%.10g %.10g\n", x[i], y[i]);
 
   /* Close file... */
@@ -5299,11 +5238,9 @@ void write_tbl(
 
   char filename[2 * LEN];
 
-  int id, ig, ip, it, iu;
-
   /* Loop over emitters and detectors... */
-  for (ig = 0; ig < ctl->ng; ig++)
-    for (id = 0; id < ctl->nd; id++) {
+  for (int ig = 0; ig < ctl->ng; ig++)
+    for (int id = 0; id < ctl->nd; id++) {
 
       /* Set filename... */
       sprintf(filename, "%s_%.4f_%s.%s", ctl->tblbase,
@@ -5328,10 +5265,10 @@ void write_tbl(
 		"# $4 = emissivity [-]\n");
 
 	/* Save table file... */
-	for (ip = 0; ip < tbl->np[ig][id]; ip++)
-	  for (it = 0; it < tbl->nt[ig][id][ip]; it++) {
+	for (int ip = 0; ip < tbl->np[ig][id]; ip++)
+	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++) {
 	    fprintf(out, "\n");
-	    for (iu = 0; iu < tbl->nu[ig][id][ip][it]; iu++)
+	    for (int iu = 0; iu < tbl->nu[ig][id][ip][it]; iu++)
 	      fprintf(out, "%g %g %e %e\n",
 		      tbl->p[ig][id][ip], tbl->t[ig][id][ip][it],
 		      tbl->u[ig][id][ip][it][iu],
@@ -5347,14 +5284,14 @@ void write_tbl(
 	FWRITE(tbl->p[ig][id], double,
 	         (size_t) tbl->np[ig][id],
 	       out);
-	for (ip = 0; ip < tbl->np[ig][id]; ip++) {
+	for (int ip = 0; ip < tbl->np[ig][id]; ip++) {
 	  FWRITE(&tbl->nt[ig][id][ip], int,
 		 1,
 		 out);
 	  FWRITE(tbl->t[ig][id][ip], double,
 		   (size_t) tbl->nt[ig][id][ip],
 		 out);
-	  for (it = 0; it < tbl->nt[ig][id][ip]; it++) {
+	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++) {
 	    FWRITE(&tbl->nu[ig][id][ip][it], int,
 		   1,
 		   out);
@@ -5384,30 +5321,28 @@ void x2atm(
   gsl_vector * x,
   atm_t * atm) {
 
-  int icl, ig, ip, isf, iw;
-
   size_t n = 0;
 
   /* Get pressure... */
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     if (atm->z[ip] >= ctl->retp_zmin && atm->z[ip] <= ctl->retp_zmax)
       x2atm_help(&atm->p[ip], x, &n);
 
   /* Get temperature... */
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     if (atm->z[ip] >= ctl->rett_zmin && atm->z[ip] <= ctl->rett_zmax)
       x2atm_help(&atm->t[ip], x, &n);
 
   /* Get volume mixing ratio... */
-  for (ig = 0; ig < ctl->ng; ig++)
-    for (ip = 0; ip < atm->np; ip++)
+  for (int ig = 0; ig < ctl->ng; ig++)
+    for (int ip = 0; ip < atm->np; ip++)
       if (atm->z[ip] >= ctl->retq_zmin[ig]
 	  && atm->z[ip] <= ctl->retq_zmax[ig])
 	x2atm_help(&atm->q[ig][ip], x, &n);
 
   /* Get extinction... */
-  for (iw = 0; iw < ctl->nw; iw++)
-    for (ip = 0; ip < atm->np; ip++)
+  for (int iw = 0; iw < ctl->nw; iw++)
+    for (int ip = 0; ip < atm->np; ip++)
       if (atm->z[ip] >= ctl->retk_zmin[iw]
 	  && atm->z[ip] <= ctl->retk_zmax[iw])
 	x2atm_help(&atm->k[iw][ip], x, &n);
@@ -5418,7 +5353,7 @@ void x2atm(
   if (ctl->ret_cldz)
     x2atm_help(&atm->cldz, x, &n);
   if (ctl->ret_clk)
-    for (icl = 0; icl < ctl->ncl; icl++)
+    for (int icl = 0; icl < ctl->ncl; icl++)
       x2atm_help(&atm->clk[icl], x, &n);
 
   /* Get surface data... */
@@ -5429,7 +5364,7 @@ void x2atm(
   if (ctl->ret_sft)
     x2atm_help(&atm->sft, x, &n);
   if (ctl->ret_sfeps)
-    for (isf = 0; isf < ctl->nsf; isf++)
+    for (int isf = 0; isf < ctl->nsf; isf++)
       x2atm_help(&atm->sfeps[isf], x, &n);
 }
 
@@ -5452,13 +5387,11 @@ void y2obs(
   gsl_vector * y,
   obs_t * obs) {
 
-  int id, ir;
-
   size_t m = 0;
 
   /* Decompose measurement vector... */
-  for (ir = 0; ir < obs->nr; ir++)
-    for (id = 0; id < ctl->nd; id++)
+  for (int ir = 0; ir < obs->nr; ir++)
+    for (int id = 0; id < ctl->nd; id++)
       if (gsl_finite(obs->rad[id][ir])) {
 	obs->rad[id][ir] = gsl_vector_get(y, m);
 	m++;
