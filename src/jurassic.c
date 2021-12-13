@@ -4256,7 +4256,8 @@ void read_ctl(
 
   /* Write info... */
   LOG(1, "\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
-      "(executable: %s | compiled: %s, %s)\n", argv[0], __DATE__, __TIME__);
+      "(executable: %s | version: %s | compiled: %s, %s)\n",
+      argv[0], VERSION, __DATE__, __TIME__);
 
   /* Emitters... */
   ctl->ng = (int) scan_ctl(argc, argv, "NG", -1, "0", NULL);
