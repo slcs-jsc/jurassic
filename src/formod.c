@@ -225,9 +225,27 @@ void call_formod(
 
     /* Measure CPU-time... */
     if (task[0] == 't' || task[0] == 'T') {
-      TIMER("formod", 1);
-      formod(ctl, &atm, &obs);
-      TIMER("formod", 3);
+      int n = 0;
+      double t0, t1, t_min, t_max, t_mean = 0, t_sigma = 0;
+      do {
+	t0 = omp_get_wtime();
+	formod(ctl, &atm, &obs);
+	t1 = omp_get_wtime();
+	t_mean += (t1 - t0);
+	t_sigma += POW2(t1 - t0);
+	if (n == 0 || t1 - t0 < t_min)
+	  t_min = t1 - t0;
+	if (n == 0 || t1 - t0 > t_max)
+	  t_max = t1 - t0;
+	n++;
+      } while (t_mean < 10.0);
+      t_mean /= (double) n;
+      t_sigma = sqrt(t_sigma / (double) n - POW2(t_mean));
+      printf("runtime_mean= %g s\n", t_mean);
+      printf("runtime_sigma= %g s\n", t_sigma);
+      printf("runtime_min= %g s\n", t_min);
+      printf("runtime_max= %g s\n", t_max);
+      printf("profiles_per_second= %g", 1.0 / t_mean);
     }
   }
 }
