@@ -274,7 +274,7 @@ void call_formod(
       printf("runtime_sigma= %g s\n", t_sigma);
       printf("runtime_min= %g s\n", t_min);
       printf("runtime_max= %g s\n", t_max);
-      printf("profiles_per_second= %g", 1.0 / t_mean);
+      printf("rays_per_second= %g", (double) obs.nr / t_mean);
     }
   }
 }
