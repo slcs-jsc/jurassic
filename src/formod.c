@@ -225,20 +225,49 @@ void call_formod(
 
     /* Measure CPU-time... */
     if (task[0] == 't' || task[0] == 'T') {
+
+      /* Init... */
+      double t_min, t_max, t_mean = 0, t_sigma = 0;
       int n = 0;
-      double t0, t1, t_min, t_max, t_mean = 0, t_sigma = 0;
+
+      /* Initialize random number generator... */
+      gsl_rng_env_setup();
+      gsl_rng *rng = gsl_rng_alloc(gsl_rng_default);
+
+      /* Loop over profiles... */
       do {
-	t0 = omp_get_wtime();
-	formod(ctl, &atm, &obs);
-	t1 = omp_get_wtime();
-	t_mean += (t1 - t0);
-	t_sigma += POW2(t1 - t0);
-	if (n == 0 || t1 - t0 < t_min)
-	  t_min = t1 - t0;
-	if (n == 0 || t1 - t0 > t_max)
-	  t_max = t1 - t0;
+
+	/* Create random atmosphere... */
+	copy_atm(ctl, &atm2, &atm, 0);
+	double dtemp = 40. * (gsl_rng_uniform(rng) - 0.5);
+	double dpress = 1. - 0.1 * gsl_rng_uniform(rng);
+	double dq[NG];
+	for (int ig = 0; ig < ctl->ng; ig++)
+	  dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
+	for (int ip = 0; ip < atm2.np; ip++) {
+	  atm.t[ip] += dtemp;
+	  atm.p[ip] *= dpress;
+	  for (int ig = 0; ig < ctl->ng; ig++)
+	    atm.q[ig][ip] *= dq[ig];
+	}
+
+	/* Measure runtime... */
+	double t0 = omp_get_wtime();
+	formod(ctl, &atm2, &obs);
+	double dt = omp_get_wtime() - t0;
+
+	/* Get runtime statistics... */
+	t_mean += (dt);
+	t_sigma += POW2(dt);
+	if (n == 0 || dt < t_min)
+	  t_min = dt;
+	if (n == 0 || dt > t_max)
+	  t_max = dt;
 	n++;
+
       } while (t_mean < 10.0);
+
+      /* Write results... */
       t_mean /= (double) n;
       t_sigma = sqrt(t_sigma / (double) n - POW2(t_mean));
       printf("runtime_mean= %g s\n", t_mean);
