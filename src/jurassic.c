@@ -3347,8 +3347,8 @@ void formod_srcfunc(
 
   /* Interpolate Planck function value... */
   for (int id = 0; id < ctl->nd; id++)
-    src[id] = LIN(tbl->st[it], tbl->sr[id][it],
-		  tbl->st[it + 1], tbl->sr[id][it + 1], t);
+    src[id] = LIN(tbl->st[it], tbl->sr[it][id],
+		  tbl->st[it + 1], tbl->sr[it + 1][id], t);
 }
 
 /*****************************************************************************/
@@ -3512,14 +3512,14 @@ void init_srcfunc(
       tbl->st[it] = LIN(0.0, TMIN, TBLNS - 1.0, TMAX, (double) it);
 
       /* Integrate Planck function... */
-      double fsum = tbl->sr[id][it] = 0;
+      double fsum = tbl->sr[it][id] = 0;
       for (double fnu = nu[0]; fnu <= nu[n - 1]; fnu += dnu) {
 	int i = locate_irr(nu, n, fnu);
 	double ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
 	fsum += ff;
-	tbl->sr[id][it] += ff * planck(tbl->st[it], fnu);
+	tbl->sr[it][id] += ff * planck(tbl->st[it], fnu);
       }
-      tbl->sr[id][it] /= fsum;
+      tbl->sr[it][id] /= fsum;
     }
   }
 }

@@ -617,7 +617,7 @@ typedef struct {
   double st[TBLNS];
 
   /*! Source function radiance [W/(m^2 sr cm^-1)]. */
-  double sr[ND][TBLNS];
+  double sr[TBLNS][ND];
 
 } tbl_t;
 
