@@ -3571,7 +3571,7 @@ void intpol_tbl(
     for (int ig = 0; ig < ctl->ng; ig++) {
 
       /* Check size of table (pressure)... */
-      if (tbl->np[ig][id] < 30)
+      if (tbl->np[id][ig] < 30)
 	eps = 0;
 
       /* Check transmittance... */
@@ -3582,19 +3582,19 @@ void intpol_tbl(
       else {
 
 	/* Determine pressure and temperature indices... */
-	int ipr = locate_irr(tbl->p[ig][id], tbl->np[ig][id], los->p[ip]);
+	int ipr = locate_irr(tbl->p[id][ig], tbl->np[id][ig], los->p[ip]);
 	int it0 =
-	  locate_reg(tbl->t[ig][id][ipr], tbl->nt[ig][id][ipr], los->t[ip]);
+	  locate_reg(tbl->t[id][ig][ipr], tbl->nt[id][ig][ipr], los->t[ip]);
 	int it1 =
-	  locate_reg(tbl->t[ig][id][ipr + 1], tbl->nt[ig][id][ipr + 1],
+	  locate_reg(tbl->t[id][ig][ipr + 1], tbl->nt[id][ig][ipr + 1],
 		     los->t[ip]);
 
 	/* Check size of table (temperature and column density)... */
-	if (tbl->nt[ig][id][ipr] < 2 || tbl->nt[ig][id][ipr + 1] < 2
-	    || tbl->nu[ig][id][ipr][it0] < 2
-	    || tbl->nu[ig][id][ipr][it0 + 1] < 2
-	    || tbl->nu[ig][id][ipr + 1][it1] < 2
-	    || tbl->nu[ig][id][ipr + 1][it1 + 1] < 2)
+	if (tbl->nt[id][ig][ipr] < 2 || tbl->nt[id][ig][ipr + 1] < 2
+	    || tbl->nu[id][ig][ipr][it0] < 2
+	    || tbl->nu[id][ig][ipr][it0 + 1] < 2
+	    || tbl->nu[id][ig][ipr + 1][it1] < 2
+	    || tbl->nu[id][ig][ipr + 1][it1 + 1] < 2)
 	  eps = 0;
 
 	else {
@@ -3618,14 +3618,14 @@ void intpol_tbl(
 	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, u + los->u[ip][ig]);
 
 	  /* Interpolate with respect to temperature... */
-	  eps00 = LIN(tbl->t[ig][id][ipr][it0], eps00,
-		      tbl->t[ig][id][ipr][it0 + 1], eps01, los->t[ip]);
-	  eps11 = LIN(tbl->t[ig][id][ipr + 1][it1], eps10,
-		      tbl->t[ig][id][ipr + 1][it1 + 1], eps11, los->t[ip]);
+	  eps00 = LIN(tbl->t[id][ig][ipr][it0], eps00,
+		      tbl->t[id][ig][ipr][it0 + 1], eps01, los->t[ip]);
+	  eps11 = LIN(tbl->t[id][ig][ipr + 1][it1], eps10,
+		      tbl->t[id][ig][ipr + 1][it1 + 1], eps11, los->t[ip]);
 
 	  /* Interpolate with respect to pressure... */
-	  eps00 = LIN(tbl->p[ig][id][ipr], eps00,
-		      tbl->p[ig][id][ipr + 1], eps11, los->p[ip]);
+	  eps00 = LIN(tbl->p[id][ig][ipr], eps00,
+		      tbl->p[id][ig][ipr + 1], eps11, los->p[ip]);
 
 	  /* Check emssivity range... */
 	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
@@ -3655,26 +3655,26 @@ double intpol_tbl_eps(
   double u) {
 
   /* Lower boundary... */
-  if (u < tbl->u[ig][id][ip][it][0])
-    return LIN(0, 0, tbl->u[ig][id][ip][it][0], tbl->eps[ig][id][ip][it][0],
+  if (u < tbl->u[id][ig][ip][it][0])
+    return LIN(0, 0, tbl->u[id][ig][ip][it][0], tbl->eps[id][ig][ip][it][0],
 	       u);
 
   /* Upper boundary... */
-  else if (u > tbl->u[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1])
-    return LIN(tbl->u[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
-	       tbl->eps[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
+  else if (u > tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
+    return LIN(tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
+	       tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
 	       1e30, 1, u);
 
   /* Interpolation... */
   else {
 
     /* Get index... */
-    int idx = locate_tbl(tbl->u[ig][id][ip][it], tbl->nu[ig][id][ip][it], u);
+    int idx = locate_tbl(tbl->u[id][ig][ip][it], tbl->nu[id][ig][ip][it], u);
 
     /* Interpolate... */
     return
-      LIN(tbl->u[ig][id][ip][it][idx], tbl->eps[ig][id][ip][it][idx],
-	  tbl->u[ig][id][ip][it][idx + 1], tbl->eps[ig][id][ip][it][idx + 1],
+      LIN(tbl->u[id][ig][ip][it][idx], tbl->eps[id][ig][ip][it][idx],
+	  tbl->u[id][ig][ip][it][idx + 1], tbl->eps[id][ig][ip][it][idx + 1],
 	  u);
   }
 }
@@ -3690,14 +3690,14 @@ double intpol_tbl_u(
   double eps) {
 
   /* Lower boundary... */
-  if (eps < tbl->eps[ig][id][ip][it][0])
-    return LIN(0, 0, tbl->eps[ig][id][ip][it][0], tbl->u[ig][id][ip][it][0],
+  if (eps < tbl->eps[id][ig][ip][it][0])
+    return LIN(0, 0, tbl->eps[id][ig][ip][it][0], tbl->u[id][ig][ip][it][0],
 	       eps);
 
   /* Upper boundary... */
-  else if (eps > tbl->eps[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1])
-    return LIN(tbl->eps[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
-	       tbl->u[ig][id][ip][it][tbl->nu[ig][id][ip][it] - 1],
+  else if (eps > tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
+    return LIN(tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
+	       tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
 	       1, 1e30, eps);
 
   /* Interpolation... */
@@ -3705,12 +3705,12 @@ double intpol_tbl_u(
 
     /* Get index... */
     int idx
-      = locate_tbl(tbl->eps[ig][id][ip][it], tbl->nu[ig][id][ip][it], eps);
+      = locate_tbl(tbl->eps[id][ig][ip][it], tbl->nu[id][ig][ip][it], eps);
 
     /* Interpolate... */
     return
-      LIN(tbl->eps[ig][id][ip][it][idx], tbl->u[ig][id][ip][it][idx],
-	  tbl->eps[ig][id][ip][it][idx + 1], tbl->u[ig][id][ip][it][idx + 1],
+      LIN(tbl->eps[id][ig][ip][it][idx], tbl->u[id][ig][ip][it][idx],
+	  tbl->eps[id][ig][ip][it][idx + 1], tbl->u[id][ig][ip][it][idx + 1],
 	  eps);
   }
 }
@@ -4497,11 +4497,11 @@ void read_tbl(
   double eps, press, temp, u;
 
   /* Loop over trace gases and channels... */
-  for (int ig = 0; ig < ctl->ng; ig++)
-    for (int id = 0; id < ctl->nd; id++) {
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ig = 0; ig < ctl->ng; ig++) {
 
       /* Initialize... */
-      tbl->np[ig][id] = -1;
+      tbl->np[id][ig] = -1;
       double eps_old = -999;
       double press_old = -999;
       double temp_old = -999;
@@ -4538,51 +4538,51 @@ void read_tbl(
 	  /* Determine pressure index... */
 	  if (press != press_old) {
 	    press_old = press;
-	    if ((++tbl->np[ig][id]) >= TBLNP)
+	    if ((++tbl->np[id][ig]) >= TBLNP)
 	      ERRMSG("Too many pressure levels!");
-	    tbl->nt[ig][id][tbl->np[ig][id]] = -1;
+	    tbl->nt[id][ig][tbl->np[id][ig]] = -1;
 	  }
 
 	  /* Determine temperature index... */
 	  if (temp != temp_old) {
 	    temp_old = temp;
-	    if ((++tbl->nt[ig][id][tbl->np[ig][id]]) >= TBLNT)
+	    if ((++tbl->nt[id][ig][tbl->np[id][ig]]) >= TBLNT)
 	      ERRMSG("Too many temperatures!");
-	    tbl->nu[ig][id][tbl->np[ig][id]]
-	      [tbl->nt[ig][id][tbl->np[ig][id]]] = -1;
+	    tbl->nu[id][ig][tbl->np[id][ig]]
+	      [tbl->nt[id][ig][tbl->np[id][ig]]] = -1;
 	  }
 
 	  /* Determine column density index... */
-	  if ((eps > eps_old && u > u_old) || tbl->nu[ig][id][tbl->np[ig][id]]
-	      [tbl->nt[ig][id][tbl->np[ig][id]]] < 0) {
+	  if ((eps > eps_old && u > u_old) || tbl->nu[id][ig][tbl->np[id][ig]]
+	      [tbl->nt[id][ig][tbl->np[id][ig]]] < 0) {
 	    eps_old = eps;
 	    u_old = u;
-	    if ((++tbl->nu[ig][id][tbl->np[ig][id]]
-		 [tbl->nt[ig][id][tbl->np[ig][id]]]) >= TBLNU) {
-	      tbl->nu[ig][id][tbl->np[ig][id]]
-		[tbl->nt[ig][id][tbl->np[ig][id]]]--;
+	    if ((++tbl->nu[id][ig][tbl->np[id][ig]]
+		 [tbl->nt[id][ig][tbl->np[id][ig]]]) >= TBLNU) {
+	      tbl->nu[id][ig][tbl->np[id][ig]]
+		[tbl->nt[id][ig][tbl->np[id][ig]]]--;
 	      continue;
 	    }
 	  }
 
 	  /* Store data... */
-	  tbl->p[ig][id][tbl->np[ig][id]] = press;
-	  tbl->t[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
+	  tbl->p[id][ig][tbl->np[id][ig]] = press;
+	  tbl->t[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
 	    = temp;
-	  tbl->u[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
-	    [tbl->nu[ig][id][tbl->np[ig][id]]
-	     [tbl->nt[ig][id][tbl->np[ig][id]]]] = (float) u;
-	  tbl->eps[ig][id][tbl->np[ig][id]][tbl->nt[ig][id][tbl->np[ig][id]]]
-	    [tbl->nu[ig][id][tbl->np[ig][id]]
-	     [tbl->nt[ig][id][tbl->np[ig][id]]]] = (float) eps;
+	  tbl->u[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
+	    [tbl->nu[id][ig][tbl->np[id][ig]]
+	     [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) u;
+	  tbl->eps[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
+	    [tbl->nu[id][ig][tbl->np[id][ig]]
+	     [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) eps;
 	}
 
 	/* Increment counters... */
-	tbl->np[ig][id]++;
-	for (int ip = 0; ip < tbl->np[ig][id]; ip++) {
-	  tbl->nt[ig][id][ip]++;
-	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++)
-	    tbl->nu[ig][id][ip][it]++;
+	tbl->np[id][ig]++;
+	for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
+	  tbl->nt[id][ig][ip]++;
+	  for (int it = 0; it < tbl->nt[id][ig][ip]; it++)
+	    tbl->nu[id][ig][ip][it]++;
 	}
       }
 
@@ -4590,34 +4590,34 @@ void read_tbl(
       else if (ctl->tblfmt == 2) {
 
 	/* Read data... */
-	FREAD(&tbl->np[ig][id], int,
+	FREAD(&tbl->np[id][ig], int,
 	      1,
 	      in);
-	if (tbl->np[ig][id] > TBLNP)
+	if (tbl->np[id][ig] > TBLNP)
 	  ERRMSG("Too many pressure levels!");
-	FREAD(tbl->p[ig][id], double,
-	        (size_t) tbl->np[ig][id],
+	FREAD(tbl->p[id][ig], double,
+	        (size_t) tbl->np[id][ig],
 	      in);
-	for (int ip = 0; ip < tbl->np[ig][id]; ip++) {
-	  FREAD(&tbl->nt[ig][id][ip], int,
+	for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
+	  FREAD(&tbl->nt[id][ig][ip], int,
 		1,
 		in);
-	  if (tbl->nt[ig][id][ip] > TBLNT)
+	  if (tbl->nt[id][ig][ip] > TBLNT)
 	    ERRMSG("Too many temperatures!");
-	  FREAD(tbl->t[ig][id][ip], double,
-		  (size_t) tbl->nt[ig][id][ip],
+	  FREAD(tbl->t[id][ig][ip], double,
+		  (size_t) tbl->nt[id][ig][ip],
 		in);
-	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++) {
-	    FREAD(&tbl->nu[ig][id][ip][it], int,
+	  for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
+	    FREAD(&tbl->nu[id][ig][ip][it], int,
 		  1,
 		  in);
-	    if (tbl->nu[ig][id][ip][it] > TBLNU)
+	    if (tbl->nu[id][ig][ip][it] > TBLNU)
 	      ERRMSG("Too many column densities!");
-	    FREAD(tbl->u[ig][id][ip][it], float,
-		    (size_t) tbl->nu[ig][id][ip][it],
+	    FREAD(tbl->u[id][ig][ip][it], float,
+		    (size_t) tbl->nu[id][ig][ip][it],
 		  in);
-	    FREAD(tbl->eps[ig][id][ip][it], float,
-		    (size_t) tbl->nu[ig][id][ip][it],
+	    FREAD(tbl->eps[id][ig][ip][it], float,
+		    (size_t) tbl->nu[id][ig][ip][it],
 		  in);
 	  }
 	}
@@ -5257,41 +5257,41 @@ void write_tbl(
 		"# $4 = emissivity [-]\n");
 
 	/* Save table file... */
-	for (int ip = 0; ip < tbl->np[ig][id]; ip++)
-	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++) {
+	for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+	  for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
 	    fprintf(out, "\n");
-	    for (int iu = 0; iu < tbl->nu[ig][id][ip][it]; iu++)
+	    for (int iu = 0; iu < tbl->nu[id][ig][ip][it]; iu++)
 	      fprintf(out, "%g %g %e %e\n",
-		      tbl->p[ig][id][ip], tbl->t[ig][id][ip][it],
-		      tbl->u[ig][id][ip][it][iu],
-		      tbl->eps[ig][id][ip][it][iu]);
+		      tbl->p[id][ig][ip], tbl->t[id][ig][ip][it],
+		      tbl->u[id][ig][ip][it][iu],
+		      tbl->eps[id][ig][ip][it][iu]);
 	  }
       }
 
       /* Write binary data... */
       else if (ctl->tblfmt == 2) {
-	FWRITE(&tbl->np[ig][id], int,
+	FWRITE(&tbl->np[id][ig], int,
 	       1,
 	       out);
-	FWRITE(tbl->p[ig][id], double,
-	         (size_t) tbl->np[ig][id],
+	FWRITE(tbl->p[id][ig], double,
+	         (size_t) tbl->np[id][ig],
 	       out);
-	for (int ip = 0; ip < tbl->np[ig][id]; ip++) {
-	  FWRITE(&tbl->nt[ig][id][ip], int,
+	for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
+	  FWRITE(&tbl->nt[id][ig][ip], int,
 		 1,
 		 out);
-	  FWRITE(tbl->t[ig][id][ip], double,
-		   (size_t) tbl->nt[ig][id][ip],
+	  FWRITE(tbl->t[id][ig][ip], double,
+		   (size_t) tbl->nt[id][ig][ip],
 		 out);
-	  for (int it = 0; it < tbl->nt[ig][id][ip]; it++) {
-	    FWRITE(&tbl->nu[ig][id][ip][it], int,
+	  for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
+	    FWRITE(&tbl->nu[id][ig][ip][it], int,
 		   1,
 		   out);
-	    FWRITE(tbl->u[ig][id][ip][it], float,
-		     (size_t) tbl->nu[ig][id][ip][it],
+	    FWRITE(tbl->u[id][ig][ip][it], float,
+		     (size_t) tbl->nu[id][ig][ip][it],
 		   out);
-	    FWRITE(tbl->eps[ig][id][ip][it], float,
-		     (size_t) tbl->nu[ig][id][ip][it],
+	    FWRITE(tbl->eps[id][ig][ip][it], float,
+		     (size_t) tbl->nu[id][ig][ip][it],
 		   out);
 	  }
 	}

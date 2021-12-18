@@ -593,25 +593,25 @@ typedef struct {
 typedef struct {
 
   /*! Number of pressure levels. */
-  int np[NG][ND];
+  int np[ND][NG];
 
   /*! Number of temperatures. */
-  int nt[NG][ND][TBLNP];
+  int nt[ND][NG][TBLNP];
 
   /*! Number of column densities. */
-  int nu[NG][ND][TBLNP][TBLNT];
+  int nu[ND][NG][TBLNP][TBLNT];
 
   /*! Pressure [hPa]. */
-  double p[NG][ND][TBLNP];
+  double p[ND][NG][TBLNP];
 
   /*! Temperature [K]. */
-  double t[NG][ND][TBLNP][TBLNT];
+  double t[ND][NG][TBLNP][TBLNT];
 
   /*! Column density [molecules/cm^2]. */
-  float u[NG][ND][TBLNP][TBLNT][TBLNU];
+  float u[ND][NG][TBLNP][TBLNT][TBLNU];
 
   /*! Emissivity. */
-  float eps[NG][ND][TBLNP][TBLNT][TBLNU];
+  float eps[ND][NG][TBLNP][TBLNT][TBLNU];
 
   /*! Source function temperature [K]. */
   double st[TBLNS];
