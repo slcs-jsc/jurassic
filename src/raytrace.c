@@ -96,7 +96,7 @@ int main(
       atm2.p[ip] = los.p[ip];
       atm2.t[ip] = los.t[ip];
       for (int ig = 0; ig < ctl.ng; ig++)
-	atm2.q[ig][ip] = los.q[ig][ip];
+	atm2.q[ig][ip] = los.q[ip][ig];
       for (int iw = 0; iw < ctl.nw; iw++)
 	atm2.k[iw][ip] = GSL_NAN;
     }
@@ -112,7 +112,7 @@ int main(
     for (int ip = 0; ip < los.np; ip++) {
       s += los.ds[ip];
       for (int ig = 0; ig < ctl.ng; ig++)
-	u[ig] += los.u[ig][ip];
+	u[ig] += los.u[ip][ig];
     }
 
     /* Write summary data... */

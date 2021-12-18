@@ -3084,7 +3084,7 @@ void formod_continua(
 
   /* Extinction... */
   for (int id = 0; id < ctl->nd; id++)
-    beta[id] = los->k[id][ip];
+    beta[id] = los->k[ip][id];
 
   /* CO2 continuum... */
   if (ctl->ctm_co2) {
@@ -3093,7 +3093,7 @@ void formod_continua(
     if (ig_co2 >= 0)
       for (int id = 0; id < ctl->nd; id++)
 	beta[id] += ctmco2(ctl->nu[id], los->p[ip], los->t[ip],
-			   los->u[ig_co2][ip]) / los->ds[ip];
+			   los->u[ip][ig_co2]) / los->ds[ip];
   }
 
   /* H2O continuum... */
@@ -3103,8 +3103,8 @@ void formod_continua(
     if (ig_h2o >= 0)
       for (int id = 0; id < ctl->nd; id++)
 	beta[id] += ctmh2o(ctl->nu[id], los->p[ip], los->t[ip],
-			   los->q[ig_h2o][ip],
-			   los->u[ig_h2o][ip]) / los->ds[ip];
+			   los->q[ip][ig_h2o], los->u[ip][ig_h2o])
+	  / los->ds[ip];
   }
 
   /* N2 continuum... */
@@ -3602,20 +3602,20 @@ void intpol_tbl(
 	  /* Get emissivities of extended path... */
 	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, 1 - tau_path[id][ig]);
 	  double eps00
-	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, u + los->u[ig][ip]);
+	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, u + los->u[ip][ig]);
 
 	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, 1 - tau_path[id][ig]);
 	  double eps01 =
-	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, u + los->u[ig][ip]);
+	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, u + los->u[ip][ig]);
 
 	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, 1 - tau_path[id][ig]);
 	  double eps10 =
-	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, u + los->u[ig][ip]);
+	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, u + los->u[ip][ig]);
 
 	  u =
 	    intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, 1 - tau_path[id][ig]);
 	  double eps11 =
-	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, u + los->u[ig][ip]);
+	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, u + los->u[ip][ig]);
 
 	  /* Interpolate with respect to temperature... */
 	  eps00 = LIN(tbl->t[ig][id][ipr][it0], eps00,
@@ -4074,9 +4074,9 @@ void raytrace(
     los->p[los->np] = p;
     los->t[los->np] = t;
     for (int ig = 0; ig < ctl->ng; ig++)
-      los->q[ig][los->np] = q[ig];
+      los->q[los->np][ig] = q[ig];
     for (int id = 0; id < ctl->nd; id++)
-      los->k[id][los->np] = k[ctl->window[id]];
+      los->k[los->np][id] = k[ctl->window[id]];
     los->ds[los->np] = ds;
 
     /* Add cloud extinction... */
@@ -4084,7 +4084,7 @@ void raytrace(
       double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (int id = 0; id < ctl->nd; id++) {
 	int icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
-	los->k[id][los->np]
+	los->k[los->np][id]
 	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
 		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
       }
@@ -4174,7 +4174,7 @@ void raytrace(
   /* Compute column density... */
   for (int ip = 0; ip < los->np; ip++)
     for (int ig = 0; ig < ctl->ng; ig++)
-      los->u[ig][ip] = 10 * los->q[ig][ip] * los->p[ip]
+      los->u[ip][ig] = 10 * los->q[ip][ig] * los->p[ip]
 	/ (KB * los->t[ip]) * los->ds[ip];
 }
 

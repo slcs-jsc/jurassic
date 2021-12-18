@@ -252,7 +252,7 @@
 
 /*! Maximum number of LOS points. */
 #ifndef NLOS
-#define NLOS 2048
+#define NLOS 1024
 #endif
 
 /*! Maximum number of shape function grid points. */
@@ -526,10 +526,10 @@ typedef struct {
   double t[NLOS];
 
   /*! Volume mixing ratio [ppv]. */
-  double q[NG][NLOS];
+  double q[NLOS][NG];
 
   /*! Extinction [1/km]. */
-  double k[ND][NLOS];
+  double k[NLOS][ND];
 
   /*! Surface temperature [K]. */
   double sft;
@@ -541,7 +541,7 @@ typedef struct {
   double ds[NLOS];
 
   /*! Column density [molecules/cm^2]. */
-  double u[NG][NLOS];
+  double u[NLOS][NG];
 
 } los_t;
 
