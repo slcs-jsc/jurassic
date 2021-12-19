@@ -276,5 +276,53 @@ void call_formod(
       printf("RUNTIME_MAX = %g s\n", t_max);
       printf("RAYS_PER_SECOND = %g", (double) obs.nr / t_mean);
     }
+
+    /* Analyze effect of step size... */
+    if (task[0] == 's' || task[0] == 'S') {
+
+      /* Reference run... */
+      ctl->rayds = 0.1;
+      ctl->raydz = 0.01;
+      formod(ctl, &atm, &obs);
+      copy_obs(ctl, &obs2, &obs, 0);
+
+      /* Loop over step size... */
+      for (double dz = 0.01; dz <= 2; dz *= 1.1) {
+	printf("STEPSIZE: \n");
+	for (double ds = 0.1; ds <= 50; ds *= 1.1) {
+
+	  /* Set step size... */
+	  ctl->rayds = ds;
+	  ctl->raydz = dz;
+
+	  /* Measure runtime... */
+	  double t0 = omp_get_wtime();
+	  formod(ctl, &atm, &obs);
+	  double dt = omp_get_wtime() - t0;
+
+	  /* Get differences... */
+	  double mean[ND], sigma[ND];
+	  for (int id = 0; id < ctl->nd; id++) {
+	    mean[id] = sigma[id] = 0;
+	    int n = 0;
+	    for (int ir = 0; ir < obs.nr; ir++) {
+	      double err = 200. * (obs.rad[id][ir] - obs2.rad[id][ir])
+		/ (obs.rad[id][ir] + obs2.rad[id][ir]);
+	      mean[id] += err;
+	      sigma[id] += POW2(err);
+	      n++;
+	    }
+	    mean[id] /= n;
+	    sigma[id] = sqrt(sigma[id] / n - POW2(mean[id]));
+	  }
+
+	  /* Write results... */
+	  printf("STEPSIZE: %g %g %g", ds, dz, dt);
+	  for (int id = 0; id < ctl->nd; id++)
+	    printf(" %g %g", mean[id], sigma[id]);
+	  printf("\n");
+	}
+      }
+    }
   }
 }
