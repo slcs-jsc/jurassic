@@ -270,11 +270,11 @@ void call_formod(
       /* Write results... */
       t_mean /= (double) n;
       t_sigma = sqrt(t_sigma / (double) n - POW2(t_mean));
-      printf("runtime_mean= %g s\n", t_mean);
-      printf("runtime_sigma= %g s\n", t_sigma);
-      printf("runtime_min= %g s\n", t_min);
-      printf("runtime_max= %g s\n", t_max);
-      printf("rays_per_second= %g", (double) obs.nr / t_mean);
+      printf("RUNTIME_MEAN = %g s\n", t_mean);
+      printf("RUNTIME_SIGMA = %g s\n", t_sigma);
+      printf("RUNTIME_MIN = %g s\n", t_min);
+      printf("RUNTIME_MAX = %g s\n", t_max);
+      printf("RAYS_PER_SECOND = %g", (double) obs.nr / t_mean);
     }
   }
 }
