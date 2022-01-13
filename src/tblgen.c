@@ -128,12 +128,12 @@ int main(
     epssum = 1 - epssum / fsum;
 
     /* Write output... */
-    if (epssum >= 1e-6 && epssum <= 0.9999 && epssum > epsold)
+    if (epssum >= 1e-6 && epssum <= 0.999999 && epssum > epsold)
       printf("%g %g %g %g\n", press, temp, u, epssum);
     epsold = epssum;
 
     /* Check for termination... */
-    if (epssum > 0.9999)
+    if (epssum > 0.999999)
       return EXIT_SUCCESS;
   }
 

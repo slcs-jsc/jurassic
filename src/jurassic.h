@@ -543,6 +543,12 @@ typedef struct {
   /*! Column density [molecules/cm^2]. */
   double u[NLOS][NG];
 
+  /*! Segment emissivity. */
+  double eps[NLOS][ND];
+
+  /*! Segment source function [W/(m^2 sr cm^-1)]. */
+  double src[NLOS][ND];
+
 } los_t;
 
 /*! Observation geometry and radiance data. */

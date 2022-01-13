@@ -3207,8 +3207,8 @@ void formod_pencil(
 
   los_t *los;
 
-  double beta_ctm[ND], eps[NLOS][ND], rad[ND], src_atm[NLOS][ND], src_sf[ND],
-    sza2, tau[ND], tau_refl[ND], tau_path[ND][NG], tau_gas[ND], x0[3], x1[3];
+  double beta_ctm[ND], rad[ND], tau[ND], tau_refl[ND],
+    tau_path[ND][NG], tau_gas[ND], x0[3], x1[3];
 
   /* Initialize look-up tables... */
   if (!init) {
@@ -3242,20 +3242,20 @@ void formod_pencil(
     formod_continua(ctl, los, ip, beta_ctm);
 
     /* Compute Planck function... */
-    formod_srcfunc(ctl, tbl, los->t[ip], src_atm[ip]);
+    formod_srcfunc(ctl, tbl, los->t[ip], los->src[ip]);
 
     /* Loop over channels... */
     for (int id = 0; id < ctl->nd; id++)
       if (tau_gas[id] > 0) {
 
 	/* Get segment emissivity... */
-	eps[ip][id] = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
+	los->eps[ip][id] = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
 
 	/* Compute radiance... */
-	rad[id] += src_atm[ip][id] * eps[ip][id] * tau[id];
+	rad[id] += los->src[ip][id] * los->eps[ip][id] * tau[id];
 
 	/* Compute path transmittance... */
-	tau[id] *= (1 - eps[ip][id]);
+	tau[id] *= (1 - los->eps[ip][id]);
       }
   }
 
@@ -3263,6 +3263,7 @@ void formod_pencil(
   if (ctl->sftype >= 1 && los->sft > 0) {
 
     /* Add surface emissions... */
+    double src_sf[ND];
     formod_srcfunc(ctl, tbl, los->sft, src_sf);
     for (int id = 0; id < ctl->nd; id++)
       rad[id] += los->sfeps[id] * src_sf[id] * tau[id];
@@ -3286,15 +3287,16 @@ void formod_pencil(
       /* Add down-welling radiance... */
       for (int ip = los->np - 1; ip >= 0; ip--)
 	for (int id = 0; id < ctl->nd; id++) {
-	  rad[id] += src_atm[ip][id] * eps[ip][id] * tau_refl[id]
+	  rad[id] += los->src[ip][id] * los->eps[ip][id] * tau_refl[id]
 	    * tau[id] * (1 - los->sfeps[id]);
-	  tau_refl[id] *= (1 - eps[ip][id]);
+	  tau_refl[id] *= (1 - los->eps[ip][id]);
 	}
 
       /* Add solar term... */
       if (ctl->sftype >= 3) {
 
 	/* Get solar zenith angle... */
+	double sza2;
 	if (ctl->sfsza < 0)
 	  sza2 =
 	    sza(obs->time[ir], los->lon[los->np - 1], los->lat[los->np - 1]);
