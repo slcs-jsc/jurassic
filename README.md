@@ -84,9 +84,9 @@ and conduct radiative transfer calculations for two or three detector channels:
 The output of the simulation is verified by comparing it to reference data.
 Additionally, gnuplot is used to create plots of the radiance data:
 
-<p align="center"><img src="example/limb/plot.png" width="60%"/></p>
+<p align="center"><img src="example/limb/plot_rad.png" width="60%"/></p>
 
-<p align="center"><img src="example/nadir/plot.png" width="60%"/></p>
+<p align="center"><img src="example/nadir/plot_rad.png" width="60%"/></p>
 
 ## Further information
 
