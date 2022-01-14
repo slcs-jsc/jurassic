@@ -285,6 +285,16 @@
 #define TBLNS 1200
 #endif
 
+/*! Maximum number of RFM spectral grid points. */
+#ifndef RFMNPTS
+#define RFMNPTS 10000000
+#endif
+
+/*! Maximum length of RFM data lines. */
+#ifndef RFMLINE
+#define RFMLINE 100000
+#endif
+
 /* ------------------------------------------------------------
    Quantity indices...
    ------------------------------------------------------------ */
@@ -501,6 +511,18 @@ typedef struct {
 
   /*! Write matrix file (0=no, 1=yes). */
   int write_matrix;
+
+  /*! Forward model (1=EGA, 2=RFM). */
+  int formod;
+
+  /*! Path to RFM binary. */
+  char rfmbin[LEN];
+
+  /*! HITRAN file for RFM. */
+  char rfmhit[LEN];
+
+  /*! Emitter cross-section files for RFM. */
+  char rfmxsc[NG][LEN];
 
 } ctl_t;
 
@@ -737,6 +759,12 @@ void formod_pencil(
   obs_t * obs,
   int ir);
 
+/*! Apply RFM for radiative transfer calculations. */
+void formod_rfm(
+  ctl_t * ctl,
+  atm_t * atm,
+  obs_t * obs);
+
 /*! Compute Planck source function. */
 void formod_srcfunc(
   ctl_t * ctl,
@@ -887,6 +915,21 @@ void read_obs(
   ctl_t * ctl,
   obs_t * obs);
 
+/*! Read observation data in RFM format. */
+double read_obs_rfm(
+  const char *basename,
+  double z,
+  double *nu,
+  double *f,
+  int n);
+
+/*! Read RFM spectrum. */
+void read_rfm_spec(
+  const char *filename,
+  double *nu,
+  double *rad,
+  int *npts);
+
 /*! Read shape function. */
 void read_shape(
   const char *filename,
@@ -948,6 +991,12 @@ void timer(
 /*! Write atmospheric data. */
 void write_atm(
   const char *dirname,
+  const char *filename,
+  ctl_t * ctl,
+  atm_t * atm);
+
+/*! Write atmospheric data in RFM format. */
+void write_atm_rfm(
   const char *filename,
   ctl_t * ctl,
   atm_t * atm);
