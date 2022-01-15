@@ -252,7 +252,7 @@
 
 /*! Maximum number of LOS points. */
 #ifndef NLOS
-#define NLOS 1024
+#define NLOS 4096
 #endif
 
 /*! Maximum number of shape function grid points. */

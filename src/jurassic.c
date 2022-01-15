@@ -4466,7 +4466,7 @@ void read_ctl(
   /* Ray-tracing... */
   ctl->refrac = (int) scan_ctl(argc, argv, "REFRAC", -1, "1", NULL);
   ctl->rayds = scan_ctl(argc, argv, "RAYDS", -1, "10", NULL);
-  ctl->raydz = scan_ctl(argc, argv, "RAYDZ", -1, "0.5", NULL);
+  ctl->raydz = scan_ctl(argc, argv, "RAYDZ", -1, "0.1", NULL);
 
   /* Field of view... */
   scan_ctl(argc, argv, "FOV", -1, "-", ctl->fov);
