@@ -2,6 +2,7 @@
 
 The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiative transfer model for the analysis of atmospheric remote sensing measurements.
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/aaba414eaf9e4e6784f13458a285ec2f)](https://app.codacy.com/gh/slcs-jsc/jurassic?utm_source=github.com&utm_medium=referral&utm_content=slcs-jsc/jurassic&utm_campaign=Badge_Grade_Settings)
 [![release (latest by date)](https://img.shields.io/github/v/release/slcs-jsc/jurassic)](https://github.com/slcs-jsc/jurassic/releases)
 [![commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/slcs-jsc/jurassic/latest)](https://github.com/slcs-jsc/jurassic/commits/master)
 [![last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/master)
