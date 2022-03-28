@@ -55,9 +55,9 @@ int main(
   size_t m = obs2y(&ctl, &obs, NULL, NULL, NULL);
 
   /* Check sizes... */
-  if (n <= 0)
+  if (n == 0)
     ERRMSG("No state vector elements!");
-  if (m <= 0)
+  if (m == 0)
     ERRMSG("No measurement vector elements!");
 
   /* Allocate... */

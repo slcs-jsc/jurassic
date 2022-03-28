@@ -49,8 +49,8 @@ int main(
 
   static char line[MAXLINE], *tok;
 
-  static double dnu, abs[MAXNPTS], epssum, epsold, f, filt[MAXNF],
-    fsum, nu, nu0, nu1, nuf[MAXNF], press, r0, temp, u;
+  static double dnu, abs[MAXNPTS], epsold, f, filt[MAXNF],
+    nu, nu0, nu1, nuf[MAXNF], press, r0, temp, u;
 
   static int i, i0, idx, nf, npts;
 
@@ -110,7 +110,7 @@ int main(
   for (u = 1.0; u <= 1e30; u *= 1.122) {
 
     /* Integrate... */
-    epssum = fsum = 0;
+    double epssum = 0, fsum = 0;
     for (i = i0; i < npts; i++) {
       nu = nu0 + dnu * (double) i;
       if (nu < nuf[0])

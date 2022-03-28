@@ -482,7 +482,7 @@ void optimal_estimation(
   /* Get sizes... */
   m = obs2y(ctl, obs_meas, NULL, NULL, NULL);
   n = atm2x(ctl, atm_apr, NULL, iqa, ipa);
-  if (m <= 0 || n <= 0)
+  if (m == 0 || n == 0)
     ERRMSG("Check problem definition!");
 
   /* Write info... */
