@@ -1,0 +1,36 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Juelich Rapid Spectral Simulation Code (JURASSIC)
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Lars
+    family-names: Hoffmann
+    email: l.hoffmann@fz-juelich.de
+    affiliation: Forschungszentrum Jülich
+    orcid: 'https://orcid.org/0000-0003-3773-4377'
+identifiers:
+  - type: doi
+    value: 10.5194/gmd-15-1855-2022
+    description: Reference paper.
+  - type: doi
+    value: 10.5281/zenodo.4572889
+    description: Latest release on Zenodo.
+  - type: url
+    value: 'https://github.com/slcs-jsc/jurassic'
+    description: Software repository on GitHub.
+abstract: >-
+  The Juelich Rapid Spectral Simulation Code
+  (JURASSIC) is a fast infrared radiative transfer
+  model for the analysis of atmospheric remote
+  sensing measurements.
+keywords:
+  - atmospheric science
+  - remote sensing
+  - radiative transfer
+  - infrared
+license: GPL-3.0
