@@ -64,7 +64,7 @@ jobs:
 
     - run: |
        sudo apt-get update ; sudo apt-get install wget gnuplot libgsl-dev
-       cs src ; make STATIC=0
+       cd src ; make STATIC=0
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
