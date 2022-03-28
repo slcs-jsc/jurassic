@@ -77,7 +77,7 @@ check: all
 clean:
 	rm -f $(EXC) *.o *~
 
-cppcheck: all
+cppcheck:
 	cd ../ && cppcheck --enable=all ./src
 
 dist:
