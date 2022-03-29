@@ -91,6 +91,8 @@ Additionally, gnuplot is used to create plots of the radiance data:
 
 ## Further information
 
+More detailed information for new users and developers of JURASSIC is collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
+
 These are the main references for citing the JURASSIC model in scientific publications:
 
 * Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer calculations using graphics processing units: JURASSIC-GPU v2.0, Geosci. Model Dev., 15, 1855–1874, https://doi.org/10.5194/gmd-15-1855-2022, 2022.
@@ -101,7 +103,7 @@ These are the main references for citing the JURASSIC model in scientific public
 
 * You can cite the source code of JURASSIC by using the DOI https://doi.org/10.5281/zenodo.4572889. This DOI represents all versions, and will always resolve to the latest one. Specific DOIs for each release of JURASSIC can be found on the zenodo web site.
 
-More detailed information for new users and developers of JURASSIC is collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
+Please see the [citation file](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff) for further information.
 
 ## Contributing
 

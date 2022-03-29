@@ -18,6 +18,12 @@ identifiers:
     value: 10.5194/gmd-15-1855-2022
     description: Reference paper.
   - type: doi
+    value: 10.1029/2008JD011241
+    description: Reference paper.
+  - type: doi
+    value: 10.5194/acp-8-3671-2008
+    description: Reference paper.
+  - type: doi
     value: 10.5281/zenodo.4572889
     description: Latest release on Zenodo.
   - type: url
