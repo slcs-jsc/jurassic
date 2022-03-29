@@ -74,11 +74,14 @@ check: all
 	cd ../example/nadir && ./run.sh
 	cd ../example/limb && ./run.sh
 
+check_cppcheck:
+	cppcheck --enable=all ./
+
+check_lizard:
+	lizard -s cyclomatic_complexity
+
 clean:
 	rm -f $(EXC) *.o *~
-
-cppcheck:
-	cppcheck --enable=all ./
 
 dist:
 	zip jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
