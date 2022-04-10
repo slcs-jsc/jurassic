@@ -7,7 +7,7 @@ The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiati
 [![last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/master)
 [![code size in bytes](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
 [![top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
-[![codacy badge](https://api.codacy.com/project/badge/Grade/aaba414eaf9e4e6784f13458a285ec2f)](https://app.codacy.com/gh/slcs-jsc/jurassic?utm_source=github.com&utm_medium=referral&utm_content=slcs-jsc/jurassic&utm_campaign=Badge_Grade_Settings)
+[![codacy](https://api.codacy.com/project/badge/Grade/aaba414eaf9e4e6784f13458a285ec2f)](https://app.codacy.com/gh/slcs-jsc/jurassic?utm_source=github.com&utm_medium=referral&utm_content=slcs-jsc/jurassic&utm_campaign=Badge_Grade_Settings)
 [![codecov](https://codecov.io/gh/slcs-jsc/jurassic/branch/master/graph/badge.svg?token=TYGWEJMOLI)](https://codecov.io/gh/slcs-jsc/jurassic)
 [![test case](https://img.shields.io/github/workflow/status/slcs-jsc/jurassic/testcase?label=test%20case)](https://github.com/slcs-jsc/jurassic/actions)
 [![doxygen](https://img.shields.io/github/workflow/status/slcs-jsc/jurassic/doxygen?label=doxygen)](https://slcs-jsc.github.io/jurassic)
