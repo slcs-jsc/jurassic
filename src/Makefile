@@ -26,6 +26,9 @@ INFO ?= 0
 # Compile for profiling...
 PROF ?= 0
 
+# Compile for coverage report...
+COV ?= 0
+
 # -----------------------------------------------------------------------------
 # Set flags for GNU compiler...
 # -----------------------------------------------------------------------------
@@ -52,6 +55,11 @@ ifeq ($(PROF),1)
   CFLAGS += -pg
 endif
 
+# Compile for coverage...
+ifeq ($(COV),1)
+  CFLAGS += -ftest-coverage -fprofile-arcs
+endif
+
 # Static compilation...
 ifeq ($(STATIC),1)
   CFLAGS += -static
@@ -74,6 +82,11 @@ check: all
 	cd ../example/nadir && ./run.sh
 	cd ../example/limb && ./run.sh
 
+check_coverage:
+	lcov --capture --directory . --output-file=coverage.info ; \
+	genhtml coverage.info --legend --frames --output-directory=coverage
+	gcov -abcfu *.c
+
 check_cppcheck:
 	cppcheck --enable=all ./
 
@@ -81,7 +94,7 @@ check_lizard:
 	lizard -s cyclomatic_complexity
 
 clean:
-	rm -f $(EXC) *.o *~
+	rm -rf $(EXC) *.o *.gcda *.gcno *.gcov coverage* *~
 
 dist:
 	zip jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
