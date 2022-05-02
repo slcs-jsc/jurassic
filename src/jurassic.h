@@ -385,7 +385,7 @@ typedef struct {
   double sft;
 
   /*! Surface emissivity. */
-  double sfeps[NCL];
+  double sfeps[NSF];
 
 } atm_t;
 
@@ -557,7 +557,7 @@ typedef struct {
   double sft;
 
   /*! Surface emissivity. */
-  double sfeps[NSF];
+  double sfeps[ND];
 
   /*! Segment length [km]. */
   double ds[NLOS];
