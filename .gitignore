@@ -3,6 +3,7 @@ docs/html/
 docs/latex/
 libs/build/
 projects/
+src/*.o
 src/brightness
 src/climatology
 src/filter
@@ -11,7 +12,6 @@ src/hydrostatic
 src/interpolate
 src/invert
 src/jsec2time
-src/jurassic.o
 src/kernel
 src/limb
 src/nadir

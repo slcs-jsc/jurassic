@@ -14,6 +14,12 @@ INCDIR += -I ../libs/build/include
 # Library directories...
 LIBDIR += -L ../libs/build/lib
 
+# Path to JURASSIC-UNIFIED library...
+UNIDIR = ../../jurassic-unified
+
+# Use JURASSIC-UNIFIED library...
+UNIFIED ?= 0
+
 # Static compilation...
 STATIC ?= 1
 
@@ -45,6 +51,23 @@ CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" $(OPT) -DHAVE_INLINE -DG
 # LDFLAGS...
 LDFLAGS ?= $(LIBDIR) -lgsl -lgslcblas -lm
 
+# Use JURASSIC-UNIFIED library...
+ifeq ($(UNIFIED),1)
+
+  # Wrapper file...
+  WRAPPER=$(UNIDIR)/include/jurassic_unified_library
+  WRAPPER_OBJ=wrapper.o
+
+  # Add paths...
+  INCDIR += -I $(UNIDIR)/include -I .
+  LIBDIR += -L $(UNIDIR)/unified_library -L $(CUDA_PATH)/lib64
+
+  # Add flags...
+  CFLAGS += -DUNIFIED
+  LDFLAGS += -lstdc++ -lcudart -ljurassic_unified
+
+endif
+
 # Optimization information...
 ifeq ($(INFO),1)
   CFLAGS += -fopt-info
@@ -62,7 +85,11 @@ endif
 
 # Static compilation...
 ifeq ($(STATIC),1)
-  CFLAGS += -static
+  ifeq ($(UNIFIED),1)
+    $(error Static compilation does not work for JURASSIC-UNIFIED)
+  else
+    CFLAGS += -static
+  endif
 endif
 
 # -----------------------------------------------------------------------------
@@ -72,8 +99,11 @@ endif
 all: $(EXC)
 	rm -f *~
 
-$(EXC): %: %.c jurassic.o
-	$(CC) $(CFLAGS) -o $@ $< jurassic.o $(LDFLAGS)
+$(EXC): %: %.c jurassic.o $(WRAPPER_OBJ)
+	$(CC) $(CFLAGS) -o $@ $< jurassic.o $(WRAPPER_OBJ) $(LDFLAGS)
+
+$(WRAPPER_OBJ): $(WRAPPER).c $(WRAPPER).h Makefile
+	$(CC) $(CFLAGS) -c -o  $(WRAPPER_OBJ) $(WRAPPER).c
 
 jurassic.o: jurassic.c jurassic.h Makefile
 	$(CC) $(CFLAGS) -c -o jurassic.o jurassic.c

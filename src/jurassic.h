@@ -34,6 +34,9 @@
   Further information can be found at: https://github.com/slcs-jsc/jurassic
 */
 
+#ifndef JURASSIC_H
+#define JURASSIC_H
+
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
@@ -1049,3 +1052,5 @@ void y2obs(
   ctl_t * ctl,
   gsl_vector * y,
   obs_t * obs);
+
+#endif

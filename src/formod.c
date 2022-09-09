@@ -23,6 +23,9 @@
 */
 
 #include "jurassic.h"
+#ifdef UNIFIED
+#include "jurassic_unified_library.h"
+#endif
 
 /* ------------------------------------------------------------
    Functions...
@@ -47,16 +50,36 @@ int main(
 
   static ctl_t ctl;
 
-  FILE *in;
-
-  char dirlist[LEN], task[LEN], wrkdir[LEN];
-
   /* Check arguments... */
   if (argc < 5)
     ERRMSG("Give parameters: <ctl> <obs> <atm> <rad>");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
+
+#ifdef UNIFIED
+
+  static atm_t atm;
+  static obs_t obs;
+
+  /* Read observation geometry... */
+  read_obs(NULL, argv[2], &ctl, &obs);
+
+  /* Read atmospheric data... */
+  read_atm(NULL, argv[3], &ctl, &atm);
+
+  /* Call forward model... */
+  jur_unified_init(argc, argv);
+  jur_unified_formod_multiple_packages(&atm, &obs, 1, NULL);
+
+  /* Save radiance data... */
+  write_obs(NULL, argv[4], &ctl, &obs);
+
+#else
+
+  FILE *in;
+
+  char dirlist[LEN], task[LEN], wrkdir[LEN];
 
   /* Get task... */
   scan_ctl(argc, argv, "TASK", -1, "-", task);
@@ -88,6 +111,8 @@ int main(
     /* Close dirlist... */
     fclose(in);
   }
+
+#endif
 
   return EXIT_SUCCESS;
 }
