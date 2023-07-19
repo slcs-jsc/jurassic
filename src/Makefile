@@ -96,6 +96,9 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
+.PHONY : all check clean coverage cppcheck dist doc indent \
+           install lizard strip uninstall
+
 all: $(EXC)
 	rm -f *~
 
@@ -112,31 +115,39 @@ check: all
 	cd ../example/nadir && ./run.sh
 	cd ../example/limb && ./run.sh
 
-check_coverage:
+clean:
+	rm -rf $(EXC) *.o *.gcda *.gcno *.gcov coverage* *~
+
+coverage:
 	lcov --capture --directory . --output-file=coverage.info ; \
 	genhtml coverage.info --legend --frames --output-directory=coverage
 	gcov -abcfu *.c
 
-check_cppcheck:
+cppcheck:
 	cppcheck --enable=all ./
 
-check_lizard:
-	lizard -s cyclomatic_complexity
-
-clean:
-	rm -rf $(EXC) *.o *.gcda *.gcno *.gcov coverage* *~
-
 dist:
-	zip jurassic_`date +"%y%m%d%H%M"`.zip Doxyfile Makefile *.c *.h
+	cd ..  && tar cvfz jurassic_$(VERSION).tgz bin/* \
+          docs/Doxyfile docs/refman.pdf example/* \
+          libs/build.sh libs/*gz src/*
 
-doc:
-	cd ../docs && doxygen && cd ../docs/latex && make
+doxygen:
+	cd ../docs && doxygen && cd latex && make && cp refman.pdf ..
 
 indent:
 	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h
 
-install: all
+install:
 	mkdir -p $(DESTDIR) && cp $(EXC) $(DESTDIR)
+
+lizard:
+	lizard -s cyclomatic_complexity
+
+mkdocs:
+	cd ../docs && mkdocs build
 
 strip:
 	strip $(EXC)
+
+uninstall:
+	cd $(DESTDIR) && rm $(EXC)
