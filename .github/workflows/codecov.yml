@@ -7,12 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: fetch
-      uses: actions/checkout@master
+      uses: actions/checkout@v3
     - name: install
       run: sudo apt-get update ; sudo apt-get install gnuplot libgsl-dev lcov
-    - name: test
-      run: cd ./src ; STATIC=0 COV=1 make check ; make check_coverage
+    - name: make
+      run: cd ./src ; STATIC=0 COV=1 make
+    - name: check
+      run: cd ./src ; STATIC=0 COV=1 make check
+    - name: coverage
+      run: cd ./src ; STATIC=0 COV=1 make coverage
     - name: upload
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         directory: ./src/
