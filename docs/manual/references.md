@@ -2,14 +2,54 @@
 
 These are the main references for citing the JURASSIC model in scientific publications:
 
-* Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer calculations using graphics processing units: JURASSIC-GPU v2.0, Geosci. Model Dev., 15, 1855–1874, https://doi.org/10.5194/gmd-15-1855-2022, 2022.
+- Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer calculations using graphics processing units: JURASSIC-GPU v2.0, Geosci. Model Dev., 15, 1855–1874, https://doi.org/10.5194/gmd-15-1855-2022, 2022.
 
-* Hoffmann, L., and M. J. Alexander, Retrieval of stratospheric temperatures from Atmospheric Infrared Sounder radiance measurements for gravity wave studies, J. Geophys. Res., 114, D07105, https://doi.org/10.1029/2008JD011241, 2009.
+- Hoffmann, L., and M. J. Alexander, Retrieval of stratospheric temperatures from Atmospheric Infrared Sounder radiance measurements for gravity wave studies, J. Geophys. Res., 114, D07105, https://doi.org/10.1029/2008JD011241, 2009.
 
-* Hoffmann, L., Kaufmann, M., Spang, R., Müller, R., Remedios, J. J., Moore, D. P., Volk, C. M., von Clarmann, T., and Riese, M.: Envisat MIPAS measurements of CFC-11: retrieval, validation, and climatology, Atmos. Chem. Phys., 8, 3671-3688, https://doi.org/10.5194/acp-8-3671-2008, 2008.
+- Hoffmann, L., Kaufmann, M., Spang, R., Müller, R., Remedios, J. J., Moore, D. P., Volk, C. M., von Clarmann, T., and Riese, M.: Envisat MIPAS measurements of CFC-11: retrieval, validation, and climatology, Atmos. Chem. Phys., 8, 3671-3688, https://doi.org/10.5194/acp-8-3671-2008, 2008.
 
-You can cite the source code of JURASSIC by using the DOI https://doi.org/10.5281/zenodo.4572889. This DOI represents all versions, and will always resolve to the latest one. Specific DOIs for each release of JURASSIC can be found on the zenodo web site.
+- You can cite the source code of JURASSIC by using the DOI https://doi.org/10.5281/zenodo.4572889. This DOI represents all versions, and will always resolve to the latest one. Specific DOIs for each release of JURASSIC can be found on the zenodo web site.
 
 This is a list of papers in which JURASSIC was applied:
 
-tbd
+- S. Griessbach, L. Hoffmann, R. Spang, P. Achtert, M. v. Hobe, N. Mateshvili, R. Müller, M. Riese, C. Rolf, P. Seifert, et al. Aerosol and cloud top height information of Envisat MIPAS measurements. Atmospheric measurement techniques, 13(3):1243–1271, 2020.
+
+- C. I. Meyer, M. Ern, L. Hoffmann, Q. T. Trinh, and M. J. Alexander. Intercomparison of AIRS and HIRDLS stratospheric gravity wave observations. Atmospheric measurement techniques, 11(1):215–232, 2018.
+
+- P. Baumeister, T. Hater, S. griessbach, L. Hoffmann, D. Pleiter, B. Rombach, and M. Bühler. Strategies for forward modelling of infrared radiative transfer on GPUs. Parallel Computing is Everywhere, 32:369, 2018.
+
+- S. Griessbach, L. Hoffmann, R. Spang, M. v. Hobe, R. Müller, and M. Riese. Infrared limb emission measurements of aerosol in the troposphere and stratosphere. Atmospheric measurement techniques, 9(9):4399–4423, 2016.
+
+- A. Orr, J. Hosking, L. Hoffmann, J. Keeble, S. Dean, H. Roscoe, N. Abraham, S. Vosper, and P. Braesicke. Inclusion of mountain-wave-induced cooling for the formation of PSCs over the antarctic peninsula in a chemistry–climate model. Atmospheric chemistry and physics, 15(2):1071–1086, 2015.
+
+- C. I. Meyer and L. Hoffmann. Validation of airs high-resolution stratospheric temperature retrievals. In Remote Sensing of Clouds and the Atmosphere XIX; and Optics in Atmospheric Propagation and Adaptive Systems XVII, volume 9242, page 92420L. International Society for Optics and Photonics, 2014.
+
+- L. Hoffmann, S. Griessbach, and C. I. Meyer. Volcanic emissions from AIRS observations: detection methods, case study, and statistical analysis. In Remote Sensing of Clouds and the Atmosphere XIX; and Optics in Atmospheric Propagation and Adaptive Systems XVII, volume 9242, page 924214. International Society for Optics and Photonics, 2014.
+
+- S. Griessbach, L. Hoffmann, R. Spang, and M. Riese. Volcanic ash detection with infrared limb sounding: MIPAS observations and radiative transfer simulations. Atmospheric measurement techniques, 7(5):1487–1507, 2014.
+
+- C. Kalicinsky, J.-U. Grooß, G. Günther, J. Ungermann, J. Blank, S. Höfer, L. Hoffmann, P. Knieling, F. Olschewski, R. Spang, et al. Observations of filamentary structures near the vortex edge in the arctic winter lower stratosphere. Atmospheric Chemistry and Physics, 13(21):10859–10871, 2013.
+
+- S. Griessbach, L. Hoffmann, M. Höpfner, M. Riese, and R. Spang. Scattering in infrared radiative transfer: A comparison between the spectrally averaging model JURASSIC and the line-by-line model KOPRA. Journal of Quantitative Spectroscopy and Radiative Transfer, 127:102–118, 2013.
+
+- J. Ungermann, L. Hoffmann, P. Preusse, M. Kaufmann, and M. Riese. Tomographic retrieval approach for mesoscale gravity wave observations by the PREMIER infrared limb-sounder. Atmospheric measurement techniques, 3(2):339–354, 2010.
+
+- L. Hoffmann and M. J. Alexander. Occurrence frequency of convective gravity waves during the north American thunderstorm season. Journal of Geophysical Research: Atmospheres, 115(D20), 2010.
+
+- A. W. Grimsdell, M. J. Alexander, P. T. May, and L. Hoffmann. Model study of waves generated by convection with direct validation via satellite. Journal of the Atmospheric Sciences, 67(5):1617–1631, 2010.
+
+- P. Preusse, S. Schroeder, L. Hoffmann, M. Ern, F. Friedl-Vallon, J. Ungermann, H. Oelhaf, H. Fischer, and M. Riese. New perspectives on gravity wave remote sensing by spaceborne infrared limb imaging. Atmospheric measurement techniques, 2(1):299–311, 2009.
+
+- L. Hoffmann, K. Weigel, R. Spang, S. Schroeder, K. Arndt, C. Lehmann, M. Kaufmann, M. Ern, P. Preusse, F. Stroh, et al. CRISTA-NF measurements of water vapor during the scout-o3 tropical aircraft campaign. Advances in Space Research, 43(1):74–81, 2009.
+
+- L. Hoffmann and M. Alexander. Retrieval of stratospheric temperatures from atmospheric infrared sounder radiance measurements for gravity wave studies. Journal of Geophysical Research: Atmospheres, 114(D7), 2009.
+
+- L. Hoffmann, M. Kaufmann, R. Spang, R. Müller, J. J. Remedios, D. Moore, C. Volk, T. v. Clarmann, and M. Riese. Envisat MIPAS measurements of CFC-11: retrieval, validation, and climatology. Atmospheric Chemistry and Physics, 8(13):3671–3688, 2008.
+
+- L. Hoffmann. Schnelle Spurengasretrieval für das Satellitenexperiment Envisat MIPAS. PhD thesis, Universität Wuppertal, Fakultät für Mathematik und Naturwissenschaften, 2006.
+
+- L. Hoffmann, R. Spang, M. Kaufmann, and M. Riese. Retrieval of CFC-11 and CFC-12 from Envisat MIPAS observations by means of rapid radiative transfer calculations. Advances in Space Research, 36(5):915–921, 2005.
+
+- L. Hoffmann, R. Spang, and M. Riese. Retrieval of chlorofluorocarbon distributions from Envisat MIPAS measurements. In Remote Sensing of Clouds and the Atmosphere IX, volume 5571, pages 193–204. International Society for Optics and Photonics, 2004.
+
+
