@@ -4680,7 +4680,7 @@ void read_rfm_spec(
   int i, ipts = 0;
 
   /* Write info... */
-  printf("Read RFM data: %s\n", filename);
+  LOG(1, "Read RFM data: %s", filename);
 
   /* Open file... */
   if (!(in = fopen(filename, "r")))
@@ -5223,7 +5223,7 @@ void write_atm_rfm(
   int ig, ip;
 
   /* Write info... */
-  printf("Write RFM data: %s\n", filename);
+  LOG(1, "Write RFM data: %s", filename);
 
   /* Create file... */
   if (!(out = fopen(filename, "w")))
