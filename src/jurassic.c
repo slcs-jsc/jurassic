@@ -4893,6 +4893,27 @@ void read_tbl(
 
       /* Close file... */
       fclose(in);
+
+      /* Write info... */
+      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+	LOG(2,
+	    "p[%2d]= %e hPa | T[%2d,0:%2d]= %e ... %e K | (u,eps)[%2d,0,0:%3d]= (%e,%e) ... (%e,%e) | (u,eps)[%2d,%2d,0:%3d]= (%e,%e) ... (%e,%e)",
+	    ip, tbl->p[id][ig][ip], ip, tbl->nt[id][ig][ip] - 1,
+	    tbl->t[id][ig][ip][0],
+	    tbl->t[id][ig][ip][tbl->nt[id][ig][ip] - 1], ip,
+	    tbl->nu[id][ig][ip][0] - 1, tbl->u[id][ig][ip][0][0],
+	    tbl->eps[id][ig][ip][0][0],
+	    tbl->u[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1],
+	    tbl->eps[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1], ip,
+	    tbl->nt[id][ig][ip] - 1, tbl->nu[id][ig][ip][0] - 1,
+	    tbl->u[id][ig][ip][tbl->nt[id][ig][ip] - 1][0],
+	    tbl->eps[id][ig][ip][tbl->nt[id][ig][ip] - 1][0],
+	    tbl->u[id][ig][ip][tbl->nt[id][ig][ip] -
+			       1][tbl->nu[id][ig][ip][tbl->nt[id][ig][ip] -
+						      1] - 1],
+	    tbl->eps[id][ig][ip][tbl->nt[id][ig][ip] -
+				 1][tbl->nu[id][ig][ip][tbl->nt[id][ig][ip] -
+							1] - 1]);
     }
 }
 
