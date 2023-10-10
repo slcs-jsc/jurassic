@@ -29,7 +29,7 @@
    ------------------------------------------------------------ */
 
 /* Maximum number of grid points for filter files: */
-#define MAXNF 10000
+#define MAXNF 20000
 
 /* Maximum number of grid points for spectra: */
 #define MAXNPTS 10000000

@@ -260,7 +260,7 @@
 
 /*! Maximum number of shape function grid points. */
 #ifndef NSHAPE
-#define NSHAPE 10000
+#define NSHAPE 20000
 #endif
 
 /*! Number of ray paths used for FOV calculations. */
