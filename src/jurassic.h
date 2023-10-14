@@ -515,7 +515,7 @@ typedef struct {
   /*! Write matrix file (0=no, 1=yes). */
   int write_matrix;
 
-  /*! Forward model (1=EGA, 2=RFM). */
+  /*! Forward model (0=CGA, 1=EGA, 2=RFM). */
   int formod;
 
   /*! Path to RFM binary. */
@@ -567,6 +567,15 @@ typedef struct {
 
   /*! Column density [molecules/cm^2]. */
   double u[NLOS][NG];
+
+  /*! Curtis-Godson pressure [hPa]. */
+  double cgp[NLOS][NG];
+
+  /*! Curtis-Godson temperature [K]. */
+  double cgt[NLOS][NG];
+
+  /*! Curtis-Godson column density [molecules/cm^2]. */
+  double cgu[NLOS][NG];
 
   /*! Segment emissivity. */
   double eps[NLOS][ND];
@@ -808,8 +817,17 @@ void intpol_atm(
   double *q,
   double *k);
 
-/*! Get transmittance from look-up tables. */
-void intpol_tbl(
+/*! Get transmittance from look-up tables (CGA method). */
+void intpol_tbl_cga(
+  ctl_t * ctl,
+  tbl_t * tbl,
+  los_t * los,
+  int ip,
+  double tau_path[ND][NG],
+  double tau_seg[ND]);
+
+/*! Get transmittance from look-up tables (EGA method). */
+void intpol_tbl_ega(
   ctl_t * ctl,
   tbl_t * tbl,
   los_t * los,

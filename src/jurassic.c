@@ -3049,8 +3049,8 @@ void formod(
   /* Hydrostatic equilibrium... */
   hydrostatic(ctl, atm);
 
-  /* EGA forward model... */
-  if (ctl->formod == 1)
+  /* CGA or EGA forward model... */
+  if (ctl->formod == 0 || ctl->formod == 1)
     for (int ir = 0; ir < obs->nr; ir++)
       formod_pencil(ctl, atm, obs, ir);
 
@@ -3241,7 +3241,10 @@ void formod_pencil(
   for (int ip = 0; ip < los->np; ip++) {
 
     /* Get trace gas transmittance... */
-    intpol_tbl(ctl, tbl, los, ip, tau_path, tau_gas);
+    if (ctl->formod == 0)
+      intpol_tbl_cga(ctl, tbl, los, ip, tau_path, tau_gas);
+    else
+      intpol_tbl_ega(ctl, tbl, los, ip, tau_path, tau_gas);
 
     /* Get continuum absorption... */
     formod_continua(ctl, los, ip, beta_ctm);
@@ -3699,7 +3702,96 @@ void intpol_atm(
 
 /*****************************************************************************/
 
-void intpol_tbl(
+void intpol_tbl_cga(
+  ctl_t * ctl,
+  tbl_t * tbl,
+  los_t * los,
+  int ip,
+  double tau_path[ND][NG],
+  double tau_seg[ND]) {
+
+  double eps;
+
+  /* Loop over channels... */
+  for (int id = 0; id < ctl->nd; id++) {
+
+    /* Initialize... */
+    tau_seg[id] = 1;
+
+    /* Loop over emitters.... */
+    for (int ig = 0; ig < ctl->ng; ig++) {
+
+      /* Check size of table (pressure)... */
+      if (tbl->np[id][ig] < 30)
+	eps = 0;
+
+      /* Check transmittance... */
+      else if (tau_path[id][ig] < 1e-9)
+	eps = 1;
+
+      /* Interpolate... */
+      else {
+
+	/* Determine pressure and temperature indices... */
+	int ipr = locate_irr(tbl->p[id][ig], tbl->np[id][ig],
+			     los->cgp[ip][ig]);
+	int it0 = locate_reg(tbl->t[id][ig][ipr], tbl->nt[id][ig][ipr],
+			     los->cgt[ip][ig]);
+	int it1 =
+	  locate_reg(tbl->t[id][ig][ipr + 1], tbl->nt[id][ig][ipr + 1],
+		     los->cgt[ip][ig]);
+
+	/* Check size of table (temperature and column density)... */
+	if (tbl->nt[id][ig][ipr] < 2 || tbl->nt[id][ig][ipr + 1] < 2
+	    || tbl->nu[id][ig][ipr][it0] < 2
+	    || tbl->nu[id][ig][ipr][it0 + 1] < 2
+	    || tbl->nu[id][ig][ipr + 1][it1] < 2
+	    || tbl->nu[id][ig][ipr + 1][it1 + 1] < 2)
+	  eps = 0;
+
+	else {
+
+	  /* Get emissivities of extended path... */
+	  double eps00
+	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, los->cgu[ip][ig]);
+	  double eps01 =
+	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, los->cgu[ip][ig]);
+	  double eps10 =
+	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, los->cgu[ip][ig]);
+	  double eps11 =
+	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, los->cgu[ip][ig]);
+
+	  /* Interpolate with respect to temperature... */
+	  eps00 = LIN(tbl->t[id][ig][ipr][it0], eps00,
+		      tbl->t[id][ig][ipr][it0 + 1], eps01, los->cgt[ip][ig]);
+	  eps11 = LIN(tbl->t[id][ig][ipr + 1][it1], eps10,
+		      tbl->t[id][ig][ipr + 1][it1 + 1],
+		      eps11, los->cgt[ip][ig]);
+
+	  /* Interpolate with respect to pressure... */
+	  eps00 = LIN(tbl->p[id][ig][ipr], eps00,
+		      tbl->p[id][ig][ipr + 1], eps11, los->cgp[ip][ig]);
+
+	  /* Check emssivity range... */
+	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
+
+	  /* Determine segment emissivity... */
+	  eps = 1 - (1 - eps00) / tau_path[id][ig];
+	}
+      }
+
+      /* Get transmittance of extended path... */
+      tau_path[id][ig] *= (1 - eps);
+
+      /* Get segment transmittance... */
+      tau_seg[id] *= (1 - eps);
+    }
+  }
+}
+
+/*****************************************************************************/
+
+void intpol_tbl_ega(
   ctl_t * ctl,
   tbl_t * tbl,
   los_t * los,
@@ -4324,6 +4416,24 @@ void raytrace(
     for (int ig = 0; ig < ctl->ng; ig++)
       los->u[ip][ig] = 10 * los->q[ip][ig] * los->p[ip]
 	/ (KB * los->t[ip]) * los->ds[ip];
+
+  /* Compute Curtis-Godson means... */
+  for (int ig = 0; ig < ctl->ng; ig++) {
+    los->cgu[0][ig] = los->u[0][ig];
+    los->cgp[0][ig] = los->u[0][ig] * los->p[0];
+    los->cgt[0][ig] = los->u[0][ig] * los->t[0];
+  }
+  for (int ip = 1; ip < los->np; ip++)
+    for (int ig = 0; ig < ctl->ng; ig++) {
+      los->cgu[ip][ig] = los->cgu[ip - 1][ig] + los->u[ip][ig];
+      los->cgp[ip][ig] = los->cgp[ip - 1][ig] + los->u[ip][ig] * los->p[ip];
+      los->cgt[ip][ig] = los->cgt[ip - 1][ig] + los->u[ip][ig] * los->t[ip];
+    }
+  for (int ip = 0; ip < los->np; ip++)
+    for (int ig = 0; ig < ctl->ng; ig++) {
+      los->cgp[ip][ig] /= los->cgu[ip][ig];
+      los->cgt[ip][ig] /= los->cgu[ip][ig];
+    }
 }
 
 /*****************************************************************************/
