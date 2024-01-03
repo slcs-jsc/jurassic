@@ -88,9 +88,13 @@ and conduct radiative transfer calculations for two or three detector channels:
 The output of the simulation is verified by comparing it to reference data.
 Additionally, gnuplot is used to create plots of the radiance data:
 
-<p align="center"><img src="example/limb/plot_rad.png" width="60%"/></p>
+<p align="center"><img src="example/limb/plot_rad.png" width="45%"/> &emsp; <img src="example/nadir/plot_rad.png" width="45%"/></p>
 
-<p align="center"><img src="example/nadir/plot_rad.png" width="60%"/></p>
+Kernel functions are calculated using a finite difference method:
+
+<p align="center"><img src="example/limb/plot_kernel_temperature_792.png" width="45%"/> &emsp; <img src="example/nadir/plot_kernel_temperature_668.5410.png" width="45%"/></p>
+
+<p align="center"><img src="example/limb/plot_kernel_H2O_792.png" width="45%"/> &emsp; <img src="example/nadir/plot_kernel_CO2_668.5410.png" width="45%"/></p>
 
 ## Further information
 
