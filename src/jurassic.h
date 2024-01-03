@@ -152,47 +152,80 @@
    Constants...
    ------------------------------------------------------------ */
 
-/*! Minimum temperature for source function [K]. */
-#define TMIN 100.
-
-/*! Maximum temperature for source function [K]. */
-#define TMAX 400.
-
-/*! Effective temperature of the sun [K]. */
-#define TSUN 5780.
-
 /*! First spectroscopic constant (c_1 = 2 h c^2) [W/(m^2 sr cm^-4)]. */
+#ifndef C1
 #define C1 1.19104259e-8
+#endif
 
 /*! Second spectroscopic constant (c_2 = h c / k) [K/cm^-1]. */
+#ifndef C2
 #define C2 1.43877506
+#endif
 
 /*! Standard gravity [m/s^2]. */
+#ifndef G0
 #define G0 9.80665
-
-/*! Boltzmann constant [kg m^2/(K s^2)]. */
-#define KB 1.3806504e-23
-
-/*! Avogadro's number. */
-#define NA 6.02214199e23
+#endif
 
 /*! Standard scale height [km]. */
+#ifndef H0
 #define H0 7.0
+#endif
 
-/*! Standard pressure [hPa]. */
-#define P0 1013.25
-
-/*! Standard temperature [K]. */
-#define T0 273.15
-
-/*! Mean radius of Earth [km]. */
-#define RE 6367.421
-
-/*! Ideal gas constant [J/(mol K)]. */
-#define RI 8.3144598
+/*! Boltzmann constant [kg m^2/(K s^2)]. */
+#ifndef KB
+#define KB 1.3806504e-23
+#endif
 
 /*! Mass of Earth [kg]. */
+#ifndef ME
 #define ME 5.976e24
+#endif
+
+/*! Avogadro's number. */
+#ifndef NA
+#define NA 6.02214199e23
+#endif
+
+/*! Mean radius of Earth [km]. */
+#ifndef RE
+#define RE 6367.421
+#endif
+
+/*! Ideal gas constant [J/(mol K)]. */
+#ifndef RI
+#define RI 8.3144598
+#endif
+
+/*! Standard pressure [hPa]. */
+#ifndef P0
+#define P0 1013.25
+#endif
+
+/*! Standard temperature [K]. */
+#ifndef T0
+#define T0 273.15
+#endif
+
+/*! Minimum temperature for source function [K]. */
+#ifndef TMIN
+#define TMIN 100.
+#endif
+
+/*! Maximum temperature for source function [K]. */
+#ifndef TMAX
+#define TMAX 400.
+#endif
+
+/*! Effective temperature of the sun [K]. */
+#ifndef TSUN
+#define TSUN 5780.
+#endif
+
+/*! Maximum column density [molecules/cm^2]. */
+#ifndef UMAX
+#define UMAX 1e30
+#endif
 
 /* ------------------------------------------------------------
    Dimensions...

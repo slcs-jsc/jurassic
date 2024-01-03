@@ -3903,7 +3903,7 @@ double intpol_tbl_eps(
   else if (u > tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
     return LIN(tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
 	       tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
-	       1e30, 1, u);
+	       UMAX, 1, u);
 
   /* Interpolation... */
   else {
@@ -3938,7 +3938,7 @@ double intpol_tbl_u(
   else if (eps > tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
     return LIN(tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
 	       tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
-	       1, 1e30, eps);
+	       1, UMAX, eps);
 
   /* Interpolation... */
   else {
@@ -4503,6 +4503,42 @@ void read_atm(
   /* Check number of points... */
   if (atm->np < 1)
     ERRMSG("Could not read any data!");
+
+  /* Write info... */
+  double mini, maxi;
+  LOG(2, "Number of data points: %d", atm->np);
+  gsl_stats_minmax(&mini, &maxi, atm->time, 1, (size_t) atm->np);
+  LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->z, 1, (size_t) atm->np);
+  LOG(2, "Altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->lon, 1, (size_t) atm->np);
+  LOG(2, "Longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->lat, 1, (size_t) atm->np);
+  LOG(2, "Latitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->p, 1, (size_t) atm->np);
+  LOG(2, "Pressure range: %g ... %g hPa", maxi, mini);
+  gsl_stats_minmax(&mini, &maxi, atm->t, 1, (size_t) atm->np);
+  LOG(2, "Temperature range: %g ... %g K", mini, maxi);
+  for (int ig = 0; ig < ctl->ng; ig++) {
+    gsl_stats_minmax(&mini, &maxi, atm->q[ig], 1, (size_t) atm->np);
+    LOG(2, "Emitter %s range: %g ... %g ppv", ctl->emitter[ig], mini, maxi);
+  }
+  for (int iw = 0; iw < ctl->nw; iw++) {
+    gsl_stats_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
+    LOG(2, "Extinction range (window %d): %g ... %g km^-1", iw, mini, maxi);
+  }
+  if (ctl->ncl > 0 && atm->np == 0) {
+    LOG(2, "Cloud layer: z= %g km | dz= %g km | k= %g ... %g km^-1",
+	atm->clz, atm->cldz, atm->clk[0], atm->clk[ctl->ncl - 1]);
+  } else
+    LOG(2, "Cloud layer: none");
+  if (ctl->nsf > 0 && atm->np == 0) {
+    LOG(2,
+	"Surface layer: z_s= %g km | p_s= %g hPa | T_s = %g K | eps= %g ... %g",
+	atm->sfz, atm->sfp, atm->sft, atm->sfeps[0],
+	atm->sfeps[ctl->nsf - 1]);
+  } else
+    LOG(2, "Surface layer: none");
 }
 
 /*****************************************************************************/
@@ -4850,12 +4886,20 @@ void read_shape(
       if ((++(*n)) > NSHAPE)
 	ERRMSG("Too many data points!");
 
-  /* Check number of points... */
-  if (*n < 1)
-    ERRMSG("Could not read any data!");
-
   /* Close file... */
   fclose(in);
+
+  /* Check number of data points... */
+  if (*n < 2)
+    ERRMSG("Could not read any data!");
+
+  /* Write info... */
+  double mini, maxi;
+  LOG(2, "Number of data points: %d", *n);
+  gsl_stats_minmax(&mini, &maxi, x, 1, (size_t) *n);
+  LOG(2, "Range of x values: %.4f ... %.4f", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, y, 1, (size_t) *n);
+  LOG(2, "Range of y values: %g ... %g", mini, maxi);
 }
 
 /*****************************************************************************/
@@ -4880,6 +4924,7 @@ void read_tbl(
       double press_old = -999;
       double temp_old = -999;
       double u_old = -999;
+      int nrange = 0;
 
       /* Set filename... */
       sprintf(filename, "%s_%.4f_%s.%s", ctl->tblbase,
@@ -4906,8 +4951,10 @@ void read_tbl(
 	    continue;
 
 	  /* Check ranges... */
-	  if (u < 0 || u > 1e30 || eps < 0 || eps > 1)
+	  if (u < 0 || u > UMAX || eps < 0 || eps > 1) {
+	    nrange++;
 	    continue;
+	  }
 
 	  /* Determine pressure index... */
 	  if (press != press_old) {
@@ -4932,11 +4979,8 @@ void read_tbl(
 	    eps_old = eps;
 	    u_old = u;
 	    if ((++tbl->nu[id][ig][tbl->np[id][ig]]
-		 [tbl->nt[id][ig][tbl->np[id][ig]]]) >= TBLNU) {
-	      tbl->nu[id][ig][tbl->np[id][ig]]
-		[tbl->nt[id][ig][tbl->np[id][ig]]]--;
-	      continue;
-	    }
+		 [tbl->nt[id][ig][tbl->np[id][ig]]]) >= TBLNU)
+	      ERRMSG("Too many column densities!");
 	  }
 
 	  /* Store data... */
@@ -5001,29 +5045,25 @@ void read_tbl(
       else
 	ERRMSG("Unknown look-up table format!");
 
+      /* Check ranges... */
+      if (nrange > 0)
+	WARN("Column density or emissivity out of range (%d data points)!",
+	     nrange);
+
       /* Close file... */
       fclose(in);
 
       /* Write info... */
       for (int ip = 0; ip < tbl->np[id][ig]; ip++)
 	LOG(2,
-	    "p[%2d]= %e hPa | T[%2d,0:%2d]= %e ... %e K | (u,eps)[%2d,0,0:%3d]= (%e,%e) ... (%e,%e) | (u,eps)[%2d,%2d,0:%3d]= (%e,%e) ... (%e,%e)",
-	    ip, tbl->p[id][ig][ip], ip, tbl->nt[id][ig][ip] - 1,
+	    "p[%2d]= %.5e hPa | T[0:%2d]= %.2f ... %.2f K | u[0:%3d]= %.5e ... %.5e molec/cm^2 | eps[0:%3d]= %.5e ... %.5e",
+	    ip, tbl->p[id][ig][ip], tbl->nt[id][ig][ip] - 1,
 	    tbl->t[id][ig][ip][0],
-	    tbl->t[id][ig][ip][tbl->nt[id][ig][ip] - 1], ip,
+	    tbl->t[id][ig][ip][tbl->nt[id][ig][ip] - 1],
 	    tbl->nu[id][ig][ip][0] - 1, tbl->u[id][ig][ip][0][0],
-	    tbl->eps[id][ig][ip][0][0],
 	    tbl->u[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1],
-	    tbl->eps[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1], ip,
-	    tbl->nt[id][ig][ip] - 1, tbl->nu[id][ig][ip][0] - 1,
-	    tbl->u[id][ig][ip][tbl->nt[id][ig][ip] - 1][0],
-	    tbl->eps[id][ig][ip][tbl->nt[id][ig][ip] - 1][0],
-	    tbl->u[id][ig][ip][tbl->nt[id][ig][ip] -
-			       1][tbl->nu[id][ig][ip][tbl->nt[id][ig][ip] -
-						      1] - 1],
-	    tbl->eps[id][ig][ip][tbl->nt[id][ig][ip] -
-				 1][tbl->nu[id][ig][ip][tbl->nt[id][ig][ip] -
-							1] - 1]);
+	    tbl->nu[id][ig][ip][0] - 1, tbl->eps[id][ig][ip][0][0],
+	    tbl->eps[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1]);
     }
 }
 
@@ -5340,6 +5380,42 @@ void write_atm(
 
   /* Close file... */
   fclose(out);
+
+  /* Write info... */
+  double mini, maxi;
+  LOG(2, "Number of data points: %d", atm->np);
+  gsl_stats_minmax(&mini, &maxi, atm->time, 1, (size_t) atm->np);
+  LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->z, 1, (size_t) atm->np);
+  LOG(2, "Altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->lon, 1, (size_t) atm->np);
+  LOG(2, "Longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->lat, 1, (size_t) atm->np);
+  LOG(2, "Latitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, atm->p, 1, (size_t) atm->np);
+  LOG(2, "Pressure range: %g ... %g hPa", maxi, mini);
+  gsl_stats_minmax(&mini, &maxi, atm->t, 1, (size_t) atm->np);
+  LOG(2, "Temperature range: %g ... %g K", mini, maxi);
+  for (int ig = 0; ig < ctl->ng; ig++) {
+    gsl_stats_minmax(&mini, &maxi, atm->q[ig], 1, (size_t) atm->np);
+    LOG(2, "Emitter %s range: %g ... %g ppv", ctl->emitter[ig], mini, maxi);
+  }
+  for (int iw = 0; iw < ctl->nw; iw++) {
+    gsl_stats_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
+    LOG(2, "Extinction range (window %d): %g ... %g km^-1", iw, mini, maxi);
+  }
+  if (ctl->ncl > 0 && atm->np == 0) {
+    LOG(2, "Cloud layer: z= %g km | dz= %g km | k= %g ... %g km^-1",
+	atm->clz, atm->cldz, atm->clk[0], atm->clk[ctl->ncl - 1]);
+  } else
+    LOG(2, "Cloud layer: none");
+  if (ctl->nsf > 0 && atm->np == 0) {
+    LOG(2,
+	"Surface layer: z_s= %g km | p_s= %g hPa | T_s = %g K | eps= %g ... %g",
+	atm->sfz, atm->sfp, atm->sft, atm->sfeps[0],
+	atm->sfeps[ctl->nsf - 1]);
+  } else
+    LOG(2, "Surface layer: none");
 }
 
 /*****************************************************************************/
