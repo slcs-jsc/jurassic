@@ -205,7 +205,7 @@
 
 /*! Maximum number of radiance channels. */
 #ifndef ND
-#define ND 64
+#define ND 128
 #endif
 
 /*! Maximum number of emitters. */
