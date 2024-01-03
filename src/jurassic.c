@@ -4775,13 +4775,20 @@ void read_obs(
   LOG(2, "Tangent point latitude range: %g ... %g deg", mini, maxi);
   for (int id = 0; id < ctl->nd; id++) {
     gsl_stats_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
-    LOG(2, "Radiance (%.4f cm^-1) range: %g ... %g W/(m^2 sr cm^-1)",
-	ctl->nu[id], mini, maxi);
+    if (ctl->write_bbt) {
+      LOG(2, "Brightness temperature (%.4f cm^-1) range: %g ... %g K",
+	  ctl->nu[id], mini, maxi);
+    } else {
+      LOG(2, "Radiance (%.4f cm^-1) range: %g ... %g W/(m^2 sr cm^-1)",
+	  ctl->nu[id], mini, maxi);
+    }
   }
   for (int id = 0; id < ctl->nd; id++) {
     gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
-    LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
-	ctl->nu[id], mini, maxi);
+    if (ctl->write_bbt) {
+      LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
+	  ctl->nu[id], mini, maxi);
+    }
   }
 }
 
@@ -5759,13 +5766,20 @@ void write_obs(
   LOG(2, "Tangent point latitude range: %g ... %g deg", mini, maxi);
   for (int id = 0; id < ctl->nd; id++) {
     gsl_stats_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
-    LOG(2, "Radiance (%.4f cm^-1) range: %g ... %g W/(m^2 sr cm^-1)",
-	ctl->nu[id], mini, maxi);
+    if (ctl->write_bbt) {
+      LOG(2, "Brightness temperature (%.4f cm^-1) range: %g ... %g K",
+	  ctl->nu[id], mini, maxi);
+    } else {
+      LOG(2, "Radiance (%.4f cm^-1) range: %g ... %g W/(m^2 sr cm^-1)",
+	  ctl->nu[id], mini, maxi);
+    }
   }
   for (int id = 0; id < ctl->nd; id++) {
     gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
-    LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
-	ctl->nu[id], mini, maxi);
+    if (ctl->write_bbt) {
+      LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
+	  ctl->nu[id], mini, maxi);
+    }
   }
 }
 
