@@ -19,6 +19,7 @@ $jurassic/kernel limb.ctl obs.tab atm.tab kernel.tab
 gnuplot <<EOF
 set term pngcairo enh truecolor font "Helvetica,28" size 1600,1200 crop lw 3
 set size ratio 0.75
+set title "JURASSIC | Limb test case"
 
 set out "plot_rad.png"
 set xla "Radiance [nW / (cm^2 sr cm^{-1})]"
@@ -76,6 +77,7 @@ for nu in 792 832 ; do
     gnuplot <<EOF
 set term pngcairo enh truecolor font "Helvetica,28" size 1600,1200 crop lw 3
 set size ratio 0.75
+set title "JURASSIC | Limb test case"
 set yla "Altitude [km]"
 set cbla "View point altitude [km]"
 set cbla offset (0,1)

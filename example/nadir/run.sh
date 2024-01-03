@@ -19,6 +19,7 @@ $jurassic/kernel nadir.ctl obs.tab atm.tab kernel.tab
 gnuplot <<EOF
 set term pngcairo enh truecolor font "Helvetica,28" size 1600,1200 crop lw 3
 set size ratio 0.75
+set title "JURASSIC | Nadir test case"
 
 set out "plot_rad.png"
 set xla "Latitude [deg]"
@@ -84,6 +85,8 @@ for nu in 667.7820 668.5410 669.8110 ; do
     gnuplot <<EOF
 set term pngcairo enh truecolor font "Helvetica,28" size 1600,1200 crop lw 3
 set size ratio 0.75
+set title "JURASSIC | Nadir test case"
+
 set yla "Altitude [km]"
 set cbla "View point latitude [deg]"
 set cbla offset (0,1)
