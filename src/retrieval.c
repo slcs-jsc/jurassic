@@ -79,7 +79,7 @@ typedef struct {
   /*! Horizontal correlation length for volume mixing ratio error [km]. */
   double err_q_ch[NG];
 
-  /*! Extinction error [1/km]. */
+  /*! Extinction error [km^-1]. */
   double err_k[NW];
 
   /*! Vertical correlation length for extinction error [km]. */
@@ -94,7 +94,7 @@ typedef struct {
   /*! Cloud depth error [km]. */
   double err_cldz;
 
-  /*! Cloud extinction error [1/km]. */
+  /*! Cloud extinction error [km^-1]. */
   double err_clk[NCL];
 
   /*! Surface height error [km]. */

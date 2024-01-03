@@ -399,7 +399,7 @@ typedef struct {
   /*! Volume mixing ratio [ppv]. */
   double q[NG][NP];
 
-  /*! Extinction [1/km]. */
+  /*! Extinction [km^-1]. */
   double k[NW][NP];
 
   /*! Cloud layer height [km]. */
@@ -408,7 +408,7 @@ typedef struct {
   /*! Cloud layer depth [km]. */
   double cldz;
 
-  /*! Cloud layer extinction [1/km]. */
+  /*! Cloud layer extinction [km^-1]. */
   double clk[NCL];
 
   /*! Surface height [km]. */
@@ -586,7 +586,7 @@ typedef struct {
   /*! Volume mixing ratio [ppv]. */
   double q[NLOS][NG];
 
-  /*! Extinction [1/km]. */
+  /*! Extinction [km^-1]. */
   double k[NLOS][ND];
 
   /*! Surface temperature [K]. */

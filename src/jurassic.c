@@ -5379,12 +5379,12 @@ void write_atm(
     fprintf(out, "# $%d = %s volume mixing ratio [ppv]\n",
 	    ++n, ctl->emitter[ig]);
   for (int iw = 0; iw < ctl->nw; iw++)
-    fprintf(out, "# $%d = extinction (window %d) [1/km]\n", ++n, iw);
+    fprintf(out, "# $%d = extinction (window %d) [km^-1]\n", ++n, iw);
   if (ctl->ncl > 0) {
     fprintf(out, "# $%d = cloud layer height [km]\n", ++n);
     fprintf(out, "# $%d = cloud layer depth [km]\n", ++n);
     for (int icl = 0; icl < ctl->ncl; icl++)
-      fprintf(out, "# $%d = cloud layer extinction (%.4f cm^-1) [1/km]\n",
+      fprintf(out, "# $%d = cloud layer extinction (%.4f cm^-1) [km^-1]\n",
 	      ++n, ctl->clnu[icl]);
   }
   if (ctl->nsf > 0) {
@@ -5717,8 +5717,12 @@ void write_obs(
 	  "# $9 = tangent point longitude [deg]\n"
 	  "# $10 = tangent point latitude [deg]\n");
   for (int id = 0; id < ctl->nd; id++)
-    fprintf(out, "# $%d = radiance (%.4f cm^-1) [W/(m^2 sr cm^-1)]\n",
-	    ++n, ctl->nu[id]);
+    if (ctl->write_bbt)
+      fprintf(out, "# $%d = brightness temperature (%.4f cm^-1) [K]\n",
+	      ++n, ctl->nu[id]);
+    else
+      fprintf(out, "# $%d = radiance (%.4f cm^-1) [W/(m^2 sr cm^-1)]\n",
+	      ++n, ctl->nu[id]);
   for (int id = 0; id < ctl->nd; id++)
     fprintf(out, "# $%d = transmittance (%.4f cm^-1) [-]\n", ++n,
 	    ctl->nu[id]);
