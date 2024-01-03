@@ -4805,7 +4805,7 @@ void read_rfm_spec(
     ERRMSG("Too many spectral grid points!");
 
   /* Read radiance data... */
-  while (fgets(line, RFMLINE, in) && ipts < *npts - 1) {
+  while (fgets(line, RFMLINE, in) && ipts < *npts) {
     if ((tok = strtok(line, " \t\n")) != NULL)
       if (sscanf(tok, "%lg", &rad[ipts]) == 1)
 	ipts++;
