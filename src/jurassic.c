@@ -4749,6 +4749,40 @@ void read_obs(
   /* Check number of points... */
   if (obs->nr < 1)
     ERRMSG("Could not read any data!");
+
+  /* Write info... */
+  double mini, maxi;
+  LOG(2, "Number of ray paths: %d", obs->nr);
+  gsl_stats_minmax(&mini, &maxi, obs->time, 1, (size_t) obs->nr);
+  LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->obsz, 1, (size_t) obs->nr);
+  LOG(2, "Observer altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->obslon, 1, (size_t) obs->nr);
+  LOG(2, "Observer longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->obslat, 1, (size_t) obs->nr);
+  LOG(2, "Observer latitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->vpz, 1, (size_t) obs->nr);
+  LOG(2, "View point altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->vplon, 1, (size_t) obs->nr);
+  LOG(2, "View point longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->vplat, 1, (size_t) obs->nr);
+  LOG(2, "View point latitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->tpz, 1, (size_t) obs->nr);
+  LOG(2, "Tangent point altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->tplon, 1, (size_t) obs->nr);
+  LOG(2, "Tangent point longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->tplat, 1, (size_t) obs->nr);
+  LOG(2, "Tangent point latitude range: %g ... %g deg", mini, maxi);
+  for (int id = 0; id < ctl->nd; id++) {
+    gsl_stats_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
+    LOG(2, "Radiance (%.4f cm^-1) range: %g ... %g W/(m^2 sr cm^-1)",
+	ctl->nu[id], mini, maxi);
+  }
+  for (int id = 0; id < ctl->nd; id++) {
+    gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
+    LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
+	ctl->nu[id], mini, maxi);
+  }
 }
 
 /*****************************************************************************/
@@ -5699,6 +5733,40 @@ void write_obs(
 
   /* Close file... */
   fclose(out);
+
+  /* Write info... */
+  double mini, maxi;
+  LOG(2, "Number of ray paths: %d", obs->nr);
+  gsl_stats_minmax(&mini, &maxi, obs->time, 1, (size_t) obs->nr);
+  LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->obsz, 1, (size_t) obs->nr);
+  LOG(2, "Observer altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->obslon, 1, (size_t) obs->nr);
+  LOG(2, "Observer longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->obslat, 1, (size_t) obs->nr);
+  LOG(2, "Observer latitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->vpz, 1, (size_t) obs->nr);
+  LOG(2, "View point altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->vplon, 1, (size_t) obs->nr);
+  LOG(2, "View point longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->vplat, 1, (size_t) obs->nr);
+  LOG(2, "View point latitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->tpz, 1, (size_t) obs->nr);
+  LOG(2, "Tangent point altitude range: %g ... %g km", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->tplon, 1, (size_t) obs->nr);
+  LOG(2, "Tangent point longitude range: %g ... %g deg", mini, maxi);
+  gsl_stats_minmax(&mini, &maxi, obs->tplat, 1, (size_t) obs->nr);
+  LOG(2, "Tangent point latitude range: %g ... %g deg", mini, maxi);
+  for (int id = 0; id < ctl->nd; id++) {
+    gsl_stats_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
+    LOG(2, "Radiance (%.4f cm^-1) range: %g ... %g W/(m^2 sr cm^-1)",
+	ctl->nu[id], mini, maxi);
+  }
+  for (int id = 0; id < ctl->nd; id++) {
+    gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
+    LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
+	ctl->nu[id], mini, maxi);
+  }
 }
 
 /*****************************************************************************/
