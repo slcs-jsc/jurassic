@@ -3900,10 +3900,14 @@ double intpol_tbl_eps(
 	       u);
 
   /* Upper boundary... */
-  else if (u > tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
-    return LIN(tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
-	       tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
-	       UMAX, 1, u);
+  else if (u > tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1]) {
+    double a =
+      log(1 -
+	  tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] -
+				   1]) /
+      tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1];
+    return 1 - exp(a * u);
+  }
 
   /* Interpolation... */
   else {
@@ -3935,10 +3939,14 @@ double intpol_tbl_u(
 	       eps);
 
   /* Upper boundary... */
-  else if (eps > tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
-    return LIN(tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
-	       tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1],
-	       1, UMAX, eps);
+  else if (eps > tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1]) {
+    double a =
+      log(1 -
+	  tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] -
+				   1]) /
+      tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1];
+    return log(1 - eps) / a;
+  }
 
   /* Interpolation... */
   else {
