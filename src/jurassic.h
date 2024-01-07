@@ -69,12 +69,6 @@
 /*! Compute dot product of two vectors. */
 #define DOTP(a, b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 
-/*! Compute exponential interpolation. */
-#define EXP(x0, y0, x1, y1, x)					\
-  (((y0)>0 && (y1)>0)						\
-   ? ((y0)*exp(log((y1)/(y0))/((x1)-(x0))*((x)-(x0))))          \
-   : LIN(x0, y0, x1, y1, x))
-
 /*! Read binary data. */
 #define FREAD(ptr, type, size, out) {					\
     if(fread(ptr, sizeof(type), size, out)!=size)			\
@@ -90,6 +84,16 @@
 /*! Compute linear interpolation. */
 #define LIN(x0, y0, x1, y1, x)			\
   ((y0)+((y1)-(y0))/((x1)-(x0))*((x)-(x0)))
+
+/*! Compute logarithmic interpolation in x. */
+#define LOGX(x0, y0, x1, y1, x)				\
+  ((y0)+((y1)-(y0))*log((x)/(x0))/log((x1)/(x0)))
+
+/*! Compute logarithmic interpolation in y. */
+#define LOGY(x0, y0, x1, y1, x)					\
+  (((y0)>0 && (y1)>0)						\
+   ? ((y0)*exp(log((y1)/(y0))/((x1)-(x0))*((x)-(x0))))          \
+   : LIN(x0, y0, x1, y1, x))
 
 /*! Compute norm of a vector. */
 #define NORM(a) sqrt(DOTP(a, a))

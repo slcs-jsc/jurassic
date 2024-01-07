@@ -858,7 +858,7 @@ void climatology(
     int iz = locate_reg(z, 121, atm->z[ip]);
 
     /* Interpolate pressure... */
-    atm->p[ip] = EXP(z[iz], pre[iz], z[iz + 1], pre[iz + 1], atm->z[ip]);
+    atm->p[ip] = LOGY(z[iz], pre[iz], z[iz + 1], pre[iz + 1], atm->z[ip]);
 
     /* Interpolate temperature... */
     atm->t[ip] = LIN(z[iz], tem[iz], z[iz + 1], tem[iz + 1], atm->z[ip]);
@@ -3690,7 +3690,7 @@ void intpol_atm(
   int ip = locate_irr(atm->z, atm->np, z);
 
   /* Interpolate... */
-  *p = EXP(atm->z[ip], atm->p[ip], atm->z[ip + 1], atm->p[ip + 1], z);
+  *p = LOGY(atm->z[ip], atm->p[ip], atm->z[ip + 1], atm->p[ip + 1], z);
   *t = LIN(atm->z[ip], atm->t[ip], atm->z[ip + 1], atm->t[ip + 1], z);
   for (int ig = 0; ig < ctl->ng; ig++)
     q[ig] =
@@ -3769,8 +3769,8 @@ void intpol_tbl_cga(
 		      eps11, los->cgt[ip][ig]);
 
 	  /* Interpolate with respect to pressure... */
-	  eps00 = LIN(tbl->p[id][ig][ipr], eps00,
-		      tbl->p[id][ig][ipr + 1], eps11, los->cgp[ip][ig]);
+	  eps00 = LOGX(tbl->p[id][ig][ipr], eps00,
+		       tbl->p[id][ig][ipr + 1], eps11, los->cgp[ip][ig]);
 
 	  /* Check emssivity range... */
 	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
