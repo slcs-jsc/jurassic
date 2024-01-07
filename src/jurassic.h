@@ -87,11 +87,13 @@
 
 /*! Compute logarithmic interpolation in x. */
 #define LOGX(x0, y0, x1, y1, x)				\
-  ((y0)+((y1)-(y0))*log((x)/(x0))/log((x1)/(x0)))
+  (((x)/(x0)>0 && (x1)/(x0)>0)				\
+   ? ((y0)+((y1)-(y0))*log((x)/(x0))/log((x1)/(x0)))	\
+   : LIN(x0, y0, x1, y1, x))
 
 /*! Compute logarithmic interpolation in y. */
 #define LOGY(x0, y0, x1, y1, x)					\
-  (((y0)>0 && (y1)>0)						\
+  (((y1)/(y0)>0)						\
    ? ((y0)*exp(log((y1)/(y0))/((x1)-(x0))*((x)-(x0))))          \
    : LIN(x0, y0, x1, y1, x))
 
