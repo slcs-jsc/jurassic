@@ -56,16 +56,21 @@ By default we use rather strict compiler warnings. All warning messages will be 
 
 The binaries will remain in the jurassic/src/ directory.
 
+To run the test cases to check the installation, please use:
+
+    make check
+
+This will run sequentially through a set of tests. The execution of the tests will stop if any of the tests fails. Please inspect the log messages.
+
 ### Run the examples
 
-It is recommended that you create a project directory for testing the examples and also to store other experiments:
+JURASSIC provides a project directory for testing the examples and also to store other experiments:
 
-    mkdir -p jurassic/projects
+    cd jurassic/projects
 
 This shows how to run the example for the nadir sounder:
 
-    cp -a jurassic/example jurassic/projects
-    cd jurassic/projects/example/nadir
+    cd nadir
     ./run.sh
 
 This shows how to run the example for the limb sounder:
@@ -88,13 +93,13 @@ and conduct radiative transfer calculations for two or three detector channels:
 The output of the simulation is verified by comparing it to reference data.
 Additionally, gnuplot is used to create plots of the radiance data:
 
-<p align="center"><img src="example/limb/plot_rad.png" width="45%"/> &emsp; <img src="example/nadir/plot_rad.png" width="45%"/></p>
+<p align="center"><img src="projects/limb/plot_rad.png" width="45%"/> &emsp; <img src="projects/nadir/plot_rad.png" width="45%"/></p>
 
 Kernel functions are calculated using a finite difference method:
 
-<p align="center"><img src="example/limb/plot_kernel_temperature_792.png" width="45%"/> &emsp; <img src="example/nadir/plot_kernel_temperature_668.5410.png" width="45%"/></p>
+<p align="center"><img src="projects/limb/plot_kernel_temperature_792.png" width="45%"/> &emsp; <img src="projects/nadir/plot_kernel_temperature_668.5410.png" width="45%"/></p>
 
-<p align="center"><img src="example/limb/plot_kernel_H2O_792.png" width="45%"/> &emsp; <img src="example/nadir/plot_kernel_CO2_668.5410.png" width="45%"/></p>
+<p align="center"><img src="projects/limb/plot_kernel_H2O_792.png" width="45%"/> &emsp; <img src="projects/nadir/plot_kernel_CO2_668.5410.png" width="45%"/></p>
 
 ## Further information
 

@@ -5,6 +5,9 @@
 # Executables...
 EXC = brightness climatology filter formod hydrostatic interpolate invert jsec2time kernel limb nadir obs2spec planck raytrace retrieval tblfmt tblgen time2jsec
 
+# List of tests...
+TESTS = limb_test nadir_test
+
 # Installation directory...
 DESTDIR ?= ../bin
 
@@ -111,9 +114,13 @@ $(WRAPPER_OBJ): $(WRAPPER).c $(WRAPPER).h Makefile
 jurassic.o: jurassic.c jurassic.h Makefile
 	$(CC) $(CFLAGS) -c -o jurassic.o jurassic.c
 
-check: all
-	cd ../example/nadir && ./run.sh
-	cd ../example/limb && ./run.sh
+check: $(TESTS)
+
+$(TESTS): all
+	@(echo "\n===== Running \"$@\" ... =====") ; \
+	  cd ../tests/$@ ; ./run.sh \
+	  && (echo "\n===== Test \"$@\" passed! =====") \
+	  || (echo "\n===== Test \"$@\" failed! =====" ; exit 1)
 
 clean:
 	rm -rf $(EXC) *.o *.gcda *.gcno *.gcov coverage* *~

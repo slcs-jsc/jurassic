@@ -4,6 +4,8 @@ docs/latex/
 docs/site/
 libs/build/
 projects/
+!projects/limb/
+!projects/nadir/
 src/*.o
 src/brightness
 src/climatology
