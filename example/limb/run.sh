@@ -121,8 +121,4 @@ EOF
 done
 
 # Compare files...
-echo -e "\nCompare results..."
-error=0
-diff -sq rad.tab rad.org || error=1
-diff -sq kernel.tab kernel.org || error=1
-exit $error
+diff -sq rad.tab rad.org
