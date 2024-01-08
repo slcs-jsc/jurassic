@@ -12,10 +12,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install
-      run: sudo apt-get update ; sudo apt-get install gnuplot libgsl-dev
+      run: sudo apt-get update ; sudo apt-get install libgsl-dev
     - name: make
       run: cd src ; make STATIC=0
-    - name: example limb
-      run: cd example/limb ; ./run.sh
-    - name: example nadir
-      run: cd example/nadir ; ./run.sh
+    - name: make check
+      run: cd src ; make check
