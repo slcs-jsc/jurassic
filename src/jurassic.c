@@ -3642,6 +3642,7 @@ void init_srcfunc(
 
   /* Write info... */
   LOG(1, "Initialize source function table...");
+  LOG(2, "Number of data points: %d", TBLNS);
 
   /* Loop over channels... */
   for (int id = 0; id < ctl->nd; id++) {
@@ -3672,6 +3673,12 @@ void init_srcfunc(
       }
       tbl->sr[it][id] /= fsum;
     }
+
+    /* Write info... */
+    LOG(2,
+	"channel= %.4f cm^-1 | T= %g ... %g K | B= %g ... %g W/(m^2 sr cm^-1)",
+	ctl->nu[id], tbl->st[0], tbl->st[TBLNS - 1], tbl->sr[0][id],
+	tbl->sr[TBLNS - 1][id]);
   }
 }
 
