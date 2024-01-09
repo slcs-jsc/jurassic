@@ -16,7 +16,7 @@ This is a list of papers in which JURASSIC was applied:
 
 - C. I. Meyer, M. Ern, L. Hoffmann, Q. T. Trinh, and M. J. Alexander, Intercomparison of AIRS and HIRDLS stratospheric gravity wave observations, Atmospheric Measurement Techniques, 11(1), 215–232, <https://doi.org/10.5194/amt-11-215-2018>, 2018.
 
-- P. Baumeister, T. Hater, S. griessbach, L. Hoffmann, D. Pleiter, B. Rombach, and M. Bühler, Strategies for forward modelling of infrared radiative transfer on GPUs, Parallel Computing is Everywhere, 32, 369, <https://doi.org/10.3233/978-1-61499-843-3-369>, 2018.
+- P. Baumeister, T. Hater, S. Griessbach, L. Hoffmann, D. Pleiter, B. Rombach, and M. Bühler, Strategies for forward modelling of infrared radiative transfer on GPUs, Parallel Computing is Everywhere, 32, 369, <https://doi.org/10.3233/978-1-61499-843-3-369>, 2018.
 
 - S. Griessbach, L. Hoffmann, R. Spang, M. v. Hobe, R. Müller, and M. Riese, Infrared limb emission measurements of aerosol in the troposphere and stratosphere, Atmospheric Measurement Techniques, 9(9), 4399–4423, <https://doi.org/10.5194/amt-9-4399-2016>, 2016.
 
