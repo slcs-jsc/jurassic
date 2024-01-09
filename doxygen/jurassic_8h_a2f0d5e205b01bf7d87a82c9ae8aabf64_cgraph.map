@@ -1,0 +1,6 @@
+<map id="init_srcfunc" name="init_srcfunc">
+<area shape="rect" id="node1" title="Initialize source function table." alt="" coords="5,56,95,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="150,5,225,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a0c76cf634aa20d85c81ad14cf9fb4276" title="Compute Planck function." alt="" coords="157,56,217,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read shape function." alt="" coords="143,107,232,133"/>
+</map>

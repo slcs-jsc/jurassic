@@ -1,0 +1,9 @@
+<map id="formod_continua" name="formod_continua">
+<area shape="rect" id="node1" title="Compute absorption coefficient of continua." alt="" coords="5,107,124,133"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#afdbfa04516650587c2b9493ccf59f34d" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="184,5,249,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#adfcdd259307ba6e4cd35884bb10b7891" title="Compute water vapor continuum (optical depth)." alt="" coords="184,56,249,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ac5247ed3b351629634243ccc4b0421da" title="Compute nitrogen continuum (absorption coefficient)." alt="" coords="187,107,246,133"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a91d990872ec6ac854bf94117ccc38499" title="Compute oxygen continuum (absorption coefficient)." alt="" coords="187,157,246,184"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#acbce6bde5455c87766a1eede6ae05dc4" title="Find index of an emitter." alt="" coords="172,208,261,235"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a843622b433d83623ab59d6cb5021636b" title="Find array index for regular grid." alt="" coords="309,132,392,159"/>
+</map>

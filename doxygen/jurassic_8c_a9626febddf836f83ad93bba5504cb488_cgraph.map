@@ -1,0 +1,8 @@
+<map id="intpol_tbl_ega" name="intpol_tbl_ega">
+<area shape="rect" id="node1" title="Get transmittance from look&#45;up tables (EGA method)." alt="" coords="5,81,108,108"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a51bf442b03bb6da93aecfde16809378c" title="Interpolate emissivity from look&#45;up tables." alt="" coords="156,5,259,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#af47645438b088aacce0e302414837ab3" title="Interpolate column density from look&#45;up tables." alt="" coords="163,56,251,83"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="170,107,245,133"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a843622b433d83623ab59d6cb5021636b" title="Find array index for regular grid." alt="" coords="166,157,249,184"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a121189f496bfbf2c9227674647965496" title="Find array index in float array." alt="" coords="307,31,385,57"/>
+</map>
