@@ -5007,7 +5007,7 @@ void read_tbl(
 	    continue;
 
 	  /* Check ranges... */
-	  if (u < 0 || u > UMAX || eps < 0 || eps > 1) {
+	  if (u < UMIN || u > UMAX || eps < EPSMIN || eps > EPSMAX) {
 	    nrange++;
 	    continue;
 	  }

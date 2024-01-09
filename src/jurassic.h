@@ -168,6 +168,16 @@
 #define C2 1.43877506
 #endif
 
+/*! Minimum emissivity. */
+#ifndef EPSMIN
+#define EPSMIN 0
+#endif
+
+/*! Maximum emissivity. */
+#ifndef EPSMAX
+#define EPSMAX 1
+#endif
+
 /*! Standard gravity [m/s^2]. */
 #ifndef G0
 #define G0 9.80665
@@ -226,6 +236,11 @@
 /*! Effective temperature of the sun [K]. */
 #ifndef TSUN
 #define TSUN 5780.
+#endif
+
+/*! Minimum column density [molecules/cm^2]. */
+#ifndef UMIN
+#define UMIN 0
 #endif
 
 /*! Maximum column density [molecules/cm^2]. */
