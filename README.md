@@ -18,7 +18,7 @@ The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiati
 
 ## Features
 
-* JURASSIC uses the emissivity growth approximation (EGA) or the Curtis-Godson approximation (CGA) to conduct radiative transfer calculations. Band transmittances are obtained from pre-calculated look-up tables from line-by-line calculations.
+* JURASSIC uses the emissivity growth approximation (EGA) or the Curtis-Godson approximation (CGA) to conduct infrared radiative transfer calculations. Band transmittances are obtained from pre-calculated look-up tables from line-by-line calculations.
 * The model was carefully tested in intercomparisons with the Karlsruhe Optimized and Precise Radiative Transfer Algorithm (KOPRA), the Reference Forward Model (RFM), and the Stand-alone AIRS Radiative Transfer Algorithm (SARTA).
 * JURASSIC features an MPI-OpenMP hybrid parallelization for efficient use on HPC systems.
 * Distributed open source under the terms and conditions of the GNU GPL.
