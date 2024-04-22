@@ -56,8 +56,8 @@ int main(
   static char line[LEN];
 
   static double rtime[NLMAX], rz[NLMAX], rlon[NLMAX], rlat[NLMAX], obs_meas,
-    obs_sim, scl = 1.0, scl_old, scl_err, c0, c1, cov00, cov01, cov11,
-    sumsq, x[NMAX], x2[NMAX], y[NMAX], y_err[NMAX], y2[NMAX], y2_err[NMAX],
+    obs_sim, scl = 1.0, scl_err, c0, c1, cov00, cov01, cov11, sumsq,
+    x[NMAX], x2[NMAX], y[NMAX], y_err[NMAX], y2[NMAX], y2_err[NMAX],
     y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX], dt, tol, obs_err;
 
   static float rp[NLMAX], rt[NLMAX], rso2[NLMAX], rh2o[NLMAX],
@@ -255,7 +255,7 @@ int main(
       ERRMSG("Check INVERT_FIT!");
 
     /* Get new scaling factor... */
-    scl_old = scl;
+    double scl_old = scl;
     scl_err = scl * sqrt(cov11);
     scl *= c1;
 

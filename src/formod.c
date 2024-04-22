@@ -77,9 +77,7 @@ int main(
 
 #else
 
-  FILE *in;
-
-  char dirlist[LEN], task[LEN], wrkdir[LEN];
+  char dirlist[LEN], task[LEN];
 
   /* Get task... */
   scan_ctl(argc, argv, "TASK", -1, "-", task);
@@ -95,10 +93,12 @@ int main(
   else {
 
     /* Open directory list... */
+    FILE *in;
     if (!(in = fopen(dirlist, "r")))
       ERRMSG("Cannot open directory list!");
 
     /* Loop over directories... */
+    char wrkdir[LEN];
     while (fscanf(in, "%s", wrkdir) != EOF) {
 
       /* Write info... */
@@ -129,8 +129,6 @@ void call_formod(
 
   static atm_t atm, atm2;
   static obs_t obs, obs2;
-
-  char filename[LEN];
 
   /* Read observation geometry... */
   read_obs(wrkdir, obsfile, ctl, &obs);
@@ -200,6 +198,8 @@ void call_formod(
 
     /* Compute contributions... */
     if (task[0] == 'c' || task[0] == 'C') {
+
+      char filename[LEN];
 
       /* Switch off continua... */
       ctl->ctm_co2 = 0;

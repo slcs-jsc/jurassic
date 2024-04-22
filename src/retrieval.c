@@ -469,11 +469,11 @@ void optimal_estimation(
 
   char filename[2 * LEN];
 
-  double chisq, chisq_old, disq = 0, lmpar = 0.001;
+  double chisq, disq = 0, lmpar = 0.001;
 
   int icl, ig, ip, isf, it = 0, it2, iw;
 
-  size_t i, j, m, n;
+  size_t i, m, n;
 
   /* ------------------------------------------------------------
      Initialize...
@@ -571,7 +571,7 @@ void optimal_estimation(
   for (it = 1; it <= ret->conv_itmax; it++) {
 
     /* Store current cost function value... */
-    chisq_old = chisq;
+    double chisq_old = chisq;
 
     /* Compute kernel matrix K_i... */
     if (it > 1 && it % ret->kernel_recomp == 0)
@@ -697,7 +697,7 @@ void optimal_estimation(
 
     /* Compute correlation matrix... */
     for (i = 0; i < n; i++)
-      for (j = 0; j < n; j++)
+      for (size_t j = 0; j < n; j++)
 	gsl_matrix_set(corr, i, j, gsl_matrix_get(cov, i, j)
 		       / sqrt(gsl_matrix_get(cov, i, i))
 		       / sqrt(gsl_matrix_get(cov, j, j)));
@@ -707,7 +707,7 @@ void optimal_estimation(
     /* Compute gain matrix...
        G = cov * K^T * S_eps^{-1} */
     for (i = 0; i < n; i++)
-      for (j = 0; j < m; j++)
+      for (size_t j = 0; j < m; j++)
 	gsl_matrix_set(auxnm, i, j, gsl_matrix_get(k_i, j, i)
 		       * POW2(gsl_vector_get(sig_eps_inv, j)));
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, cov, auxnm, 0.0, gain);

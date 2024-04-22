@@ -47,7 +47,7 @@ int main(
 
   FILE *in;
 
-  static char line[MAXLINE], *tok;
+  static char line[MAXLINE];
 
   static double dnu, abs[MAXNPTS], epsold, f, filt[MAXNF],
     nu, nu0, nu1, nuf[MAXNF], press, r0, temp, u;
@@ -88,6 +88,7 @@ int main(
     ERRMSG("Too many points in optical depth spectrum!");
   i = 0;
   while (fgets(line, MAXLINE, in)) {
+    char *tok;
     if ((tok = strtok(line, " \t\n")) != NULL) {
       sscanf(tok, "%lg", &abs[i]);
       abs[i] /= u;
