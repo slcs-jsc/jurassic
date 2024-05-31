@@ -22,16 +22,42 @@
   JURASSIC library declarations.
 */
 
-/*!
+/*! 
   \mainpage
   
-  The JUelich RApid Spectral SImulation Code (JURASSIC) is a fast radiative
-  transfer model for the mid-infrared spectral region.
+  The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiative transfer model for the analysis of atmospheric remote sensing measurements.
 
-  This reference manual provides information on the algorithms
-  and data structures used in the code.
+  \section Introduction
 
-  Further information can be found at: https://github.com/slcs-jsc/jurassic
+  The source code of JURASSIC is available from the [git repository] (https://github.com/slcs-jsc/jurassic). Please see the [README.md](https://github.com/slcs-jsc/jurassic/blob/master/README.md) in the git repository for introductory information. More information can be found in the [user manual](https://slcs-jsc.github.io/jurassic).
+  
+  This doxygen manual contains information about the algorithms and data structures used in the code. Please refer to the `jurassic.h' documentation for a first overview.
+  
+  \section References
+  
+  For citing the model in scientific publications, please see [CITATION.cff](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff) and refer to the following papers:
+  
+  _Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer calculations using graphics processing units: JURASSIC-GPU v2.0, Geosci. Model Dev., 15, 1855–1874, https://doi.org/10.5194/gmd-15-1855-2022, 2022._
+  
+  _Hoffmann, L., and M. J. Alexander, Retrieval of stratospheric temperatures from Atmospheric Infrared Sounder radiance measurements for gravity wave studies, J. Geophys. Res., 114, D07105, https://doi.org/10.1029/2008JD011241, 2009._
+  
+  _Hoffmann, L., Kaufmann, M., Spang, R., Müller, R., Remedios, J. J., Moore, D. P., Volk, C. M., von Clarmann, T., and Riese, M.: Envisat MIPAS measurements of CFC-11: retrieval, validation, and climatology, Atmos. Chem. Phys., 8, 3671-3688, https://doi.org/10.5194/acp-8-3671-2008, 2008._
+  
+  Additional references are collected here: https://slcs-jsc.github.io/jurassic/references
+  
+  \section License
+  
+  JURASSIC is being develop at the Jülich Supercomputing Centre, Forschungszentrum Jülich, Germany.
+
+  JURASSIC is distributed under the terms of the [GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/master/COPYING).
+  
+  \section Contact
+  
+  You can submit bug reports or feature requests on the [issue tracker](https://github.com/slcs-jsc/jurassic/issues).
+  
+  Proposed code changes and fixes can be submitted as [pull requests](https://github.com/slcs-jsc/jurassic/pulls).
+  
+  Please do not hesitate to contact us if you have any questions or need assistance: Dr. Lars Hoffmann, <l.hoffmann@fz-juelich.de>
 */
 
 #ifndef JURASSIC_H

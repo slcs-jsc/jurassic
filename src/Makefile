@@ -139,7 +139,7 @@ dist:
           libs/build.sh libs/*gz src/*
 
 doxygen:
-	cd ../docs && doxygen && cd latex && make && cp refman.pdf ..
+	cd ../docs && doxygen
 
 indent:
 	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h

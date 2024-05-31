@@ -1,6 +1,5 @@
 bin/
-docs/html/
-docs/latex/
+docs/docs/
 docs/site/
 libs/build/
 projects/
