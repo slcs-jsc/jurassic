@@ -77,7 +77,7 @@ int main(
     /* Triangle... */
     else if (type == 1) {
       ff[fn] = 1.0 - fabs(nu - center) / fwhm;
-      ff[fn] = GSL_MAX(ff[fn], 0.0);
+      ff[fn] = MAX(ff[fn], 0.0);
     }
 
     /* Gaussian... */

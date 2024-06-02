@@ -98,7 +98,7 @@ int main(
       for (int ig = 0; ig < ctl.ng; ig++)
 	atm2.q[ig][ip] = los.q[ip][ig];
       for (int iw = 0; iw < ctl.nw; iw++)
-	atm2.k[iw][ip] = GSL_NAN;
+	atm2.k[iw][ip] = NAN;
     }
 
     /* Save data... */

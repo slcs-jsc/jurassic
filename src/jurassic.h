@@ -107,6 +107,14 @@
       ERRMSG("Error while writing!");					\
   }
 
+/*! @brief Macro to determine the maximum of two values. */
+#define MAX(a,b)				\
+  (((a)>(b))?(a):(b))
+
+/*! Macro to determine the minimum of two values. */
+#define MIN(a,b)				\
+  (((a)<(b))?(a):(b))
+
 /*! Compute linear interpolation. */
 #define LIN(x0, y0, x1, y1, x)			\
   ((y0)+((y1)-(y0))/((x1)-(x0))*((x)-(x0)))

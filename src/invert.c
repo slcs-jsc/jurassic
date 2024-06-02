@@ -139,7 +139,7 @@ int main(
     atm.np = n = 0;
     for (i = 0; i < NMAX; i++) {
       ndata[i] = 0;
-      x[i] = y[i] = GSL_NAN;
+      x[i] = y[i] = NAN;
     }
 
     /* Loop over lines... */
@@ -162,10 +162,10 @@ int main(
 
 	/* Get maxima... */
 	if (data == 1) {
-	  x[i] = (gsl_finite(x[i]) ? GSL_MAX(x[i], obs_sim) : obs_sim);
-	  y[i] = (gsl_finite(y[i]) ? GSL_MAX(y[i], obs_meas) : obs_meas);
+	  x[i] = (isfinite(x[i]) ? MAX(x[i], obs_sim) : obs_sim);
+	  y[i] = (isfinite(y[i]) ? MAX(y[i], obs_meas) : obs_meas);
 	  y_err[i] = obs_err;
-	  if (gsl_finite(x[i]) && gsl_finite(y[i]))
+	  if (isfinite(x[i]) && isfinite(y[i]))
 	    ndata[i] = 1;
 	}
 
@@ -224,15 +224,15 @@ int main(
 	if (ndata[i] > 0) {
 	  x[i] /= ndata[i];
 	  y[i] /= ndata[i];
-	  y_err[i] = sqrt(GSL_MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
+	  y_err[i] = sqrt(MAX(y_err[i] / ndata[i] - POW2(y[i]), 0.0))
 	    / sqrt(ndata[i]);	/* standard error! */
 	}
 
     /* Filter data... */
     n = 0;
     for (i = 0; i < NMAX; i++)
-      if (ndata[i] > 0 && gsl_finite(x[i]) && gsl_finite(y[i])
-	  && gsl_finite(y_err[i])) {
+      if (ndata[i] > 0 && isfinite(x[i]) && isfinite(y[i])
+	  && isfinite(y_err[i])) {
 	x2[n] = x[i];
 	y2[n] = y[i];
 	y2_err[n] = y_err[i];

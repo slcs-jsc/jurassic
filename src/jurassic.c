@@ -3009,7 +3009,7 @@ void copy_obs(
   if (init)
     for (int id = 0; id < ctl->nd; id++)
       for (int ir = 0; ir < obs_dest->nr; ir++)
-	if (gsl_finite(obs_dest->rad[id][ir])) {
+	if (isfinite(obs_dest->rad[id][ir])) {
 	  obs_dest->rad[id][ir] = 0;
 	  obs_dest->tau[id][ir] = 0;
 	}
@@ -3044,7 +3044,7 @@ void formod(
   /* Save observation mask... */
   for (int id = 0; id < ctl->nd; id++)
     for (int ir = 0; ir < obs->nr; ir++)
-      mask[id * NR + ir] = !gsl_finite(obs->rad[id][ir]);
+      mask[id * NR + ir] = !isfinite(obs->rad[id][ir]);
 
   /* Hydrostatic equilibrium... */
   hydrostatic(ctl, atm);
@@ -3071,7 +3071,7 @@ void formod(
   for (int id = 0; id < ctl->nd; id++)
     for (int ir = 0; ir < obs->nr; ir++)
       if (mask[id * NR + ir])
-	obs->rad[id][ir] = GSL_NAN;
+	obs->rad[id][ir] = NAN;
 
   /* Free... */
   free(mask);
@@ -3158,8 +3158,8 @@ void formod_fov(
 
     /* Get radiance and transmittance profiles... */
     int nz = 0;
-    for (int ir2 = GSL_MAX(ir - NFOV, 0);
-	 ir2 < GSL_MIN(ir + 1 + NFOV, obs->nr); ir2++)
+    for (int ir2 = MAX(ir - NFOV, 0);
+	 ir2 < MIN(ir + 1 + NFOV, obs->nr); ir2++)
       if (obs->time[ir2] == obs->time[ir]) {
 	z[nz] = obs2->vpz[ir2];
 	for (int id = 0; id < ctl->nd; id++) {
@@ -3654,7 +3654,7 @@ void init_srcfunc(
     /* Get minimum grid spacing... */
     double dnu = 1.0;
     for (int i = 1; i < n; i++)
-      dnu = GSL_MIN(dnu, nu[i] - nu[i - 1]);
+      dnu = MIN(dnu, nu[i] - nu[i - 1]);
 
     /* Compute source function table... */
 #pragma omp parallel for default(none) shared(ctl,tbl,id,nu,f,n,dnu)
@@ -3780,7 +3780,7 @@ void intpol_tbl_cga(
 		       tbl->p[id][ig][ipr + 1], eps11, los->cgp[ip][ig]);
 
 	  /* Check emssivity range... */
-	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
+	  eps00 = MAX(MIN(eps00, 1), 0);
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
@@ -3875,7 +3875,7 @@ void intpol_tbl_ega(
 		      tbl->p[id][ig][ipr + 1], eps11, los->p[ip]);
 
 	  /* Check emssivity range... */
-	  eps00 = GSL_MAX(GSL_MIN(eps00, 1), 0);
+	  eps00 = MAX(MIN(eps00, 1), 0);
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
@@ -4051,11 +4051,11 @@ void kernel(
     /* Set perturbation size... */
     double h;
     if (iqa[j] == IDXP)
-      h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-7);
+      h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-7);
     else if (iqa[j] == IDXT)
       h = 1.0;
     else if (iqa[j] >= IDXQ(0) && iqa[j] < IDXQ(ctl->ng))
-      h = GSL_MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-15);
+      h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-15);
     else if (iqa[j] >= IDXK(0) && iqa[j] < IDXK(ctl->nw))
       h = 1e-4;
     else if (iqa[j] == IDXCLZ || iqa[j] == IDXCLDZ)
@@ -4189,7 +4189,7 @@ size_t obs2y(
   /* Determine measurement vector... */
   for (int ir = 0; ir < obs->nr; ir++)
     for (int id = 0; id < ctl->nd; id++)
-      if (gsl_finite(obs->rad[id][ir])) {
+      if (isfinite(obs->rad[id][ir])) {
 	if (y != NULL)
 	  gsl_vector_set(y, m, obs->rad[id][ir]);
 	if (ida != NULL)
@@ -4237,12 +4237,12 @@ void raytrace(
   /* Get altitude range of atmospheric data... */
   gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
   if (ctl->nsf > 0) {
-    zmin = GSL_MAX(atm->sfz, zmin);
+    zmin = MAX(atm->sfz, zmin);
     if (atm->sfp > 0) {
       int ip = locate_irr(atm->p, atm->np, atm->sfp);
       double zip = LIN(log(atm->p[ip]), atm->z[ip],
 		       log(atm->p[ip + 1]), atm->z[ip + 1], log(atm->sfp));
-      zmin = GSL_MAX(zip, zmin);
+      zmin = MAX(zip, zmin);
     }
   }
 
@@ -4297,7 +4297,7 @@ void raytrace(
 	xh[i] = x[i] / norm;
       double cosa = fabs(DOTP(ex0, xh));
       if (cosa != 0)
-	ds = GSL_MIN(ctl->rayds, ctl->raydz / cosa);
+	ds = MIN(ctl->rayds, ctl->raydz / cosa);
     }
 
     /* Determine geolocation... */
@@ -5996,7 +5996,7 @@ void y2obs(
   /* Decompose measurement vector... */
   for (int ir = 0; ir < obs->nr; ir++)
     for (int id = 0; id < ctl->nd; id++)
-      if (gsl_finite(obs->rad[id][ir])) {
+      if (isfinite(obs->rad[id][ir])) {
 	obs->rad[id][ir] = gsl_vector_get(y, m);
 	m++;
       }
