@@ -1,0 +1,50 @@
+<map id="main" name="main">
+<area shape="rect" id="node1" title=" " alt="" coords="5,948,56,975"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#afb2d90bd3a6b3cce3d7965c465650de7" title="Compose state vector or parameter vector." alt="" coords="255,898,312,924"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ade98b629cc336a9c2f1a9563f0c9e5b4" title="Determine ray paths and compute radiative transfer." alt="" coords="252,695,315,722"/>
+<area shape="rect" id="node39" href="$jurassic_8c.html#aeefdc8136e69ccb8979eacf56bbb35e3" title="Compute Jacobians." alt="" coords="121,822,179,848"/>
+<area shape="rect" id="node41" href="$jurassic_8c.html#a5ce82e78c060ed68f6276ebefe6e9651" title="Compose measurement vector." alt="" coords="255,948,311,975"/>
+<area shape="rect" id="node44" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read forward model control parameters." alt="" coords="116,1126,184,1152"/>
+<area shape="rect" id="node45" href="$jurassic_8c.html#ace274e4068072c682e6070021525b515" title="Search control parameter file for variable entry." alt="" coords="248,1100,319,1127"/>
+<area shape="rect" id="node46" href="$jurassic_8c.html#a47a1cea1d9e3bf957e5959435b57c503" title="Write atmospheric data." alt="" coords="111,1075,189,1102"/>
+<area shape="rect" id="node47" href="$jurassic_8c.html#a7207aafddb6356d7f93f2f795a242ead" title="Write matrix." alt="" coords="104,923,196,950"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#af3ead601181d2db4076302aad05852cf" title="Add element to state vector." alt="" coords="378,898,466,924"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#aaab9b5262db11d928639b5730f96e7c0" title="Compute brightness temperature." alt="" coords="381,746,463,772"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a56c955e06f9bb920e7cf928dc4881340" title="Apply field of view convolution." alt="" coords="379,619,465,646"/>
+<area shape="rect" id="node10" href="$jurassic_8c.html#a60badc638de0a10669890b63cd2991de" title="Compute radiative transfer for a pencil beam." alt="" coords="371,391,473,418"/>
+<area shape="rect" id="node34" href="$jurassic_8c.html#afbc4101221a46d84a09dc24f45e8c0eb" title="Apply RFM for radiative transfer calculations." alt="" coords="378,695,466,722"/>
+<area shape="rect" id="node38" href="$jurassic_8c.html#a818c87e049a65b293ace5f78c22ca0a4" title="Set hydrostatic equilibrium." alt="" coords="379,239,465,266"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a443c55759461efe6db88e179e28d9e64" title="Copy and initialize observation data." alt="" coords="542,898,619,924"/>
+<area shape="rect" id="node8" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="858,492,933,519"/>
+<area shape="rect" id="node9" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read shape function." alt="" coords="697,543,787,570"/>
+<area shape="rect" id="node11" href="$jurassic_8c.html#af1529ec408a59b2287f0806fa0492d1c" title="Compute absorption coefficient of continua." alt="" coords="521,188,640,215"/>
+<area shape="rect" id="node18" href="$jurassic_8c.html#a9d1c44b38726392d18d62b296ac772b6" title="Compute Planck source function." alt="" coords="525,11,637,38"/>
+<area shape="rect" id="node19" href="$jurassic_8c.html#ad97e04e82009975d18fa256cd977da76" title="Convert geolocation to Cartesian coordinates." alt="" coords="859,923,931,950"/>
+<area shape="rect" id="node20" href="$jurassic_8c.html#a2f0d5e205b01bf7d87a82c9ae8aabf64" title="Initialize source function table." alt="" coords="536,442,625,468"/>
+<area shape="rect" id="node21" href="$jurassic_8c.html#a0c76cf634aa20d85c81ad14cf9fb4276" title="Compute Planck function." alt="" coords="712,340,772,367"/>
+<area shape="rect" id="node22" href="$jurassic_8c.html#ab3b2ede2616f0f30742bdfeeafe96d35" title="Get transmittance from look&#45;up tables (CGA method)." alt="" coords="691,391,793,418"/>
+<area shape="rect" id="node25" href="$jurassic_8c.html#a9626febddf836f83ad93bba5504cb488" title="Get transmittance from look&#45;up tables (EGA method)." alt="" coords="691,290,793,316"/>
+<area shape="rect" id="node27" href="$jurassic_8c.html#a3af9f213af23ca71015ccde4a2bb7e47" title="Do ray&#45;tracing to determine LOS." alt="" coords="547,695,615,722"/>
+<area shape="rect" id="node32" href="$jurassic_8c.html#a56b39fa9af2507fdb386f3b35a707c61" title="Read look&#45;up table data." alt="" coords="547,391,615,418"/>
+<area shape="rect" id="node33" href="$jurassic_8c.html#ad1500cc96441cf118acda392366397cc" title="Calculate solar zenith angle." alt="" coords="559,492,602,519"/>
+<area shape="rect" id="node12" href="$jurassic_8c.html#afdbfa04516650587c2b9493ccf59f34d" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="709,239,775,266"/>
+<area shape="rect" id="node13" href="$jurassic_8c.html#adfcdd259307ba6e4cd35884bb10b7891" title="Compute water vapor continuum (optical depth)." alt="" coords="709,188,775,215"/>
+<area shape="rect" id="node14" href="$jurassic_8c.html#ac5247ed3b351629634243ccc4b0421da" title="Compute nitrogen continuum (absorption coefficient)." alt="" coords="713,138,771,164"/>
+<area shape="rect" id="node16" href="$jurassic_8c.html#a91d990872ec6ac854bf94117ccc38499" title="Compute oxygen continuum (absorption coefficient)." alt="" coords="713,87,771,114"/>
+<area shape="rect" id="node17" href="$jurassic_8c.html#acbce6bde5455c87766a1eede6ae05dc4" title="Find index of an emitter." alt="" coords="697,36,787,63"/>
+<area shape="rect" id="node15" href="$jurassic_8c.html#a843622b433d83623ab59d6cb5021636b" title="Find array index for regular grid." alt="" coords="854,138,937,164"/>
+<area shape="rect" id="node23" href="$jurassic_8c.html#a51bf442b03bb6da93aecfde16809378c" title="Interpolate emissivity from look&#45;up tables." alt="" coords="844,340,947,367"/>
+<area shape="rect" id="node24" href="$jurassic_8c.html#a121189f496bfbf2c9227674647965496" title="Find array index in float array." alt="" coords="995,315,1073,342"/>
+<area shape="rect" id="node26" href="$jurassic_8c.html#af47645438b088aacce0e302414837ab3" title="Interpolate column density from look&#45;up tables." alt="" coords="851,290,939,316"/>
+<area shape="rect" id="node28" href="$jurassic_8c.html#afcebac771f3524363c18f14dd8791c27" title="Convert Cartesian coordinates to geolocation." alt="" coords="859,796,931,823"/>
+<area shape="rect" id="node29" href="$jurassic_8c.html#a88dbf00d0a92f872bc7f79a6d4a04f73" title="Interpolate atmospheric data." alt="" coords="701,644,783,671"/>
+<area shape="rect" id="node30" href="$jurassic_8c.html#a7710061480fdf72b1bb1f35c3d7c2b95" title="Compute refractivity (return value is n &#45; 1)." alt="" coords="701,695,783,722"/>
+<area shape="rect" id="node31" href="$jurassic_8c.html#a6139da92e644377c885dab79690d893a" title="Find tangent point of a given LOS." alt="" coords="692,847,792,874"/>
+<area shape="rect" id="node35" href="$jurassic_8c.html#ae457fead8261c1e25c29e01ead4ded41" title="Read observation data in RFM format." alt="" coords="530,796,631,823"/>
+<area shape="rect" id="node37" href="$jurassic_8c.html#a63efc891964d86b0f092a2cac421f184" title="Write atmospheric data in RFM format." alt="" coords="528,847,633,874"/>
+<area shape="rect" id="node36" href="$jurassic_8c.html#a19d63e07e3eb8166cbf65ce079e4d156" title="Read RFM spectrum." alt="" coords="688,999,796,1026"/>
+<area shape="rect" id="node40" href="$jurassic_8c.html#af99ebcda83d49b5e454345a649abc5c7" title="Copy and initialize atmospheric data." alt="" coords="244,746,323,772"/>
+<area shape="rect" id="node42" href="$jurassic_8c.html#a20a58ba61a755ae05eba2b43d46dea46" title="Decompose parameter vector or state vector." alt="" coords="255,796,312,823"/>
+<area shape="rect" id="node43" href="$jurassic_8c.html#a347aef1df45d828e793726d2d9e1b3e0" title="Get element from state vector." alt="" coords="378,796,466,823"/>
+<area shape="rect" id="node48" href="$jurassic_8c.html#a94d15c485d8ad7952ecfc1b95d3a64eb" title="Determine name of state vector quantity for given index." alt="" coords="245,999,322,1026"/>
+</map>

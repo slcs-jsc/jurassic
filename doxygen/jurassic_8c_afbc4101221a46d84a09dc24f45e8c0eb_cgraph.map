@@ -1,0 +1,14 @@
+<map id="formod_rfm" name="formod_rfm">
+<area shape="rect" id="node1" title="Apply RFM for radiative transfer calculations." alt="" coords="5,264,93,290"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#ad97e04e82009975d18fa256cd977da76" title="Convert geolocation to Cartesian coordinates." alt="" coords="452,10,524,37"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a3af9f213af23ca71015ccde4a2bb7e47" title="Do ray&#45;tracing to determine LOS." alt="" coords="160,162,228,189"/>
+<area shape="rect" id="node9" href="$jurassic_8c.html#ae457fead8261c1e25c29e01ead4ded41" title="Read observation data in RFM format." alt="" coords="143,264,245,290"/>
+<area shape="rect" id="node11" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read shape function." alt="" coords="149,314,239,341"/>
+<area shape="rect" id="node12" href="$jurassic_8c.html#a63efc891964d86b0f092a2cac421f184" title="Write atmospheric data in RFM format." alt="" coords="141,365,247,392"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#afcebac771f3524363c18f14dd8791c27" title="Convert Cartesian coordinates to geolocation." alt="" coords="452,137,524,164"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a88dbf00d0a92f872bc7f79a6d4a04f73" title="Interpolate atmospheric data." alt="" coords="307,264,390,290"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="451,264,525,290"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a7710061480fdf72b1bb1f35c3d7c2b95" title="Compute refractivity (return value is n &#45; 1)." alt="" coords="307,61,390,88"/>
+<area shape="rect" id="node8" href="$jurassic_8c.html#a6139da92e644377c885dab79690d893a" title="Find tangent point of a given LOS." alt="" coords="299,112,399,138"/>
+<area shape="rect" id="node10" href="$jurassic_8c.html#a19d63e07e3eb8166cbf65ce079e4d156" title="Read RFM spectrum." alt="" coords="295,365,403,392"/>
+</map>

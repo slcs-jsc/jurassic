@@ -1,0 +1,7 @@
+<map id="intpol_tbl_cga" name="intpol_tbl_cga">
+<area shape="rect" id="node1" title="Get transmittance from look&#45;up tables (CGA method)." alt="" coords="5,56,108,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a51bf442b03bb6da93aecfde16809378c" title="Interpolate emissivity from look&#45;up tables." alt="" coords="156,5,259,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a2413fa8c4fe9309a2f833393a0022777" title="Find array index for irregular grid." alt="" coords="170,56,245,83"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a843622b433d83623ab59d6cb5021636b" title="Find array index for regular grid." alt="" coords="166,107,249,133"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a121189f496bfbf2c9227674647965496" title="Find array index in float array." alt="" coords="307,5,385,32"/>
+</map>
