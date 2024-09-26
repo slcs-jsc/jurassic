@@ -122,6 +122,10 @@
   if((ptr=malloc((size_t)(n)*sizeof(type)))==NULL)	\
     ERRMSG("Out of memory!");
 
+/*! Convert degrees to radians. */
+#define DEG2RAD(deg)				\
+  ((deg) * (M_PI / 180.0))
+
 /*! Compute Cartesian distance between two vectors. */
 #define DIST(a, b) sqrt(DIST2(a, b))
 
@@ -176,6 +180,10 @@
 
 /*! Compute x^3. */
 #define POW3(x) ((x)*(x)*(x))
+
+/*! Convert radians to degrees. */
+#define RAD2DEG(rad)				\
+  ((rad) * (180.0 / M_PI))
 
 /*! Start or stop a timer. */
 #define TIMER(name, mode)				\
@@ -815,7 +823,7 @@ double brightness(
 
 /*! Convert Cartesian coordinates to geolocation. */
 void cart2geo(
-  double *x,
+  const double *x,
   double *z,
   double *lon,
   double *lat);
@@ -911,9 +919,9 @@ void formod_srcfunc(
 
 /*! Convert geolocation to Cartesian coordinates. */
 void geo2cart(
-  double z,
-  double lon,
-  double lat,
+  const double z,
+  const double lon,
+  const double lat,
   double *x);
 
 /*! Set hydrostatic equilibrium. */
