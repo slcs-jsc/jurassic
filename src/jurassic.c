@@ -3320,10 +3320,10 @@ void formod_pencil(
 	  geo2cart(los->z[0], los->lon[0], los->lat[0], x1);
 	  for (int i = 0; i < 3; i++)
 	    x1[i] -= x0[i];
-	  double cosa = DOTP(x0, x1) / NORM(x0) / NORM(x1);
-
+	  const double cosa = DOTP(x0, x1) / NORM(x0) / NORM(x1);
+	  
 	  /* Get ratio of SZA and incident radiation... */
-	  double rcos = cosa / cos(sza2 * M_PI / 180.);
+	  const double rcos = cosa / cos(DEG2RAD(sza2));
 
 	  /* Add solar radiation... */
 	  for (int id = 0; id < ctl->nd; id++)
@@ -5218,12 +5218,12 @@ double sza(
   double D = sec / 86400 - 0.5;
 
   /* Geocentric apparent ecliptic longitude [rad]... */
-  double g = (357.529 + 0.98560028 * D) * M_PI / 180;
+  double g = DEG2RAD(357.529 + 0.98560028 * D);
   double q = 280.459 + 0.98564736 * D;
-  double L = (q + 1.915 * sin(g) + 0.020 * sin(2 * g)) * M_PI / 180;
+  double L = DEG2RAD(q + 1.915 * sin(g) + 0.020 * sin(2 * g));
 
   /* Mean obliquity of the ecliptic [rad]... */
-  double e = (23.439 - 0.00000036 * D) * M_PI / 180;
+  double e = DEG2RAD(23.439 - 0.00000036 * D);
 
   /* Declination [rad]... */
   double dec = asin(sin(e) * sin(L));
@@ -5244,8 +5244,7 @@ double sza(
   lat *= M_PI / 180;
 
   /* Return solar zenith angle [deg]... */
-  return acos(sin(lat) * sin(dec) +
-	      cos(lat) * cos(dec) * cos(h)) * 180 / M_PI;
+  return RAD2DEG(acos(sin(lat) * sin(dec) + cos(lat) * cos(dec) * cos(h)));
 }
 
 /*****************************************************************************/
