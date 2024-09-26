@@ -3361,21 +3361,21 @@ void formod_rfm(
   double f[NSHAPE], nu[NSHAPE], nu0, nu1, obsz = -999, tsurf,
     xd[3], xo[3], xv[3], z[NR], zmin, zmax;
 
-  int i, id, ig, ip, ir, iw, n, nadir = 0;
+  int n, nadir = 0;
 
   /* Allocate... */
   ALLOC(los, los_t, 1);
 
   /* Check observer positions... */
-  for (ir = 1; ir < obs->nr; ir++)
+  for (int ir = 1; ir < obs->nr; ir++)
     if (obs->obsz[ir] != obs->obsz[0]
 	|| obs->obslon[ir] != obs->obslon[0]
 	|| obs->obslat[ir] != obs->obslat[0])
       ERRMSG("RFM interface requires identical observer positions!");
 
   /* Check extinction data... */
-  for (iw = 0; iw < ctl->nw; iw++)
-    for (ip = 0; ip < atm->np; ip++)
+  for (int iw = 0; iw < ctl->nw; iw++)
+    for (int ip = 0; ip < atm->np; ip++)
       if (atm->k[iw][ip] != 0)
 	ERRMSG("RFM interface cannot handle extinction data!");
 
@@ -3389,7 +3389,7 @@ void formod_rfm(
   }
 
   /* Determine tangent altitude or air mass factor... */
-  for (ir = 0; ir < obs->nr; ir++) {
+  for (int ir = 0; ir < obs->nr; ir++) {
 
     /* Raytracing... */
     raytrace(ctl, atm, obs, los, ir);
@@ -3398,7 +3398,7 @@ void formod_rfm(
     if (obs->tpz[ir] <= zmin) {
       geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xo);
       geo2cart(obs->vpz[ir], obs->vplon[ir], obs->vplat[ir], xv);
-      for (i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
 	xd[i] = xo[i] - xv[i];
       z[ir] = NORM(xo) * NORM(xd) / DOTP(xo, xd);
       nadir++;
@@ -3427,7 +3427,7 @@ void formod_rfm(
   write_atm_rfm("rfm.atm", ctl, atm);
 
   /* Loop over channels... */
-  for (id = 0; id < ctl->nd; id++) {
+  for (int id = 0; id < ctl->nd; id++) {
 
     /* Read filter function... */
     sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
@@ -3444,18 +3444,18 @@ void formod_rfm(
     fprintf(out, "*FLG\n%s\n", rfmflg);
     fprintf(out, "*SPC\n%.4f %.4f 0.0005\n", nu0, nu1);
     fprintf(out, "*GAS\n");
-    for (ig = 0; ig < ctl->ng; ig++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       fprintf(out, "%s\n", ctl->emitter[ig]);
     fprintf(out, "*ATM\nrfm.atm\n");
     fprintf(out, "*TAN\n");
-    for (ir = 0; ir < obs->nr; ir++)
+    for (int ir = 0; ir < obs->nr; ir++)
       fprintf(out, "%g\n", z[ir]);
     fprintf(out, "*SFC\n%g 1.0\n", tsurf);
     if (obsz >= 0)
       fprintf(out, "*OBS\n%g\n", obsz);
     fprintf(out, "*HIT\n%s\n", ctl->rfmhit);
     fprintf(out, "*XSC\n");
-    for (ig = 0; ig < ctl->ng; ig++)
+    for (int ig = 0; ig < ctl->ng; ig++)
       if (ctl->rfmxsc[ig][0] != '-')
 	fprintf(out, "%s\n", ctl->rfmxsc[ig]);
     fprintf(out, "*END\n");
@@ -3471,7 +3471,7 @@ void formod_rfm(
       ERRMSG("Error while calling RFM!");
 
     /* Read data... */
-    for (ir = 0; ir < obs->nr; ir++) {
+    for (int ir = 0; ir < obs->nr; ir++) {
       obs->rad[id][ir] = read_obs_rfm("rad", z[ir], nu, f, n) * 1e-5;
       obs->tau[id][ir] = read_obs_rfm("tra", z[ir], nu, f, n);
     }
@@ -4827,7 +4827,7 @@ double read_obs_rfm(
 
   double filt, fsum = 0, nu2[NSHAPE], *nurfm, *rad, radsum = 0;
 
-  int i, idx, ipts, npts;
+  int npts;
 
   /* Allocate... */
   ALLOC(nurfm, double,
@@ -4850,13 +4850,13 @@ double read_obs_rfm(
   /* Set wavenumbers... */
   nu2[0] = nu[0];
   nu2[n - 1] = nu[n - 1];
-  for (i = 1; i < n - 1; i++)
+  for (int i = 1; i < n - 1; i++)
     nu2[i] = LIN(0.0, nu2[0], n - 1.0, nu2[n - 1], i);
 
   /* Convolute... */
-  for (ipts = 0; ipts < npts; ipts++)
+  for (int ipts = 0; ipts < npts; ipts++)
     if (nurfm[ipts] >= nu2[0] && nurfm[ipts] <= nu2[n - 1]) {
-      idx = locate_irr(nu2, n, nurfm[ipts]);
+      int idx = locate_irr(nu2, n, nurfm[ipts]);
       filt = LIN(nu2[idx], f[idx], nu2[idx + 1], f[idx + 1], nurfm[ipts]);
       fsum += filt;
       radsum += filt * rad[ipts];
@@ -4884,7 +4884,7 @@ void read_rfm_spec(
 
   double dnu, nu0, nu1;
 
-  int i, ipts = 0;
+  int ipts = 0;
 
   /* Write info... */
   LOG(1, "Read RFM data: %s", filename);
@@ -4894,7 +4894,7 @@ void read_rfm_spec(
     ERRMSG("Cannot open file!");
 
   /* Read header...... */
-  for (i = 0; i < 4; i++)
+  for (int i = 0; i < 4; i++)
     if (fgets(line, RFMLINE, in) == NULL)
       ERRMSG("Error while reading file header!");
   sscanf(line, "%d %lg %lg %lg", npts, &nu0, &dnu, &nu1);
@@ -5486,9 +5486,7 @@ void write_atm_rfm(
   atm_t * atm) {
 
   FILE *out;
-
-  int ig, ip;
-
+  
   /* Write info... */
   LOG(1, "Write RFM data: %s", filename);
 
@@ -5499,17 +5497,17 @@ void write_atm_rfm(
   /* Write data... */
   fprintf(out, "%d\n", atm->np);
   fprintf(out, "*HGT [km]\n");
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     fprintf(out, "%g\n", atm->z[ip]);
   fprintf(out, "*PRE [mb]\n");
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     fprintf(out, "%g\n", atm->p[ip]);
   fprintf(out, "*TEM [K]\n");
-  for (ip = 0; ip < atm->np; ip++)
+  for (int ip = 0; ip < atm->np; ip++)
     fprintf(out, "%g\n", atm->t[ip]);
-  for (ig = 0; ig < ctl->ng; ig++) {
+  for (int ig = 0; ig < ctl->ng; ig++) {
     fprintf(out, "*%s [ppmv]\n", ctl->emitter[ig]);
-    for (ip = 0; ip < atm->np; ip++)
+    for (int ip = 0; ip < atm->np; ip++)
       fprintf(out, "%g\n", atm->q[ig][ip] * 1e6);
   }
   fprintf(out, "*END\n");
