@@ -1732,18 +1732,18 @@ double ctmco2(
   };
 
   /* Get CO2 continuum absorption... */
-  double xw = nu / 2 + 1;
+  const double xw = nu / 2 + 1;
   if (xw >= 1 && xw < 2001) {
-    int iw = (int) xw;
-    double dw = xw - iw;
-    double ew = 1 - dw;
-    double cw296 = ew * co2296[iw - 1] + dw * co2296[iw];
-    double cw260 = ew * co2260[iw - 1] + dw * co2260[iw];
-    double cw230 = ew * co2230[iw - 1] + dw * co2230[iw];
-    double dt230 = t - 230;
-    double dt260 = t - 260;
-    double dt296 = t - 296;
-    double ctw = dt260 * 5.050505e-4 * dt296 * cw230 - dt230 * 9.259259e-4
+    const int iw = (int) xw;
+    const double dw = xw - iw;
+    const double ew = 1 - dw;
+    const double cw296 = ew * co2296[iw - 1] + dw * co2296[iw];
+    const double cw260 = ew * co2260[iw - 1] + dw * co2260[iw];
+    const double cw230 = ew * co2230[iw - 1] + dw * co2230[iw];
+    const double dt230 = t - 230;
+    const double dt260 = t - 260;
+    const double dt296 = t - 296;
+    const double ctw = dt260 * 5.050505e-4 * dt296 * cw230 - dt230 * 9.259259e-4
       * dt296 * cw260 + dt230 * 4.208754e-4 * dt260 * cw296;
     return u / NA / 1000 * p / P0 * ctw;
   } else
@@ -2770,31 +2770,31 @@ double ctmh2o(
   double sfac;
 
   /* Get H2O continuum absorption... */
-  double xw = nu / 10 + 1;
+  const double xw = nu / 10 + 1;
   if (xw >= 1 && xw < 2001) {
-    int iw = (int) xw;
-    double dw = xw - iw;
-    double ew = 1 - dw;
-    double cw296 = ew * h2o296[iw - 1] + dw * h2o296[iw];
-    double cw260 = ew * h2o260[iw - 1] + dw * h2o260[iw];
-    double cwfrn = ew * h2ofrn[iw - 1] + dw * h2ofrn[iw];
+    const int iw = (int) xw;
+    const double dw = xw - iw;
+    const double ew = 1 - dw;
+    const double cw296 = ew * h2o296[iw - 1] + dw * h2o296[iw];
+    const double cw260 = ew * h2o260[iw - 1] + dw * h2o260[iw];
+    const double cwfrn = ew * h2ofrn[iw - 1] + dw * h2ofrn[iw];
     if (nu <= 820 || nu >= 960) {
       sfac = 1;
     } else {
-      double xx = (nu - 820) / 10;
-      int ix = (int) xx;
-      double dx = xx - ix;
+      const double xx = (nu - 820) / 10;
+      const int ix = (int) xx;
+      const double dx = xx - ix;
       sfac = (1 - dx) * xfcrev[ix] + dx * xfcrev[ix + 1];
     }
-    double ctwslf =
+    const double ctwslf =
       sfac * cw296 * pow(cw260 / cw296, (296 - t) / (296 - 260));
-    double vf2 = POW2(nu - 370);
-    double vf6 = POW3(vf2);
-    double fscal = 36100 / (vf2 + vf6 * 1e-8 + 36100) * -.25 + 1;
-    double ctwfrn = cwfrn * fscal;
-    double a1 = nu * u * tanh(.7193876 / t * nu);
-    double a2 = 296 / t;
-    double a3 = p / P0 * (q * ctwslf + (1 - q) * ctwfrn) * 1e-20;
+    const double vf2 = POW2(nu - 370);
+    const double vf6 = POW3(vf2);
+    const double fscal = 36100 / (vf2 + vf6 * 1e-8 + 36100) * -.25 + 1;
+    const double ctwfrn = cwfrn * fscal;
+    const double a1 = nu * u * tanh(.7193876 / t * nu);
+    const double a2 = 296 / t;
+    const double a3 = p / P0 * (q * ctwslf + (1 - q) * ctwfrn) * 1e-20;
     return a1 * a2 * a3;
   } else
     return 0;
@@ -2855,9 +2855,9 @@ double ctmn2(
     return 0;
 
   /* Interpolate B and beta... */
-  int idx = locate_reg(nua, 98, nu);
-  double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
-  double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+  const int idx = locate_reg(nua, 98, nu);
+  const double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
+  const double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t))
@@ -2914,9 +2914,9 @@ double ctmo2(
     return 0;
 
   /* Interpolate B and beta... */
-  int idx = locate_reg(nua, 90, nu);
-  double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
-  double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+  const int idx = locate_reg(nua, 90, nu);
+  const double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
+  const double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t)) * q_o2 *
@@ -2986,7 +2986,7 @@ void copy_obs(
   int init) {
 
   /* Data size... */
-  size_t s = (size_t) obs_src->nr * sizeof(double);
+  const size_t s = (size_t) obs_src->nr * sizeof(double);
 
   /* Copy data... */
   obs_dest->nr = obs_src->nr;
@@ -3494,7 +3494,7 @@ void formod_srcfunc(
   double *src) {
 
   /* Determine index in temperature array... */
-  int it = locate_reg(tbl->st, TBLNS, t);
+  const int it = locate_reg(tbl->st, TBLNS, t);
 
   /* Interpolate Planck function value... */
   for (int id = 0; id < ctl->nd; id++)
@@ -3699,7 +3699,7 @@ void intpol_atm(
   double *k) {
 
   /* Get array index... */
-  int ip = locate_irr(atm->z, atm->np, z);
+  const int ip = locate_irr(atm->z, atm->np, z);
 
   /* Interpolate... */
   *p = LOGY(atm->z[ip], atm->p[ip], atm->z[ip + 1], atm->p[ip + 1], z);
@@ -4024,8 +4024,8 @@ void kernel(
   int *iqa;
 
   /* Get sizes... */
-  size_t m = k->size1;
-  size_t n = k->size2;
+  const size_t m = k->size1;
+  const size_t n = k->size2;
 
   /* Allocate... */
   x0 = gsl_vector_alloc(n);
@@ -4147,7 +4147,7 @@ int locate_reg(
   double x) {
 
   /* Calculate index... */
-  int i = (int) ((x - xx[0]) / (xx[1] - xx[0]));
+  const int i = (int) ((x - xx[0]) / (xx[1] - xx[0]));
 
   /* Check range... */
   if (i < 0)
@@ -4278,7 +4278,7 @@ void raytrace(
   if (obs->obsz[ir] > zmax) {
     double dmax = norm, dmin = 0;
     while (fabs(dmin - dmax) > 0.001) {
-      double d = (dmax + dmin) / 2;
+      const double d = (dmax + dmin) / 2;
       for (int i = 0; i < 3; i++)
 	x[i] = xobs[i] + d * ex0[i];
       cart2geo(x, &z, &lon, &lat);
@@ -4300,7 +4300,7 @@ void raytrace(
       norm = NORM(x);
       for (int i = 0; i < 3; i++)
 	xh[i] = x[i] / norm;
-      double cosa = fabs(DOTP(ex0, xh));
+      const double cosa = fabs(DOTP(ex0, xh));
       if (cosa != 0)
 	ds = MIN(ctl->rayds, ctl->raydz / cosa);
     }
@@ -4311,7 +4311,7 @@ void raytrace(
     /* Check if LOS hits the ground or has left atmosphere... */
     if (z < zmin || z > zmax) {
       stop = (z < zmin ? 2 : 1);
-      double frac =
+      const double frac =
 	((z <
 	  zmin ? zmin : zmax) - los->z[los->np - 1]) / (z - los->z[los->np -
 								   1]);
@@ -4341,9 +4341,9 @@ void raytrace(
 
     /* Add cloud extinction... */
     if (ctl->ncl > 0 && atm->cldz > 0) {
-      double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
+      const double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (int id = 0; id < ctl->nd; id++) {
-	int icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
+	const int icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
 	los->k[los->np][id]
 	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
 		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
@@ -4366,7 +4366,7 @@ void raytrace(
       for (int id = 0; id < ctl->nd; id++) {
 	los->sfeps[id] = 1.0;
 	if (ctl->nsf > 0) {
-	  int isf = locate_irr(ctl->sfnu, ctl->nsf, ctl->nu[id]);
+	  const int isf = locate_irr(ctl->sfnu, ctl->nsf, ctl->nu[id]);
 	  los->sfeps[id] = LIN(ctl->sfnu[isf], atm->sfeps[isf],
 			       ctl->sfnu[isf + 1], atm->sfeps[isf + 1],
 			       ctl->nu[id]);
@@ -5215,30 +5215,30 @@ double sza(
   double lat) {
 
   /* Number of days and fraction with respect to 2000-01-01T12:00Z... */
-  double D = sec / 86400 - 0.5;
+  const double D = sec / 86400 - 0.5;
 
   /* Geocentric apparent ecliptic longitude [rad]... */
-  double g = DEG2RAD(357.529 + 0.98560028 * D);
-  double q = 280.459 + 0.98564736 * D;
-  double L = DEG2RAD(q + 1.915 * sin(g) + 0.020 * sin(2 * g));
+  const double g = DEG2RAD(357.529 + 0.98560028 * D);
+  const double q = 280.459 + 0.98564736 * D;
+  const double L = DEG2RAD(q + 1.915 * sin(g) + 0.020 * sin(2 * g));
 
   /* Mean obliquity of the ecliptic [rad]... */
-  double e = DEG2RAD(23.439 - 0.00000036 * D);
+  const double e = DEG2RAD(23.439 - 0.00000036 * D);
 
   /* Declination [rad]... */
-  double dec = asin(sin(e) * sin(L));
+  const double dec = asin(sin(e) * sin(L));
 
   /* Right ascension [rad]... */
-  double ra = atan2(cos(e) * sin(L), cos(L));
+  const double ra = atan2(cos(e) * sin(L), cos(L));
 
   /* Greenwich Mean Sidereal Time [h]... */
-  double GMST = 18.697374558 + 24.06570982441908 * D;
+  const double GMST = 18.697374558 + 24.06570982441908 * D;
 
   /* Local Sidereal Time [h]... */
-  double LST = GMST + lon / 15;
+  const double LST = GMST + lon / 15;
 
   /* Hour angle [rad]... */
-  double h = LST / 12 * M_PI - ra;
+  const double h = LST / 12 * M_PI - ra;
 
   /* Convert latitude... */
   lat *= M_PI / 180;
