@@ -3683,9 +3683,9 @@ void init_srcfunc(
 /*****************************************************************************/
 
 void intpol_atm(
-  ctl_t * ctl,
-  atm_t * atm,
-  double z,
+  const ctl_t * ctl,
+  const atm_t * atm,
+  const double z,
   double *p,
   double *t,
   double *q,
@@ -3892,12 +3892,12 @@ void intpol_tbl_ega(
 /*****************************************************************************/
 
 double intpol_tbl_eps(
-  tbl_t * tbl,
-  int ig,
-  int id,
-  int ip,
-  int it,
-  double u) {
+  const tbl_t * tbl,
+  const int ig,
+  const int id,
+  const int ip,
+  const int it,
+  const double u) {
 
   /* Lower boundary... */
   if (u < tbl->u[id][ig][ip][it][0])
@@ -3931,12 +3931,12 @@ double intpol_tbl_eps(
 /*****************************************************************************/
 
 double intpol_tbl_u(
-  tbl_t * tbl,
-  int ig,
-  int id,
-  int ip,
-  int it,
-  double eps) {
+  const tbl_t * tbl,
+  const int ig,
+  const int id,
+  const int ip,
+  const int it,
+  const double eps) {
 
   /* Lower boundary... */
   if (eps < tbl->eps[id][ig][ip][it][0])
@@ -4105,9 +4105,9 @@ void kernel(
 /*****************************************************************************/
 
 int locate_irr(
-  double *xx,
-  int n,
-  double x) {
+  const double *xx,
+  const int n,
+  const double x) {
 
   int ilo = 0;
   int ihi = n - 1;
@@ -4135,9 +4135,9 @@ int locate_irr(
 /*****************************************************************************/
 
 int locate_reg(
-  double *xx,
-  int n,
-  double x) {
+  const double *xx,
+  const int n,
+  const double x) {
 
   /* Calculate index... */
   const int i = (int) ((x - xx[0]) / (xx[1] - xx[0]));
@@ -4154,9 +4154,9 @@ int locate_reg(
 /*****************************************************************************/
 
 int locate_tbl(
-  float *xx,
-  int n,
-  double x) {
+  const float *xx,
+  const int n,
+  const double x) {
 
   int ilo = 0;
   int ihi = n - 1;
@@ -5268,13 +5268,13 @@ void tangent_point(
 /*****************************************************************************/
 
 void time2jsec(
-  int year,
-  int mon,
-  int day,
-  int hour,
-  int min,
-  int sec,
-  double remain,
+  const int year,
+  const int mon,
+  const int day,
+  const int hour,
+  const int min,
+  const int sec,
+  const double remain,
   double *jsec) {
 
   struct tm t0, t1;

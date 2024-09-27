@@ -949,9 +949,9 @@ void init_srcfunc(
 
 /*! Interpolate atmospheric data. */
 void intpol_atm(
-  ctl_t * ctl,
-  atm_t * atm,
-  double z,
+  const ctl_t * ctl,
+  const atm_t * atm,
+  const double z,
   double *p,
   double *t,
   double *q,
@@ -977,25 +977,25 @@ void intpol_tbl_ega(
 
 /*! Interpolate emissivity from look-up tables. */
 double intpol_tbl_eps(
-  tbl_t * tbl,
-  int ig,
-  int id,
-  int ip,
-  int it,
-  double u);
+  const tbl_t * tbl,
+  const int ig,
+  const int id,
+  const int ip,
+  const int it,
+  const double u);
 
 /*! Interpolate column density from look-up tables. */
 double intpol_tbl_u(
-  tbl_t * tbl,
-  int ig,
-  int id,
-  int ip,
-  int it,
-  double eps);
+  const tbl_t * tbl,
+  const int ig,
+  const int id,
+  const int ip,
+  const int it,
+  const double eps);
 
 /*! Convert seconds to date. */
 void jsec2time(
-  double jsec,
+  const double jsec,
   int *year,
   int *mon,
   int *day,
@@ -1013,21 +1013,21 @@ void kernel(
 
 /*! Find array index for irregular grid. */
 int locate_irr(
-  double *xx,
-  int n,
-  double x);
+  const double *xx,
+  const int n,
+  const double x);
 
 /*! Find array index for regular grid. */
 int locate_reg(
-  double *xx,
-  int n,
-  double x);
+  const double *xx,
+  const int n,
+  const double x);
 
 /*! Find array index in float array. */
 int locate_tbl(
-  float *xx,
-  int n,
-  double x);
+  const float *xx,
+  const int n,
+  const double x);
 
 /*! Compose measurement vector. */
 size_t obs2y(
@@ -1122,13 +1122,13 @@ void tangent_point(
 
 /*! Convert date to seconds. */
 void time2jsec(
-  int year,
-  int mon,
-  int day,
-  int hour,
-  int min,
-  int sec,
-  double remain,
+  const int year,
+  const int mon,
+  const int day,
+  const int hour,
+  const int min,
+  const int sec,
+  const double remain,
   double *jsec);
 
 /*! Measure wall-clock time. */
