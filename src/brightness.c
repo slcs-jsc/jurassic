@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2024 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -42,7 +42,7 @@ int main(
     double nu = atof(argv[2]);
 
     /* Compute brightness temperature... */
-    printf("%.10g\n", brightness(rad, nu));
+    printf("%.10g\n", BRIGHT(rad, nu));
 
   }
 
@@ -66,7 +66,7 @@ int main(
     for (double rad = rad0; rad <= rad1; rad += drad) {
       printf("\n");
       for (double nu = nu0; nu <= nu1; nu += dnu)
-	printf("%.10g %.4f %.10g\n", rad, nu, brightness(rad, nu));
+	printf("%.10g %.4f %.10g\n", rad, nu, BRIGHT(rad, nu));
     }
   }
 

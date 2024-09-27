@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2024 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -41,7 +41,7 @@ int main(
     double nu = atof(argv[2]);
 
     /* Compute Planck function... */
-    printf("%.10g\n", planck(t, nu));
+    printf("%.10g\n", PLANCK(t, nu));
   }
 
   /* Calculate table... */
@@ -64,7 +64,7 @@ int main(
     for (double t = t0; t <= t1; t += dt) {
       printf("\n");
       for (double nu = nu0; nu <= nu1; nu += dnu)
-	printf("%.10g %.4f %.10g\n", t, nu, planck(t, nu));
+	printf("%.10g %.4f %.10g\n", t, nu, PLANCK(t, nu));
     }
   }
 

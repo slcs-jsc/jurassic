@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2024 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -122,6 +122,10 @@
   if((ptr=malloc((size_t)(n)*sizeof(type)))==NULL)	\
     ERRMSG("Out of memory!");
 
+/*! Compute brightness temperature. */
+#define BRIGHT(rad, nu)					\
+  (C2 * (nu) / gsl_log1p(C1 * POW3(nu) / (rad)))
+
 /*! Convert degrees to radians. */
 #define DEG2RAD(deg)				\
   ((deg) * (M_PI / 180.0))
@@ -175,6 +179,10 @@
 /*! Compute norm of a vector. */
 #define NORM(a) sqrt(DOTP(a, a))
 
+/*! Compute Planck function. */
+#define PLANCK(T, nu)				\
+  (C1 * POW3(nu) / gsl_expm1(C2 * (nu) / (T)))
+
 /*! Compute x^2. */
 #define POW2(x) ((x)*(x))
 
@@ -184,6 +192,10 @@
 /*! Convert radians to degrees. */
 #define RAD2DEG(rad)				\
   ((rad) * (180.0 / M_PI))
+
+/*! Compute refractivity (return value is n - 1). */
+#define REFRAC(p, T)				\
+  (7.753e-05 * (p) / (T))
 
 /*! Start or stop a timer. */
 #define TIMER(name, mode)				\
@@ -816,11 +828,6 @@ void atm2x_help(
   int *ipa,
   size_t *n);
 
-/*! Compute brightness temperature. */
-double brightness(
-  double rad,
-  double nu);
-
 /*! Convert Cartesian coordinates to geolocation. */
 void cart2geo(
   const double *x,
@@ -835,30 +842,30 @@ void climatology(
 
 /*! Compute carbon dioxide continuum (optical depth). */
 double ctmco2(
-  double nu,
-  double p,
-  double t,
-  double u);
+  const double nu,
+  const double p,
+  const double t,
+  const double u);
 
 /*! Compute water vapor continuum (optical depth). */
 double ctmh2o(
-  double nu,
-  double p,
-  double t,
-  double q,
-  double u);
+  const double nu,
+  const double p,
+  const double t,
+  const double q,
+  const double u);
 
 /*! Compute nitrogen continuum (absorption coefficient). */
 double ctmn2(
-  double nu,
-  double p,
-  double t);
+  const double nu,
+  const double p,
+  const double t);
 
 /*! Compute oxygen continuum (absorption coefficient). */
 double ctmo2(
-  double nu,
-  double p,
-  double t);
+  const double nu,
+  const double p,
+  const double t);
 
 /*! Copy and initialize atmospheric data. */
 void copy_atm(
@@ -1030,11 +1037,6 @@ size_t obs2y(
   int *ida,
   int *ira);
 
-/*! Compute Planck function. */
-double planck(
-  double t,
-  double nu);
-
 /*! Do ray-tracing to determine LOS. */
 void raytrace(
   ctl_t * ctl,
@@ -1095,11 +1097,6 @@ void read_shape(
 void read_tbl(
   ctl_t * ctl,
   tbl_t * tbl);
-
-/*! Compute refractivity (return value is n - 1). */
-double refractivity(
-  double p,
-  double t);
 
 /*! Search control parameter file for variable entry. */
 double scan_ctl(

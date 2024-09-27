@@ -14,7 +14,7 @@
   You should have received a copy of the GNU eneral Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2021 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2024 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -102,17 +102,6 @@ void atm2x_help(
     ipa[*n] = value_ip;
   (*n)++;
 }
-
-
-/*****************************************************************************/
-
-double brightness(
-  double rad,
-  double nu) {
-
-  return C2 * nu / gsl_log1p(C1 * POW3(nu) / rad);
-}
-
 
 /*****************************************************************************/
 
@@ -895,10 +884,10 @@ void climatology(
 /*****************************************************************************/
 
 double ctmco2(
-  double nu,
-  double p,
-  double t,
-  double u) {
+  const double nu,
+  const double p,
+  const double t,
+  const double u) {
 
   static double co2296[2001] = { 9.3388e-5, 9.7711e-5, 1.0224e-4, 1.0697e-4,
     1.1193e-4, 1.1712e-4, 1.2255e-4, 1.2824e-4, 1.3419e-4, 1.4043e-4,
@@ -1743,8 +1732,10 @@ double ctmco2(
     const double dt230 = t - 230;
     const double dt260 = t - 260;
     const double dt296 = t - 296;
-    const double ctw = dt260 * 5.050505e-4 * dt296 * cw230 - dt230 * 9.259259e-4
-      * dt296 * cw260 + dt230 * 4.208754e-4 * dt260 * cw296;
+    const double ctw =
+      dt260 * 5.050505e-4 * dt296 * cw230 -
+      dt230 * 9.259259e-4 * dt296 * cw260 +
+      dt230 * 4.208754e-4 * dt260 * cw296;
     return u / NA / 1000 * p / P0 * ctw;
   } else
     return 0;
@@ -1753,11 +1744,11 @@ double ctmco2(
 /*****************************************************************************/
 
 double ctmh2o(
-  double nu,
-  double p,
-  double t,
-  double q,
-  double u) {
+  const double nu,
+  const double p,
+  const double t,
+  const double q,
+  const double u) {
 
   static double h2o296[2001] = { .17, .1695, .172, .168, .1687, .1624, .1606,
     .1508, .1447, .1344, .1214, .1133, .1009, .09217, .08297, .06989,
@@ -2803,9 +2794,9 @@ double ctmh2o(
 /*****************************************************************************/
 
 double ctmn2(
-  double nu,
-  double p,
-  double t) {
+  const double nu,
+  const double p,
+  const double t) {
 
   static double ba[98] = { 0., 4.45e-8, 5.22e-8, 6.46e-8, 7.75e-8, 9.03e-8,
     1.06e-7, 1.21e-7, 1.37e-7, 1.57e-7, 1.75e-7, 2.01e-7, 2.3e-7,
@@ -2857,7 +2848,8 @@ double ctmn2(
   /* Interpolate B and beta... */
   const int idx = locate_reg(nua, 98, nu);
   const double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
-  const double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+  const double beta =
+    LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t))
@@ -2867,9 +2859,9 @@ double ctmn2(
 /*****************************************************************************/
 
 double ctmo2(
-  double nu,
-  double p,
-  double t) {
+  const double nu,
+  const double p,
+  const double t) {
 
   static double ba[90] = { 0., .061, .074, .084, .096, .12, .162, .208, .246,
     .285, .314, .38, .444, .5, .571, .673, .768, .853, .966, 1.097,
@@ -2916,7 +2908,8 @@ double ctmo2(
   /* Interpolate B and beta... */
   const int idx = locate_reg(nua, 90, nu);
   const double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
-  const double beta = LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+  const double beta =
+    LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t)) * q_o2 *
@@ -2932,7 +2925,7 @@ void copy_atm(
   int init) {
 
   /* Data size... */
-  size_t s = (size_t) atm_src->np * sizeof(double);
+  const size_t s = (size_t) atm_src->np * sizeof(double);
 
   /* Copy data... */
   atm_dest->np = atm_src->np;
@@ -3065,7 +3058,7 @@ void formod(
   if (ctl->write_bbt)
     for (int id = 0; id < ctl->nd; id++)
       for (int ir = 0; ir < obs->nr; ir++)
-	obs->rad[id][ir] = brightness(obs->rad[id][ir], ctl->nu[id]);
+	obs->rad[id][ir] = BRIGHT(obs->rad[id][ir], ctl->nu[id]);
 
   /* Apply observation mask... */
   for (int id = 0; id < ctl->nd; id++)
@@ -3321,13 +3314,13 @@ void formod_pencil(
 	  for (int i = 0; i < 3; i++)
 	    x1[i] -= x0[i];
 	  const double cosa = DOTP(x0, x1) / NORM(x0) / NORM(x1);
-	  
+
 	  /* Get ratio of SZA and incident radiation... */
 	  const double rcos = cosa / cos(DEG2RAD(sza2));
 
 	  /* Add solar radiation... */
 	  for (int id = 0; id < ctl->nd; id++)
-	    rad[id] += 6.764e-5 / (2. * M_PI) * planck(TSUN, ctl->nu[id])
+	    rad[id] += 6.764e-5 / (2. * M_PI) * PLANCK(TSUN, ctl->nu[id])
 	      * tau_refl[id] * (1 - los->sfeps[id]) * tau[id] * rcos;
 	}
       }
@@ -3674,7 +3667,7 @@ void init_srcfunc(
 	int i = locate_irr(nu, n, fnu);
 	double ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
 	fsum += ff;
-	tbl->sr[it][id] += ff * planck(tbl->st[it], fnu);
+	tbl->sr[it][id] += ff * PLANCK(tbl->st[it], fnu);
       }
       tbl->sr[it][id] /= fsum;
     }
@@ -4209,15 +4202,6 @@ size_t obs2y(
 
 /*****************************************************************************/
 
-double planck(
-  double t,
-  double nu) {
-
-  return C1 * POW3(nu) / gsl_expm1(C2 * nu / t);
-}
-
-/*****************************************************************************/
-
 void raytrace(
   ctl_t * ctl,
   atm_t * atm,
@@ -4227,8 +4211,8 @@ void raytrace(
 
   const double h = 0.02, zrefrac = 60;
 
-  double ds, ex0[3], ex1[3], k[NW], lat, lon, n, ng[3], norm,
-    p, q[NG], t, x[3], xh[3], xobs[3], xvp[3], z = 1e99, zmax, zmin;
+  double ex0[3], ex1[3], k[NW], lat, lon, n, ng[3], norm, p, q[NG], t,
+    x[3], xh[3], xobs[3], xvp[3], z = 1e99, zmax, zmin;
 
   int stop = 0;
 
@@ -4295,7 +4279,7 @@ void raytrace(
   while (1) {
 
     /* Set step length... */
-    ds = ctl->rayds;
+    double ds = ctl->rayds;
     if (ctl->raydz > 0) {
       norm = NORM(x);
       for (int i = 0; i < 3; i++)
@@ -4379,7 +4363,7 @@ void raytrace(
 
     /* Determine refractivity... */
     if (ctl->refrac && z <= zrefrac)
-      n = 1 + refractivity(p, t);
+      n = 1 + REFRAC(p, t);
     else
       n = 1;
 
@@ -4393,12 +4377,12 @@ void raytrace(
 	xh[i] = x[i] + 0.5 * ds * ex0[i];
       cart2geo(xh, &z, &lon, &lat);
       intpol_atm(ctl, atm, z, &p, &t, q, k);
-      n = refractivity(p, t);
+      n = REFRAC(p, t);
       for (int i = 0; i < 3; i++) {
 	xh[i] += h;
 	cart2geo(xh, &z, &lon, &lat);
 	intpol_atm(ctl, atm, z, &p, &t, q, k);
-	ng[i] = (refractivity(p, t) - n) / h;
+	ng[i] = (REFRAC(p, t) - n) / h;
 	xh[i] -= h;
       }
     } else
@@ -5130,16 +5114,6 @@ void read_tbl(
 
 /*****************************************************************************/
 
-double refractivity(
-  double p,
-  double t) {
-
-  /* Refractivity of air at 4 to 15 micron... */
-  return 7.753e-05 * p / t;
-}
-
-/*****************************************************************************/
-
 double scan_ctl(
   int argc,
   char *argv[],
@@ -5210,9 +5184,9 @@ double scan_ctl(
 /*****************************************************************************/
 
 double sza(
-  double sec,
-  double lon,
-  double lat) {
+  const double sec,
+  const double lon,
+  const double lat) {
 
   /* Number of days and fraction with respect to 2000-01-01T12:00Z... */
   const double D = sec / 86400 - 0.5;
@@ -5241,10 +5215,10 @@ double sza(
   const double h = LST / 12 * M_PI - ra;
 
   /* Convert latitude... */
-  lat *= M_PI / 180;
+  const double latr = DEG2RAD(lat);
 
   /* Return solar zenith angle [deg]... */
-  return RAD2DEG(acos(sin(lat) * sin(dec) + cos(lat) * cos(dec) * cos(h)));
+  return RAD2DEG(acos(sin(latr) * sin(dec) + cos(latr) * cos(dec) * cos(h)));
 }
 
 /*****************************************************************************/
@@ -5486,7 +5460,7 @@ void write_atm_rfm(
   atm_t * atm) {
 
   FILE *out;
-  
+
   /* Write info... */
   LOG(1, "Write RFM data: %s", filename);
 
