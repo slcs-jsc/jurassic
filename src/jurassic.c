@@ -3024,7 +3024,7 @@ int find_emitter(
 /*****************************************************************************/
 
 void formod(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm,
   obs_t * obs) {
 
@@ -3194,10 +3194,10 @@ void formod_fov(
 /*****************************************************************************/
 
 void formod_pencil(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   obs_t * obs,
-  int ir) {
+  const int ir) {
 
   static tbl_t *tbl;
 
@@ -3340,8 +3340,8 @@ void formod_pencil(
 /*****************************************************************************/
 
 void formod_rfm(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   obs_t * obs) {
 
   los_t *los;
@@ -4207,7 +4207,7 @@ void raytrace(
   const atm_t * atm,
   obs_t * obs,
   los_t * los,
-  int ir) {
+  const int ir) {
 
   const double h = 0.02, zrefrac = 60;
 

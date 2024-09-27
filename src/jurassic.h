@@ -888,7 +888,7 @@ int find_emitter(
 
 /*! Determine ray paths and compute radiative transfer. */
 void formod(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm,
   obs_t * obs);
 
@@ -906,15 +906,15 @@ void formod_fov(
 
 /*! Compute radiative transfer for a pencil beam. */
 void formod_pencil(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   obs_t * obs,
-  int ir);
+  const int ir);
 
 /*! Apply RFM for radiative transfer calculations. */
 void formod_rfm(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   obs_t * obs);
 
 /*! Compute Planck source function. */
@@ -1043,7 +1043,7 @@ void raytrace(
   const atm_t * atm,
   obs_t * obs,
   los_t * los,
-  int ir);
+  const int ir);
 
 /*! Read atmospheric data. */
 void read_atm(
