@@ -3708,10 +3708,10 @@ void intpol_atm(
 /*****************************************************************************/
 
 void intpol_tbl_cga(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  los_t * los,
-  int ip,
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  const los_t * los,
+  const int ip,
   double tau_path[ND][NG],
   double tau_seg[ND]) {
 
@@ -3797,10 +3797,10 @@ void intpol_tbl_cga(
 /*****************************************************************************/
 
 void intpol_tbl_ega(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  los_t * los,
-  int ip,
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  const los_t * los,
+  const int ip,
   double tau_path[ND][NG],
   double tau_seg[ND]) {
 
@@ -3971,7 +3971,7 @@ double intpol_tbl_u(
 /*****************************************************************************/
 
 void jsec2time(
-  double jsec,
+  const double jsec,
   int *year,
   int *mon,
   int *day,
@@ -4176,8 +4176,8 @@ int locate_tbl(
 /*****************************************************************************/
 
 size_t obs2y(
-  ctl_t * ctl,
-  obs_t * obs,
+  const ctl_t * ctl,
+  const obs_t * obs,
   gsl_vector * y,
   int *ida,
   int *ira) {
@@ -4203,8 +4203,8 @@ size_t obs2y(
 /*****************************************************************************/
 
 void raytrace(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   obs_t * obs,
   los_t * los,
   int ir) {
@@ -4445,7 +4445,7 @@ void raytrace(
 void read_atm(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm) {
 
   FILE *in;
@@ -4700,7 +4700,7 @@ void read_matrix(
 void read_obs(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
+  const ctl_t * ctl,
   obs_t * obs) {
 
   FILE *in;
@@ -4800,7 +4800,7 @@ void read_obs(
 
 double read_obs_rfm(
   const char *basename,
-  double z,
+  const double z,
   double *nu,
   double *f,
   int n) {
@@ -4950,7 +4950,7 @@ void read_shape(
 /*****************************************************************************/
 
 void read_tbl(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   tbl_t * tbl) {
 
   FILE *in;
@@ -5224,7 +5224,7 @@ double sza(
 /*****************************************************************************/
 
 void tangent_point(
-  los_t * los,
+  const los_t * los,
   double *tpz,
   double *tplon,
   double *tplat) {
@@ -5339,8 +5339,8 @@ void timer(
 void write_atm(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
-  atm_t * atm) {
+  const ctl_t * ctl,
+  const atm_t * atm) {
 
   FILE *out;
 
@@ -5456,8 +5456,8 @@ void write_atm(
 
 void write_atm_rfm(
   const char *filename,
-  ctl_t * ctl,
-  atm_t * atm) {
+  const ctl_t * ctl,
+  const atm_t * atm) {
 
   FILE *out;
 
@@ -5495,10 +5495,10 @@ void write_atm_rfm(
 void write_matrix(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
-  gsl_matrix * matrix,
-  atm_t * atm,
-  obs_t * obs,
+  const ctl_t * ctl,
+  const gsl_matrix * matrix,
+  const atm_t * atm,
+  const obs_t * obs,
   const char *rowspace,
   const char *colspace,
   const char *sort) {
@@ -5673,8 +5673,8 @@ void write_matrix(
 void write_obs(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
-  obs_t * obs) {
+  const ctl_t * ctl,
+  const obs_t * obs) {
 
   FILE *out;
 
@@ -5782,9 +5782,9 @@ void write_obs(
 
 void write_shape(
   const char *filename,
-  double *x,
-  double *y,
-  int n) {
+  const double *x,
+  const double *y,
+  const int n) {
 
   FILE *out;
 
@@ -5811,8 +5811,8 @@ void write_shape(
 /*****************************************************************************/
 
 void write_tbl(
-  ctl_t * ctl,
-  tbl_t * tbl) {
+  const ctl_t * ctl,
+  const tbl_t * tbl) {
 
   FILE *out;
 
@@ -5897,8 +5897,8 @@ void write_tbl(
 /*****************************************************************************/
 
 void x2atm(
-  ctl_t * ctl,
-  gsl_vector * x,
+  const ctl_t * ctl,
+  const gsl_vector * x,
   atm_t * atm) {
 
   size_t n = 0;
@@ -5952,7 +5952,7 @@ void x2atm(
 
 void x2atm_help(
   double *value,
-  gsl_vector * x,
+  const gsl_vector * x,
   size_t *n) {
 
   /* Get state vector element... */
@@ -5963,8 +5963,8 @@ void x2atm_help(
 /*****************************************************************************/
 
 void y2obs(
-  ctl_t * ctl,
-  gsl_vector * y,
+  const ctl_t * ctl,
+  const gsl_vector * y,
   obs_t * obs) {
 
   size_t m = 0;

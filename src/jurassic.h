@@ -959,19 +959,19 @@ void intpol_atm(
 
 /*! Get transmittance from look-up tables (CGA method). */
 void intpol_tbl_cga(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  los_t * los,
-  int ip,
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  const los_t * los,
+  const int ip,
   double tau_path[ND][NG],
   double tau_seg[ND]);
 
 /*! Get transmittance from look-up tables (EGA method). */
 void intpol_tbl_ega(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  los_t * los,
-  int ip,
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  const los_t * los,
+  const int ip,
   double tau_path[ND][NG],
   double tau_seg[ND]);
 
@@ -1031,16 +1031,16 @@ int locate_tbl(
 
 /*! Compose measurement vector. */
 size_t obs2y(
-  ctl_t * ctl,
-  obs_t * obs,
+  const ctl_t * ctl,
+  const obs_t * obs,
   gsl_vector * y,
   int *ida,
   int *ira);
 
 /*! Do ray-tracing to determine LOS. */
 void raytrace(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   obs_t * obs,
   los_t * los,
   int ir);
@@ -1049,7 +1049,7 @@ void raytrace(
 void read_atm(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm);
 
 /*! Read forward model control parameters. */
@@ -1068,13 +1068,13 @@ void read_matrix(
 void read_obs(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
+  const ctl_t * ctl,
   obs_t * obs);
 
 /*! Read observation data in RFM format. */
 double read_obs_rfm(
   const char *basename,
-  double z,
+  const double z,
   double *nu,
   double *f,
   int n);
@@ -1095,7 +1095,7 @@ void read_shape(
 
 /*! Read look-up table data. */
 void read_tbl(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   tbl_t * tbl);
 
 /*! Search control parameter file for variable entry. */
@@ -1115,7 +1115,7 @@ double sza(
 
 /*! Find tangent point of a given LOS. */
 void tangent_point(
-  los_t * los,
+  const los_t * los,
   double *tpz,
   double *tplon,
   double *tplat);
@@ -1143,23 +1143,23 @@ void timer(
 void write_atm(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
-  atm_t * atm);
+  const ctl_t * ctl,
+  const atm_t * atm);
 
 /*! Write atmospheric data in RFM format. */
 void write_atm_rfm(
   const char *filename,
-  ctl_t * ctl,
-  atm_t * atm);
+  const ctl_t * ctl,
+  const atm_t * atm);
 
 /*! Write matrix. */
 void write_matrix(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
-  gsl_matrix * matrix,
-  atm_t * atm,
-  obs_t * obs,
+  const ctl_t * ctl,
+  const gsl_matrix * matrix,
+  const atm_t * atm,
+  const obs_t * obs,
   const char *rowspace,
   const char *colspace,
   const char *sort);
@@ -1168,37 +1168,37 @@ void write_matrix(
 void write_obs(
   const char *dirname,
   const char *filename,
-  ctl_t * ctl,
-  obs_t * obs);
+  const ctl_t * ctl,
+  const obs_t * obs);
 
 /*! Write shape function. */
 void write_shape(
   const char *filename,
-  double *x,
-  double *y,
-  int n);
+  const double *x,
+  const double *y,
+  const int n);
 
 /*! Write look-up table data. */
 void write_tbl(
-  ctl_t * ctl,
-  tbl_t * tbl);
+  const ctl_t * ctl,
+  const tbl_t * tbl);
 
 /*! Decompose parameter vector or state vector. */
 void x2atm(
-  ctl_t * ctl,
-  gsl_vector * x,
+  const ctl_t * ctl,
+  const gsl_vector * x,
   atm_t * atm);
 
 /*! Get element from state vector. */
 void x2atm_help(
   double *value,
-  gsl_vector * x,
+  const gsl_vector * x,
   size_t *n);
 
 /*! Decompose measurement vector. */
 void y2obs(
-  ctl_t * ctl,
-  gsl_vector * y,
+  const ctl_t * ctl,
+  const gsl_vector * y,
   obs_t * obs);
 
 #endif
