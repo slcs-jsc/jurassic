@@ -27,8 +27,8 @@
 /*****************************************************************************/
 
 size_t atm2x(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   gsl_vector * x,
   int *iqa,
   int *ipa) {
@@ -85,9 +85,9 @@ size_t atm2x(
 /*****************************************************************************/
 
 void atm2x_help(
-  double value,
-  int value_iqa,
-  int value_ip,
+  const double value,
+  const int value_iqa,
+  const int value_ip,
   gsl_vector * x,
   int *iqa,
   int *ipa,
@@ -121,7 +121,7 @@ void cart2geo(
 /*****************************************************************************/
 
 void climatology(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm) {
 
   static double z[121] = {
@@ -2919,10 +2919,10 @@ double ctmo2(
 /*****************************************************************************/
 
 void copy_atm(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm_dest,
-  atm_t * atm_src,
-  int init) {
+  const atm_t * atm_src,
+  const int init) {
 
   /* Data size... */
   const size_t s = (size_t) atm_src->np * sizeof(double);
@@ -2973,10 +2973,10 @@ void copy_atm(
 /*****************************************************************************/
 
 void copy_obs(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   obs_t * obs_dest,
-  obs_t * obs_src,
-  int init) {
+  const obs_t * obs_src,
+  const int init) {
 
   /* Data size... */
   const size_t s = (size_t) obs_src->nr * sizeof(double);
@@ -3011,7 +3011,7 @@ void copy_obs(
 /*****************************************************************************/
 
 int find_emitter(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   const char *emitter) {
 
   for (int ig = 0; ig < ctl->ng; ig++)
@@ -3073,9 +3073,9 @@ void formod(
 /*****************************************************************************/
 
 void formod_continua(
-  ctl_t * ctl,
-  los_t * los,
-  int ip,
+  const ctl_t * ctl,
+  const los_t * los,
+  const int ip,
   double *beta) {
 
   static int ig_co2 = -999, ig_h2o = -999;
@@ -3119,7 +3119,7 @@ void formod_continua(
 /*****************************************************************************/
 
 void formod_fov(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   obs_t * obs) {
 
   static double dz[NSHAPE], w[NSHAPE];
@@ -3481,9 +3481,9 @@ void formod_rfm(
 /*****************************************************************************/
 
 void formod_srcfunc(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  double t,
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  const double t,
   double *src) {
 
   /* Determine index in temperature array... */
@@ -3518,7 +3518,7 @@ void geo2cart(
 /*****************************************************************************/
 
 void hydrostatic(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm) {
 
   const double mmair = 28.96456e-3, mmh2o = 18.0153e-3;
@@ -3584,8 +3584,8 @@ void hydrostatic(
 /*****************************************************************************/
 
 void idx2name(
-  ctl_t * ctl,
-  int idx,
+  const ctl_t * ctl,
+  const int idx,
   char *quantity) {
 
   if (idx == IDXP)
@@ -3629,7 +3629,7 @@ void idx2name(
 /*****************************************************************************/
 
 void init_srcfunc(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   tbl_t * tbl) {
 
   char filename[2 * LEN];

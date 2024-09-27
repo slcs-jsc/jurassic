@@ -812,17 +812,17 @@ typedef struct {
 
 /*! Compose state vector or parameter vector. */
 size_t atm2x(
-  ctl_t * ctl,
-  atm_t * atm,
+  const ctl_t * ctl,
+  const atm_t * atm,
   gsl_vector * x,
   int *iqa,
   int *ipa);
 
 /*! Add element to state vector. */
 void atm2x_help(
-  double value,
-  int value_iqa,
-  int value_ip,
+  const double value,
+  const int value_iqa,
+  const int value_ip,
   gsl_vector * x,
   int *iqa,
   int *ipa,
@@ -837,7 +837,7 @@ void cart2geo(
 
 /*! Interpolate climatological data. */
 void climatology(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm_mean);
 
 /*! Compute carbon dioxide continuum (optical depth). */
@@ -869,21 +869,21 @@ double ctmo2(
 
 /*! Copy and initialize atmospheric data. */
 void copy_atm(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm_dest,
-  atm_t * atm_src,
-  int init);
+  const atm_t * atm_src,
+  const int init);
 
 /*! Copy and initialize observation data. */
 void copy_obs(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   obs_t * obs_dest,
-  obs_t * obs_src,
-  int init);
+  const obs_t * obs_src,
+  const int init);
 
 /*! Find index of an emitter. */
 int find_emitter(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   const char *emitter);
 
 /*! Determine ray paths and compute radiative transfer. */
@@ -894,14 +894,14 @@ void formod(
 
 /*! Compute absorption coefficient of continua. */
 void formod_continua(
-  ctl_t * ctl,
-  los_t * los,
-  int ip,
+  const ctl_t * ctl,
+  const los_t * los,
+  const int ip,
   double *beta);
 
 /*! Apply field of view convolution. */
 void formod_fov(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   obs_t * obs);
 
 /*! Compute radiative transfer for a pencil beam. */
@@ -919,9 +919,9 @@ void formod_rfm(
 
 /*! Compute Planck source function. */
 void formod_srcfunc(
-  ctl_t * ctl,
-  tbl_t * tbl,
-  double t,
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  const double t,
   double *src);
 
 /*! Convert geolocation to Cartesian coordinates. */
@@ -933,18 +933,18 @@ void geo2cart(
 
 /*! Set hydrostatic equilibrium. */
 void hydrostatic(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   atm_t * atm);
 
 /*! Determine name of state vector quantity for given index. */
 void idx2name(
-  ctl_t * ctl,
-  int idx,
+  const ctl_t * ctl,
+  const int idx,
   char *quantity);
 
 /*! Initialize source function table. */
 void init_srcfunc(
-  ctl_t * ctl,
+  const ctl_t * ctl,
   tbl_t * tbl);
 
 /*! Interpolate atmospheric data. */
