@@ -83,7 +83,7 @@ endif
 
 # Compile for coverage...
 ifeq ($(COV),1)
-  CFLAGS += -ftest-coverage -fprofile-arcs
+  CFLAGS += --coverage
 endif
 
 # Static compilation...
