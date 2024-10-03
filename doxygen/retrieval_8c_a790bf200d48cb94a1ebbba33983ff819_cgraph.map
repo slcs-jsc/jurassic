@@ -1,0 +1,6 @@
+<map id="analyze_avk" name="analyze_avk">
+<area shape="rect" id="node1" title="Compute information content and resolution." alt="" coords="5,56,99,83"/>
+<area shape="rect" id="node2" href="$retrieval_8c.html#ae003c3ae1198f815d74e2246b9320eaa" title="Analyze averaging kernels for individual retrieval target." alt="" coords="147,5,292,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1" title="Copy and initialize atmospheric data." alt="" coords="180,56,259,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a26be12322766162766071e8cd3587515" title="Write atmospheric data." alt="" coords="180,107,259,133"/>
+</map>

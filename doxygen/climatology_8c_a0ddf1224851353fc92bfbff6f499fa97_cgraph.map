@@ -1,0 +1,9 @@
+<map id="main" name="main">
+<area shape="rect" id="node1" title=" " alt="" coords="5,107,56,133"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#ae324329aa277798b632b25de13faf1b2" title="Interpolate climatological data." alt="" coords="104,31,191,57"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read forward model control parameters." alt="" coords="113,81,181,108"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#ace274e4068072c682e6070021525b515" title="Search control parameter file for variable entry." alt="" coords="248,107,319,133"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a26be12322766162766071e8cd3587515" title="Write atmospheric data." alt="" coords="108,183,187,209"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find index of an emitter." alt="" coords="239,5,328,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Find array index for regular grid." alt="" coords="242,56,325,83"/>
+</map>

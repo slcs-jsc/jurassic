@@ -1,0 +1,14 @@
+<map id="main" name="main">
+<area shape="rect" id="node1" title=" " alt="" coords="5,220,56,247"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f" title="Do ray&#45;tracing to determine LOS." alt="" coords="109,93,177,120"/>
+<area shape="rect" id="node8" href="$jurassic_8c.html#aa4a7b8ec913874ba418cfb4280fd3b84" title="Read atmospheric data." alt="" coords="105,144,181,171"/>
+<area shape="rect" id="node9" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read forward model control parameters." alt="" coords="109,195,177,221"/>
+<area shape="rect" id="node10" href="$jurassic_8c.html#ace274e4068072c682e6070021525b515" title="Search control parameter file for variable entry." alt="" coords="245,245,316,272"/>
+<area shape="rect" id="node11" href="$jurassic_8c.html#aa92ca8109106ef5912a265d7c882038d" title="Read observation data." alt="" coords="106,296,181,323"/>
+<area shape="rect" id="node12" href="$jurassic_8c.html#a26be12322766162766071e8cd3587515" title="Write atmospheric data." alt="" coords="104,347,183,373"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#aaf98f7230de0893b8dc4833d3c83c7a4" title="Convert Cartesian coordinates to geolocation." alt="" coords="380,5,452,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Convert geolocation to Cartesian coordinates." alt="" coords="380,68,452,95"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a82151ea4448e70f46f7f3b770bb77612" title="Interpolate atmospheric data." alt="" coords="239,144,322,171"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Find array index for irregular grid." alt="" coords="379,169,453,196"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a9020f32787ea7be08486d537a4f5c0fc" title="Find tangent point of a given LOS." alt="" coords="231,43,331,69"/>
+</map>
