@@ -127,8 +127,8 @@ clean:
 
 coverage:
 	lcov --capture --directory . --output-file=coverage.info ; \
-	genhtml coverage.info --legend --frames --output-directory=coverage
-	gcov -abcfu *.c
+	genhtml coverage.info --legend --frames --output-directory=coverage ; \
+	gcov -abcfu *.c || true
 
 cppcheck:
 	cppcheck --enable=all ./
