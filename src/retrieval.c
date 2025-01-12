@@ -255,12 +255,12 @@ int main(
 /*****************************************************************************/
 
 void analyze_avk(
-  ret_t * ret,
-  ctl_t * ctl,
-  atm_t * atm,
+  ret_t *ret,
+  ctl_t *ctl,
+  atm_t *atm,
   int *iqa,
   int *ipa,
-  gsl_matrix * avk) {
+  gsl_matrix *avk) {
 
   static atm_t atm_cont, atm_res;
 
@@ -316,7 +316,7 @@ void analyze_avk(
 /*****************************************************************************/
 
 void analyze_avk_quantity(
-  gsl_matrix * avk,
+  gsl_matrix *avk,
   int iq,
   int *ipa,
   size_t *n0,
@@ -340,10 +340,10 @@ void analyze_avk_quantity(
 /*****************************************************************************/
 
 double cost_function(
-  gsl_vector * dx,
-  gsl_vector * dy,
-  gsl_matrix * s_a_inv,
-  gsl_vector * sig_eps_inv) {
+  gsl_vector *dx,
+  gsl_vector *dy,
+  gsl_matrix *s_a_inv,
+  gsl_vector *sig_eps_inv) {
 
   gsl_vector *x_aux, *y_aux;
 
@@ -375,7 +375,7 @@ double cost_function(
 /*****************************************************************************/
 
 void matrix_invert(
-  gsl_matrix * a) {
+  gsl_matrix *a) {
 
   size_t diag = 1;
 
@@ -405,10 +405,10 @@ void matrix_invert(
 /*****************************************************************************/
 
 void matrix_product(
-  gsl_matrix * a,
-  gsl_vector * b,
+  gsl_matrix *a,
+  gsl_vector *b,
   int transpose,
-  gsl_matrix * c) {
+  gsl_matrix *c) {
 
   gsl_matrix *aux;
 
@@ -452,12 +452,12 @@ void matrix_product(
 /*****************************************************************************/
 
 void optimal_estimation(
-  ret_t * ret,
-  ctl_t * ctl,
-  obs_t * obs_meas,
-  obs_t * obs_i,
-  atm_t * atm_apr,
-  atm_t * atm_i) {
+  ret_t *ret,
+  ctl_t *ctl,
+  obs_t *obs_meas,
+  obs_t *obs_i,
+  atm_t *atm_apr,
+  atm_t *atm_i) {
 
   static int ipa[N], iqa[N];
 
@@ -765,8 +765,8 @@ void optimal_estimation(
 void read_ret(
   int argc,
   char *argv[],
-  ctl_t * ctl,
-  ret_t * ret) {
+  ctl_t *ctl,
+  ret_t *ret) {
 
   /* Iteration control... */
   ret->kernel_recomp =
@@ -818,12 +818,12 @@ void read_ret(
 /*****************************************************************************/
 
 void set_cov_apr(
-  ret_t * ret,
-  ctl_t * ctl,
-  atm_t * atm,
+  ret_t *ret,
+  ctl_t *ctl,
+  atm_t *atm,
   int *iqa,
   int *ipa,
-  gsl_matrix * s_a) {
+  gsl_matrix *s_a) {
 
   gsl_vector *x_a;
 
@@ -936,12 +936,12 @@ void set_cov_apr(
 /*****************************************************************************/
 
 void set_cov_meas(
-  ret_t * ret,
-  ctl_t * ctl,
-  obs_t * obs,
-  gsl_vector * sig_noise,
-  gsl_vector * sig_formod,
-  gsl_vector * sig_eps_inv) {
+  ret_t *ret,
+  ctl_t *ctl,
+  obs_t *obs,
+  gsl_vector *sig_noise,
+  gsl_vector *sig_formod,
+  gsl_vector *sig_eps_inv) {
 
   static obs_t obs_err;
 
@@ -981,10 +981,10 @@ void set_cov_meas(
 
 void write_stddev(
   const char *quantity,
-  ret_t * ret,
-  ctl_t * ctl,
-  atm_t * atm,
-  gsl_matrix * s) {
+  ret_t *ret,
+  ctl_t *ctl,
+  atm_t *atm,
+  gsl_matrix *s) {
 
   static atm_t atm_aux;
 

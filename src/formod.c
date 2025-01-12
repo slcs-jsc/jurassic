@@ -120,7 +120,7 @@ int main(
 /*****************************************************************************/
 
 void call_formod(
-  ctl_t * ctl,
+  ctl_t *ctl,
   const char *wrkdir,
   const char *obsfile,
   const char *atmfile,

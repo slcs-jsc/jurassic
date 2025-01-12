@@ -27,9 +27,9 @@
 /*****************************************************************************/
 
 size_t atm2x(
-  const ctl_t * ctl,
-  const atm_t * atm,
-  gsl_vector * x,
+  const ctl_t *ctl,
+  const atm_t *atm,
+  gsl_vector *x,
   int *iqa,
   int *ipa) {
 
@@ -88,7 +88,7 @@ void atm2x_help(
   const double value,
   const int value_iqa,
   const int value_ip,
-  gsl_vector * x,
+  gsl_vector *x,
   int *iqa,
   int *ipa,
   size_t *n) {
@@ -121,8 +121,8 @@ void cart2geo(
 /*****************************************************************************/
 
 void climatology(
-  const ctl_t * ctl,
-  atm_t * atm) {
+  const ctl_t *ctl,
+  atm_t *atm) {
 
   static double z[121] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -2919,9 +2919,9 @@ double ctmo2(
 /*****************************************************************************/
 
 void copy_atm(
-  const ctl_t * ctl,
-  atm_t * atm_dest,
-  const atm_t * atm_src,
+  const ctl_t *ctl,
+  atm_t *atm_dest,
+  const atm_t *atm_src,
   const int init) {
 
   /* Data size... */
@@ -2973,9 +2973,9 @@ void copy_atm(
 /*****************************************************************************/
 
 void copy_obs(
-  const ctl_t * ctl,
-  obs_t * obs_dest,
-  const obs_t * obs_src,
+  const ctl_t *ctl,
+  obs_t *obs_dest,
+  const obs_t *obs_src,
   const int init) {
 
   /* Data size... */
@@ -3011,7 +3011,7 @@ void copy_obs(
 /*****************************************************************************/
 
 int find_emitter(
-  const ctl_t * ctl,
+  const ctl_t *ctl,
   const char *emitter) {
 
   for (int ig = 0; ig < ctl->ng; ig++)
@@ -3024,9 +3024,9 @@ int find_emitter(
 /*****************************************************************************/
 
 void formod(
-  const ctl_t * ctl,
-  atm_t * atm,
-  obs_t * obs) {
+  const ctl_t *ctl,
+  atm_t *atm,
+  obs_t *obs) {
 
   int *mask;
 
@@ -3073,8 +3073,8 @@ void formod(
 /*****************************************************************************/
 
 void formod_continua(
-  const ctl_t * ctl,
-  const los_t * los,
+  const ctl_t *ctl,
+  const los_t *los,
   const int ip,
   double *beta) {
 
@@ -3119,8 +3119,8 @@ void formod_continua(
 /*****************************************************************************/
 
 void formod_fov(
-  const ctl_t * ctl,
-  obs_t * obs) {
+  const ctl_t *ctl,
+  obs_t *obs) {
 
   static double dz[NSHAPE], w[NSHAPE];
 
@@ -3194,9 +3194,9 @@ void formod_fov(
 /*****************************************************************************/
 
 void formod_pencil(
-  const ctl_t * ctl,
-  const atm_t * atm,
-  obs_t * obs,
+  const ctl_t *ctl,
+  const atm_t *atm,
+  obs_t *obs,
   const int ir) {
 
   static tbl_t *tbl;
@@ -3340,9 +3340,9 @@ void formod_pencil(
 /*****************************************************************************/
 
 void formod_rfm(
-  const ctl_t * ctl,
-  const atm_t * atm,
-  obs_t * obs) {
+  const ctl_t *ctl,
+  const atm_t *atm,
+  obs_t *obs) {
 
   los_t *los;
 
@@ -3481,8 +3481,8 @@ void formod_rfm(
 /*****************************************************************************/
 
 void formod_srcfunc(
-  const ctl_t * ctl,
-  const tbl_t * tbl,
+  const ctl_t *ctl,
+  const tbl_t *tbl,
   const double t,
   double *src) {
 
@@ -3518,8 +3518,8 @@ void geo2cart(
 /*****************************************************************************/
 
 void hydrostatic(
-  const ctl_t * ctl,
-  atm_t * atm) {
+  const ctl_t *ctl,
+  atm_t *atm) {
 
   const double mmair = 28.96456e-3, mmh2o = 18.0153e-3;
 
@@ -3584,7 +3584,7 @@ void hydrostatic(
 /*****************************************************************************/
 
 void idx2name(
-  const ctl_t * ctl,
+  const ctl_t *ctl,
   const int idx,
   char *quantity) {
 
@@ -3629,8 +3629,8 @@ void idx2name(
 /*****************************************************************************/
 
 void init_srcfunc(
-  const ctl_t * ctl,
-  tbl_t * tbl) {
+  const ctl_t *ctl,
+  tbl_t *tbl) {
 
   char filename[2 * LEN];
 
@@ -3683,8 +3683,8 @@ void init_srcfunc(
 /*****************************************************************************/
 
 void intpol_atm(
-  const ctl_t * ctl,
-  const atm_t * atm,
+  const ctl_t *ctl,
+  const atm_t *atm,
   const double z,
   double *p,
   double *t,
@@ -3708,9 +3708,9 @@ void intpol_atm(
 /*****************************************************************************/
 
 void intpol_tbl_cga(
-  const ctl_t * ctl,
-  const tbl_t * tbl,
-  const los_t * los,
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  const los_t *los,
   const int ip,
   double tau_path[ND][NG],
   double tau_seg[ND]) {
@@ -3797,9 +3797,9 @@ void intpol_tbl_cga(
 /*****************************************************************************/
 
 void intpol_tbl_ega(
-  const ctl_t * ctl,
-  const tbl_t * tbl,
-  const los_t * los,
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  const los_t *los,
   const int ip,
   double tau_path[ND][NG],
   double tau_seg[ND]) {
@@ -3892,7 +3892,7 @@ void intpol_tbl_ega(
 /*****************************************************************************/
 
 double intpol_tbl_eps(
-  const tbl_t * tbl,
+  const tbl_t *tbl,
   const int ig,
   const int id,
   const int ip,
@@ -3931,7 +3931,7 @@ double intpol_tbl_eps(
 /*****************************************************************************/
 
 double intpol_tbl_u(
-  const tbl_t * tbl,
+  const tbl_t *tbl,
   const int ig,
   const int id,
   const int ip,
@@ -4004,10 +4004,10 @@ void jsec2time(
 /*****************************************************************************/
 
 void kernel(
-  ctl_t * ctl,
-  atm_t * atm,
-  obs_t * obs,
-  gsl_matrix * k) {
+  ctl_t *ctl,
+  atm_t *atm,
+  obs_t *obs,
+  gsl_matrix *k) {
 
   atm_t *atm1;
   obs_t *obs1;
@@ -4176,9 +4176,9 @@ int locate_tbl(
 /*****************************************************************************/
 
 size_t obs2y(
-  const ctl_t * ctl,
-  const obs_t * obs,
-  gsl_vector * y,
+  const ctl_t *ctl,
+  const obs_t *obs,
+  gsl_vector *y,
   int *ida,
   int *ira) {
 
@@ -4203,10 +4203,10 @@ size_t obs2y(
 /*****************************************************************************/
 
 void raytrace(
-  const ctl_t * ctl,
-  const atm_t * atm,
-  obs_t * obs,
-  los_t * los,
+  const ctl_t *ctl,
+  const atm_t *atm,
+  obs_t *obs,
+  los_t *los,
   const int ir) {
 
   const double h = 0.02, zrefrac = 60;
@@ -4445,8 +4445,8 @@ void raytrace(
 void read_atm(
   const char *dirname,
   const char *filename,
-  const ctl_t * ctl,
-  atm_t * atm) {
+  const ctl_t *ctl,
+  atm_t *atm) {
 
   FILE *in;
 
@@ -4550,7 +4550,7 @@ void read_atm(
 void read_ctl(
   int argc,
   char *argv[],
-  ctl_t * ctl) {
+  ctl_t *ctl) {
 
   /* Write info... */
   LOG(1, "\nJuelich Rapid Spectral Simulation Code (JURASSIC)\n"
@@ -4660,7 +4660,7 @@ void read_ctl(
 void read_matrix(
   const char *dirname,
   const char *filename,
-  gsl_matrix * matrix) {
+  gsl_matrix *matrix) {
 
   FILE *in;
 
@@ -4700,8 +4700,8 @@ void read_matrix(
 void read_obs(
   const char *dirname,
   const char *filename,
-  const ctl_t * ctl,
-  obs_t * obs) {
+  const ctl_t *ctl,
+  obs_t *obs) {
 
   FILE *in;
 
@@ -4950,8 +4950,8 @@ void read_shape(
 /*****************************************************************************/
 
 void read_tbl(
-  const ctl_t * ctl,
-  tbl_t * tbl) {
+  const ctl_t *ctl,
+  tbl_t *tbl) {
 
   FILE *in;
 
@@ -5224,7 +5224,7 @@ double sza(
 /*****************************************************************************/
 
 void tangent_point(
-  const los_t * los,
+  const los_t *los,
   double *tpz,
   double *tplon,
   double *tplat) {
@@ -5339,8 +5339,8 @@ void timer(
 void write_atm(
   const char *dirname,
   const char *filename,
-  const ctl_t * ctl,
-  const atm_t * atm) {
+  const ctl_t *ctl,
+  const atm_t *atm) {
 
   FILE *out;
 
@@ -5456,8 +5456,8 @@ void write_atm(
 
 void write_atm_rfm(
   const char *filename,
-  const ctl_t * ctl,
-  const atm_t * atm) {
+  const ctl_t *ctl,
+  const atm_t *atm) {
 
   FILE *out;
 
@@ -5495,10 +5495,10 @@ void write_atm_rfm(
 void write_matrix(
   const char *dirname,
   const char *filename,
-  const ctl_t * ctl,
-  const gsl_matrix * matrix,
-  const atm_t * atm,
-  const obs_t * obs,
+  const ctl_t *ctl,
+  const gsl_matrix *matrix,
+  const atm_t *atm,
+  const obs_t *obs,
   const char *rowspace,
   const char *colspace,
   const char *sort) {
@@ -5673,8 +5673,8 @@ void write_matrix(
 void write_obs(
   const char *dirname,
   const char *filename,
-  const ctl_t * ctl,
-  const obs_t * obs) {
+  const ctl_t *ctl,
+  const obs_t *obs) {
 
   FILE *out;
 
@@ -5811,8 +5811,8 @@ void write_shape(
 /*****************************************************************************/
 
 void write_tbl(
-  const ctl_t * ctl,
-  const tbl_t * tbl) {
+  const ctl_t *ctl,
+  const tbl_t *tbl) {
 
   FILE *out;
 
@@ -5897,9 +5897,9 @@ void write_tbl(
 /*****************************************************************************/
 
 void x2atm(
-  const ctl_t * ctl,
-  const gsl_vector * x,
-  atm_t * atm) {
+  const ctl_t *ctl,
+  const gsl_vector *x,
+  atm_t *atm) {
 
   size_t n = 0;
 
@@ -5952,7 +5952,7 @@ void x2atm(
 
 void x2atm_help(
   double *value,
-  const gsl_vector * x,
+  const gsl_vector *x,
   size_t *n) {
 
   /* Get state vector element... */
@@ -5963,9 +5963,9 @@ void x2atm_help(
 /*****************************************************************************/
 
 void y2obs(
-  const ctl_t * ctl,
-  const gsl_vector * y,
-  obs_t * obs) {
+  const ctl_t *ctl,
+  const gsl_vector *y,
+  obs_t *obs) {
 
   size_t m = 0;
 
