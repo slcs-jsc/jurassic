@@ -35,13 +35,13 @@ int main(
     ERRMSG("Give parameters: <year> <mon> <day> <hour> <min> <sec> <remain>");
 
   /* Read arguments... */
-  int year = atoi(argv[1]);
-  int mon = atoi(argv[2]);
-  int day = atoi(argv[3]);
-  int hour = atoi(argv[4]);
-  int min = atoi(argv[5]);
-  int sec = atoi(argv[6]);
-  double remain = atof(argv[7]);
+  const int year = atoi(argv[1]);
+  const int mon = atoi(argv[2]);
+  const int day = atoi(argv[3]);
+  const int hour = atoi(argv[4]);
+  const int min = atoi(argv[5]);
+  const int sec = atoi(argv[6]);
+  const double remain = atof(argv[7]);
 
   /* Convert... */
   time2jsec(year, mon, day, hour, min, sec, remain, &jsec);

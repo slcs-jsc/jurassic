@@ -39,19 +39,19 @@ int main(
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
-  double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
-  double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
-  double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
-  double z0 = scan_ctl(argc, argv, "Z0", -1, "0", NULL);
-  double z1 = scan_ctl(argc, argv, "Z1", -1, "90", NULL);
-  double dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
-  double clz = scan_ctl(argc, argv, "CLZ", -1, "0", NULL);
-  double cldz = scan_ctl(argc, argv, "CLDZ", -1, "0", NULL);
+  const double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
+  const double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
+  const double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
+  const double z0 = scan_ctl(argc, argv, "Z0", -1, "0", NULL);
+  const double z1 = scan_ctl(argc, argv, "Z1", -1, "90", NULL);
+  const double dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
+  const double clz = scan_ctl(argc, argv, "CLZ", -1, "0", NULL);
+  const double cldz = scan_ctl(argc, argv, "CLDZ", -1, "0", NULL);
   for (int icl = 0; icl < ctl.ncl; icl++)
     clk[icl] = scan_ctl(argc, argv, "CLK", icl, "0", NULL);
-  double sfz = scan_ctl(argc, argv, "SFZ", -1, "0", NULL);
-  double sfp = scan_ctl(argc, argv, "SFP", -1, "0", NULL);
-  double sft = scan_ctl(argc, argv, "SFT", -1, "0", NULL);
+  const double sfz = scan_ctl(argc, argv, "SFZ", -1, "0", NULL);
+  const double sfp = scan_ctl(argc, argv, "SFP", -1, "0", NULL);
+  const double sft = scan_ctl(argc, argv, "SFT", -1, "0", NULL);
   for (int isf = 0; isf < ctl.nsf; isf++)
     sfeps[isf] = scan_ctl(argc, argv, "SFEPS", isf, "1", NULL);
 

@@ -50,9 +50,9 @@ int main(
   static char line[MAXLINE];
 
   static double dnu, abs[MAXNPTS], epsold, f, filt[MAXNF],
-    nu, nu0, nu1, nuf[MAXNF], press, r0, temp, u;
+    nu, nu0, nu1, nuf[MAXNF], press, temp, u;
 
-  static int i, i0, idx, nf, npts;
+  static int i, idx, nf, npts;
 
   /* Read command line arguments... */
   if (argc != 5)
@@ -104,8 +104,8 @@ int main(
 
   /* Set grid spacing... */
   dnu = (nu1 - nu0) / ((double) npts - 1.0);
-  r0 = (nuf[0] - nu0) / (nu1 - nu0) * (double) npts;
-  i0 = (int) r0;
+  const double r0 = (nuf[0] - nu0) / (nu1 - nu0) * (double) npts;
+  const int i0 = (int) r0;
 
   /* Loop over column densities... */
   for (u = 1.0; u <= 1e30; u *= 1.122) {

@@ -32,8 +32,6 @@ int main(
   static ctl_t ctl;
   static obs_t obs;
 
-  gsl_matrix *k;
-
   /* Check arguments... */
   if (argc < 5)
     ERRMSG("Give parameters: <ctl> <obs> <atm> <kernel>");
@@ -51,8 +49,8 @@ int main(
   read_atm(NULL, argv[3], &ctl, &atm);
 
   /* Get sizes... */
-  size_t n = atm2x(&ctl, &atm, NULL, NULL, NULL);
-  size_t m = obs2y(&ctl, &obs, NULL, NULL, NULL);
+  const size_t n = atm2x(&ctl, &atm, NULL, NULL, NULL);
+  const size_t m = obs2y(&ctl, &obs, NULL, NULL, NULL);
 
   /* Check sizes... */
   if (n == 0)
@@ -61,7 +59,7 @@ int main(
     ERRMSG("No measurement vector elements!");
 
   /* Allocate... */
-  k = gsl_matrix_alloc(m, n);
+  gsl_matrix *k = gsl_matrix_alloc(m, n);
 
   /* Compute kernel matrix... */
   kernel(&ctl, &atm, &obs, k);

@@ -56,12 +56,13 @@ int main(
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
-  int type = (int) scan_ctl(argc, argv, "FILTER_TYPE", -1, "1", NULL);
-  double opd = scan_ctl(argc, argv, "FILTER_OPD", -1, "10.0", NULL);
-  double fwhm = scan_ctl(argc, argv, "FILTER_FWHM", -1, "1.0", NULL);
-  double center = scan_ctl(argc, argv, "FILTER_CENTER", -1, "1000.0", NULL);
-  double width = scan_ctl(argc, argv, "FILTER_WIDTH", -1, "2.1", NULL);
-  double samp = scan_ctl(argc, argv, "FILTER_SAMP", -1, "0.0005", NULL);
+  const int type = (int) scan_ctl(argc, argv, "FILTER_TYPE", -1, "1", NULL);
+  const double opd = scan_ctl(argc, argv, "FILTER_OPD", -1, "10.0", NULL);
+  const double fwhm = scan_ctl(argc, argv, "FILTER_FWHM", -1, "1.0", NULL);
+  const double center =
+    scan_ctl(argc, argv, "FILTER_CENTER", -1, "1000.0", NULL);
+  const double width = scan_ctl(argc, argv, "FILTER_WIDTH", -1, "2.1", NULL);
+  const double samp = scan_ctl(argc, argv, "FILTER_SAMP", -1, "0.0005", NULL);
 
   /* Compute filter function... */
   for (double nu = center - 0.5 * width;

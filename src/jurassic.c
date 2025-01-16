@@ -844,7 +844,7 @@ void climatology(
   for (int ip = 0; ip < atm->np; ip++) {
 
     /* Get altitude index... */
-    int iz = locate_reg(z, 121, atm->z[ip]);
+    const int iz = locate_reg(z, 121, atm->z[ip]);
 
     /* Interpolate pressure... */
     atm->p[ip] = LOGY(z[iz], pre[iz], z[iz + 1], pre[iz + 1], atm->z[ip]);
@@ -3171,8 +3171,8 @@ void formod_fov(
       obs->tau[id][ir] = 0;
     }
     for (int i = 0; i < n; i++) {
-      double zfov = obs->vpz[ir] + dz[i];
-      int idx = locate_irr(z, nz, zfov);
+      const double zfov = obs->vpz[ir] + dz[i];
+      const int idx = locate_irr(z, nz, zfov);
       for (int id = 0; id < ctl->nd; id++) {
 	obs->rad[id][ir] += w[i]
 	  * LIN(z[idx], rad[id][idx], z[idx + 1], rad[id][idx + 1], zfov);
@@ -3664,8 +3664,8 @@ void init_srcfunc(
       /* Integrate Planck function... */
       double fsum = tbl->sr[it][id] = 0;
       for (double fnu = nu[0]; fnu <= nu[n - 1]; fnu += dnu) {
-	int i = locate_irr(nu, n, fnu);
-	double ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
+	const int i = locate_irr(nu, n, fnu);
+	const double ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
 	fsum += ff;
 	tbl->sr[it][id] += ff * PLANCK(tbl->st[it], fnu);
       }
@@ -3738,11 +3738,11 @@ void intpol_tbl_cga(
       else {
 
 	/* Determine pressure and temperature indices... */
-	int ipr = locate_irr(tbl->p[id][ig], tbl->np[id][ig],
-			     los->cgp[ip][ig]);
-	int it0 = locate_reg(tbl->t[id][ig][ipr], tbl->nt[id][ig][ipr],
-			     los->cgt[ip][ig]);
-	int it1 =
+	const int ipr =
+	  locate_irr(tbl->p[id][ig], tbl->np[id][ig], los->cgp[ip][ig]);
+	const int it0 = locate_reg(tbl->t[id][ig][ipr], tbl->nt[id][ig][ipr],
+				   los->cgt[ip][ig]);
+	const int it1 =
 	  locate_reg(tbl->t[id][ig][ipr + 1], tbl->nt[id][ig][ipr + 1],
 		     los->cgt[ip][ig]);
 
@@ -3827,10 +3827,11 @@ void intpol_tbl_ega(
       else {
 
 	/* Determine pressure and temperature indices... */
-	int ipr = locate_irr(tbl->p[id][ig], tbl->np[id][ig], los->p[ip]);
-	int it0 =
+	const int ipr =
+	  locate_irr(tbl->p[id][ig], tbl->np[id][ig], los->p[ip]);
+	const int it0 =
 	  locate_reg(tbl->t[id][ig][ipr], tbl->nt[id][ig][ipr], los->t[ip]);
-	int it1 =
+	const int it1 =
 	  locate_reg(tbl->t[id][ig][ipr + 1], tbl->nt[id][ig][ipr + 1],
 		     los->t[ip]);
 
@@ -3906,11 +3907,9 @@ double intpol_tbl_eps(
 
   /* Upper boundary... */
   else if (u > tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1]) {
-    double a =
-      log(1 -
-	  tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] -
-				   1]) /
-      tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1];
+    const double a =
+      log(1 - tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
+      / tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1];
     return 1 - exp(a * u);
   }
 
@@ -3918,7 +3917,8 @@ double intpol_tbl_eps(
   else {
 
     /* Get index... */
-    int idx = locate_tbl(tbl->u[id][ig][ip][it], tbl->nu[id][ig][ip][it], u);
+    const int idx =
+      locate_tbl(tbl->u[id][ig][ip][it], tbl->nu[id][ig][ip][it], u);
 
     /* Interpolate... */
     return
@@ -3945,11 +3945,9 @@ double intpol_tbl_u(
 
   /* Upper boundary... */
   else if (eps > tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1]) {
-    double a =
-      log(1 -
-	  tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] -
-				   1]) /
-      tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1];
+    const double a =
+      log(1 - tbl->eps[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1])
+      / tbl->u[id][ig][ip][it][tbl->nu[id][ig][ip][it] - 1];
     return log(1 - eps) / a;
   }
 
@@ -3957,8 +3955,8 @@ double intpol_tbl_u(
   else {
 
     /* Get index... */
-    int idx
-      = locate_tbl(tbl->eps[id][ig][ip][it], tbl->nu[id][ig][ip][it], eps);
+    const int idx =
+      locate_tbl(tbl->eps[id][ig][ip][it], tbl->nu[id][ig][ip][it], eps);
 
     /* Interpolate... */
     return
@@ -4012,8 +4010,6 @@ void kernel(
   atm_t *atm1;
   obs_t *obs1;
 
-  gsl_vector *x0, *x1, *yy0, *yy1;
-
   int *iqa;
 
   /* Get sizes... */
@@ -4021,8 +4017,8 @@ void kernel(
   const size_t n = k->size2;
 
   /* Allocate... */
-  x0 = gsl_vector_alloc(n);
-  yy0 = gsl_vector_alloc(m);
+  gsl_vector *x0 = gsl_vector_alloc(n);
+  gsl_vector *yy0 = gsl_vector_alloc(m);
   ALLOC(iqa, int,
 	N);
 
@@ -4037,12 +4033,12 @@ void kernel(
   gsl_matrix_set_zero(k);
 
   /* Loop over state vector elements... */
-#pragma omp parallel for default(none) shared(ctl,atm,obs,k,x0,yy0,n,m,iqa) private(x1, yy1, atm1, obs1)
+#pragma omp parallel for default(none) shared(ctl,atm,obs,k,x0,yy0,n,m,iqa) private(atm1, obs1)
   for (size_t j = 0; j < n; j++) {
 
     /* Allocate... */
-    x1 = gsl_vector_alloc(n);
-    yy1 = gsl_vector_alloc(m);
+    gsl_vector *x1 = gsl_vector_alloc(n);
+    gsl_vector *yy1 = gsl_vector_alloc(m);
     ALLOC(atm1, atm_t, 1);
     ALLOC(obs1, obs_t, 1);
 
@@ -4228,9 +4224,10 @@ void raytrace(
   if (ctl->nsf > 0) {
     zmin = MAX(atm->sfz, zmin);
     if (atm->sfp > 0) {
-      int ip = locate_irr(atm->p, atm->np, atm->sfp);
-      double zip = LIN(log(atm->p[ip]), atm->z[ip],
-		       log(atm->p[ip + 1]), atm->z[ip + 1], log(atm->sfp));
+      const int ip = locate_irr(atm->p, atm->np, atm->sfp);
+      const double zip =
+	LIN(log(atm->p[ip]), atm->z[ip], log(atm->p[ip + 1]), atm->z[ip + 1],
+	    log(atm->sfp));
       zmin = MAX(zip, zmin);
     }
   }
@@ -4840,7 +4837,7 @@ double read_obs_rfm(
   /* Convolute... */
   for (int ipts = 0; ipts < npts; ipts++)
     if (nurfm[ipts] >= nu2[0] && nurfm[ipts] <= nu2[n - 1]) {
-      int idx = locate_irr(nu2, n, nurfm[ipts]);
+      const int idx = locate_irr(nu2, n, nurfm[ipts]);
       filt = LIN(nu2[idx], f[idx], nu2[idx + 1], f[idx + 1], nurfm[ipts]);
       fsum += filt;
       radsum += filt * rad[ipts];
@@ -5232,7 +5229,7 @@ void tangent_point(
   double dummy, v[3], v0[3], v2[3];
 
   /* Find minimum altitude... */
-  size_t ip = gsl_stats_min_index(los->z, 1, (size_t) los->np);
+  const size_t ip = gsl_stats_min_index(los->z, 1, (size_t) los->np);
 
   /* Nadir or zenith... */
   if (ip <= 0 || ip >= (size_t) los->np - 1) {
@@ -5245,17 +5242,17 @@ void tangent_point(
   else {
 
     /* Determine interpolating polynomial y=a*x^2+b*x+c... */
-    double yy0 = los->z[ip - 1];
-    double yy1 = los->z[ip];
-    double yy2 = los->z[ip + 1];
-    double x1 = sqrt(POW2(los->ds[ip]) - POW2(yy1 - yy0));
-    double x2 = x1 + sqrt(POW2(los->ds[ip + 1]) - POW2(yy2 - yy1));
-    double a = 1 / (x1 - x2) * (-(yy0 - yy1) / x1 + (yy0 - yy2) / x2);
-    double b = -(yy0 - yy1) / x1 - a * x1;
-    double c = yy0;
+    const double yy0 = los->z[ip - 1];
+    const double yy1 = los->z[ip];
+    const double yy2 = los->z[ip + 1];
+    const double x1 = sqrt(POW2(los->ds[ip]) - POW2(yy1 - yy0));
+    const double x2 = x1 + sqrt(POW2(los->ds[ip + 1]) - POW2(yy2 - yy1));
+    const double a = 1 / (x1 - x2) * (-(yy0 - yy1) / x1 + (yy0 - yy2) / x2);
+    const double b = -(yy0 - yy1) / x1 - a * x1;
+    const double c = yy0;
 
     /* Get tangent point location... */
-    double x = -b / (2 * a);
+    const double x = -b / (2 * a);
     *tpz = a * x * x + b * x + c;
     geo2cart(los->z[ip - 1], los->lon[ip - 1], los->lat[ip - 1], v0);
     geo2cart(los->z[ip + 1], los->lon[ip + 1], los->lat[ip + 1], v2);

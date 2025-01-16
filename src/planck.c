@@ -37,8 +37,8 @@ int main(
   if (argc == 3) {
 
     /* Read arguments... */
-    double t = atof(argv[1]);
-    double nu = atof(argv[2]);
+    const double t = atof(argv[1]);
+    const double nu = atof(argv[2]);
 
     /* Compute Planck function... */
     printf("%.10g\n", PLANCK(t, nu));
@@ -48,12 +48,12 @@ int main(
   else if (argc == 7) {
 
     /* Read arguments... */
-    double t0 = atof(argv[1]);
-    double t1 = atof(argv[2]);
-    double dt = atof(argv[3]);
-    double nu0 = atof(argv[4]);
-    double nu1 = atof(argv[5]);
-    double dnu = atof(argv[6]);
+    const double t0 = atof(argv[1]);
+    const double t1 = atof(argv[2]);
+    const double dt = atof(argv[3]);
+    const double nu0 = atof(argv[4]);
+    const double nu1 = atof(argv[5]);
+    const double dnu = atof(argv[6]);
 
     /* Write header... */
     printf("# $1 = brightness temperature [K]\n"

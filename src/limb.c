@@ -37,13 +37,13 @@ int main(
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
-  double obsz = scan_ctl(argc, argv, "OBSZ", -1, "780", NULL);
-  double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
-  double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
-  double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
-  double z0 = scan_ctl(argc, argv, "Z0", -1, "3", NULL);
-  double z1 = scan_ctl(argc, argv, "Z1", -1, "68", NULL);
-  double dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
+  const double obsz = scan_ctl(argc, argv, "OBSZ", -1, "780", NULL);
+  const double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
+  const double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
+  const double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
+  const double z0 = scan_ctl(argc, argv, "Z0", -1, "3", NULL);
+  const double z1 = scan_ctl(argc, argv, "Z1", -1, "68", NULL);
+  const double dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
 
   /* Create measurement geometry... */
   for (double t = t0; t <= t1; t += dt)

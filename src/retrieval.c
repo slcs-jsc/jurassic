@@ -264,15 +264,13 @@ void analyze_avk(
 
   static atm_t atm_cont, atm_res;
 
-  int icl, ig, iq, isf, iw;
-
-  size_t i, n, n0[NQ], n1[NQ];
+  size_t i, n0[NQ], n1[NQ];
 
   /* Get sizes... */
-  n = avk->size1;
+  const size_t n = avk->size1;
 
   /* Find sub-matrices for different quantities... */
-  for (iq = 0; iq < NQ; iq++) {
+  for (int iq = 0; iq < NQ; iq++) {
     n0[iq] = N;
     for (i = 0; i < n; i++) {
       if (iqa[i] == iq && n0[iq] == N)
@@ -289,22 +287,22 @@ void analyze_avk(
   /* Analyze quantities... */
   analyze_avk_quantity(avk, IDXP, ipa, n0, n1, atm_cont.p, atm_res.p);
   analyze_avk_quantity(avk, IDXT, ipa, n0, n1, atm_cont.t, atm_res.t);
-  for (ig = 0; ig < ctl->ng; ig++)
+  for (int ig = 0; ig < ctl->ng; ig++)
     analyze_avk_quantity(avk, IDXQ(ig), ipa, n0, n1,
 			 atm_cont.q[ig], atm_res.q[ig]);
-  for (iw = 0; iw < ctl->nw; iw++)
+  for (int iw = 0; iw < ctl->nw; iw++)
     analyze_avk_quantity(avk, IDXK(iw), ipa, n0, n1,
 			 atm_cont.k[iw], atm_res.k[iw]);
   analyze_avk_quantity(avk, IDXCLZ, ipa, n0, n1, &atm_cont.clz, &atm_res.clz);
   analyze_avk_quantity(avk, IDXCLDZ, ipa, n0, n1, &atm_cont.cldz,
 		       &atm_res.cldz);
-  for (icl = 0; icl < ctl->ncl; icl++)
+  for (int icl = 0; icl < ctl->ncl; icl++)
     analyze_avk_quantity(avk, IDXCLK(icl), ipa, n0, n1,
 			 &atm_cont.clk[icl], &atm_res.clk[icl]);
   analyze_avk_quantity(avk, IDXSFZ, ipa, n0, n1, &atm_cont.sfz, &atm_res.sfz);
   analyze_avk_quantity(avk, IDXSFP, ipa, n0, n1, &atm_cont.sfp, &atm_res.sfp);
   analyze_avk_quantity(avk, IDXSFT, ipa, n0, n1, &atm_cont.sft, &atm_res.sft);
-  for (isf = 0; isf < ctl->nsf; isf++)
+  for (int isf = 0; isf < ctl->nsf; isf++)
     analyze_avk_quantity(avk, IDXSFEPS(isf), ipa, n0, n1,
 			 &atm_cont.sfeps[isf], &atm_res.sfeps[isf]);
 
@@ -345,17 +343,15 @@ double cost_function(
   gsl_matrix *s_a_inv,
   gsl_vector *sig_eps_inv) {
 
-  gsl_vector *x_aux, *y_aux;
-
   double chisq_a, chisq_m = 0;
 
   /* Get sizes... */
-  size_t m = dy->size;
-  size_t n = dx->size;
+  const size_t m = dy->size;
+  const size_t n = dx->size;
 
   /* Allocate... */
-  x_aux = gsl_vector_alloc(n);
-  y_aux = gsl_vector_alloc(m);
+  gsl_vector *x_aux = gsl_vector_alloc(n);
+  gsl_vector *y_aux = gsl_vector_alloc(m);
 
   /* Determine normalized cost function...
      (chi^2 = 1/m * [dy^T * S_eps^{-1} * dy + dx^T * S_a^{-1} * dx]) */
@@ -380,7 +376,7 @@ void matrix_invert(
   size_t diag = 1;
 
   /* Get size... */
-  size_t n = a->size1;
+  const size_t n = a->size1;
 
   /* Check if matrix is diagonal... */
   for (size_t i = 0; i < n && diag; i++)
@@ -410,14 +406,12 @@ void matrix_product(
   int transpose,
   gsl_matrix *c) {
 
-  gsl_matrix *aux;
-
   /* Set sizes... */
-  size_t m = a->size1;
-  size_t n = a->size2;
+  const size_t m = a->size1;
+  const size_t n = a->size2;
 
   /* Allocate... */
-  aux = gsl_matrix_alloc(m, n);
+  gsl_matrix *aux = gsl_matrix_alloc(m, n);
 
   /* Compute A^T B A... */
   if (transpose == 1) {
@@ -461,27 +455,21 @@ void optimal_estimation(
 
   static int ipa[N], iqa[N];
 
-  gsl_matrix *a, *auxnm, *corr, *cov, *gain, *k_i, *s_a_inv;
-  gsl_vector *b, *dx, *dy, *sig_eps_inv, *sig_formod, *sig_noise,
-    *x_a, *x_i, *x_step, *y_aux, *y_i, *y_m;
-
   FILE *out;
 
   char filename[2 * LEN];
 
   double chisq, disq = 0, lmpar = 0.001;
 
-  int icl, ig, ip, isf, it = 0, it2, iw;
-
-  size_t i, m, n;
+  int it = 0;
 
   /* ------------------------------------------------------------
      Initialize...
      ------------------------------------------------------------ */
 
   /* Get sizes... */
-  m = obs2y(ctl, obs_meas, NULL, NULL, NULL);
-  n = atm2x(ctl, atm_apr, NULL, iqa, ipa);
+  const size_t m = obs2y(ctl, obs_meas, NULL, NULL, NULL);
+  const size_t n = atm2x(ctl, atm_apr, NULL, iqa, ipa);
   if (m == 0 || n == 0)
     ERRMSG("Check problem definition!");
 
@@ -495,23 +483,23 @@ void optimal_estimation(
 		+ 2 * N * sizeof(int)) / 1024. / 1024.);
 
   /* Allocate... */
-  a = gsl_matrix_alloc(n, n);
-  cov = gsl_matrix_alloc(n, n);
-  k_i = gsl_matrix_alloc(m, n);
-  s_a_inv = gsl_matrix_alloc(n, n);
+  gsl_matrix *a = gsl_matrix_alloc(n, n);
+  gsl_matrix *cov = gsl_matrix_alloc(n, n);
+  gsl_matrix *k_i = gsl_matrix_alloc(m, n);
+  gsl_matrix *s_a_inv = gsl_matrix_alloc(n, n);
 
-  b = gsl_vector_alloc(n);
-  dx = gsl_vector_alloc(n);
-  dy = gsl_vector_alloc(m);
-  sig_eps_inv = gsl_vector_alloc(m);
-  sig_formod = gsl_vector_alloc(m);
-  sig_noise = gsl_vector_alloc(m);
-  x_a = gsl_vector_alloc(n);
-  x_i = gsl_vector_alloc(n);
-  x_step = gsl_vector_alloc(n);
-  y_aux = gsl_vector_alloc(m);
-  y_i = gsl_vector_alloc(m);
-  y_m = gsl_vector_alloc(m);
+  gsl_vector *b = gsl_vector_alloc(n);
+  gsl_vector *dx = gsl_vector_alloc(n);
+  gsl_vector *dy = gsl_vector_alloc(m);
+  gsl_vector *sig_eps_inv = gsl_vector_alloc(m);
+  gsl_vector *sig_formod = gsl_vector_alloc(m);
+  gsl_vector *sig_noise = gsl_vector_alloc(m);
+  gsl_vector *x_a = gsl_vector_alloc(n);
+  gsl_vector *x_i = gsl_vector_alloc(n);
+  gsl_vector *x_step = gsl_vector_alloc(n);
+  gsl_vector *y_aux = gsl_vector_alloc(m);
+  gsl_vector *y_i = gsl_vector_alloc(m);
+  gsl_vector *y_m = gsl_vector_alloc(m);
 
   /* Set initial state... */
   copy_atm(ctl, atm_i, atm_apr, 0);
@@ -582,14 +570,14 @@ void optimal_estimation(
       matrix_product(k_i, sig_eps_inv, 1, cov);
 
     /* Determine b = K_i^T * S_eps^{-1} * dy - S_a^{-1} * dx ... */
-    for (i = 0; i < m; i++)
+    for (size_t i = 0; i < m; i++)
       gsl_vector_set(y_aux, i, gsl_vector_get(dy, i)
 		     * POW2(gsl_vector_get(sig_eps_inv, i)));
     gsl_blas_dgemv(CblasTrans, 1.0, k_i, y_aux, 0.0, b);
     gsl_blas_dgemv(CblasNoTrans, -1.0, s_a_inv, dx, 1.0, b);
 
     /* Inner loop... */
-    for (it2 = 0; it2 < 20; it2++) {
+    for (int it2 = 0; it2 < 20; it2++) {
 
       /* Compute A = (1 + lmpar) * S_a^{-1} + K_i^T * S_eps^{-1} * K_i ... */
       gsl_matrix_memcpy(a, s_a_inv);
@@ -607,22 +595,22 @@ void optimal_estimation(
       x2atm(ctl, x_i, atm_i);
 
       /* Check atmospheric state... */
-      for (ip = 0; ip < atm_i->np; ip++) {
+      for (int ip = 0; ip < atm_i->np; ip++) {
 	atm_i->p[ip] = MIN(MAX(atm_i->p[ip], 5e-7), 5e4);
 	atm_i->t[ip] = MIN(MAX(atm_i->t[ip], 100), 400);
-	for (ig = 0; ig < ctl->ng; ig++)
+	for (int ig = 0; ig < ctl->ng; ig++)
 	  atm_i->q[ig][ip] = MIN(MAX(atm_i->q[ig][ip], 0), 1);
-	for (iw = 0; iw < ctl->nw; iw++)
+	for (int iw = 0; iw < ctl->nw; iw++)
 	  atm_i->k[iw][ip] = MAX(atm_i->k[iw][ip], 0);
       }
       atm_i->clz = MAX(atm_i->clz, 0);
       atm_i->cldz = MAX(atm_i->cldz, 0.1);
-      for (icl = 0; icl < ctl->ncl; icl++)
+      for (int icl = 0; icl < ctl->ncl; icl++)
 	atm_i->clk[icl] = MAX(atm_i->clk[icl], 0);
       atm_i->sfz = MAX(atm_i->sfz, 0);
       atm_i->sfp = MAX(atm_i->sfp, 0);
       atm_i->sft = MIN(MAX(atm_i->sft, 100), 400);
-      for (isf = 0; isf < ctl->nsf; isf++)
+      for (int isf = 0; isf < ctl->nsf; isf++)
 	atm_i->sfeps[isf] = MIN(MAX(atm_i->sfeps[isf], 0), 1);
 
       /* Forward calculation... */
@@ -680,9 +668,9 @@ void optimal_estimation(
   if (ret->err_ana) {
 
     /* Allocate... */
-    auxnm = gsl_matrix_alloc(n, m);
-    corr = gsl_matrix_alloc(n, n);
-    gain = gsl_matrix_alloc(n, m);
+    gsl_matrix *auxnm = gsl_matrix_alloc(n, m);
+    gsl_matrix *corr = gsl_matrix_alloc(n, n);
+    gsl_matrix *gain = gsl_matrix_alloc(n, m);
 
     /* Compute inverse retrieval covariance...
        cov^{-1} = S_a^{-1} + K_i^T * S_eps^{-1} * K_i */
@@ -696,7 +684,7 @@ void optimal_estimation(
     write_stddev("total", ret, ctl, atm_i, cov);
 
     /* Compute correlation matrix... */
-    for (i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
       for (size_t j = 0; j < n; j++)
 	gsl_matrix_set(corr, i, j, gsl_matrix_get(cov, i, j)
 		       / sqrt(gsl_matrix_get(cov, i, i))
@@ -706,7 +694,7 @@ void optimal_estimation(
 
     /* Compute gain matrix...
        G = cov * K^T * S_eps^{-1} */
-    for (i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
       for (size_t j = 0; j < m; j++)
 	gsl_matrix_set(auxnm, i, j, gsl_matrix_get(k_i, j, i)
 		       * POW2(gsl_vector_get(sig_eps_inv, j)));
@@ -825,15 +813,13 @@ void set_cov_apr(
   int *ipa,
   gsl_matrix *s_a) {
 
-  gsl_vector *x_a;
-
   double x0[3], x1[3];
 
   /* Get sizes... */
-  size_t n = s_a->size1;
+  const size_t n = s_a->size1;
 
   /* Allocate... */
-  x_a = gsl_vector_alloc(n);
+  gsl_vector *x_a = gsl_vector_alloc(n);
 
   /* Get sigma vector... */
   atm2x(ctl, atm, x_a, NULL, NULL);
@@ -946,7 +932,7 @@ void set_cov_meas(
   static obs_t obs_err;
 
   /* Get size... */
-  size_t m = sig_eps_inv->size;
+  const size_t m = sig_eps_inv->size;
 
   /* Noise error (always considered in retrieval fit)... */
   copy_obs(ctl, &obs_err, obs, 1);
@@ -988,15 +974,13 @@ void write_stddev(
 
   static atm_t atm_aux;
 
-  gsl_vector *x_aux;
-
   char filename[LEN];
 
   /* Get sizes... */
-  size_t n = s->size1;
+  const size_t n = s->size1;
 
   /* Allocate... */
-  x_aux = gsl_vector_alloc(n);
+  gsl_vector *x_aux = gsl_vector_alloc(n);
 
   /* Compute standard deviation... */
   for (size_t i = 0; i < n; i++)

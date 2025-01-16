@@ -37,7 +37,7 @@ int main(
     ERRMSG("Give parameters: <jsec>");
 
   /* Read arguments... */
-  double jsec = atof(argv[1]);
+  const double jsec = atof(argv[1]);
 
   /* Convert time... */
   jsec2time(jsec, &year, &mon, &day, &hour, &min, &sec, &remain);

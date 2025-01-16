@@ -49,8 +49,6 @@ int main(
 
   static obs_t obs;
 
-  static gsl_matrix *k;
-
   static FILE *in, *out;
 
   static char line[LEN];
@@ -58,14 +56,12 @@ int main(
   static double rtime[NLMAX], rz[NLMAX], rlon[NLMAX], rlat[NLMAX], obs_meas,
     obs_sim, scl = 1.0, scl_err, c0, c1, cov00, cov01, cov11, sumsq,
     x[NMAX], x2[NMAX], y[NMAX], y_err[NMAX], y2[NMAX], y2_err[NMAX],
-    y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX], dt, tol, obs_err;
+    y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX];
 
   static float rp[NLMAX], rt[NLMAX], rso2[NLMAX], rh2o[NLMAX],
     ro3[NLMAX], robs[NLMAX];
 
-  static int data, fit, i, ig, il, ip, it, itmax, n, nl, ndata[NMAX], nprof;
-
-  static size_t mk, nk;
+  static int i, ig, n, nl, ndata[NMAX], nprof;
 
   /* Check arguments... */
   if (argc < 6)
@@ -73,12 +69,14 @@ int main(
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
-  dt = scan_ctl(argc, argv, "INVERT_DT", -1, "86400", NULL);
-  obs_err = scan_ctl(argc, argv, "INVERT_OBS_ERR", -1, "1.0", NULL);
-  data = (int) scan_ctl(argc, argv, "INVERT_DATA", -1, "2", NULL);
-  fit = (int) scan_ctl(argc, argv, "INVERT_FIT", -1, "3", NULL);
-  itmax = (int) scan_ctl(argc, argv, "INVERT_ITMAX", -1, "10", NULL);
-  tol = scan_ctl(argc, argv, "INVERT_TOL", -1, "1e-4", NULL);
+  const double dt = scan_ctl(argc, argv, "INVERT_DT", -1, "86400", NULL);
+  const double obs_err =
+    scan_ctl(argc, argv, "INVERT_OBS_ERR", -1, "1.0", NULL);
+  const int data = (int) scan_ctl(argc, argv, "INVERT_DATA", -1, "2", NULL);
+  const int fit = (int) scan_ctl(argc, argv, "INVERT_FIT", -1, "3", NULL);
+  const int itmax =
+    (int) scan_ctl(argc, argv, "INVERT_ITMAX", -1, "10", NULL);
+  const double tol = scan_ctl(argc, argv, "INVERT_TOL", -1, "1e-4", NULL);
 
   /* Check control parameters... */
   if (ctl.ng != 4)
@@ -133,7 +131,7 @@ int main(
      ------------------------------------------------------------ */
 
   /* Iterations... */
-  for (it = 0; it < itmax; it++) {
+  for (int it = 0; it < itmax; it++) {
 
     /* Init... */
     atm.np = n = 0;
@@ -143,7 +141,7 @@ int main(
     }
 
     /* Loop over lines... */
-    for (il = 0; il < nl; il++) {
+    for (int il = 0; il < nl; il++) {
 
       /* Check for new profile... */
       if ((rtime[il] != atm.time[0]
@@ -186,7 +184,7 @@ int main(
 	/* Calculate mean atmospheric profile... */
 	nprof++;
 	atm2.np = atm.np;
-	for (ip = 0; ip < atm.np; ip++) {
+	for (int ip = 0; ip < atm.np; ip++) {
 	  atm2.time[ip] += atm.time[ip];
 	  atm2.z[ip] += atm.z[ip];
 	  atm2.lon[ip] += atm.lon[ip];
@@ -322,7 +320,7 @@ int main(
      ------------------------------------------------------------ */
 
   /* Set atmospheric data... */
-  for (ip = 0; ip < atm2.np; ip++) {
+  for (int ip = 0; ip < atm2.np; ip++) {
     atm2.time[ip] /= nprof;
     atm2.z[ip] /= nprof;
     atm2.lon[ip] /= nprof;
@@ -334,11 +332,11 @@ int main(
   }
 
   /* Get sizes... */
-  nk = atm2x(&ctl, &atm2, NULL, NULL, NULL);
-  mk = obs2y(&ctl, &obs, NULL, NULL, NULL);
+  const size_t nk = atm2x(&ctl, &atm2, NULL, NULL, NULL);
+  const size_t mk = obs2y(&ctl, &obs, NULL, NULL, NULL);
 
   /* Allocate... */
-  k = gsl_matrix_alloc(mk, nk);
+  gsl_matrix *k = gsl_matrix_alloc(mk, nk);
 
   /* Compute kernel matrix... */
   kernel(&ctl, &atm2, &obs, k);
