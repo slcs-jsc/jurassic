@@ -123,14 +123,12 @@ double ails(
   double opl,
   double dnu) {
 
-  double a, a2, a4, a6, a8, cosa, q0, q2, q4, sinca;
-
   /* Auxiliary quantities... */
-  a = 2 * M_PI * dnu * opl;
-  a2 = a * a;
-  a4 = a2 * a2;
-  a6 = a4 * a2;
-  a8 = a4 * a4;
+  const double a = 2 * M_PI * dnu * opl;
+  const double a2 = a * a;
+  const double a4 = a2 * a2;
+  const double a6 = a4 * a2;
+  const double a8 = a4 * a4;
 
   /* Sinc function... */
   if (apo == 0) {
@@ -142,13 +140,14 @@ double ails(
 
   /* Norton-Beer strong apodization... */
   else if (apo == 1) {
+    double q0, q2, q4;
     if (fabs(a) < 0.7) {
       q0 = 1 - a2 / 6 + a4 / 120 - a6 / 5040 + a8 / 362880;
       q2 = 1 - a2 / 14 + a4 / 504 - a6 / 33264 + a8 / 3459456;
       q4 = 1 - a2 / 22 + a4 / 1144 - a6 / 102960 + a8 / 14002560;
     } else {
-      sinca = sin(a) / a;
-      cosa = cos(a);
+      const double sinca = sin(a) / a;
+      const double cosa = cos(a);
       q0 = sinca;
       q2 = -15 / a2 * ((1 - 3 / a2) * sinca + (3 / a2) * cosa);
       q4 =
