@@ -225,7 +225,7 @@ int main(
     ERRMSG("Cannot open directory list!");
 
   /* Loop over directories... */
-  while (fscanf(dirlist, "%s", ret.dir) != EOF) {
+  while (fscanf(dirlist, "%4999s", ret.dir) != EOF) {
 
     /* Write info... */
     LOG(1, "\nRetrieve in directory %s...\n", ret.dir);

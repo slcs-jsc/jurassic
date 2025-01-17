@@ -99,7 +99,7 @@ int main(
 
     /* Loop over directories... */
     char wrkdir[LEN];
-    while (fscanf(in, "%s", wrkdir) != EOF) {
+    while (fscanf(in, "%4999s", wrkdir) != EOF) {
 
       /* Write info... */
       LOG(1, "\nWorking directory: %s", wrkdir);
