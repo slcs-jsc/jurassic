@@ -29,28 +29,8 @@ channels:
     cat rad.tab
 
 The output of the simulation is verified by comparing it to reference
-data.  Additionally, gnuplot is used to create plots of the radiance
-data:
-
-<p align="center">
-  <img src="projects/limb/plot_rad.png" alt="limb radiance data" width="45%"/>
-  &emsp;
-  <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="45%"/>
-</p>
-
-Kernel functions are calculated using a finite difference method:
-
-<p align="center">
-  <img src="projects/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="45%"/>
-  &emsp;
-  <img src="projects/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="45%"/>
-</p>
-
-<p align="center">
-  <img src="projects/limb/plot_kernel_H2O_792.png" alt="limb water vapor kernel function" width="45%"/>
-  &emsp;
-  <img src="projects/nadir/plot_kernel_CO2_668.5410.png" alt="nadir water vapor kernel function" width="45%"/>
-</p>
+data. Additionally, gnuplot is used to create plots of the radiance
+and kernel data.
 
 ## Further information
 
@@ -58,7 +38,7 @@ More detailed information for new users and developers is provided in
 the [JURASSIC user manual](https://slcs-jsc.github.io/jurassic) and
 collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
 
-A detailed description of the JURASSIC model is provided in this paper:
+A detailed description of the JURASSIC model is provided in these papers:
 
 * Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer
   calculations using graphics processing units: JURASSIC-GPU v2.0,
