@@ -1,6 +1,8 @@
 # Juelich Rapid Spectral Simulation Code
 
-The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiative transfer model for the analysis of atmospheric remote sensing measurements.
+The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast
+infrared radiative transfer model for the analysis of atmospheric
+remote sensing measurements.
 
 ![logo](https://github.com/slcs-jsc/jurassic/blob/master/docs/logo/JURASSIC_320px.png)
 
@@ -18,16 +20,29 @@ The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast infrared radiati
 
 ## Features
 
-* JURASSIC uses the emissivity growth approximation (EGA) or the Curtis-Godson approximation (CGA) to conduct infrared radiative transfer calculations. Band transmittances are obtained from pre-calculated look-up tables from line-by-line calculations.
-* The model was carefully tested in intercomparisons with the Karlsruhe Optimized and Precise Radiative Transfer Algorithm (KOPRA), the Reference Forward Model (RFM), and the Stand-alone AIRS Radiative Transfer Algorithm (SARTA).
-* JURASSIC features an MPI-OpenMP hybrid parallelization for efficient use on HPC systems.
-* Distributed open source under the terms and conditions of the GNU GPL.
+* JURASSIC uses the emissivity growth approximation (EGA) or the
+  Curtis-Godson approximation (CGA) to conduct infrared radiative
+  transfer calculations. Band transmittances are obtained from
+  pre-calculated look-up tables from line-by-line calculations.
+* The model was carefully tested in intercomparisons with the
+  Karlsruhe Optimized and Precise Radiative Transfer Algorithm
+  (KOPRA), the Reference Forward Model (RFM), and the Stand-alone AIRS
+  Radiative Transfer Algorithm (SARTA).
+* JURASSIC features an MPI-OpenMP hybrid parallelization for efficient
+  use on HPC systems.
+* Distributed open source under the terms and conditions of the
+  GNU GPL.
 
 ## Getting started
 
 ### Prerequisites
 
-This documentation describes the installation of JURASSIC on a Linux system. A number of standard tools (gcc, git, make) and software libraries are needed to install JURASSIC. The [GNU Scientific Library](https://www.gnu.org/software/gsl) is required for numerical calculations. A copy of this library can be found in the git repository.
+This documentation describes the installation of JURASSIC on a Linux
+system. A number of standard tools (gcc, git, make) and software
+libraries are needed to install JURASSIC. The [GNU Scientific
+Library](https://www.gnu.org/software/gsl) is required for numerical
+calculations. A copy of this library can be found in the git
+repository.
 
 Start by downloading the source code from the git repository:
 
@@ -39,20 +54,24 @@ To update an existing installation use:
 
 ### Installation
 
-First, compile the GSL library needed for JURASSIC by using the build script:
+First, compile the GSL library needed for JURASSIC by using the build
+script:
 
-    cd jurassic/lib
-    ./build.sh
+    cd jurassic/lib ./build.sh
 
-Next, change to the source directory, edit the Makefile according to your needs, and try to compile the code:
+Next, change to the source directory, edit the Makefile according to
+your needs, and try to compile the code:
 
-    cd jurassic/src
-    emacs Makefile
-    make
+    cd jurassic/src emacs Makefile make
 
-The binaries will be linked statically, i.e., they can be copied and run on other machines. Sometimes this causes problems. In this case remove the '-static' flag from the CFLAGS in the Makefile and compile again.
+The binaries will be linked statically, i.e., they can be copied and
+run on other machines. Sometimes this causes problems. In this case
+remove the '-static' flag from the CFLAGS in the Makefile and compile
+again.
 
-By default we use rather strict compiler warnings. All warning messages will be turned into errors and no binaries will be produced. This behavior is enforced by the flag '-Werror'.
+By default we use rather strict compiler warnings. All warning
+messages will be turned into errors and no binaries will be
+produced. This behavior is enforced by the flag '-Werror'.
 
 The binaries will remain in the jurassic/src/ directory.
 
@@ -60,23 +79,24 @@ To run the test cases to check the installation, please use:
 
     make check
 
-This will run sequentially through a set of tests. The execution of the tests will stop if any of the tests fails. Please inspect the log messages.
+This will run sequentially through a set of tests. The execution of
+the tests will stop if any of the tests fails. Please inspect the log
+messages.
 
 ### Run the examples
 
-JURASSIC provides a project directory for testing the examples and also to store other experiments:
+JURASSIC provides a project directory for testing the examples and
+also to store other experiments:
 
     cd jurassic/projects
 
 This shows how to run the example for the nadir sounder:
 
-    cd nadir
-    ./run.sh
+    cd nadir ./run.sh
 
 This shows how to run the example for the limb sounder:
 
-    cd ../limb
-    ./run.sh
+    cd ../limb ./run.sh
 
 In both examples, we generate an observation geometry file,
 
@@ -86,44 +106,77 @@ a standard atmosphere for mid-latitudes,
 
     cat atm.tab
 
-and conduct radiative transfer calculations for two or three detector channels:
+and conduct radiative transfer calculations for two or three detector
+channels:
 
     cat rad.tab
 
-The output of the simulation is verified by comparing it to reference data.
-Additionally, gnuplot is used to create plots of the radiance data:
+The output of the simulation is verified by comparing it to reference
+data.  Additionally, gnuplot is used to create plots of the radiance
+data:
 
-<p align="center"><img src="projects/limb/plot_rad.png" width="45%"/> &emsp; <img src="projects/nadir/plot_rad.png" width="45%"/></p>
+<p align="center">
+  <img src="projects/limb/plot_rad.png" alt="limb radiance data" width="45%"/>
+  &emsp;
+  <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="45%"/>
+</p>
 
 Kernel functions are calculated using a finite difference method:
 
-<p align="center"><img src="projects/limb/plot_kernel_temperature_792.png" width="45%"/> &emsp; <img src="projects/nadir/plot_kernel_temperature_668.5410.png" width="45%"/></p>
+<p align="center">
+  <img src="projects/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="45%"/>
+  &emsp;
+  <img src="projects/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="45%"/>
+</p>
 
-<p align="center"><img src="projects/limb/plot_kernel_H2O_792.png" width="45%"/> &emsp; <img src="projects/nadir/plot_kernel_CO2_668.5410.png" width="45%"/></p>
+<p align="center">
+  <img src="projects/limb/plot_kernel_H2O_792.png" alt="limb water vapor kernel function" width="45%"/>
+  &emsp;
+  <img src="projects/nadir/plot_kernel_CO2_668.5410.png" alt="nadir water vapor kernel function" width="45%"/>
+</p>
 
 ## Further information
 
-More detailed information for new users and developers of JURASSIC is collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
+More detailed information for new users and developers of JURASSIC is
+collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
 
-These are the main references for citing the JURASSIC model in scientific publications:
+These are the main references for citing the JURASSIC model in
+scientific publications:
 
-* Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer calculations using graphics processing units: JURASSIC-GPU v2.0, Geosci. Model Dev., 15, 1855–1874, https://doi.org/10.5194/gmd-15-1855-2022, 2022.
+* Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer
+  calculations using graphics processing units: JURASSIC-GPU v2.0,
+  Geosci. Model Dev., 15, 1855–1874,
+  <https://doi.org/10.5194/gmd-15-1855-2022>, 2022.
 
-* Hoffmann, L., and M. J. Alexander, Retrieval of stratospheric temperatures from Atmospheric Infrared Sounder radiance measurements for gravity wave studies, J. Geophys. Res., 114, D07105, https://doi.org/10.1029/2008JD011241, 2009.
+* Hoffmann, L., and M. J. Alexander, Retrieval of stratospheric
+  temperatures from Atmospheric Infrared Sounder radiance measurements
+  for gravity wave studies, J. Geophys. Res., 114, D07105,
+  <https://doi.org/10.1029/2008JD011241>, 2009.
 
-* Hoffmann, L., Kaufmann, M., Spang, R., Müller, R., Remedios, J. J., Moore, D. P., Volk, C. M., von Clarmann, T., and Riese, M.: Envisat MIPAS measurements of CFC-11: retrieval, validation, and climatology, Atmos. Chem. Phys., 8, 3671-3688, https://doi.org/10.5194/acp-8-3671-2008, 2008.
+* Hoffmann, L., Kaufmann, M., Spang, R., Müller, R., Remedios, J. J.,
+  Moore, D. P., Volk, C. M., von Clarmann, T., and Riese, M.: Envisat
+  MIPAS measurements of CFC-11: retrieval, validation, and
+  climatology, Atmos. Chem. Phys., 8, 3671-3688,
+  <https://doi.org/10.5194/acp-8-3671-2008>, 2008.
 
-* You can cite the source code of JURASSIC by using the DOI https://doi.org/10.5281/zenodo.4572889. This DOI represents all versions, and will always resolve to the latest one. Specific DOIs for each release of JURASSIC can be found on the zenodo web site.
+* You can cite the source code of JURASSIC by using the DOI
+  <https://doi.org/10.5281/zenodo.4572889>. This DOI represents all
+  versions, and will always resolve to the latest one. Specific DOIs
+  for each release of JURASSIC can be found on the zenodo web site.
 
-Please see the [citation file](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff) for further information.
+Please see the [citation file](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff)
+for further information.
 
 ## Contributing
 
-We are interested in sharing JURASSIC for operational or research applications. Please do not hesitate to contact us, if you have any further questions or need support.
+We are interested in sharing JURASSIC for operational or research
+applications. Please do not hesitate to contact us, if you have any
+further questions or need support.
 
 ## License
 
-JURASSIC is distributed under the [GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/master/COPYING).
+JURASSIC is distributed under the
+[GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/master/COPYING).
 
 ## Contact
 
@@ -131,6 +184,4 @@ Dr. Lars Hoffmann
 
 Jülich Supercomputing Centre, Forschungszentrum Jülich
 
-e-mail: l.hoffmann@fz-juelich.de
-
-website: https://www.fz-juelich.de/ias/jsc/slcs
+e-mail: <l.hoffmann@fz-juelich.de>
