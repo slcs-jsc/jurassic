@@ -128,15 +128,15 @@ clean:
 coverage:
 	lcov --capture --directory . --output-file=coverage.info ; \
 	genhtml coverage.info --legend --frames --output-directory=coverage ; \
-	gcov -abcfu *.c || true
+	gcov -abcfu *.c ; echo "FINISHED" || true
 
 cppcheck:
 	cppcheck --enable=all ./
 
 dist:
 	cd ..  && tar cvfz jurassic_$(VERSION).tgz bin/* \
-          docs/Doxyfile docs/refman.pdf example/* \
-          libs/build.sh libs/*gz src/*
+          docs/Doxyfile libs/build.sh libs/*bz2 \
+          projects/limb/* projects/nadir/* src/* tests/*
 
 doxygen:
 	cd ../docs && doxygen
