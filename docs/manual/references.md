@@ -26,7 +26,7 @@ scientific publications:
 
 This is a list of papers in which JURASSIC was applied:
 
-- S, Griessbach, L. Hoffmann, R. Spang, P. Achtert, M. v. Hobe,
+- S. Griessbach, L. Hoffmann, R. Spang, P. Achtert, M. v. Hobe,
   N. Mateshvili, R. Müller, M. Riese, C. Rolf, P. Seifert, et al.,
   Aerosol and cloud top height information of Envisat MIPAS
   measurements, Atmospheric Measurement Techniques, 13(3), 1243–1271,
