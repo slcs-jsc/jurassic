@@ -99,8 +99,7 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
-.PHONY : all check clean coverage cppcheck dist doxygen indent \
-           install lizard mkdocs strip uninstall
+.PHONY : all check clean coverage cppcheck dist doxygen indent  install lizard mkdocs strip uninstall
 
 all: $(EXC)
 	rm -f *~
