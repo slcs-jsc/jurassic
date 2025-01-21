@@ -58,12 +58,14 @@ To update an existing installation use:
 First, compile the GSL library needed for JURASSIC by using the build
 script:
 
-    cd jurassic/lib ./build.sh
+    cd [jurassic_directory]/libs ./build.sh
 
 Next, change to the source directory, edit the Makefile according to
 your needs, and try to compile the code:
 
-    cd jurassic/src emacs Makefile make
+    cd [jurassic_directory]/src
+    emacs Makefile
+    make
 
 The binaries will be linked statically, i.e., they can be copied and
 run on other machines. Sometimes this causes problems. In this case
@@ -89,7 +91,7 @@ messages.
 JURASSIC provides a project directory for testing the examples and
 also to store other experiments:
 
-    cd jurassic/projects
+    cd [jurassic_directory]/projects
 
 This shows how to run the example for the nadir sounder:
 
