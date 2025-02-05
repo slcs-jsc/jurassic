@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['rad_0',['rad',['../structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3',1,'obs_t']]],
+  ['rayds_1',['rayds',['../structctl__t.html#add30b1dee3914f1d1473df0fccabb364',1,'ctl_t']]],
+  ['raydz_2',['raydz',['../structctl__t.html#aee8d7ddf07ec801c7d4a2037cb23a6e7',1,'ctl_t']]],
+  ['refrac_3',['refrac',['../structctl__t.html#a840532f5c38a5b325317cede07b40990',1,'ctl_t']]],
+  ['ret_5fcldz_4',['ret_cldz',['../structctl__t.html#ae25be11810f5e53581c26f20fe22fe7d',1,'ctl_t']]],
+  ['ret_5fclk_5',['ret_clk',['../structctl__t.html#ad6e4dce394bf7b0dd53d37cd9417cbd2',1,'ctl_t']]],
+  ['ret_5fclz_6',['ret_clz',['../structctl__t.html#a59116b56f658e88f16fdadd8f8573b9b',1,'ctl_t']]],
+  ['ret_5fsfeps_7',['ret_sfeps',['../structctl__t.html#a563edaaec6157678618fed9fbc85b79c',1,'ctl_t']]],
+  ['ret_5fsfp_8',['ret_sfp',['../structctl__t.html#aa447ccc80191c37bc6d95246536fb05f',1,'ctl_t']]],
+  ['ret_5fsft_9',['ret_sft',['../structctl__t.html#a5771f0852888a5ac64c5cdcc588f684b',1,'ctl_t']]],
+  ['ret_5fsfz_10',['ret_sfz',['../structctl__t.html#a40ee6988c308b930668617324d70cf62',1,'ctl_t']]],
+  ['retk_5fzmax_11',['retk_zmax',['../structctl__t.html#a26933d7ba71ac03f208a4c3b59c6c12a',1,'ctl_t']]],
+  ['retk_5fzmin_12',['retk_zmin',['../structctl__t.html#aab99fb086f49aee8e2aa5fd1c517a221',1,'ctl_t']]],
+  ['retp_5fzmax_13',['retp_zmax',['../structctl__t.html#afb1ec420b7e90ebf056640417572a225',1,'ctl_t']]],
+  ['retp_5fzmin_14',['retp_zmin',['../structctl__t.html#a1184388515bcde02af618c43495164a1',1,'ctl_t']]],
+  ['retq_5fzmax_15',['retq_zmax',['../structctl__t.html#a785678f0cb53cbf59f390ad671f262f3',1,'ctl_t']]],
+  ['retq_5fzmin_16',['retq_zmin',['../structctl__t.html#a7d487af5fe0e4d378d90865f589c7ddc',1,'ctl_t']]],
+  ['rett_5fzmax_17',['rett_zmax',['../structctl__t.html#a4ceaa6f495415c535223541d957491d3',1,'ctl_t']]],
+  ['rett_5fzmin_18',['rett_zmin',['../structctl__t.html#a8df8e6875b7fe5ab5e2805390b3f9c3f',1,'ctl_t']]],
+  ['rfmbin_19',['rfmbin',['../structctl__t.html#a342dfe238de9dfcb389b07477f8ef527',1,'ctl_t']]],
+  ['rfmhit_20',['rfmhit',['../structctl__t.html#a32f95b8c7a13422eb1614bc86261d8f2',1,'ctl_t']]],
+  ['rfmxsc_21',['rfmxsc',['../structctl__t.html#a6ea477ad330f7edacbef53573d224d9b',1,'ctl_t']]]
+];
