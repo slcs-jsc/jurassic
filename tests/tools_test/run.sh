@@ -17,6 +17,8 @@ echo "checking time..."
 	    for hour in 0 12 24 ; do
 		t0=$($trac/time2jsec $year $mon $day $hour 0 0 0)
 		echo "$($trac/jsec2time "$t0") = $t0"
+		d0=$($trac/day2doy $year $mon $day)
+		echo "$($trac/doy2day $d0) = $d0"
 	    done
 	done
     done
