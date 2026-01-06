@@ -33,7 +33,7 @@ int main(
   static los_t los;
   static obs_t obs;
 
-  FILE *out, *out2;
+  FILE *out;
 
   char filename[2 * LEN], losbase[LEN];
 
@@ -93,6 +93,7 @@ int main(
     LOG(1, "Write LOS data: %s", filename);
 
     /* Create file... */
+    FILE *out2;
     if (!(out2 = fopen(filename, "w")))
       ERRMSG("Cannot create file!");
 
