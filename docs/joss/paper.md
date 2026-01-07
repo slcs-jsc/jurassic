@@ -48,7 +48,7 @@ Spectral absorption and emission are represented using precomputed lookup tables
 
 ## Radiative transfer and retrieval capabilities
 
-JURASSIC implements established spectral approximations, including the Emissivity Growth Approximation (EGA) and the Curtis–Godson Approximation (CGA), to efficiently model infrared radiative transfer. These methods allow accurate simulations of atmospheric radiances and transmittances across a broad spectral range while avoiding the computational expense of full line-by-line calculations.
+JURASSIC implements established spectral approximations, including the Emissivity Growth Approximation (EGA) and the Curtis–Godson Approximation (CGA), to efficiently model infrared radiative transfer [@Godson1953; @Gordley1981; @Marshall1994]. These methods allow accurate simulations of atmospheric radiances and transmittances across a broad spectral range while avoiding the computational expense of full line-by-line calculations.
 
 In addition to forward modelling, JURASSIC includes an optimal estimation retrieval module for inverse modelling of atmospheric state variables. This enables the retrieval of geophysical parameters such as temperature and trace gas volume mixing ratios directly from measured radiances within the same software framework.
 
@@ -62,7 +62,7 @@ A comprehensive description of the underlying algorithms, numerical methods, and
 
 In its standard configuration, JURASSIC is designed primarily for clear-air conditions, where scattering of infrared radiation can be neglected and local thermodynamic equilibrium is assumed. Cloud and aerosol effects can be represented in a simplified manner using grey-body or extinction-based parameterizations, which are suitable for many stratospheric and upper-tropospheric applications. These approximations are consistent with the primary design focus of JURASSIC on clear-air infrared remote sensing applications.
 
-More advanced treatments of infrared scattering by cloud and aerosol particles are not part of the core JURASSIC distribution described here. However, dedicated extensions of JURASSIC have been developed to account for single and multiple scattering of infrared radiation by aerosols and clouds. These developments enable the simulation of radiative transfer in the presence of optically thin and moderately thick particle layers and have been applied, for example, to the analysis of volcanic aerosol observations and cloud-affected infrared limb measurements [@Griessbach2013; @Griessbach2014].
+More advanced treatments of infrared scattering by cloud and aerosol particles are not part of the core JURASSIC distribution described here. However, dedicated extensions of JURASSIC have been developed to account for single and multiple scattering of infrared radiation by aerosols and clouds. These developments enable the simulation of radiative transfer in the presence of optically thin and moderately thick particle layers and have been applied, for example, to the analysis of volcanic aerosol observations and cloud-affected infrared limb measurements [@Griessbach2013; @Griessbach2016].
 
 ## Applications
 
@@ -70,7 +70,7 @@ JURASSIC has been applied in a wide range of atmospheric remote sensing studies,
 
 The model has also been used extensively for temperature retrievals from nadir-viewing infrared sounders. For example, Hoffmann and Alexander (2009) applied JURASSIC to Atmospheric Infrared Sounder (AIRS) radiance measurements to retrieve stratospheric temperature perturbations for gravity wave studies [@Hoffmann2009].
 
-Beyond satellite observations, JURASSIC has been applied to airborne infrared limb measurements. In particular, the model has been extended for tomographic retrievals of mesoscale atmospheric structures from observations by aircraft instruments, supporting studies of gravity waves and stratospheric dynamics [@Ungermann2010; @Ungermann2012]. These applications demonstrate the flexibility of JURASSIC across different platforms, observation geometries, and spatial resolutions.
+Beyond satellite observations, JURASSIC has been applied to airborne infrared limb measurements. In particular, the model has been extended for tomographic retrievals of mesoscale atmospheric structures from observations by aircraft and satellite instruments, supporting studies of gravity waves and stratospheric dynamics [@Ungermann2010; @Ungermann2012]. These applications demonstrate the flexibility of JURASSIC across different platforms, observation geometries, and spatial resolutions.
 
 ## Performance and scalability
 
