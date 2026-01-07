@@ -34,17 +34,15 @@ The Jülich Rapid Spectral Simulation Code (JURASSIC) is an open-source infrared
 
 # Statement of Need
 
-Infrared remote sensing instruments provide critical observations of atmospheric temperature, trace gases, aerosols, and clouds. The increasing data volume from modern and upcoming satellite missions places strong demands on radiative transfer models, which must be both computationally efficient and scientifically reliable. While line-by-line radiative transfer models offer high accuracy, their computational cost limits their applicability for large-scale or near-real-time applications.
+Infrared remote sensing instruments provide critical observations of atmospheric temperature, trace gases, aerosols, and clouds. The increasing data volume from modern satellite missions places strong demands on radiative transfer models, which must be both computationally efficient and scientifically reliable. While line-by-line radiative transfer models offer high accuracy, their computational cost limits their applicability for large-scale or near-real-time applications.
 
-Fast radiative transfer models address this challenge by using spectral approximations and precomputed spectroscopic information. However, many existing tools are tailored to specific instruments, spectral ranges, or operational contexts, limiting their flexibility for research-oriented workflows. JURASSIC addresses this gap by providing a general-purpose, modular infrared radiative transfer framework that supports multiple observation geometries, customizable spectral configurations, and high-performance computing environments. Its open-source distribution further promotes transparency, reproducibility, and community-driven development.
+Fast radiative transfer models address this challenge by using spectral approximations and precomputed spectroscopic information, but many existing tools are tailored to specific instruments or operational contexts. JURASSIC addresses this gap by providing a general-purpose, modular infrared radiative transfer framework that supports multiple observation geometries, customizable spectral configurations, and high-performance computing environments, while being openly available to promote transparency and reproducibility.
 
 # Software Description
 
 ## Model architecture and design
 
-JURASSIC is implemented in the C programming language with a modular design that separates ray tracing, radiative transfer, spectroscopy, and retrieval components. The atmosphere is represented as a vertically stratified medium, and radiative transfer calculations are performed along curved ray paths that account for atmospheric refraction. The model supports limb, nadir, zenith, and occultation geometries for instruments located inside or outside the atmosphere.
-
-Spectral absorption and emission are represented using precomputed lookup tables derived from detailed line-by-line calculations. During runtime, band-averaged emissivities are obtained through fast interpolation, enabling rapid evaluation of the radiative transfer equation without sacrificing spectroscopic fidelity.
+JURASSIC is implemented in the C programming language with a modular design that separates ray tracing, radiative transfer, spectroscopy, and retrieval components. The atmosphere is represented as a vertically stratified medium, and radiative transfer calculations are performed along curved ray paths that account for atmospheric refraction. The model supports limb, nadir, zenith, and occultation geometries for instruments located inside or outside the atmosphere. Spectral absorption and emission are represented using precomputed lookup tables derived from detailed line-by-line calculations, allowing rapid evaluation of band-averaged emissivities during runtime.
 
 ## Radiative transfer and retrieval capabilities
 
@@ -60,17 +58,11 @@ A comprehensive description of the underlying algorithms, numerical methods, and
 
 ## Assumptions and treatment of clouds and aerosols
 
-In its standard configuration, JURASSIC is designed primarily for clear-air conditions, where scattering of infrared radiation can be neglected and local thermodynamic equilibrium is assumed. Cloud and aerosol effects can be represented in a simplified manner using grey-body or extinction-based parameterizations, which are suitable for many stratospheric and upper-tropospheric applications. These approximations are consistent with the primary design focus of JURASSIC on clear-air infrared remote sensing applications.
-
-More advanced treatments of infrared scattering by cloud and aerosol particles are not part of the core JURASSIC distribution described here. However, dedicated extensions of JURASSIC have been developed to account for single and multiple scattering of infrared radiation by aerosols and clouds. These developments enable the simulation of radiative transfer in the presence of optically thin and moderately thick particle layers and have been applied, for example, to the analysis of volcanic aerosol observations and cloud-affected infrared limb measurements [@Griessbach2013; @Griessbach2016].
+In its standard configuration, JURASSIC is designed primarily for clear-air conditions, where scattering of infrared radiation can be neglected and local thermodynamic equilibrium is assumed. Cloud and aerosol effects can be represented using simplified grey-body or extinction-based parameterizations suitable for many stratospheric and upper-tropospheric applications. More advanced treatments of infrared scattering are not part of the core distribution but have been implemented in dedicated extensions of JURASSIC that account for single and multiple scattering by aerosols and clouds and have been applied, for example, to volcanic aerosol observations and cloud-affected infrared limb measurements [@Griessbach2013; @Griessbach2016].
 
 ## Applications
 
-JURASSIC has been applied in a wide range of atmospheric remote sensing studies, particularly for the analysis of infrared limb and nadir observations. Early applications focused on the retrieval of trace gas concentrations from satellite measurements, including the analysis of Envisat Michelson Interferometer for Passive Atmospheric Sounding (MIPAS) observations to derive stratospheric distributions and climatologies of chlorofluorocarbons and other species [@Hoffmann2008].
-
-The model has also been used extensively for temperature retrievals from nadir-viewing infrared sounders. For example, Hoffmann and Alexander (2009) applied JURASSIC to Atmospheric Infrared Sounder (AIRS) radiance measurements to retrieve stratospheric temperature perturbations for gravity wave studies [@Hoffmann2009].
-
-Beyond satellite observations, JURASSIC has been applied to airborne infrared limb measurements. In particular, the model has been extended for tomographic retrievals of mesoscale atmospheric structures from observations by aircraft and satellite instruments, supporting studies of gravity waves and stratospheric dynamics [@Ungermann2010; @Ungermann2012]. These applications demonstrate the flexibility of JURASSIC across different platforms, observation geometries, and spatial resolutions.
+JURASSIC has been applied in a wide range of atmospheric remote sensing studies, particularly for infrared limb and nadir observations. Early applications focused on trace gas retrievals from satellite measurements, including Envisat Michelson Interferometer for Passive Atmospheric Sounding (MIPAS) observations used to derive stratospheric distributions and climatologies of chlorofluorocarbons and other species [@Hoffmann2008]. The model has also been used for temperature retrievals from nadir-viewing infrared sounders, such as Atmospheric Infrared Sounder (AIRS) radiance measurements applied to gravity wave studies [@Hoffmann2009]. JURASSIC has also been extended for tomographic retrievals of mesoscale atmospheric structures from airborne and satellite measurements, supporting studies of gravity waves and stratospheric dynamics [@Ungermann2010; @Ungermann2012].
 
 ## Performance and scalability
 
@@ -88,8 +80,6 @@ The JURASSIC codebase includes automated tests and example configurations to ver
 
 # Acknowledgements
 
-We acknowledge contributions from numerous collaborators within the atmospheric remote sensing community
-for testing, validation, and scientific feedback.
-The Jülich Supercomputing Centre provided computational and storage resources.
+We acknowledge contributions from numerous collaborators within the atmospheric remote sensing community for testing, validation, and scientific feedback. The Jülich Supercomputing Centre provided computational and storage resources.
 
 # References
