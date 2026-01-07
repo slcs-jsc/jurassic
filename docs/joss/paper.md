@@ -48,17 +48,17 @@ Spectral absorption and emission are represented using precomputed lookup tables
 
 ## Radiative transfer and retrieval capabilities
 
-JURASSIC implements established spectral approximations, including the Emissivity Growth Approximation and the Curtis–Godson Approximation, to efficiently model infrared radiative transfer. These methods allow accurate simulations of atmospheric radiances and transmittances across a broad spectral range while avoiding the computational expense of full line-by-line calculations.
+JURASSIC implements established spectral approximations, including the Emissivity Growth Approximation (EGA) and the Curtis–Godson Approximation (CGA), to efficiently model infrared radiative transfer. These methods allow accurate simulations of atmospheric radiances and transmittances across a broad spectral range while avoiding the computational expense of full line-by-line calculations.
 
 In addition to forward modelling, JURASSIC includes an optimal estimation retrieval module for inverse modelling of atmospheric state variables. This enables the retrieval of geophysical parameters such as temperature and trace gas volume mixing ratios directly from measured radiances within the same software framework.
 
-A comprehensive description of the underlying algorithms, numerical methods, and GPU-accelerated implementation is provided by Baumeister and Hoffmann (2022) [@Baumeister2022].
+A comprehensive description of the underlying algorithms, numerical methods, and GPU-accelerated implementation is provided by @Baumeister2022.
 
-Figure 1 illustrates example mid-infrared limb and nadir radiance spectra simulated with JURASSIC, including the contributions of selected trace gases for a mid-latitude reference atmosphere.
+\autoref{fig:spectra} illustrates example mid-infrared limb and nadir radiance spectra simulated with JURASSIC, including the contributions of selected trace gases for a mid-latitude reference atmosphere.
 
-![Simulated mid-infrared radiance spectra for limb and nadir viewing geometries calculated with JURASSIC for mid-latitude atmospheric conditions at 1 cm$^{-1}$ spectral resolution. The total radiance is shown together with the individual contributions of selected trace gases, illustrating the spectral decomposition capabilities of the model.](fig_spectra.pdf)
+![Simulated mid-infrared radiance spectra for limb (a) and nadir (b) viewing geometries calculated with JURASSIC for mid-latitude atmospheric conditions at 1 cm$^{-1}$ spectral resolution.\label{fig:spectra}](fig_spectra.pdf)
 
-### Assumptions and treatment of clouds and aerosols
+## Assumptions and treatment of clouds and aerosols
 
 In its standard configuration, JURASSIC is designed primarily for clear-air conditions, where scattering of infrared radiation can be neglected and local thermodynamic equilibrium is assumed. Cloud and aerosol effects can be represented in a simplified manner using grey-body or extinction-based parameterizations, which are suitable for many stratospheric and upper-tropospheric applications. These approximations are consistent with the primary design focus of JURASSIC on clear-air infrared remote sensing applications.
 
@@ -66,21 +66,19 @@ More advanced treatments of infrared scattering by cloud and aerosol particles a
 
 ## Applications
 
-JURASSIC has been applied in a wide range of atmospheric remote sensing studies, particularly for the analysis of infrared limb and nadir observations. Early applications focused on the retrieval of trace gas concentrations from satellite measurements, including the analysis of Envisat Michelson Interferometer for Passive Atmospheric Sounding (MIPAS) observations to derive stratospheric distributions and climatologies of chlorofluorocarbons and other species [@Hoffmann2008MIPAS].
+JURASSIC has been applied in a wide range of atmospheric remote sensing studies, particularly for the analysis of infrared limb and nadir observations. Early applications focused on the retrieval of trace gas concentrations from satellite measurements, including the analysis of Envisat Michelson Interferometer for Passive Atmospheric Sounding (MIPAS) observations to derive stratospheric distributions and climatologies of chlorofluorocarbons and other species [@Hoffmann2008].
 
-The model has also been used extensively for temperature retrievals from nadir-viewing infrared sounders. For example, Hoffmann and Alexander (2009) applied JURASSIC to Atmospheric Infrared Sounder (AIRS) radiance measurements to retrieve stratospheric temperature perturbations for gravity wave studies [@Hoffmann2009AIRS].
+The model has also been used extensively for temperature retrievals from nadir-viewing infrared sounders. For example, Hoffmann and Alexander (2009) applied JURASSIC to Atmospheric Infrared Sounder (AIRS) radiance measurements to retrieve stratospheric temperature perturbations for gravity wave studies [@Hoffmann2009].
 
-Beyond satellite observations, JURASSIC has been applied to airborne infrared limb measurements. In particular, the model has been used for tomographic retrievals of mesoscale atmospheric structures from observations by the Cryogenic Infrared Spectrometers and Telescopes for the Atmosphere – New Frontiers (CRISTA-NF) aircraft instrument, supporting studies of gravity waves and stratospheric dynamics [@Ungermann2012]. These applications demonstrate the flexibility of JURASSIC across different platforms, observation geometries, and spatial resolutions.
+Beyond satellite observations, JURASSIC has been applied to airborne infrared limb measurements. In particular, the model has been extended for tomographic retrievals of mesoscale atmospheric structures from observations by aircraft instruments, supporting studies of gravity waves and stratospheric dynamics [@Ungermann2010; @Ungermann2012]. These applications demonstrate the flexibility of JURASSIC across different platforms, observation geometries, and spatial resolutions.
 
 ## Performance and scalability
 
-JURASSIC supports hybrid MPI–OpenMP parallelization and is designed for efficient execution on multicore CPUs and high-performance computing clusters. The model has also been extended to GPU-accelerated architectures, demonstrating substantial speedups and improved energy efficiency compared to CPU-only implementations. These capabilities enable the processing of large observational datasets, global simulations, and long time series within practical time constraints.
+JURASSIC supports hybrid MPI–OpenMP parallelization and is designed for efficient execution on multicore CPUs and high-performance computing clusters. The model has also been extended to GPU-accelerated architectures, demonstrating substantial speedups and improved energy efficiency compared to CPU-only implementations [@Baumeister2022]. These capabilities enable the processing of large observational datasets, global simulations, and long time series within practical time constraints.
 
 # Quality Control
 
-The JURASSIC codebase includes automated tests and example configurations to verify correct installation and numerical behaviour. Example projects for limb and nadir geometries are provided and can be executed as part of the test workflow. Model outputs are validated against reference data, and extensive benchmarking and intercomparison studies with established radiative transfer models have been documented in the literature.
-
-Continuous integration practices, versioned releases, and persistent digital object identifiers are used to support reproducibility and long-term usability.
+The JURASSIC codebase includes automated tests and example configurations to verify correct installation and numerical behaviour. Example projects for limb and nadir geometries are provided and can be executed as part of the test workflow. Model outputs are validated against reference data, and extensive benchmarking and intercomparison studies with established radiative transfer models have been documented in the literature. Continuous integration practices, versioned releases, and persistent digital object identifiers are used to support reproducibility and long-term usability.
 
 # Availability
 
@@ -90,6 +88,8 @@ Continuous integration practices, versioned releases, and persistent digital obj
 
 # Acknowledgements
 
-The development of JURASSIC has benefited from contributions by numerous collaborators and from computational resources provided by the Jülich Supercomputing Centre. We acknowledge support from Forschungszentrum Jülich and the broader atmospheric remote sensing community for testing, validation, and scientific feedback.
+We acknowledge contributions from numerous collaborators within the atmospheric remote sensing community
+for testing, validation, and scientific feedback.
+The Jülich Supercomputing Centre provided computational and storage resources.
 
 # References
