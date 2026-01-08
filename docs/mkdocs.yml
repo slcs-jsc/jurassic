@@ -2,12 +2,50 @@ site_name: JURASSIC
 site_url: https://slcs-jsc.github.io/jurassic/
 repo_url: https://github.com/slcs-jsc/jurassic
 docs_dir: manual
-theme: material
+theme:
+  name: material
+  logo: img/JURASSIC_320px.png
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 nav:
     - Home: index.md
+
+    - Introduction:
+        - Overview: overview.md
+        - Physical background: theory.md
+        - Retrieval theory: retrieval_theory.md
+        - Model assumptions & limitations: limitations.md
+
     - User manual:
         - Quickstart: quickstart.md
+        - Installation: installation.md
+        - Configuration files: configuration.md
+        - Running JURASSIC: running.md
+        - Input data:
+            - Atmospheric profiles: input_profiles.md
+            - Spectroscopic data & LUTs: input_luts.md
+        - Output data:
+            - Radiances & spectra: output_radiances.md
+            - Diagnostics & logs: output_diagnostics.md
+
+    - Advanced usage:
+        - Parallelization (MPI/OpenMP): parallelization.md
+        - HPC workflows: hpc_workflows.md
+        - Performance tuning: performance.md
+
+    - Developer documentation:
+        - Code structure: code_structure.md
+        - Building from source: building.md
+        - Testing & validation: validation.md
+
     - Further information:
         - References: references.md
         - Links: links.md

@@ -4,24 +4,71 @@ The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast
 infrared radiative transfer model for the analysis of atmospheric
 remote sensing measurements.
 
+## Who should use JURASSIC?
+
+JURASSIC is designed for atmospheric scientists and remote-sensing
+experts who require fast and accurate infrared radiative transfer
+simulations, particularly for large data sets and HPC environments.
+
 ## Features
 
-These are some of the most important features of the JURASSIC model:
+JURASSIC provides a comprehensive and efficient framework for infrared
+radiative transfer simulations, offering key capabilities to support
+research, operational, and development workflows:
 
-* JURASSIC uses the emissivity growth approximation (EGA) to conduct
-  the radiative transfer calculations. Band transmittances are
-  obtained from pre-calculated look-up tables from line-by-line
-  calculations.
+- **Efficient radiative transfer approximations**: JURASSIC implements
+    the Emissivity Growth Approximation (EGA) and the Curtis–Godson
+    Approximation (CGA) to model infrared radiative transfer. These
+    methods enable rapid yet accurate simulations of atmospheric
+    radiances and transmittances across a broad spectral range.
 
-* The model was carefully tested in intercomparisons with the
-  Karlsruhe Optimized and Precise Radiative Transfer Algorithm
-  (KOPRA), the Reference Forward Model (RFM), and the Stand-alone AIRS
-  Radiative Transfer Algorithm (SARTA).
+- **High-fidelity spectroscopy via lookup tables**: Band
+    transmittances are derived from pre-calculated lookup tables based
+    on detailed line-by-line spectroscopy. This approach maintains
+    spectroscopic accuracy while largely reducing computational cost,
+    making the model suitable for large-scale and near-real-time
+    applications.
 
-* JURASSIC features an MPI-OpenMP hybrid parallelization for efficient
-  use on HPC systems.
+- **Optimal estimation retrieval framework**: In addition to forward
+    modelling, JURASSIC includes an optimal estimation retrieval
+    module for inverse modelling of atmospheric state variables. This
+    enables the derivation of geophysical parameters such as
+    temperature or trace gas volume mixing ratios from observed
+    radiances, providing a complete forward–inverse modelling system
+    within the same framework.
 
-* Distributed as open source under the terms of the GNU GPL.
+- **Flexible configuration and modular design**: The model supports
+    customizable spectral bands, instrument configurations, and
+    atmospheric input fields, allowing users to integrate JURASSIC
+    into diverse workflows and existing analysis pipelines.
+
+- **Validated against established reference models**: The model has
+    undergone extensive benchmarking and intercomparison studies with
+    leading radiative transfer codes such as KOPRA, RFM, and SARTA,
+    ensuring reliable performance and scientific credibility across a
+    wide range of atmospheric conditions.
+
+- **Hybrid parallelization for HPC environments**: JURASSIC enables
+    hybrid MPI–OpenMP parallelization for highly efficient execution
+    on multicore CPUs and HPC clusters, enabling the processing of
+    large datasets, global simulations, or long time series with
+    excellent scalability.
+
+- **Open source and community oriented**: JURASSIC is distributed
+    under the GNU General Public License (GPL), fostering
+    transparency, collaboration, and community-driven development
+    within the atmospheric and remote sensing research community.
+
+## Getting started
+
+If you are new to JURASSIC, start with the
+[Quickstart](quickstart.md), which walks you through installation,
+basic configuration, and a first simulation.
+
+## Citation
+
+If you use JURASSIC in your research, please cite the relevant
+publications listed in the [References](references.md).
 
 ## Contact
 

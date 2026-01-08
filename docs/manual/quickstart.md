@@ -1,61 +1,132 @@
 # Quickstart
 
-## Example of a JURASSIC simulation
+This Quickstart guides you through running the provided example
+simulations that come with JURASSIC. The goal is to verify that the
+model is correctly installed and to familiarize yourself with the basic
+workflow of a JURASSIC radiative transfer simulation.
 
-JURASSIC provides a project directory for testing the examples and
-also to store other experiments:
+## Prerequisites
 
-    cd jurassic/projects
+This guide assumes that:
 
-This shows how to run the example for the nadir sounder:
+-   JURASSIC has been successfully compiled
+-   All required runtime dependencies are available
+-   You are working in a shell environment on a Linux or HPC system
 
-    cd nadir ./run.sh
+Detailed installation instructions are provided in the
+[Installation](installation.md) section of the user manual.
 
-This shows how to run the example for the limb sounder:
+------------------------------------------------------------------------
 
-    cd ../limb ./run.sh
+## Running the example simulations
 
-In both examples, we generate an observation geometry file,
+JURASSIC includes a set of example projects that demonstrate typical use
+cases and serve as regression tests. These projects are located in the
+`projects` directory.
 
+``` bash
+cd jurassic/projects
+```
+
+Two example observation geometries are provided:
+
+-   **Nadir sounding**, representative of satellite instruments viewing
+    the atmosphere from above
+-   **Limb sounding**, representative of instruments observing along the
+    atmospheric limb
+
+### Nadir sounder example
+
+To run the nadir sounder example:
+
+``` bash
+cd nadir
+./run.sh
+```
+
+### Limb sounder example
+
+To run the limb sounder example:
+
+``` bash
+cd ../limb
+./run.sh
+```
+
+Each example is executed via a simple wrapper script that prepares the
+input data, runs the radiative transfer calculations, and performs basic
+verification steps.
+
+------------------------------------------------------------------------
+
+## Input files
+
+In both examples, the following input files are generated or used:
+
+-   **Observation geometry**\
+    The file `obs.tab` defines the viewing geometry of the instrument,
+    including sensor position and line-of-sight information.
+
+    ``` bash
     cat obs.tab
+    ```
 
-a standard atmosphere for mid-latitudes,
+-   **Atmospheric state**\
+    The file `atm.tab` contains a standard mid-latitude atmospheric
+    profile, including pressure, temperature, and trace gas
+    concentrations.
 
+    ``` bash
     cat atm.tab
+    ```
 
-and conduct radiative transfer calculations for two or three detector
-channels:
+-   **Radiative transfer configuration**\
+    The file `rad.tab` specifies the detector channels and spectral
+    configuration used for the radiative transfer calculations.
 
+    ``` bash
     cat rad.tab
+    ```
 
-The output of the simulation is verified by comparing it to reference
-data. Additionally, gnuplot is used to create plots of the radiance
-and kernel data.
+These files illustrate the basic structure of JURASSIC input data and
+are discussed in more detail in the User Manual.
+
+------------------------------------------------------------------------
+
+## Output and verification
+
+After the simulation completes, JURASSIC:
+
+-   Computes radiances for two or three detector channels
+-   Compares the results against reference data to verify correctness
+-   Generates diagnostic plots of radiances and Jacobians using gnuplot
+
+If the run completes without errors and the verification checks pass,
+your JURASSIC installation is functioning correctly.
+
+------------------------------------------------------------------------
+
+## Next steps
+
+After completing the Quickstart, you may want to explore:
+
+-   Customizing atmospheric profiles and observation geometries
+-   Defining your own spectral bands and instrument configurations
+-   Running JURASSIC on parallel HPC systems
+
+These topics are covered in detail in the subsequent sections of the
+User Manual.
+
+------------------------------------------------------------------------
 
 ## Further information
 
-More detailed information for new users and developers is provided in
-the [JURASSIC user manual](https://slcs-jsc.github.io/jurassic) and
-collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
+More detailed documentation for users and developers is available in the
+main [JURASSIC documentation](https://slcs-jsc.github.io/jurassic) and
+in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
 
-A detailed description of the JURASSIC model is provided in these papers:
+A detailed description of the JURASSIC model and its applications can be
+found in the publications listed in the [References](references.md).
 
-* Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative transfer
-  calculations using graphics processing units: JURASSIC-GPU v2.0,
-  Geosci. Model Dev., 15, 1855–1874,
-  <https://doi.org/10.5194/gmd-15-1855-2022>, 2022.
-
-* Hoffmann, L., and M. J. Alexander, Retrieval of stratospheric
-  temperatures from Atmospheric Infrared Sounder radiance measurements
-  for gravity wave studies, J. Geophys. Res., 114, D07105,
-  <https://doi.org/10.1029/2008JD011241>, 2009.
-
-* Hoffmann, L., Kaufmann, M., Spang, R., Müller, R., Remedios, J. J.,
-  Moore, D. P., Volk, C. M., von Clarmann, T., and Riese, M.: Envisat
-  MIPAS measurements of CFC-11: retrieval, validation, and
-  climatology, Atmos. Chem. Phys., 8, 3671-3688,
-  <https://doi.org/10.5194/acp-8-3671-2008>, 2008.
-
-We are interested in sharing JURASSIC for operational and research
-applications. Please do not hesitate to contact us, if you have any
-further questions or need support.
+If you are interested in using JURASSIC for operational or research
+applications, please do not hesitate to contact us for support.
