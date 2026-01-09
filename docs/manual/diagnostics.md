@@ -201,5 +201,5 @@ results.
 ## Related pages
 
 - [Retrieval theory](retrieval_theory.md)
-- [Output radiances](output_radiances.md)
+- [Output radiances](radiance_data.md)
 - [Configuration](configuration.md)

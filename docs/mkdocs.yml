@@ -29,12 +29,10 @@ nav:
         - Installation: installation.md
         - Configuration files: configuration.md
         - Running JURASSIC: running.md
-        - Input data:
-            - Atmospheric profiles: input_profiles.md
-            - Spectroscopic data & LUTs: input_luts.md
-        - Output data:
-            - Radiances & spectra: output_radiances.md
-            - Diagnostics & logs: output_diagnostics.md
+        - Atmospheric data: atmospheric_data.md
+        - Radiance data: radiance_data.md
+        - Spectroscopic data & LUTs: lookup_tables.md
+        - Diagnostics & logs: diagnostics.md
 
     - Advanced usage:
         - Parallelization (MPI/OpenMP): parallelization.md

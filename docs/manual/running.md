@@ -72,7 +72,7 @@ respect to atmospheric state variables.
 ```
 
 Kernel output is written to diagnostic files and/or matrix output files,
-depending on the configuration (see [Output diagnostics](output_diagnostics.md)).
+depending on the configuration (see [Output diagnostics](diagnostics.md)).
 
 Kernel calculations are typically more expensive than pure forward
 simulations.
