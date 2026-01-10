@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -5112,8 +5112,6 @@ void read_atm(
   const ctl_t *ctl,
   atm_t *atm) {
 
-  FILE *in;
-
   char file[LEN];
 
   /* Init... */
@@ -5128,24 +5126,21 @@ void read_atm(
   /* Write info... */
   LOG(1, "Read atmospheric data: %s", file);
 
-  /* Open file... */
-  if (!(in = fopen(file, "r")))
-    ERRMSG("Cannot open file!");
-
   /* Read ASCII data... */
   if (ctl->atmfmt == 1)
-    read_atm_asc(in, ctl, atm);
+    read_atm_asc(file, ctl, atm);
 
   /* Read binary data... */
   else if (ctl->atmfmt == 2)
-    read_atm_bin(in, ctl, atm);
+    read_atm_bin(file, ctl, atm);
+
+  /* Read netCDF data... */
+  else if (ctl->atmfmt == 3)
+    read_atm_nc(file, ctl, atm, 0);
 
   /* Error... */
   else
     ERRMSG("Unknown atmospheric data file format, check ATMFMT!");
-
-  /* Close file... */
-  fclose(in);
 
   /* Check number of points... */
   if (atm->np < 1)
@@ -5190,7 +5185,7 @@ void read_atm(
 /*****************************************************************************/
 
 void read_atm_asc(
-  FILE *in,
+  const char *filename,
   const ctl_t *ctl,
   atm_t *atm) {
 
@@ -5198,6 +5193,11 @@ void read_atm_asc(
 
   /* Init... */
   atm->np = 0;
+
+  /* Open file... */
+  FILE *in;
+  if (!(in = fopen(filename, "r")))
+    ERRMSG("Cannot open file!");
 
   /* Read line... */
   while (fgets(line, LEN, in)) {
@@ -5229,14 +5229,22 @@ void read_atm_asc(
     if ((++atm->np) > NP)
       ERRMSG("Too many data points!");
   }
+
+  /* Close file... */
+  fclose(in);
 }
 
 /*****************************************************************************/
 
 void read_atm_bin(
-  FILE *in,
+  const char *filename,
   const ctl_t *ctl,
   atm_t *atm) {
+
+  /* Open file... */
+  FILE *in;
+  if (!(in = fopen(filename, "r")))
+    ERRMSG("Cannot open file!");
 
   /* Read header... */
   char magic[4];
@@ -5315,6 +5323,114 @@ void read_atm_bin(
 	    (size_t) ctl->nsf,
 	  in);
   }
+
+  /* Close file... */
+  fclose(in);
+}
+
+/*****************************************************************************/
+
+void read_atm_nc(
+  const char *filename,
+  const ctl_t *ctl,
+  atm_t *atm,
+  int profile) {
+  int ncid;
+
+  int var_time, var_z, var_lon, var_lat, var_p, var_t, var_q[NG], var_k[NW],
+    var_cz = -1, var_cdz = -1, var_ck[NCL], var_sft =
+    -1, var_sfe[NSF], var_nlev = -1;
+
+  char varname[LEN];
+
+  /* Open file... */
+  NC(nc_open(filename, NC_NOWRITE, &ncid));
+
+  /* Set hyperslab... */
+  size_t start1[1] = { (size_t) profile };
+  size_t count1[1] = { 1 };
+  size_t start2[2] = { (size_t) profile, 0 };
+  size_t count2[2] = { 1, (size_t) atm->np };
+
+  /* Determine atm->np... */
+  NC(nc_inq_varid(ncid, "nlev", &var_nlev));
+  NC(nc_get_vara_int(ncid, var_nlev, start1, count1, &atm->np));
+  if (atm->np < 1 || atm->np > NP)
+    ERRMSG("Number of level out of range!");
+
+  /* Inquire core variables... */
+  NC(nc_inq_varid(ncid, "time", &var_time));
+  NC(nc_inq_varid(ncid, "z", &var_z));
+  NC(nc_inq_varid(ncid, "lon", &var_lon));
+  NC(nc_inq_varid(ncid, "lat", &var_lat));
+  NC(nc_inq_varid(ncid, "p", &var_p));
+  NC(nc_inq_varid(ncid, "t", &var_t));
+
+  /* Inquire emiters... */
+  for (int ig = 0; ig < ctl->ng; ig++)
+    NC(nc_inq_varid(ncid, ctl->emitter[ig], &var_q[ig]));
+
+  /* Inquire extinctions... */
+  for (int iw = 0; iw < ctl->nw; iw++) {
+    snprintf(varname, sizeof(varname), "ext_win_%d", iw);
+    NC(nc_inq_varid(ncid, varname, &var_k[iw]));
+  }
+
+  /* Inquire cloud variables... */
+  if (ctl->ncl > 0) {
+    NC(nc_inq_varid(ncid, "cld_z", &var_cz));
+    NC(nc_inq_varid(ncid, "cld_dz", &var_cdz));
+    for (int icl = 0; icl < ctl->ncl; icl++) {
+      snprintf(varname, sizeof(varname), "cld_k_%d", icl);
+      NC(nc_inq_varid(ncid, varname, &var_ck[icl]));
+    }
+  }
+
+  /* Inquire surface variables... */
+  if (ctl->nsf > 0) {
+    NC(nc_inq_varid(ncid, "sf_t", &var_sft));
+    for (int isf = 0; isf < ctl->nsf; isf++) {
+      snprintf(varname, sizeof(varname), "sf_eps_%d", isf);
+      NC(nc_inq_varid(ncid, varname, &var_sfe[isf]));
+    }
+  }
+
+  /* Read core variables... */
+  NC(nc_get_vara_double(ncid, var_time, start2, count2, atm->time));
+  NC(nc_get_vara_double(ncid, var_z, start2, count2, atm->z));
+  NC(nc_get_vara_double(ncid, var_lon, start2, count2, atm->lon));
+  NC(nc_get_vara_double(ncid, var_lat, start2, count2, atm->lat));
+  NC(nc_get_vara_double(ncid, var_p, start2, count2, atm->p));
+  NC(nc_get_vara_double(ncid, var_t, start2, count2, atm->t));
+
+  /* Read emitters... */
+  for (int ig = 0; ig < ctl->ng; ig++)
+    NC(nc_get_vara_double(ncid, var_q[ig], start2, count2, atm->q[ig]));
+
+  /* Read extinctions... */
+  for (int iw = 0; iw < ctl->nw; iw++)
+    NC(nc_get_vara_double(ncid, var_k[iw], start2, count2, atm->k[iw]));
+
+  /* Read cloud variables... */
+  if (ctl->ncl > 0) {
+    NC(nc_get_vara_double(ncid, var_cz, start1, count1, &atm->clz));
+    NC(nc_get_vara_double(ncid, var_cdz, start1, count1, &atm->cldz));
+    for (int icl = 0; icl < ctl->ncl; icl++)
+      NC(nc_get_vara_double
+	 (ncid, var_ck[icl], start1, count1, &atm->clk[icl]));
+  }
+
+  /* Read surface variables... */
+  if (ctl->nsf > 0) {
+    NC(nc_get_vara_double(ncid, var_sft, start1, count1, &atm->sft));
+
+    for (int isf = 0; isf < ctl->nsf; isf++)
+      NC(nc_get_vara_double
+	 (ncid, var_sfe[isf], start1, count1, &atm->sfeps[isf]));
+  }
+
+  /* Close file... */
+  NC(nc_close(ncid));
 }
 
 /*****************************************************************************/
@@ -6607,8 +6723,6 @@ void write_atm(
   const ctl_t *ctl,
   const atm_t *atm) {
 
-  FILE *out;
-
   char file[LEN];
 
   /* Set filename... */
@@ -6620,24 +6734,21 @@ void write_atm(
   /* Write info... */
   LOG(1, "Write atmospheric data: %s", file);
 
-  /* Create file... */
-  if (!(out = fopen(file, "w")))
-    ERRMSG("Cannot create file!");
-
   /* Write ASCII file... */
   if (ctl->atmfmt == 1)
-    write_atm_asc(out, ctl, atm);
+    write_atm_asc(file, ctl, atm);
 
   /* Write binary file... */
   else if (ctl->atmfmt == 2)
-    write_atm_bin(out, ctl, atm);
+    write_atm_bin(file, ctl, atm);
+
+  /* Write netCDF file... */
+  else if (ctl->atmfmt == 3)
+    write_atm_nc(file, ctl, atm, 0);
 
   /* Error... */
   else
     ERRMSG("Unknown file format, check ATMFMT!");
-
-  /* Close file... */
-  fclose(out);
 
   /* Write info... */
   double mini, maxi;
@@ -6678,11 +6789,16 @@ void write_atm(
 /*****************************************************************************/
 
 void write_atm_asc(
-  FILE *out,
+  const char *filename,
   const ctl_t *ctl,
   const atm_t *atm) {
 
   int n = 6;
+
+  /* Create file... */
+  FILE *out;
+  if (!(out = fopen(filename, "w")))
+    ERRMSG("Cannot create file!");
 
   /* Write header... */
   fprintf(out,
@@ -6734,14 +6850,22 @@ void write_atm_asc(
     }
     fprintf(out, "\n");
   }
+
+  /* Close file... */
+  fclose(out);
 }
 
 /*****************************************************************************/
 
 void write_atm_bin(
-  FILE *out,
+  const char *filename,
   const ctl_t *ctl,
   const atm_t *atm) {
+
+  /* Create file... */
+  FILE *out;
+  if (!(out = fopen(filename, "w")))
+    ERRMSG("Cannot create file!");
 
   /* Write header... */
   FWRITE("ATM1", char,
@@ -6810,6 +6934,161 @@ void write_atm_bin(
 	     (size_t) ctl->nsf,
 	   out);
   }
+
+  /* Close file... */
+  fclose(out);
+}
+
+/*****************************************************************************/
+
+void write_atm_nc(
+  const char *filename,
+  const ctl_t *ctl,
+  const atm_t *atm,
+  int profile) {
+
+  char varname[64];
+
+  int ncid, dim_profile, dim_level, v_nlev, v_time, v_z, v_lon, v_lat, v_p,
+    v_t, v_q[NG], v_k[NW], v_clz = -1, v_cldz = -1, v_clk[NCL], v_sft =
+    -1, v_sfe[NSF];
+
+  size_t level_max;
+
+  /* Open or create file... */
+  if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR)
+    NC(nc_create(filename, NC_NETCDF4, &ncid));
+
+  /* Enter define mode... */
+  int r = nc_redef(ncid);
+  if (r != NC_NOERR && r != NC_EINDEFINE)
+    NC(r);
+
+  /* Define profile dimension (unlimited)... */
+  if (nc_inq_dimid(ncid, "profile", &dim_profile) != NC_NOERR)
+    NC(nc_def_dim(ncid, "profile", NC_UNLIMITED, &dim_profile));
+
+  /* Define level dimension (fixed)... */
+  if (nc_inq_dimid(ncid, "level", &dim_level) == NC_NOERR) {
+    NC(nc_inq_dimlen(ncid, dim_level, &level_max));
+    if (level_max < 1 || level_max > (size_t) NP)
+      ERRMSG("netCDF dimension level is out of range!");
+    if ((size_t) atm->np > level_max)
+      ERRMSG("profile has too many levels!");
+  } else {
+    level_max = (size_t) atm->np;
+    NC(nc_def_dim(ncid, "level", level_max, &dim_level));
+  }
+
+  /* Set dimensions IDs... */
+  int dimids1[1] = { dim_profile };
+  int dimids2[2] = { dim_profile, dim_level };
+
+  /* Define nlev... */
+  if (nc_inq_varid(ncid, "nlev", &v_nlev) != NC_NOERR)
+    NC(nc_def_var(ncid, "nlev", NC_INT, 1, dimids1, &v_nlev));
+
+  /* Define core variables...... */
+  if (nc_inq_varid(ncid, "time", &v_time) != NC_NOERR)
+    NC(nc_def_var(ncid, "time", NC_DOUBLE, 2, dimids2, &v_time));
+  if (nc_inq_varid(ncid, "z", &v_z) != NC_NOERR)
+    NC(nc_def_var(ncid, "z", NC_DOUBLE, 2, dimids2, &v_z));
+  if (nc_inq_varid(ncid, "lon", &v_lon) != NC_NOERR)
+    NC(nc_def_var(ncid, "lon", NC_DOUBLE, 2, dimids2, &v_lon));
+  if (nc_inq_varid(ncid, "lat", &v_lat) != NC_NOERR)
+    NC(nc_def_var(ncid, "lat", NC_DOUBLE, 2, dimids2, &v_lat));
+  if (nc_inq_varid(ncid, "p", &v_p) != NC_NOERR)
+    NC(nc_def_var(ncid, "p", NC_DOUBLE, 2, dimids2, &v_p));
+  if (nc_inq_varid(ncid, "t", &v_t) != NC_NOERR)
+    NC(nc_def_var(ncid, "t", NC_DOUBLE, 2, dimids2, &v_t));
+
+  /* Define emitters... */
+  for (int ig = 0; ig < ctl->ng; ig++)
+    if (nc_inq_varid(ncid, ctl->emitter[ig], &v_q[ig]) != NC_NOERR)
+      NC(nc_def_var(ncid, ctl->emitter[ig], NC_DOUBLE, 2, dimids2, &v_q[ig]));
+
+  /* Define extinction... */
+  for (int iw = 0; iw < ctl->nw; iw++) {
+    snprintf(varname, sizeof(varname), "ext_win_%d", iw);
+    if (nc_inq_varid(ncid, varname, &v_k[iw]) != NC_NOERR)
+      NC(nc_def_var(ncid, varname, NC_DOUBLE, 2, dimids2, &v_k[iw]));
+  }
+
+  /* Define cloud variables... */
+  if (ctl->ncl > 0) {
+    if (nc_inq_varid(ncid, "cld_z", &v_clz) != NC_NOERR)
+      NC(nc_def_var(ncid, "cld_z", NC_DOUBLE, 1, dimids1, &v_clz));
+
+    if (nc_inq_varid(ncid, "cld_dz", &v_cldz) != NC_NOERR)
+      NC(nc_def_var(ncid, "cld_dz", NC_DOUBLE, 1, dimids1, &v_cldz));
+
+    for (int icl = 0; icl < ctl->ncl; icl++) {
+      snprintf(varname, sizeof(varname), "cld_k_%d", icl);
+      if (nc_inq_varid(ncid, varname, &v_clk[icl]) != NC_NOERR)
+	NC(nc_def_var(ncid, varname, NC_DOUBLE, 1, dimids1, &v_clk[icl]));
+    }
+  }
+
+  /* Define surface variables... */
+  if (ctl->nsf > 0) {
+    if (nc_inq_varid(ncid, "sf_t", &v_sft) != NC_NOERR)
+      NC(nc_def_var(ncid, "sf_t", NC_DOUBLE, 1, dimids1, &v_sft));
+
+    for (int isf = 0; isf < ctl->nsf; isf++) {
+      snprintf(varname, sizeof(varname), "sf_eps_%d", isf);
+      if (nc_inq_varid(ncid, varname, &v_sfe[isf]) != NC_NOERR)
+	NC(nc_def_var(ncid, varname, NC_DOUBLE, 1, dimids1, &v_sfe[isf]));
+    }
+  }
+
+  /* Leave define mode... */
+  NC(nc_enddef(ncid));
+
+  /* Define hyperslab... */
+  size_t start1[1] = { (size_t) profile };
+  size_t count1[1] = { 1 };
+  size_t start2[2] = { (size_t) profile, 0 };
+  size_t count2[2] = { 1, (size_t) atm->np };
+
+  /* Write nlev... */
+  NC(nc_put_vara_int(ncid, v_nlev, start1, count1, &atm->np));
+
+  /* Write core variables... */
+  NC(nc_put_vara_double(ncid, v_time, start2, count2, atm->time));
+  NC(nc_put_vara_double(ncid, v_z, start2, count2, atm->z));
+  NC(nc_put_vara_double(ncid, v_lon, start2, count2, atm->lon));
+  NC(nc_put_vara_double(ncid, v_lat, start2, count2, atm->lat));
+  NC(nc_put_vara_double(ncid, v_p, start2, count2, atm->p));
+  NC(nc_put_vara_double(ncid, v_t, start2, count2, atm->t));
+
+  /* Write emitters... */
+  for (int ig = 0; ig < ctl->ng; ig++)
+    NC(nc_put_vara_double(ncid, v_q[ig], start2, count2, atm->q[ig]));
+
+  /* Write extinction... */
+  for (int iw = 0; iw < ctl->nw; iw++)
+    NC(nc_put_vara_double(ncid, v_k[iw], start2, count2, atm->k[iw]));
+
+  /* Write cloud variables... */
+  if (ctl->ncl > 0) {
+    NC(nc_put_vara_double(ncid, v_clz, start1, count1, &atm->clz));
+    NC(nc_put_vara_double(ncid, v_cldz, start1, count1, &atm->cldz));
+    for (int icl = 0; icl < ctl->ncl; icl++)
+      NC(nc_put_vara_double
+	 (ncid, v_clk[icl], start1, count1, &atm->clk[icl]));
+  }
+
+  /* Write surface variables... */
+  if (ctl->nsf > 0) {
+    NC(nc_put_vara_double(ncid, v_sft, start1, count1, &atm->sft));
+    for (int isf = 0; isf < ctl->nsf; isf++)
+      NC(nc_put_vara_double
+	 (ncid, v_sfe[isf], start1, count1, &atm->sfeps[isf]));
+  }
+
+  /* Close file... */
+  NC(nc_sync(ncid));
+  NC(nc_close(ncid));
 }
 
 /*****************************************************************************/

@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -112,6 +112,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_statistics.h>
 #include <math.h>
+#include <netcdf.h>
 #include <omp.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -631,6 +632,23 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
 /**
+ * @brief Execute a NetCDF command and check for errors.
+ *
+ * This macro executes a NetCDF command and checks the result. If the
+ * result indicates an error, it prints the error message using
+ * ERRMSG.
+ *
+ * @param cmd NetCDF command to execute.
+ *
+ * @author Lars Hoffmann
+ */
+#define NC(cmd) {				     \
+    int nc_result=(cmd);			     \
+    if(nc_result!=NC_NOERR)			     \
+      ERRMSG("%s", nc_strerror(nc_result));	     \
+  }
+
+/**
  * @brief Convert noise-equivalent spectral radiance (NESR) to
  *        noise-equivalent delta temperature (NEDT).
  *
@@ -1104,7 +1122,7 @@ typedef struct {
   /*! Look-up table file format (1=ASCII, 2=binary). */
   int tblfmt;
 
-  /*! Atmospheric data file format (1=ASCII, 2=binary). */
+  /*! Atmospheric data file format (1=ASCII, 2=binary, 3=netCDF). */
   int atmfmt;
 
   /*! Observation data file format (1=ASCII, 2=binary). */
@@ -3035,7 +3053,7 @@ void read_atm(
  * @author Lars Hoffmann
  */
 void read_atm_asc(
-  FILE * in,
+  const char *filename,
   const ctl_t * ctl,
   atm_t * atm);
 
@@ -3089,9 +3107,54 @@ void read_atm_asc(
  * @author Lars Hoffmann
  */
 void read_atm_bin(
-  FILE * in,
+  const char *filename,
   const ctl_t * ctl,
   atm_t * atm);
+
+/**
+ * @brief Read one atmospheric profile from a netCDF file.
+ *
+ * This routine reads a single profile (record) from a netCDF file into an
+ * @ref atm_t structure. The file is expected to follow the JURASSIC netCDF
+ * layout produced by @ref write_atm_nc(), using an unlimited @c profile
+ * dimension and a fixed @c level dimension.
+ *
+ * The number of valid vertical levels for the requested profile is read from
+ * @c nlev(profile) and stored in @c atm->np. All 2-D profile variables are
+ * then read for the hyperslab @c (profile,0:atm->np-1).
+ *
+ * ## File layout (expected)
+ * Dimensions:
+ * - @c profile : unlimited (record dimension)
+ * - @c level   : fixed (maximum number of vertical levels stored in the file)
+ *
+ * Variables:
+ * - @c nlev(profile) : number of valid levels per profile (required)
+ * - Core state (2-D): @c time,z,lon,lat,p,t(profile,level)
+ * - Trace gases (2-D): one variable per species named @c ctl->emitter[ig]
+ *   with dimensions @c (profile,level)
+ * - Extinction windows (2-D): @c ext_win_%d(profile,level)
+ * - Clouds (1-D, optional if @c ctl->ncl>0): @c cld_z, cld_dz, cld_k_%d(profile)
+ * - Surface (1-D, optional if @c ctl->nsf>0): @c sf_t, sf_eps_%d(profile)
+ *
+ * @param filename Input netCDF file name.
+ * @param ctl      Control structure (defines numbers/names of optional fields,
+ *                 e.g., @c ng, @c nw, @c ncl, @c nsf, and @c emitter[]).
+ * @param atm      Atmospheric profile structure to fill. On return, @c atm->np
+ *                 contains the number of valid levels for the requested profile.
+ * @param profile  Record index along the unlimited @c profile dimension.
+ *
+ * @note This function assumes that arrays in @p atm have static capacity @c NP
+ *       and checks that @c atm->np is within @c [1,NP]. Errors are handled via
+ *       the @c NC(...) macro.
+ *
+ * @author Lars Hoffmann
+ */
+void read_atm_nc(
+  const char *filename,
+  const ctl_t * ctl,
+  atm_t * atm,
+  int dataset);
 
 /**
  * @brief Read model control parameters from command-line and configuration input.
@@ -4126,7 +4189,7 @@ void write_atm(
  * @author Lars Hoffmann
  */
 void write_atm_asc(
-  FILE * out,
+  const char *filename,
   const ctl_t * ctl,
   const atm_t * atm);
 
@@ -4185,9 +4248,58 @@ void write_atm_asc(
  * @author Lars Hoffmann
  */
 void write_atm_bin(
-  FILE * out,
+  const char *filename,
   const ctl_t * ctl,
   const atm_t * atm);
+
+/**
+ * @brief Write one atmospheric profile to a netCDF file.
+ *
+ * This routine writes a single profile from an @ref atm_t structure into a
+ * netCDF file using an unlimited record dimension. Multiple profiles can be
+ * stored in the same file by calling this function repeatedly with increasing
+ * @p profile indices.
+ *
+ * The function creates the file if it does not exist (netCDF-4/HDF5) and
+ * defines missing dimensions/variables on the fly. Existing definitions are
+ * reused.
+ *
+ * ## File layout
+ * Dimensions:
+ * - @c profile : unlimited (record dimension)
+ * - @c level   : fixed (maximum number of vertical levels stored in the file)
+ *
+ * Variables:
+ * - @c nlev(profile) : number of valid levels for each profile (written as
+ *   @c atm->np)
+ * - Core state (2-D): @c time,z,lon,lat,p,t(profile,level)
+ * - Trace gases (2-D): one variable per species named @c ctl->emitter[ig]
+ *   with dimensions @c (profile,level)
+ * - Extinction windows (2-D): @c ext_win_%d(profile,level)
+ * - Clouds (1-D, optional if @c ctl->ncl>0): @c cld_z, cld_dz, cld_k_%d(profile)
+ * - Surface (1-D, optional if @c ctl->nsf>0): @c sf_t, sf_eps_%d(profile)
+ *
+ * Only the first @c atm->np elements along @c level are written for 2-D
+ * variables. The effective number of levels is stored in @c nlev(profile).
+ * (If a profile is overwritten with fewer levels than previously written, old
+ * values above @c nlev may remain unless explicitly filled by the caller.)
+ *
+ * @param filename Output netCDF file name.
+ * @param ctl      Control structure (defines numbers/names of optional fields,
+ *                 e.g., @c ng, @c nw, @c ncl, @c nsf, and @c emitter[]).
+ * @param atm      Atmospheric profile data to write (uses @c atm->np levels).
+ * @param profile  Record index along the unlimited @c profile dimension.
+ *
+ * @note This function requires netCDF support (@c HAVE_NETCDF) and uses the
+ *       netCDF C API. Errors are handled via the @c NC(...) macro.
+ *
+ * @author Lars Hoffmann
+ */
+void write_atm_nc(
+  const char *filename,
+  const ctl_t * ctl,
+  const atm_t * atm,
+  int dataset);
 
 /**
  * @brief Write atmospheric profile in RFM-compatible format.

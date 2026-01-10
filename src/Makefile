@@ -52,7 +52,10 @@ CC ?= gcc
 CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" $(OPT) -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
 
 # LDFLAGS...
-LDFLAGS ?= $(LIBDIR) -lgsl -lgslcblas -lm
+LDFLAGS += $(LIBDIR) -lgsl -lgslcblas -lnetcdf -lm
+ifeq ($(STATIC),1)
+  LDFLAGS += -lhdf5_hl -lhdf5 -lm -lz -lsz -lzstd
+endif
 
 # Use JURASSIC-UNIFIED library...
 ifeq ($(UNIFIED),1)
