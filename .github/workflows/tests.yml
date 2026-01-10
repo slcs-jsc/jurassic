@@ -12,8 +12,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install
-      run: sudo apt-get update ; sudo apt-get install libgsl-dev
+      run: sudo apt-get update ; sudo apt-get install libgsl-dev libnetcdf-dev libhdf5-dev
     - name: make
-      run: cd src ; make STATIC=0
+      run: cd src ; make
     - name: make check
       run: cd src ; make check
