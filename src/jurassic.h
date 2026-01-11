@@ -649,6 +649,202 @@
   }
 
 /**
+ * @brief Define a NetCDF variable with attributes.
+ *
+ * This macro defines a NetCDF variable with the specified name, data
+ * type, dimensions, long name, and units. It also sets the
+ * `long_name` and `units` attributes for the variable.
+ * It enables compression and quantizatio of the data.
+ *
+ * @param varname Name of the variable.
+ * @param type Data type of the variable.
+ * @param ndims Number of dimensions for the variable.
+ * @param dims Array of dimension IDs.
+ * @param long_name Long name of the variable.
+ * @param units Units of the variable.
+ * @param level zlib compression level (0 = off).
+ * @param quant Number of digits for quantization (0 = off).
+ *
+ * @note To enable ZSTD compression, replace `nc_def_var_deflate()` by
+ * `nc_def_var_filter()` below. Use dynamic linking, static linking does not work.
+ * Set environment variable `HDF5_PLUGIN_PATH` to `./libs/build/share/netcdf-plugins/`.
+ *
+ * @author Lars Hoffmann
+ */
+#define NC_DEF_VAR(varname, type, ndims, dims, long_name, units, level, quant) { \
+    NC(nc_def_var(ncid, varname, type, ndims, dims, &varid));		\
+    NC(nc_put_att_text(ncid, varid, "long_name", strnlen(long_name, LEN), long_name)); \
+    NC(nc_put_att_text(ncid, varid, "units", strnlen(units, LEN), units)); \
+    if((quant) > 0)							\
+      NC(nc_def_var_quantize(ncid, varid, NC_QUANTIZE_GRANULARBR, quant)); \
+    if((level) != 0) {							\
+      NC(nc_def_var_deflate(ncid, varid, 1, 1, level));			\
+      /* unsigned int ulevel = (unsigned int)level; */			\
+      /* NC(nc_def_var_filter(ncid, varid, 32015, 1, (unsigned int[]){ulevel})); */ \
+    }									\
+  }
+
+/**
+ * @brief Retrieve a double-precision variable from a NetCDF file.
+ *
+ * This macro retrieves a double-precision variable from a NetCDF
+ * file. It first checks if the variable exists in the file and then
+ * reads its data into the specified pointer. If the `force` parameter
+ * is set to true, it forces the retrieval of the variable, raising an
+ * error if the variable does not exist.  If `force` is false, it
+ * retrieves the variable if it exists and issues a warning if it does
+ * not.
+ *
+ * @param varname Name of the variable to retrieve.
+ * @param ptr Pointer to the memory location where the data will be stored.
+ * @param force Boolean flag indicating whether to force retrieval (true) or not (false).
+ *
+ * @author Lars Hoffmann
+ */
+#define NC_GET_DOUBLE(varname, ptr, force) {			\
+    if(force) {							\
+      NC(nc_inq_varid(ncid, varname, &varid));			\
+      NC(nc_get_var_double(ncid, varid, ptr));			\
+    } else {							\
+      if(nc_inq_varid(ncid, varname, &varid) == NC_NOERR) {	\
+	NC(nc_get_var_double(ncid, varid, ptr));		\
+      } else							\
+	WARN("netCDF variable %s is missing!", varname);	\
+    }								\
+  }
+
+/**
+ * @brief Inquire the length of a dimension in a NetCDF file.
+ *
+ * This macro retrieves the length of a specified dimension from a
+ * NetCDF file.  It checks if the length of the dimension is within a
+ * specified range and assigns the length to the provided pointer. If
+ * the length is outside the specified range, an error message is
+ * raised.
+ *
+ * @param dimname Name of the dimension to inquire.
+ * @param ptr Pointer to an integer where the dimension length will be stored.
+ * @param min Minimum acceptable length for the dimension.
+ * @param max Maximum acceptable length for the dimension.
+ * @param check Flag to check bounds. Set to 1 for bounds check.
+ *
+ * @author Lars Hoffmann
+ * @author Jan Clemens
+ */
+#define NC_INQ_DIM(dimname, ptr, min, max, check) {       \
+    int dimid; size_t naux;				  \
+    NC(nc_inq_dimid(ncid, dimname, &dimid));		  \
+    NC(nc_inq_dimlen(ncid, dimid, &naux));		  \
+    *ptr = (int)naux;                                     \
+    if (check)		                                  \
+      if ((*ptr) < (min) || (*ptr) > (max))		  \
+        ERRMSG("Dimension %s is out of range!", dimname); \
+  }
+
+/**
+ * @brief Write double precision data to a NetCDF variable.
+ *
+ * This macro writes data to a specified NetCDF variable. It can
+ * handle both full variable writes and hyperslab writes depending on
+ * the `hyperslab` parameter. If `hyperslab` is true, the data is
+ * written as a hyperslab; otherwise, the entire variable is written.
+ *
+ * @param varname Name of the NetCDF variable to write to.
+ * @param ptr Pointer to the data to be written.
+ * @param hyperslab Boolean indicating whether to write the data as a hyperslab.
+ *
+ * @author Lars Hoffmann
+ */
+#define NC_PUT_DOUBLE(varname, ptr, hyperslab) {		\
+    NC(nc_inq_varid(ncid, varname, &varid));			\
+    if(hyperslab) {						\
+      NC(nc_put_vara_double(ncid, varid, start, count, ptr));	\
+    } else {							\
+      NC(nc_put_var_double(ncid, varid, ptr));			\
+    }								\
+  }
+
+/**
+ * @brief Write a float array to a NetCDF file.
+ *
+ * This macro writes a float array to a specified variable in a NetCDF
+ * file.  Depending on the value of the hyperslab parameter, the data
+ * can be written as a hyperslab or as a whole variable.
+ *
+ * @param varname Name of the variable to which the float array will be written.
+ * @param ptr Pointer to the float array to be written.
+ * @param hyperslab Boolean flag indicating if the data should be written as a hyperslab. 
+ *        - If true, the data will be written as a hyperslab using the start and count arrays.
+ *        - If false, the data will be written to the entire variable.
+ *
+ * @author Lars Hoffmann
+ */
+#define NC_PUT_FLOAT(varname, ptr, hyperslab) {			\
+    NC(nc_inq_varid(ncid, varname, &varid));			\
+    if(hyperslab) {						\
+      NC(nc_put_vara_float(ncid, varid, start, count, ptr));	\
+    } else {							\
+      NC(nc_put_var_float(ncid, varid, ptr));			\
+    }								\
+  }
+
+/**
+ * @brief Write integer data to a NetCDF variable.
+ *
+ * This macro writes data to a specified NetCDF variable. It can
+ * handle both full variable writes and hyperslab writes depending on
+ * the `hyperslab` parameter. If `hyperslab` is true, the data is
+ * written as a hyperslab; otherwise, the entire variable is written.
+ *
+ * @param varname Name of the NetCDF variable to write to.
+ * @param ptr Pointer to the data to be written.
+ * @param hyperslab Boolean indicating whether to write the data as a hyperslab.
+ *
+ * @author Lars Hoffmann
+ */
+#define NC_PUT_INT(varname, ptr, hyperslab) {			\
+    NC(nc_inq_varid(ncid, varname, &varid));			\
+    if(hyperslab) {						\
+      NC(nc_put_vara_int(ncid, varid, start, count, ptr));	\
+    } else {							\
+      NC(nc_put_var_int(ncid, varid, ptr));			\
+    }								\
+  }
+
+/**
+ * @brief Add a text attribute to a NetCDF variable.
+ *
+ * This macro adds a text attribute to a specified NetCDF variable. It
+ * first retrieves the variable ID using its name, then it attaches
+ * the text attribute to the variable.
+ *
+ * @param varname Name of the NetCDF variable to which the attribute will be added.
+ * @param attname Name of the attribute to be added.
+ * @param text Text of the attribute to be added.
+ *
+ * @author Lars Hoffmann
+ */
+#define NC_PUT_ATT(varname, attname, text) {				\
+    NC(nc_inq_varid(ncid, varname, &varid));				\
+    NC(nc_put_att_text(ncid, varid, attname, strnlen(text, LEN), text)); \
+  }
+
+/**
+ * @brief Add a global text attribute to a NetCDF file.
+ *
+ * This macro adds a text attribute to the global attributes of a
+ * NetCDF file.  It directly attaches the attribute to the file,
+ * rather than to a specific variable.
+ *
+ * @param attname Name of the global attribute to be added.
+ * @param text Text of the attribute to be added.
+ *
+ * @author Lars Hoffmann
+ */
+#define NC_PUT_ATT_GLOBAL(attname, text)				\
+  NC(nc_put_att_text(ncid, NC_GLOBAL, attname, strnlen(text, LEN), text));
+
+/**
  * @brief Convert noise-equivalent spectral radiance (NESR) to
  *        noise-equivalent delta temperature (NEDT).
  *

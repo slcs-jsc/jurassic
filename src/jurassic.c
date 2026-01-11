@@ -140,7 +140,7 @@ size_t atm2x(
 	  && atm->z[ip] <= ctl->retk_zmax[iw])
 	atm2x_help(atm->k[iw][ip], IDXK(iw), ip, x, iqa, ipa, &n);
 
-  /* Add cloud parameters... */
+  /* Add cloud variables... */
   if (ctl->ret_clz)
     atm2x_help(atm->clz, IDXCLZ, 0, x, iqa, ipa, &n);
   if (ctl->ret_cldz)
@@ -149,7 +149,7 @@ size_t atm2x(
     for (int icl = 0; icl < ctl->ncl; icl++)
       atm2x_help(atm->clk[icl], IDXCLK(icl), 0, x, iqa, ipa, &n);
 
-  /* Add surface parameters... */
+  /* Add surface variables... */
   if (ctl->ret_sft)
     atm2x_help(atm->sft, IDXSFT, 0, x, iqa, ipa, &n);
   if (ctl->ret_sfeps)
@@ -1126,7 +1126,7 @@ void climatology(
     for (int icl = 0; icl < ctl->ncl; icl++)
       atm->clk[icl] = 0;
 
-    /* Set surface layer... */
+    /* Set surface... */
     atm->sft = 0;
     for (int isf = 0; isf < ctl->nsf; isf++)
       atm->sfeps[isf] = 1;
@@ -5176,10 +5176,10 @@ void read_atm(
     LOG(2, "Cloud layer: none");
   if (ctl->nsf > 0 && atm->np == 0) {
     LOG(2,
-	"Surface layer: T_s = %g K | eps= %g ... %g",
+	"Surface: T_s = %g K | eps= %g ... %g",
 	atm->sft, atm->sfeps[0], atm->sfeps[ctl->nsf - 1]);
   } else
-    LOG(2, "Surface layer: none");
+    LOG(2, "Surface: none");
 }
 
 /*****************************************************************************/
@@ -5335,10 +5335,9 @@ void read_atm_nc(
   const ctl_t *ctl,
   atm_t *atm,
   int profile) {
-  int ncid;
 
-  int var_time, var_z, var_lon, var_lat, var_p, var_t, var_q[NG], var_k[NW],
-    var_cz = -1, var_cdz = -1, var_ck[NCL], var_sft =
+  int ncid, var_time, var_z, var_lon, var_lat, var_p, var_t, var_q[NG],
+    var_k[NW], var_cz = -1, var_cdz = -1, var_ck[NCL], var_sft =
     -1, var_sfe[NSF], var_nlev = -1;
 
   char varname[LEN];
@@ -5347,14 +5346,12 @@ void read_atm_nc(
   NC(nc_open(filename, NC_NOWRITE, &ncid));
 
   /* Set hyperslab... */
-  size_t start1[1] = { (size_t) profile };
-  size_t count1[1] = { 1 };
-  size_t start2[2] = { (size_t) profile, 0 };
-  size_t count2[2] = { 1, (size_t) atm->np };
+  size_t start[2] = { (size_t) profile, 0 };
+  size_t count[2] = { 1, (size_t) atm->np };
 
   /* Determine atm->np... */
   NC(nc_inq_varid(ncid, "nlev", &var_nlev));
-  NC(nc_get_vara_int(ncid, var_nlev, start1, count1, &atm->np));
+  NC(nc_get_vara_int(ncid, var_nlev, start, count, &atm->np));
   if (atm->np < 1 || atm->np > NP)
     ERRMSG("Number of level out of range!");
 
@@ -5372,7 +5369,7 @@ void read_atm_nc(
 
   /* Inquire extinctions... */
   for (int iw = 0; iw < ctl->nw; iw++) {
-    snprintf(varname, sizeof(varname), "ext_win_%d", iw);
+    sprintf(varname, "ext_win_%d", iw);
     NC(nc_inq_varid(ncid, varname, &var_k[iw]));
   }
 
@@ -5381,52 +5378,51 @@ void read_atm_nc(
     NC(nc_inq_varid(ncid, "cld_z", &var_cz));
     NC(nc_inq_varid(ncid, "cld_dz", &var_cdz));
     for (int icl = 0; icl < ctl->ncl; icl++) {
-      snprintf(varname, sizeof(varname), "cld_k_%d", icl);
+      sprintf(varname, "cld_k_%.4f", ctl->clnu[icl]);
       NC(nc_inq_varid(ncid, varname, &var_ck[icl]));
     }
   }
 
   /* Inquire surface variables... */
   if (ctl->nsf > 0) {
-    NC(nc_inq_varid(ncid, "sf_t", &var_sft));
+    NC(nc_inq_varid(ncid, "srf_t", &var_sft));
     for (int isf = 0; isf < ctl->nsf; isf++) {
-      snprintf(varname, sizeof(varname), "sf_eps_%d", isf);
+      sprintf(varname, "srf_eps_%.4f", ctl->sfnu[isf]);
       NC(nc_inq_varid(ncid, varname, &var_sfe[isf]));
     }
   }
 
   /* Read core variables... */
-  NC(nc_get_vara_double(ncid, var_time, start2, count2, atm->time));
-  NC(nc_get_vara_double(ncid, var_z, start2, count2, atm->z));
-  NC(nc_get_vara_double(ncid, var_lon, start2, count2, atm->lon));
-  NC(nc_get_vara_double(ncid, var_lat, start2, count2, atm->lat));
-  NC(nc_get_vara_double(ncid, var_p, start2, count2, atm->p));
-  NC(nc_get_vara_double(ncid, var_t, start2, count2, atm->t));
+  NC(nc_get_vara_double(ncid, var_time, start, count, atm->time));
+  NC(nc_get_vara_double(ncid, var_z, start, count, atm->z));
+  NC(nc_get_vara_double(ncid, var_lon, start, count, atm->lon));
+  NC(nc_get_vara_double(ncid, var_lat, start, count, atm->lat));
+  NC(nc_get_vara_double(ncid, var_p, start, count, atm->p));
+  NC(nc_get_vara_double(ncid, var_t, start, count, atm->t));
 
   /* Read emitters... */
   for (int ig = 0; ig < ctl->ng; ig++)
-    NC(nc_get_vara_double(ncid, var_q[ig], start2, count2, atm->q[ig]));
+    NC(nc_get_vara_double(ncid, var_q[ig], start, count, atm->q[ig]));
 
   /* Read extinctions... */
   for (int iw = 0; iw < ctl->nw; iw++)
-    NC(nc_get_vara_double(ncid, var_k[iw], start2, count2, atm->k[iw]));
+    NC(nc_get_vara_double(ncid, var_k[iw], start, count, atm->k[iw]));
 
   /* Read cloud variables... */
   if (ctl->ncl > 0) {
-    NC(nc_get_vara_double(ncid, var_cz, start1, count1, &atm->clz));
-    NC(nc_get_vara_double(ncid, var_cdz, start1, count1, &atm->cldz));
+    NC(nc_get_vara_double(ncid, var_cz, start, count, &atm->clz));
+    NC(nc_get_vara_double(ncid, var_cdz, start, count, &atm->cldz));
     for (int icl = 0; icl < ctl->ncl; icl++)
-      NC(nc_get_vara_double
-	 (ncid, var_ck[icl], start1, count1, &atm->clk[icl]));
+      NC(nc_get_vara_double(ncid, var_ck[icl], start, count, &atm->clk[icl]));
   }
 
   /* Read surface variables... */
   if (ctl->nsf > 0) {
-    NC(nc_get_vara_double(ncid, var_sft, start1, count1, &atm->sft));
+    NC(nc_get_vara_double(ncid, var_sft, start, count, &atm->sft));
 
     for (int isf = 0; isf < ctl->nsf; isf++)
       NC(nc_get_vara_double
-	 (ncid, var_sfe[isf], start1, count1, &atm->sfeps[isf]));
+	 (ncid, var_sfe[isf], start, count, &atm->sfeps[isf]));
   }
 
   /* Close file... */
@@ -6780,10 +6776,10 @@ void write_atm(
     LOG(2, "Cloud layer: none");
   if (ctl->nsf > 0 && atm->np == 0) {
     LOG(2,
-	"Surface layer: T_s = %g K | eps= %g ... %g",
+	"Surface: T_s = %g K | eps= %g ... %g",
 	atm->sft, atm->sfeps[0], atm->sfeps[ctl->nsf - 1]);
   } else
-    LOG(2, "Surface layer: none");
+    LOG(2, "Surface: none");
 }
 
 /*****************************************************************************/
@@ -6820,11 +6816,9 @@ void write_atm_asc(
 	      ++n, ctl->clnu[icl]);
   }
   if (ctl->nsf > 0) {
-    fprintf(out, "# $%d = surface layer height [km]\n", ++n);
-    fprintf(out, "# $%d = surface layer pressure [hPa]\n", ++n);
-    fprintf(out, "# $%d = surface layer temperature [K]\n", ++n);
+    fprintf(out, "# $%d = surface temperature [K]\n", ++n);
     for (int isf = 0; isf < ctl->nsf; isf++)
-      fprintf(out, "# $%d = surface layer emissivity (%.4f cm^-1)\n",
+      fprintf(out, "# $%d = surface emissivity (%.4f cm^-1)\n",
 	      ++n, ctl->sfnu[isf]);
   }
 
@@ -6947,11 +6941,9 @@ void write_atm_nc(
   const atm_t *atm,
   int profile) {
 
-  char varname[64];
+  char longname[LEN], varname[LEN];
 
-  int ncid, dim_profile, dim_level, v_nlev, v_time, v_z, v_lon, v_lat, v_p,
-    v_t, v_q[NG], v_k[NW], v_clz = -1, v_cldz = -1, v_clk[NCL], v_sft =
-    -1, v_sfe[NSF];
+  int ncid, varid, dim_profile, dim_level;
 
   size_t level_max;
 
@@ -6980,110 +6972,146 @@ void write_atm_nc(
     NC(nc_def_dim(ncid, "level", level_max, &dim_level));
   }
 
-  /* Set dimensions IDs... */
-  int dimids1[1] = { dim_profile };
-  int dimids2[2] = { dim_profile, dim_level };
+  /* Set dimension IDs... */
+  int dimids[2] = { dim_profile, dim_level };
 
-  /* Define nlev... */
-  if (nc_inq_varid(ncid, "nlev", &v_nlev) != NC_NOERR)
-    NC(nc_def_var(ncid, "nlev", NC_INT, 1, dimids1, &v_nlev));
+  /* Tunables for compression/quantization... */
+  const int deflate_level = 0;
+  const int quant_digits = 0;
 
-  /* Define core variables...... */
-  if (nc_inq_varid(ncid, "time", &v_time) != NC_NOERR)
-    NC(nc_def_var(ncid, "time", NC_DOUBLE, 2, dimids2, &v_time));
-  if (nc_inq_varid(ncid, "z", &v_z) != NC_NOERR)
-    NC(nc_def_var(ncid, "z", NC_DOUBLE, 2, dimids2, &v_z));
-  if (nc_inq_varid(ncid, "lon", &v_lon) != NC_NOERR)
-    NC(nc_def_var(ncid, "lon", NC_DOUBLE, 2, dimids2, &v_lon));
-  if (nc_inq_varid(ncid, "lat", &v_lat) != NC_NOERR)
-    NC(nc_def_var(ncid, "lat", NC_DOUBLE, 2, dimids2, &v_lat));
-  if (nc_inq_varid(ncid, "p", &v_p) != NC_NOERR)
-    NC(nc_def_var(ncid, "p", NC_DOUBLE, 2, dimids2, &v_p));
-  if (nc_inq_varid(ncid, "t", &v_t) != NC_NOERR)
-    NC(nc_def_var(ncid, "t", NC_DOUBLE, 2, dimids2, &v_t));
+  /* Define nlev (1D)... */
+  if (nc_inq_varid(ncid, "nlev", &varid) != NC_NOERR)
+    NC_DEF_VAR("nlev", NC_INT, 1, dimids,
+	       "number of vertical levels", "1", 0, 0);
 
-  /* Define emitters... */
+  /* Define core variables (2D)... */
+  if (nc_inq_varid(ncid, "time", &varid) != NC_NOERR)
+    NC_DEF_VAR("time", NC_DOUBLE, 2, dimids,
+	       "time in seconds since 2000-01-01, 00:00 UTC", "s",
+	       deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "z", &varid) != NC_NOERR)
+    NC_DEF_VAR("z", NC_DOUBLE, 2, dimids, "altitude", "km", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "lon", &varid) != NC_NOERR)
+    NC_DEF_VAR("lon", NC_DOUBLE, 2, dimids,
+	       "longitude", "degrees_east", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "lat", &varid) != NC_NOERR)
+    NC_DEF_VAR("lat", NC_DOUBLE, 2, dimids,
+	       "latitude", "degrees_north", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "p", &varid) != NC_NOERR)
+    NC_DEF_VAR("p", NC_DOUBLE, 2, dimids,
+	       "pressure", "hPa", deflate_level, quant_digits);
+
+  if (nc_inq_varid(ncid, "t", &varid) != NC_NOERR)
+    NC_DEF_VAR("t", NC_DOUBLE, 2, dimids,
+	       "temperature", "K", deflate_level, quant_digits);
+
+  /* Write emitters (2D)... */
   for (int ig = 0; ig < ctl->ng; ig++)
-    if (nc_inq_varid(ncid, ctl->emitter[ig], &v_q[ig]) != NC_NOERR)
-      NC(nc_def_var(ncid, ctl->emitter[ig], NC_DOUBLE, 2, dimids2, &v_q[ig]));
+    if (nc_inq_varid(ncid, ctl->emitter[ig], &varid) != NC_NOERR) {
+      sprintf(longname, "%s volume mixing ratio", ctl->emitter[ig]);
+      NC_DEF_VAR(ctl->emitter[ig], NC_DOUBLE, 2, dimids,
+		 longname, "ppv", deflate_level, quant_digits);
+    }
 
-  /* Define extinction... */
+  /* Write extinction (2D)... */
   for (int iw = 0; iw < ctl->nw; iw++) {
-    snprintf(varname, sizeof(varname), "ext_win_%d", iw);
-    if (nc_inq_varid(ncid, varname, &v_k[iw]) != NC_NOERR)
-      NC(nc_def_var(ncid, varname, NC_DOUBLE, 2, dimids2, &v_k[iw]));
-  }
-
-  /* Define cloud variables... */
-  if (ctl->ncl > 0) {
-    if (nc_inq_varid(ncid, "cld_z", &v_clz) != NC_NOERR)
-      NC(nc_def_var(ncid, "cld_z", NC_DOUBLE, 1, dimids1, &v_clz));
-
-    if (nc_inq_varid(ncid, "cld_dz", &v_cldz) != NC_NOERR)
-      NC(nc_def_var(ncid, "cld_dz", NC_DOUBLE, 1, dimids1, &v_cldz));
-
-    for (int icl = 0; icl < ctl->ncl; icl++) {
-      snprintf(varname, sizeof(varname), "cld_k_%d", icl);
-      if (nc_inq_varid(ncid, varname, &v_clk[icl]) != NC_NOERR)
-	NC(nc_def_var(ncid, varname, NC_DOUBLE, 1, dimids1, &v_clk[icl]));
+    sprintf(varname, "ext_win_%d", iw);
+    if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
+      sprintf(longname, "extinction (window %d)", iw);
+      NC_DEF_VAR(varname, NC_DOUBLE, 2, dimids,
+		 longname, "km**-1", deflate_level, quant_digits);
     }
   }
 
-  /* Define surface variables... */
+  /* Write cloud variables (1D)... */
+  if (ctl->ncl > 0) {
+    if (nc_inq_varid(ncid, "cld_z", &varid) != NC_NOERR)
+      NC_DEF_VAR("cld_z", NC_DOUBLE, 1, dimids,
+		 "cloud layer height", "km", deflate_level, quant_digits);
+
+    if (nc_inq_varid(ncid, "cld_dz", &varid) != NC_NOERR)
+      NC_DEF_VAR("cld_dz", NC_DOUBLE, 1, dimids,
+		 "cloud layer depth", "km", deflate_level, quant_digits);
+
+    for (int icl = 0; icl < ctl->ncl; icl++) {
+      sprintf(varname, "cld_k_%.4f", ctl->clnu[icl]);
+      if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
+	sprintf(longname, "cloud layer extinction (%.4f cm^-1)",
+		ctl->clnu[icl]);
+	NC_DEF_VAR(varname, NC_DOUBLE, 1, dimids, longname, "km**-1",
+		   deflate_level, quant_digits);
+      }
+    }
+  }
+
+  /* Write surface variables (1D)... */
   if (ctl->nsf > 0) {
-    if (nc_inq_varid(ncid, "sf_t", &v_sft) != NC_NOERR)
-      NC(nc_def_var(ncid, "sf_t", NC_DOUBLE, 1, dimids1, &v_sft));
+    if (nc_inq_varid(ncid, "srf_t", &varid) != NC_NOERR)
+      NC_DEF_VAR("srf_t", NC_DOUBLE, 1, dimids,
+		 "surface temperature", "K", deflate_level, quant_digits);
 
     for (int isf = 0; isf < ctl->nsf; isf++) {
-      snprintf(varname, sizeof(varname), "sf_eps_%d", isf);
-      if (nc_inq_varid(ncid, varname, &v_sfe[isf]) != NC_NOERR)
-	NC(nc_def_var(ncid, varname, NC_DOUBLE, 1, dimids1, &v_sfe[isf]));
+      sprintf(varname, "srf_eps_%.4f", ctl->sfnu[isf]);
+      if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
+	snprintf(longname, sizeof(longname),
+		 "surface emissivity (%.4f cm^-1)", ctl->sfnu[isf]);
+	NC_DEF_VAR(varname, NC_DOUBLE, 1, dimids, longname, "1",
+		   deflate_level, quant_digits);
+      }
     }
   }
 
   /* Leave define mode... */
   NC(nc_enddef(ncid));
 
-  /* Define hyperslab... */
-  size_t start1[1] = { (size_t) profile };
-  size_t count1[1] = { 1 };
-  size_t start2[2] = { (size_t) profile, 0 };
-  size_t count2[2] = { 1, (size_t) atm->np };
+  /* Define hyperslabs... */
+  size_t start[2] = { (size_t) profile, 0 };
+  size_t count[2] = { 1, (size_t) atm->np };
 
   /* Write nlev... */
-  NC(nc_put_vara_int(ncid, v_nlev, start1, count1, &atm->np));
+  NC_PUT_INT("nlev", &atm->np, 1);
 
   /* Write core variables... */
-  NC(nc_put_vara_double(ncid, v_time, start2, count2, atm->time));
-  NC(nc_put_vara_double(ncid, v_z, start2, count2, atm->z));
-  NC(nc_put_vara_double(ncid, v_lon, start2, count2, atm->lon));
-  NC(nc_put_vara_double(ncid, v_lat, start2, count2, atm->lat));
-  NC(nc_put_vara_double(ncid, v_p, start2, count2, atm->p));
-  NC(nc_put_vara_double(ncid, v_t, start2, count2, atm->t));
+  NC_PUT_DOUBLE("time", atm->time, 1);
+  NC_PUT_DOUBLE("z", atm->z, 1);
+  NC_PUT_DOUBLE("lon", atm->lon, 1);
+  NC_PUT_DOUBLE("lat", atm->lat, 1);
+  NC_PUT_DOUBLE("p", atm->p, 1);
+  NC_PUT_DOUBLE("t", atm->t, 1);
 
   /* Write emitters... */
   for (int ig = 0; ig < ctl->ng; ig++)
-    NC(nc_put_vara_double(ncid, v_q[ig], start2, count2, atm->q[ig]));
+    NC_PUT_DOUBLE(ctl->emitter[ig], atm->q[ig], 1);
 
   /* Write extinction... */
-  for (int iw = 0; iw < ctl->nw; iw++)
-    NC(nc_put_vara_double(ncid, v_k[iw], start2, count2, atm->k[iw]));
+  for (int iw = 0; iw < ctl->nw; iw++) {
+    sprintf(varname, "ext_win_%d", iw);
+    NC_PUT_DOUBLE(varname, atm->k[iw], 1);
+  }
 
   /* Write cloud variables... */
   if (ctl->ncl > 0) {
-    NC(nc_put_vara_double(ncid, v_clz, start1, count1, &atm->clz));
-    NC(nc_put_vara_double(ncid, v_cldz, start1, count1, &atm->cldz));
-    for (int icl = 0; icl < ctl->ncl; icl++)
-      NC(nc_put_vara_double
-	 (ncid, v_clk[icl], start1, count1, &atm->clk[icl]));
+    NC_PUT_DOUBLE("cld_z", &atm->clz, 1);
+    NC_PUT_DOUBLE("cld_dz", &atm->cldz, 1);
+
+    for (int icl = 0; icl < ctl->ncl; icl++) {
+      sprintf(varname, "cld_k_%d", icl);
+      NC_PUT_DOUBLE(varname, &atm->clk[icl], 1);
+    }
   }
 
   /* Write surface variables... */
   if (ctl->nsf > 0) {
-    NC(nc_put_vara_double(ncid, v_sft, start1, count1, &atm->sft));
-    for (int isf = 0; isf < ctl->nsf; isf++)
-      NC(nc_put_vara_double
-	 (ncid, v_sfe[isf], start1, count1, &atm->sfeps[isf]));
+    NC_PUT_DOUBLE("srf_t", &atm->sft, 1);
+
+    for (int isf = 0; isf < ctl->nsf; isf++) {
+      sprintf(varname, "srf_eps_%d", isf);
+      NC_PUT_DOUBLE(varname, &atm->sfeps[isf], 1);
+    }
   }
 
   /* Close file... */
