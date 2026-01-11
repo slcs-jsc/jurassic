@@ -1321,7 +1321,7 @@ typedef struct {
   /*! Atmospheric data file format (1=ASCII, 2=binary, 3=netCDF). */
   int atmfmt;
 
-  /*! Observation data file format (1=ASCII, 2=binary). */
+  /*! Observation data file format (1=ASCII, 2=binary, 3=netCDF). */
   int obsfmt;
 
   /*! Reference height for hydrostatic pressure profile (-999 to skip) [km]. */
@@ -3506,7 +3506,7 @@ void read_obs(
  * @author Lars Hoffmann
  */
 void read_obs_asc(
-  FILE * in,
+  const char *filename,
   const ctl_t * ctl,
   obs_t * obs);
 
@@ -3547,9 +3547,46 @@ void read_obs_asc(
  * @author Lars Hoffmann
  */
 void read_obs_bin(
-  FILE * in,
+  const char *filename,
   const ctl_t * ctl,
   obs_t * obs);
+
+/**
+ * @brief Read one observation profile from a NetCDF file.
+ *
+ * This function reads all geometric and spectral observation data for a
+ * single profile from a NetCDF file using the variable-per-channel layout.
+ *
+ * The NetCDF file is expected to contain:
+ *  - A dimension \c profile (unlimited)
+ *  - A dimension \c ray (number of ray paths)
+ *  - A variable \c nray(profile) giving the number of rays for each profile
+ *  - Geometry variables with dimensions \c (profile, ray):
+ *      - \c time, \c obs_z, \c obs_lon, \c obs_lat
+ *      - \c vp_z,  \c vp_lon,  \c vp_lat
+ *      - \c tp_z,  \c tp_lon,  \c tp_lat
+ *  - Spectral variables with dimensions \c (profile, ray), one per channel:
+ *      - \c rad_%.4f  (radiance or brightness temperature)
+ *      - \c tau_%.4f  (transmittance)
+ *    where the formatted frequency corresponds to \c ctl->nu[id].
+ *
+ * All data for the selected profile are read into the supplied \c obs_t
+ * structure. The number of rays is read from \c nray(profile) and stored
+ * in \c obs->nr. If the number of rays exceeds \c NR or is less than one,
+ * an error is raised.
+ *
+ * @param filename  Path to the NetCDF observation file.
+ * @param ctl       Pointer to the control structure defining spectral channels.
+ * @param obs       Pointer to the observation structure to be filled.
+ * @param profile   Zero-based index of the profile to read.
+ *
+ * @author Lars Hoffmann
+ */
+void read_obs_nc(
+  const char *filename,
+  const ctl_t * ctl,
+  obs_t * obs,
+  const int profile);
 
 /**
  * @brief Read and spectrally convolve an RFM output spectrum.
@@ -4684,7 +4721,7 @@ void write_obs(
  * @author Lars Hoffmann
  */
 void write_obs_asc(
-  FILE * out,
+  const char *filename,
   const ctl_t * ctl,
   const obs_t * obs);
 
@@ -4720,9 +4757,50 @@ void write_obs_asc(
  * @author Lars Hoffmann
  */
 void write_obs_bin(
-  FILE * out,
+  const char *filename,
   const ctl_t * ctl,
   const obs_t * obs);
+
+/**
+ * @brief Write one observation profile to a NetCDF file.
+ *
+ * This function writes all geometric and spectral observation data for a
+ * single profile into a NetCDF file using a variable-per-channel layout.
+ * If the file does not exist it is created; if it already exists, the
+ * required dimensions and variables are created if missing and then
+ * extended by writing the specified profile.
+ *
+ * The NetCDF file will contain:
+ *  - A dimension \c profile (unlimited)
+ *  - A dimension \c ray (fixed, number of ray paths)
+ *  - A variable \c nray(profile) giving the number of rays for each profile
+ *  - Geometry variables with dimensions \c (profile, ray):
+ *      - \c time, \c obs_z, \c obs_lon, \c obs_lat
+ *      - \c vp_z,  \c vp_lon,  \c vp_lat
+ *      - \c tp_z,  \c tp_lon,  \c tp_lat
+ *  - Spectral variables with dimensions \c (profile, ray), one per channel:
+ *      - \c rad_%.4f  (radiance or brightness temperature)
+ *      - \c tau_%.4f  (transmittance)
+ *    where the formatted frequency corresponds to \c ctl->nu[id].
+ *
+ * Radiance is written either as physical radiance or as brightness
+ * temperature depending on \c ctl->write_bbt. The ray dimension is fixed
+ * on first creation and all subsequently written profiles must not exceed
+ * this number of rays.
+ *
+ * @param filename  Path to the NetCDF observation file.
+ * @param ctl       Pointer to the control structure defining spectral channels.
+ * @param obs       Pointer to the observation structure containing the data
+ *                  to be written.
+ * @param profile   Zero-based index of the profile to write.
+ *
+ * @author Lars Hoffmann
+ */
+void write_obs_nc(
+  const char *filename,
+  const ctl_t * ctl,
+  const obs_t * obs,
+  const int profile);
 
 /**
  * @brief Write tabulated shape function data to a text file.

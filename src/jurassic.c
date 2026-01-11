@@ -5595,8 +5595,6 @@ void read_obs(
   const ctl_t *ctl,
   obs_t *obs) {
 
-  FILE *in;
-
   char file[LEN];
 
   /* Set filename... */
@@ -5608,24 +5606,21 @@ void read_obs(
   /* Write info... */
   LOG(1, "Read observation data: %s", file);
 
-  /* Open file... */
-  if (!(in = fopen(file, "r")))
-    ERRMSG("Cannot open file!");
-
   /* Read ASCII data... */
   if (ctl->obsfmt == 1)
-    read_obs_asc(in, ctl, obs);
+    read_obs_asc(file, ctl, obs);
 
   /* Read binary data... */
   else if (ctl->obsfmt == 2)
-    read_obs_bin(in, ctl, obs);
+    read_obs_bin(file, ctl, obs);
+
+  /* Read netCDF data... */
+  else if (ctl->obsfmt == 3)
+    read_obs_nc(file, ctl, obs, 0);
 
   /* Error... */
   else
     ERRMSG("Unknown observation file format!");
-
-  /* Close file... */
-  fclose(in);
 
   /* Check number of points... */
   if (obs->nr < 1)
@@ -5676,7 +5671,7 @@ void read_obs(
 /*****************************************************************************/
 
 void read_obs_asc(
-  FILE *in,
+  const char *filename,
   const ctl_t *ctl,
   obs_t *obs) {
 
@@ -5684,6 +5679,11 @@ void read_obs_asc(
 
   /* Init... */
   obs->nr = 0;
+
+  /* Open file... */
+  FILE *in;
+  if (!(in = fopen(filename, "r")))
+    ERRMSG("Cannot open file!");
 
   /* Read line... */
   while (fgets(line, LEN, in)) {
@@ -5708,14 +5708,22 @@ void read_obs_asc(
     if ((++obs->nr) > NR)
       ERRMSG("Too many rays!");
   }
+
+  /* Close file... */
+  fclose(in);
 }
 
 /*****************************************************************************/
 
 void read_obs_bin(
-  FILE *in,
+  const char *filename,
   const ctl_t *ctl,
   obs_t *obs) {
+
+  /* Open file... */
+  FILE *in;
+  if (!(in = fopen(filename, "r")))
+    ERRMSG("Cannot open file!");
 
   /* Read header... */
   char magic[4];
@@ -5778,6 +5786,84 @@ void read_obs_bin(
     FREAD(obs->tau[id], double,
 	  nr,
 	  in);
+
+  /* Close file... */
+  fclose(in);
+}
+
+/*****************************************************************************/
+
+void read_obs_nc(
+  const char *filename,
+  const ctl_t *ctl,
+  obs_t *obs,
+  const int profile) {
+
+  int ncid, var_nray = -1, var_time = -1, var_obsz = -1, var_obslon =
+    -1, var_obslat = -1, var_vpz = -1, var_vplon = -1, var_vplat =
+    -1, var_tpz = -1, var_tplon = -1, var_tplat =
+    -1, var_rad[ND], var_tau[ND];
+
+  char varname[LEN];
+
+  /* Open file... */
+  NC(nc_open(filename, NC_NOWRITE, &ncid));
+
+  /* Hyperslab for variables (profile, ray)... */
+  size_t start[2] = { (size_t) profile, 0 };
+  size_t count[2] = { 1, (size_t) obs->nr };
+
+  /* Read nray(profile) -> obs->nr */
+  NC(nc_inq_varid(ncid, "nray", &var_nray));
+  NC(nc_get_vara_int(ncid, var_nray, start, count, &obs->nr));
+  if (obs->nr < 1 || obs->nr > NR)
+    ERRMSG("Number of ray paths out of range!");
+
+  /* Inquire geometry variables... */
+  NC(nc_inq_varid(ncid, "time", &var_time));
+  NC(nc_inq_varid(ncid, "obs_z", &var_obsz));
+  NC(nc_inq_varid(ncid, "obs_lon", &var_obslon));
+  NC(nc_inq_varid(ncid, "obs_lat", &var_obslat));
+
+  NC(nc_inq_varid(ncid, "vp_z", &var_vpz));
+  NC(nc_inq_varid(ncid, "vp_lon", &var_vplon));
+  NC(nc_inq_varid(ncid, "vp_lat", &var_vplat));
+
+  NC(nc_inq_varid(ncid, "tp_z", &var_tpz));
+  NC(nc_inq_varid(ncid, "tp_lon", &var_tplon));
+  NC(nc_inq_varid(ncid, "tp_lat", &var_tplat));
+
+  /* Inquire spectral variables per channel... */
+  for (int id = 0; id < ctl->nd; id++) {
+    sprintf(varname, "rad_%.4f", ctl->nu[id]);
+    NC(nc_inq_varid(ncid, varname, &var_rad[id]));
+
+    sprintf(varname, "tau_%.4f", ctl->nu[id]);
+    NC(nc_inq_varid(ncid, varname, &var_tau[id]));
+  }
+
+  /* Read geometry... */
+  NC(nc_get_vara_double(ncid, var_time, start, count, obs->time));
+  NC(nc_get_vara_double(ncid, var_obsz, start, count, obs->obsz));
+  NC(nc_get_vara_double(ncid, var_obslon, start, count, obs->obslon));
+  NC(nc_get_vara_double(ncid, var_obslat, start, count, obs->obslat));
+
+  NC(nc_get_vara_double(ncid, var_vpz, start, count, obs->vpz));
+  NC(nc_get_vara_double(ncid, var_vplon, start, count, obs->vplon));
+  NC(nc_get_vara_double(ncid, var_vplat, start, count, obs->vplat));
+
+  NC(nc_get_vara_double(ncid, var_tpz, start, count, obs->tpz));
+  NC(nc_get_vara_double(ncid, var_tplon, start, count, obs->tplon));
+  NC(nc_get_vara_double(ncid, var_tplat, start, count, obs->tplat));
+
+  /* Read radiance and transmittance... */
+  for (int id = 0; id < ctl->nd; id++) {
+    NC(nc_get_vara_double(ncid, var_rad[id], start, count, obs->rad[id]));
+    NC(nc_get_vara_double(ncid, var_tau[id], start, count, obs->tau[id]));
+  }
+
+  /* Close file... */
+  NC(nc_close(ncid));
 }
 
 /*****************************************************************************/
@@ -6730,15 +6816,15 @@ void write_atm(
   /* Write info... */
   LOG(1, "Write atmospheric data: %s", file);
 
-  /* Write ASCII file... */
+  /* Write ASCII data... */
   if (ctl->atmfmt == 1)
     write_atm_asc(file, ctl, atm);
 
-  /* Write binary file... */
+  /* Write binary data... */
   else if (ctl->atmfmt == 2)
     write_atm_bin(file, ctl, atm);
 
-  /* Write netCDF file... */
+  /* Write netCDF data... */
   else if (ctl->atmfmt == 3)
     write_atm_nc(file, ctl, atm, 0);
 
@@ -7057,8 +7143,7 @@ void write_atm_nc(
     for (int isf = 0; isf < ctl->nsf; isf++) {
       sprintf(varname, "srf_eps_%.4f", ctl->sfnu[isf]);
       if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
-	snprintf(longname, sizeof(longname),
-		 "surface emissivity (%.4f cm^-1)", ctl->sfnu[isf]);
+	sprintf(longname, "surface emissivity (%.4f cm^-1)", ctl->sfnu[isf]);
 	NC_DEF_VAR(varname, NC_DOUBLE, 1, dimids, longname, "1",
 		   deflate_level, quant_digits);
       }
@@ -7343,8 +7428,6 @@ void write_obs(
   const ctl_t *ctl,
   const obs_t *obs) {
 
-  FILE *out;
-
   char file[LEN];
 
   /* Set filename... */
@@ -7356,24 +7439,21 @@ void write_obs(
   /* Write info... */
   LOG(1, "Write observation data: %s", file);
 
-  /* Create file... */
-  if (!(out = fopen(file, "w")))
-    ERRMSG("Cannot create file!");
-
   /* Write ASCII data... */
   if (ctl->obsfmt == 1)
-    write_obs_asc(out, ctl, obs);
+    write_obs_asc(file, ctl, obs);
 
   /* Write binary data... */
   else if (ctl->obsfmt == 2)
-    write_obs_bin(out, ctl, obs);
+    write_obs_bin(file, ctl, obs);
+
+  /* Write netCDF data... */
+  else if (ctl->obsfmt == 3)
+    write_obs_nc(file, ctl, obs, 0);
 
   /* Error... */
   else
     ERRMSG("Unknown observation file format, check OBSFMT!");
-
-  /* Close file... */
-  fclose(out);
 
   /* Write info... */
   double mini, maxi;
@@ -7420,11 +7500,16 @@ void write_obs(
 /*****************************************************************************/
 
 void write_obs_asc(
-  FILE *out,
+  const char *filename,
   const ctl_t *ctl,
   const obs_t *obs) {
 
   int n = 10;
+
+  /* Create file... */
+  FILE *out;
+  if (!(out = fopen(filename, "w")))
+    ERRMSG("Cannot create file!");
 
   /* Write header... */
   fprintf(out,
@@ -7463,14 +7548,22 @@ void write_obs_asc(
       fprintf(out, " %g", obs->tau[id][ir]);
     fprintf(out, "\n");
   }
+
+  /* Close file... */
+  fclose(out);
 }
 
 /*****************************************************************************/
 
 void write_obs_bin(
-  FILE *out,
+  const char *filename,
   const ctl_t *ctl,
   const obs_t *obs) {
+
+  /* Create file... */
+  FILE *out;
+  if (!(out = fopen(filename, "w")))
+    ERRMSG("Cannot create file!");
 
   /* Write header... */
   FWRITE("OBS1", char,
@@ -7523,6 +7616,184 @@ void write_obs_bin(
     FWRITE(obs->tau[id], double,
 	   nr,
 	   out);
+
+  /* Close file... */
+  fclose(out);
+}
+
+/*****************************************************************************/
+
+void write_obs_nc(
+  const char *filename,
+  const ctl_t *ctl,
+  const obs_t *obs,
+  const int profile) {
+
+  char longname[LEN], varname[LEN];
+
+  int ncid, varid, dim_profile, dim_ray;
+
+  size_t ray_max;
+
+  /* Open or create file... */
+  if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR)
+    NC(nc_create(filename, NC_NETCDF4, &ncid));
+
+  /* Enter define mode... */
+  int r = nc_redef(ncid);
+  if (r != NC_NOERR && r != NC_EINDEFINE)
+    NC(r);
+
+  /* Define profile dimension (unlimited)... */
+  if (nc_inq_dimid(ncid, "profile", &dim_profile) != NC_NOERR)
+    NC(nc_def_dim(ncid, "profile", NC_UNLIMITED, &dim_profile));
+
+  /* Define ray dimension (fixed)... */
+  if (nc_inq_dimid(ncid, "ray", &dim_ray) == NC_NOERR) {
+    NC(nc_inq_dimlen(ncid, dim_ray, &ray_max));
+    if (ray_max < 1 || ray_max > (size_t) NR)
+      ERRMSG("netCDF dimension ray is out of range!");
+    if ((size_t) obs->nr > ray_max)
+      ERRMSG("profile has too many rays!");
+  } else {
+    ray_max = (size_t) obs->nr;
+    NC(nc_def_dim(ncid, "ray", ray_max, &dim_ray));
+  }
+
+  /* Dimension ID array... */
+  int dimids[2] = { dim_profile, dim_ray };
+
+  /* Tunables for compression/quantization... */
+  const int deflate_level = 0;
+  const int quant_digits = 0;
+
+  /* Define nray (1D over profile)... */
+  if (nc_inq_varid(ncid, "nray", &varid) != NC_NOERR)
+    NC_DEF_VAR("nray", NC_INT, 1, dimids, "number of ray paths", "1", 0, 0);
+
+  /* Define geometry variables (2D over profile, ray)... */
+  if (nc_inq_varid(ncid, "time", &varid) != NC_NOERR)
+    NC_DEF_VAR("time", NC_DOUBLE, 2, dimids,
+	       "time in seconds since 2000-01-01, 00:00 UTC", "s",
+	       deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "obs_z", &varid) != NC_NOERR)
+    NC_DEF_VAR("obs_z", NC_DOUBLE, 2, dimids,
+	       "observer altitude", "km", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "obs_lon", &varid) != NC_NOERR)
+    NC_DEF_VAR("obs_lon", NC_DOUBLE, 2, dimids,
+	       "observer longitude", "degrees_east", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "obs_lat", &varid) != NC_NOERR)
+    NC_DEF_VAR("obs_lat", NC_DOUBLE, 2, dimids,
+	       "observer latitude", "degrees_north", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "vp_z", &varid) != NC_NOERR)
+    NC_DEF_VAR("vp_z", NC_DOUBLE, 2, dimids,
+	       "view point altitude", "km", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "vp_lon", &varid) != NC_NOERR)
+    NC_DEF_VAR("vp_lon", NC_DOUBLE, 2, dimids,
+	       "view point longitude", "degrees_east", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "vp_lat", &varid) != NC_NOERR)
+    NC_DEF_VAR("vp_lat", NC_DOUBLE, 2, dimids,
+	       "view point latitude", "degrees_north", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "tp_z", &varid) != NC_NOERR)
+    NC_DEF_VAR("tp_z", NC_DOUBLE, 2, dimids,
+	       "tangent point altitude", "km", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "tp_lon", &varid) != NC_NOERR)
+    NC_DEF_VAR("tp_lon", NC_DOUBLE, 2, dimids,
+	       "tangent point longitude", "degrees_east", deflate_level, 0);
+
+  if (nc_inq_varid(ncid, "tp_lat", &varid) != NC_NOERR)
+    NC_DEF_VAR("tp_lat", NC_DOUBLE, 2, dimids,
+	       "tangent point latitude", "degrees_north", deflate_level, 0);
+
+  /* Define radiance/transmittance per channel (2D profile,ray)... */
+  for (int id = 0; id < ctl->nd; id++) {
+
+    sprintf(varname, "rad_%.4f", ctl->nu[id]);
+    if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
+      if (ctl->write_bbt) {
+	sprintf(longname, "brightness temperature (%.4f cm^-1)", ctl->nu[id]);
+	NC_DEF_VAR(varname, NC_DOUBLE, 2, dimids, longname, "K",
+		   deflate_level, quant_digits);
+      } else {
+	sprintf(longname, "radiance (%.4f cm^-1)", ctl->nu[id]);
+	NC_DEF_VAR(varname, NC_DOUBLE, 2, dimids, longname,
+		   "W/(m^2 sr cm^-1)", deflate_level, quant_digits);
+      }
+    }
+
+    sprintf(varname, "tau_%.4f", ctl->nu[id]);
+    if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
+      sprintf(longname, "transmittance (%.4f cm^-1)", ctl->nu[id]);
+      NC_DEF_VAR(varname, NC_DOUBLE, 2, dimids, longname, "1",
+		 deflate_level, quant_digits);
+    }
+  }
+
+  /* Leave define mode... */
+  NC(nc_enddef(ncid));
+
+  /* Hyperslabs... */
+  size_t start[2] = { (size_t) profile, 0 };
+  size_t count[2] = { 1, (size_t) obs->nr };
+
+  /* Write nray(profile)... */
+  int nr = obs->nr;
+  NC(nc_inq_varid(ncid, "nray", &varid));
+  NC(nc_put_vara_int(ncid, varid, start, count, &nr));
+
+  /* Write geometry... */
+  NC(nc_inq_varid(ncid, "time", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->time));
+
+  NC(nc_inq_varid(ncid, "obs_z", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->obsz));
+
+  NC(nc_inq_varid(ncid, "obs_lon", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->obslon));
+
+  NC(nc_inq_varid(ncid, "obs_lat", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->obslat));
+
+  NC(nc_inq_varid(ncid, "vp_z", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->vpz));
+
+  NC(nc_inq_varid(ncid, "vp_lon", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->vplon));
+
+  NC(nc_inq_varid(ncid, "vp_lat", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->vplat));
+
+  NC(nc_inq_varid(ncid, "tp_z", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->tpz));
+
+  NC(nc_inq_varid(ncid, "tp_lon", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->tplon));
+
+  NC(nc_inq_varid(ncid, "tp_lat", &varid));
+  NC(nc_put_vara_double(ncid, varid, start, count, obs->tplat));
+
+  /* Write spectral variables per channel... */
+  for (int id = 0; id < ctl->nd; id++) {
+    sprintf(varname, "rad_%.4f", ctl->nu[id]);
+    NC(nc_inq_varid(ncid, varname, &varid));
+    NC(nc_put_vara_double(ncid, varid, start, count, obs->rad[id]));
+
+    sprintf(varname, "tau_%.4f", ctl->nu[id]);
+    NC(nc_inq_varid(ncid, varname, &varid));
+    NC(nc_put_vara_double(ncid, varid, start, count, obs->tau[id]));
+  }
+
+  /* Close file... */
+  NC(nc_sync(ncid));
+  NC(nc_close(ncid));
 }
 
 /*****************************************************************************/
