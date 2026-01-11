@@ -3205,10 +3205,11 @@ void read_atm(
 /**
  * @brief Read atmospheric data in ASCII format.
  *
- * This function parses atmospheric input data from an opened ASCII file stream
- * (`in`) and stores the values in the atmospheric structure `atm`. The number
- * and type of fields to read are determined by the control structure `ctl`.
- * Each line of the ASCII file corresponds to a single atmospheric data point.
+ * This function reads and parses atmospheric input data from an ASCII file
+ * specified by its filename and stores the values in the atmospheric
+ * structure \c atm. The number and type of fields to read are determined by
+ * the control structure \c ctl. Each line of the ASCII file corresponds to a
+ * single atmospheric data point.
  *
  * The expected order of fields in each line is:
  *   - Time
@@ -3217,17 +3218,16 @@ void read_atm(
  *   - Latitude
  *   - Pressure
  *   - Temperature
- *   - Mixing ratios for each gas/emitter (`ctl->ng` values)
- *   - Extinction coefficients for each spectral window (`ctl->nw` values)
+ *   - Mixing ratios for each gas/emitter (\c ctl->ng values)
+ *   - Extinction coefficients for each spectral window (\c ctl->nw values)
  *
- * Additionally, if cloud or surface layer parameters are enabled in `ctl`,
+ * Additionally, if cloud or surface layer parameters are enabled in \c ctl,
  * they are read once from the first line only:
- *   - Cloud layer: altitude, thickness, and extinction (`ctl->ncl` values)
- *   - Surface layer: temperature and emissivity (`ctl->nsf` values)
+ *   - Cloud layer: altitude, thickness, and extinction (\c ctl->ncl values)
+ *   - Surface layer: temperature and emissivity (\c ctl->nsf values)
  *
- * @param in
- *        Pointer to an already opened input file stream containing ASCII
- *        atmospheric data.
+ * @param filename
+ *        Path to the ASCII file containing atmospheric data.
  *
  * @param ctl
  *        Pointer to a control structure defining the number of gases,
@@ -3236,14 +3236,14 @@ void read_atm(
  *
  * @param atm
  *        Pointer to an initialized atmospheric structure where the parsed
- *        data points will be stored. The function updates `atm->np` to
+ *        data points will be stored. The function updates \c atm->np to
  *        reflect the number of successfully read data records.
  *
- * @note The function continues reading until EOF is reached. Each successfully
+ * @note The function reads until end-of-file is reached. Each successfully
  *       parsed line increments the atmospheric data point counter.
  *
- * @warning The function terminates execution using `ERRMSG` if more than
- *          `NP` data points are encountered, or if the input format deviates
+ * @warning The function terminates execution using \c ERRMSG if more than
+ *          \c NP data points are encountered, or if the input format deviates
  *          from expectations.
  *
  * @author Lars Hoffmann
@@ -3256,36 +3256,36 @@ void read_atm_asc(
 /**
  * @brief Read atmospheric data in binary format.
  *
- * This function reads atmospheric input data from a binary file stream (`in`)
- * and stores the decoded values in the atmospheric structure `atm`. The expected
- * binary format is predefined and must match the configuration provided in the
- * control structure `ctl`. The function reads a header containing metadata
- * describing the dataset, followed by the atmospheric fields and optional
- * cloud/surface layer properties.
+ * This function reads atmospheric input data from a binary file specified
+ * by its filename and stores the decoded values in the atmospheric structure
+ * \c atm. The expected binary format is predefined and must match the
+ * configuration provided in the control structure \c ctl. The function reads
+ * a header containing metadata describing the dataset, followed by the
+ * atmospheric fields and optional cloud and surface layer properties.
  *
  * The binary file layout is expected to follow this structure:
  *   1. **Magic identifier** (4 bytes, ignored except for presence)
  *   2. **Header integers**:
- *      - Number of gas species (`ng`)
- *      - Number of spectral windows (`nw`)
- *      - Number of cloud layer extinction elements (`ncl`)
- *      - Number of surface emissivity elements (`nsf`)
- *      These must match the corresponding values in `ctl`.
+ *      - Number of gas species (\c ng)
+ *      - Number of spectral windows (\c nw)
+ *      - Number of cloud layer extinction elements (\c ncl)
+ *      - Number of surface emissivity elements (\c nsf)
+ *      These must match the corresponding values in \c ctl.
  *   3. **Data payload**:
- *      - Number of points (`np`)
- *      - Arrays of size `np` for time, altitude, longitude, latitude,
- *        pressure, temperature
- *      - For each gas species: mixing ratio array of length `np`
- *      - For each spectral window: extinction coefficient array of length `np`
+ *      - Number of points (\c np)
+ *      - Arrays of size \c np for time, altitude, longitude, latitude,
+ *        pressure, and temperature
+ *      - For each gas species: mixing ratio array of length \c np
+ *      - For each spectral window: extinction coefficient array of length \c np
  *   4. **Optional layered parameters**:
- *      - Cloud layer altitude, thickness, and extinction (`ctl->ncl` values)
- *      - Surface temperature and emissivity (`ctl->nsf` values)
+ *      - Cloud layer altitude, thickness, and extinction (\c ctl->ncl values)
+ *      - Surface temperature and emissivity (\c ctl->nsf values)
  *
- * @param in
- *        Pointer to an opened binary input file stream.
+ * @param filename
+ *        Path to the binary file containing atmospheric data.
  *
  * @param ctl
- *        Pointer to a control structure specifying expected dimensions of
+ *        Pointer to a control structure specifying the expected dimensions of
  *        atmospheric fields and optional layers. Used for header validation.
  *
  * @param atm
@@ -3296,9 +3296,9 @@ void read_atm_asc(
  * @note This function does **not** allocate memory; it assumes storage for all
  *       atmospheric variables already exists and matches the expected sizes.
  *
- * @warning Execution is terminated via `ERRMSG` if:
+ * @warning Execution is terminated via \c ERRMSG if:
  *          - The binary header does not match the control structure.
- *          - The binary stream does not contain the expected amount of data.
+ *          - The binary file does not contain the expected amount of data.
  *
  * @author Lars Hoffmann
  */
@@ -3474,32 +3474,36 @@ void read_obs(
   obs_t * obs);
 
 /**
- * @brief Read ASCII-formatted observation data from an open file stream.
+ * @brief Read ASCII-formatted observation data from a file.
  *
- * This function parses atmospheric observation data from an ASCII text file
- * and stores it in the provided ::obs_t structure. Each line in the input file
- * is expected to contain numerical values representing a single observation
- * record, including time, observer coordinates, view point coordinates,
- * tangent point coordinates, radiance or brightness temperature values, and
- * transmittances. The number of radiance and transmittance values per record
- * is determined by `ctl->nd`.
+ * This function reads atmospheric observation data from an ASCII text file
+ * specified by its filename and stores it in the provided ::obs_t structure.
+ * Each line in the input file is expected to contain numerical values
+ * representing a single observation record, including time, observer
+ * coordinates, view point coordinates, tangent point coordinates, radiance
+ * or brightness temperature values, and transmittances. The number of radiance
+ * and transmittance values per record is determined by \c ctl->nd.
  *
  * The function reads the file line by line, tokenizes the data fields, and
- * fills the corresponding observation arrays. The number of successfully read
- * observation entries is stored in `obs->nr`.
+ * fills the corresponding observation arrays. The number of successfully
+ * read observation entries is stored in \c obs->nr.
  *
- * @param[in]  in   Open file pointer from which the ASCII observation data
- *                  will be read. The file must already be opened in read mode.
- * @param[in]  ctl  Control structure containing metadata such as the number
- *                  of spectral channels (`nd`).
- * @param[out] obs  Observation structure where parsed data will be stored.
+ * @param filename
+ *        Path to the ASCII file containing the observation data.
  *
- * @note This is a C function and assumes that the @p obs structure has been
+ * @param ctl
+ *        Control structure containing metadata such as the number of spectral
+ *        channels (\c nd).
+ *
+ * @param obs
+ *        Observation structure where the parsed data will be stored.
+ *
+ * @note This is a C function and assumes that the \c obs structure has been
  *       preallocated with sufficient space for all records and spectral
  *       channels. No memory allocation is performed inside this routine.
  *
  * @warning The function terminates with an error message if the number of
- *          entries exceeds the predefined limit `NR`.
+ *          entries exceeds the predefined limit \c NR.
  *
  * @see read_obs(), read_obs_bin(), ctl_t, obs_t
  *
@@ -3511,36 +3515,40 @@ void read_obs_asc(
   obs_t * obs);
 
 /**
- * @brief Read binary-formatted observation data from an open file stream.
+ * @brief Read binary-formatted observation data from a file.
  *
- * This C function reads observation data stored in a compact binary format and
- * initializes the provided ::obs_t structure with the values retrieved from
- * the input file. The binary format begins with a header that contains a magic
- * identifier and the expected number of spectral channels. The number of
- * channels in the file must match `ctl->nd`, otherwise the routine aborts with
- * an error.
+ * This C function reads observation data stored in a compact binary format
+ * from a file specified by its filename and initializes the provided ::obs_t
+ * structure with the values retrieved. The binary format begins with a header
+ * that contains a magic identifier and the expected number of spectral
+ * channels. The number of channels in the file must match \c ctl->nd, otherwise
+ * the routine aborts with an error.
  *
  * After verifying the header, the function reads the number of ray paths and
  * then sequentially loads arrays corresponding to observation time, observer
  * location, view point location, tangent point location, radiance (or
  * brightness temperature), and transmittance data. The number of ray paths is
- * assigned to `obs->nr`. All arrays must have been allocated prior to calling
+ * assigned to \c obs->nr. All arrays must have been allocated prior to calling
  * this function.
  *
- * @param[in]  in   Open file stream positioned at the beginning of the binary
- *                  observation data. The file must be opened in binary mode.
- * @param[in]  ctl  Pointer to a control structure specifying the number of
- *                  spectral channels (`nd`) and other configuration settings.
- * @param[out] obs  Pointer to an observation structure where the decoded
- *                  binary data will be stored.
+ * @param filename
+ *        Path to the binary file containing the observation data.
  *
- * @note This is a C routine and does not perform any memory allocation. The
- *       caller must ensure that all arrays in @p obs have sufficient capacity
- *       for the data being read.
+ * @param ctl
+ *        Pointer to a control structure specifying the number of spectral
+ *        channels (\c nd) and other configuration settings.
+ *
+ * @param obs
+ *        Pointer to an observation structure where the decoded binary data
+ *        will be stored.
+ *
+ * @note This function does not perform any memory allocation. The caller must
+ *       ensure that all arrays in \c obs have sufficient capacity for the data
+ *       being read.
  *
  * @warning The function terminates with an error message if the binary header
  *          does not match the expected channel count, if more data than allowed
- *          by `NR` is encountered, or if any read operation fails.
+ *          by \c NR is encountered, or if any read operation fails.
  *
  * @see read_obs(), read_obs_asc(), ctl_t, obs_t
  *
@@ -4373,12 +4381,12 @@ void write_atm(
 /**
  * @brief Write atmospheric data to an ASCII file.
  *
- * This function writes the contents of an atmospheric structure `atm` to an
- * ASCII-formatted output stream `out`. A descriptive column header is generated
+ * This function writes the contents of an atmospheric structure \c atm to an
+ * ASCII file specified by its filename. A descriptive column header is written
  * first, documenting the meaning, units, and ordering of each data field.
  * Atmospheric data points are then written line by line, with optional cloud
  * and surface layer parameters appended if they are enabled in the control
- * structure `ctl`.
+ * structure \c ctl.
  *
  * The output columns include, in order:
  *   1. Time (seconds since 2000-01-01T00:00Z)
@@ -4387,22 +4395,22 @@ void write_atm(
  *   4. Latitude [deg]
  *   5. Pressure [hPa]
  *   6. Temperature [K]
- *   + Gas/emitter mixing ratios for each species (`ctl->ng`) [ppv]
- *   + Extinction values for each spectral window (`ctl->nw`) [km^-1]
+ *   + Gas/emitter mixing ratios for each species (\c ctl->ng) [ppv]
+ *   + Extinction values for each spectral window (\c ctl->nw) [km^-1]
  *
- * If cloud layer properties are enabled (`ctl->ncl > 0`), the following are added:
+ * If cloud layer properties are enabled (\c ctl->ncl > 0), the following are added:
  *   - Cloud layer height [km]
  *   - Cloud layer depth [km]
- *   - Cloud extinction values for each frequency (`ctl->ncl`) [km^-1]
+ *   - Cloud extinction values for each frequency (\c ctl->ncl) [km^-1]
  *
- * If surface layer properties are enabled (`ctl->nsf > 0`), the following are added:
+ * If surface layer properties are enabled (\c ctl->nsf > 0), the following are added:
  *   - Surface layer height [km]
  *   - Surface layer pressure [hPa]
  *   - Surface layer temperature [K]
- *   - Surface emissivity values (`ctl->nsf`)
+ *   - Surface emissivity values (\c ctl->nsf)
  *
- * @param out
- *        Pointer to an open output file stream where the ASCII data is written.
+ * @param filename
+ *        Path to the ASCII output file.
  *
  * @param ctl
  *        Pointer to a control structure defining the number of gases,
@@ -4411,12 +4419,12 @@ void write_atm(
  *
  * @param atm
  *        Pointer to the atmospheric structure containing the data to be written.
- *        The function writes all `atm->np` data points.
+ *        The function writes all \c atm->np data points.
  *
  * @note A blank line is inserted each time the time coordinate changes, grouping
  *       data points belonging to different timestamps.
  *
- * @warning The function assumes that all arrays in `atm` are properly allocated
+ * @warning The function assumes that all arrays in \c atm are properly allocated
  *          and populated. No validation of data ranges is performed here.
  *
  * @author Lars Hoffmann
@@ -4429,37 +4437,36 @@ void write_atm_asc(
 /**
  * @brief Write atmospheric data to a binary file.
  *
- * This function writes the atmospheric dataset contained in `atm` to a binary
- * file stream `out`. The output format is compact and includes a file header
- * followed by the serialized atmospheric fields. The format is compatible with
- * `read_atm_bin()`, ensuring that files written by this function can be read
- * back without loss of information.
+ * This function writes the atmospheric dataset contained in \c atm to a binary
+ * file specified by its filename. The output format is compact and includes a
+ * file header followed by the serialized atmospheric fields. The format is
+ * compatible with \c read_atm_bin(), ensuring that files written by this
+ * function can be read back without loss of information.
  *
  * The binary file structure written is as follows:
- *   1. **Magic identifier** `"ATM1"` (4 bytes)
+ *   1. **Magic identifier** \c "ATM1" (4 bytes)
  *   2. **Header integers** describing dataset layout:
- *        - Number of gas/emitter species (`ctl->ng`)
- *        - Number of spectral windows (`ctl->nw`)
- *        - Number of cloud extinction values (`ctl->ncl`)
- *        - Number of surface emissivity values (`ctl->nsf`)
+ *        - Number of gas/emitter species (\c ctl->ng)
+ *        - Number of spectral windows (\c ctl->nw)
+ *        - Number of cloud extinction values (\c ctl->ncl)
+ *        - Number of surface emissivity values (\c ctl->nsf)
  *   3. **Data payload**:
- *        - Number of atmospheric points `np`
- *        - Arrays of length `np` containing:
+ *        - Number of atmospheric points \c np
+ *        - Arrays of length \c np containing:
  *            * Time
  *            * Altitude
  *            * Longitude
  *            * Latitude
  *            * Pressure
  *            * Temperature
- *        - Gas mixing ratios for all emitters (`ctl->ng × np`)
- *        - Extinction coefficients for all spectral windows (`ctl->nw × np`)
- *   4. **Optional parameters** written only if enabled in `ctl`:
- *        - Cloud layer height, depth, and extinction values (`ctl->ncl`)
- *        - Surface temperature and emissivity values (`ctl->nsf`)
+ *        - Gas mixing ratios for all emitters (\c ctl->ng × \c np)
+ *        - Extinction coefficients for all spectral windows (\c ctl->nw × \c np)
+ *   4. **Optional parameters** written only if enabled in \c ctl:
+ *        - Cloud layer height, depth, and extinction values (\c ctl->ncl)
+ *        - Surface temperature and emissivity values (\c ctl->nsf)
  *
- * @param out
- *        Pointer to an already opened binary output file stream where the
- *        atmospheric data will be written.
+ * @param filename
+ *        Path to the binary output file.
  *
  * @param ctl
  *        Pointer to a control structure specifying the number of gases,
@@ -4468,14 +4475,14 @@ void write_atm_asc(
  *
  * @param atm
  *        Pointer to the atmospheric data structure containing values to be
- *        written. All arrays must be populated and `atm->np` must contain the
+ *        written. All arrays must be populated and \c atm->np must contain the
  *        number of valid atmospheric records.
  *
- * @note This function performs no range checking or validation of the `atm`
+ * @note This function performs no range checking or validation of the \c atm
  *       contents. It assumes that the memory layout matches expectations.
  *
  * @warning The binary structure must remain consistent with
- *          `read_atm_bin()`; modifying either implementation requires
+ *          \c read_atm_bin(); modifying either implementation requires
  *          updating the other accordingly.
  *
  * @author Lars Hoffmann
@@ -4690,12 +4697,12 @@ void write_obs(
  * @brief Write observation data to an ASCII text file.
  *
  * This C function writes the contents of the ::obs_t observation structure as
- * human-readable ASCII text to the given output stream. It first prints a
- * descriptive header that documents each column of the output format,
+ * human-readable ASCII text to a file specified by its filename. It first
+ * prints a descriptive header that documents each column of the output format,
  * including observation time, observer and view geometry, tangent point
  * information, and spectral values. The number and meaning of spectral fields
- * depend on `ctl->nd` and whether brightness temperature output is enabled
- * via `ctl->write_bbt`.
+ * depend on \c ctl->nd and whether brightness temperature output is enabled
+ * via \c ctl->write_bbt.
  *
  * The function then writes one line of data per ray path, including the base
  * geometric information followed by radiance or brightness temperature values
@@ -4703,18 +4710,22 @@ void write_obs(
  * whenever the time stamp changes, providing visual separation of distinct
  * observation groups.
  *
- * @param[in] out  Output file stream opened in text mode.
- * @param[in] ctl  Control structure specifying the number of spectral
- *                 channels (`nd`), wavenumbers (`nu`), and output mode
- *                 (`write_bbt`).
- * @param[in] obs  Observation structure containing the data to be written.
+ * @param filename
+ *        Path to the ASCII output file.
  *
- * @note This is a C routine that produces plain-text output intended for
- *       inspection, debugging, and compatibility with external processing
- *       tools.
+ * @param ctl
+ *        Control structure specifying the number of spectral
+ *        channels (\c nd), wavenumbers (\c nu), and output mode
+ *        (\c write_bbt).
  *
- * @warning The caller must ensure that @p out is valid and writable. No
- *          attempt is made to reopen or validate the file stream.
+ * @param obs
+ *        Observation structure containing the data to be written.
+ *
+ * @note This routine produces plain-text output intended for inspection,
+ *       debugging, and compatibility with external processing tools.
+ *
+ * @warning The caller must ensure that the file specified by \c filename is
+ *          writable. Existing files may be overwritten.
  *
  * @see write_obs(), write_obs_bin(), ctl_t, obs_t
  *
@@ -4726,12 +4737,12 @@ void write_obs_asc(
   const obs_t * obs);
 
 /**
- * @brief Write observation data in binary format to an output file stream.
+ * @brief Write observation data in binary format to a file.
  *
  * This C function serializes the contents of the ::obs_t structure into a
- * compact binary format and writes it to the file stream provided via @p out.
+ * compact binary format and writes it to a file specified by its filename.
  * The binary format begins with a header consisting of a magic identifier
- * ("OBS1") and the number of spectral channels (`ctl->nd`). This header is
+ * (\c "OBS1") and the number of spectral channels (\c ctl->nd). This header is
  * used by ::read_obs_bin() to validate compatibility when reading.
  *
  * Following the header, the function writes the number of ray paths and then
@@ -4740,17 +4751,22 @@ void write_obs_asc(
  * are written in native binary representation using the FWRITE() macro, which
  * performs buffered writes and error checking.
  *
- * @param[out] out  Output file stream opened in binary mode.
- * @param[in]  ctl  Control structure specifying the number of spectral
- *                  channels (`nd`) and corresponding configuration parameters.
- * @param[in]  obs  Observation structure containing the data to be written.
+ * @param filename
+ *        Path to the binary output file.
  *
- * @note This is a C routine that does not perform any formatting or conversion.
- *       The resulting file is portable only to systems with compatible binary
+ * @param ctl
+ *        Control structure specifying the number of spectral
+ *        channels (\c nd) and corresponding configuration parameters.
+ *
+ * @param obs
+ *        Observation structure containing the data to be written.
+ *
+ * @note This routine does not perform any formatting or conversion. The
+ *       resulting file is portable only to systems with compatible binary
  *       layouts (integer size, floating-point format, and endianness).
  *
- * @warning The caller must ensure that @p out is writable and already opened
- *          in binary mode. The function does not validate stream state.
+ * @warning The caller must ensure that the file specified by \c filename is
+ *          writable. Existing files may be overwritten.
  *
  * @see write_obs(), write_obs_asc(), read_obs_bin(), ctl_t, obs_t
  *
