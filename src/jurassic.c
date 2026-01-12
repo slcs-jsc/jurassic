@@ -6104,9 +6104,9 @@ tbl_t *read_tbl(
       else if (ctl->tblfmt == 2)
 	read_tbl_bin(ctl, tbl, id, ig);
 
-      /* Read per-gas look-up tables... */
+      /* Read netCDF look-up tables... */
       else if (ctl->tblfmt == 3)
-	read_tbl_gas(ctl, tbl, id, ig);
+	read_tbl_nc(ctl, tbl, id, ig);
 
       /* Error message... */
       else
@@ -6292,172 +6292,47 @@ void read_tbl_bin(
 
 /*****************************************************************************/
 
-void read_tbl_gas(
+void read_tbl_nc(
   const ctl_t *ctl,
   tbl_t *tbl,
-  const int id,
-  const int ig) {
+  int id,
+  int ig) {
 
-  /* Set filename... */
-  char filename[2 * LEN];
-  sprintf(filename, "%s_%s.tbl", ctl->tblbase, ctl->emitter[ig]);
+  char filename[2 * LEN], varname[LEN];
 
-  /* Write info... */
-  LOG(1, "Read emissivity table: %s", filename);
+  int ncid, varid, dimid;
 
-  /* Open file... */
-  tbl_gas_t gas;
-  if (read_tbl_gas_open(filename, &gas) != 0) {
-    WARN("Missing emissivity table: %s", filename);
-    return;
-  }
+  size_t nbytes;
 
-  /* Read table... */
-  if (read_tbl_gas_single(&gas, ctl->nu[id], tbl, id, ig) != 0)
-    WARN("Frequency %.6f missing in %s", ctl->nu[id], filename);
+  /* Maximum buffer size... */
+  const size_t bufmax =
+    (size_t) (4 * (1 + TBLNP * (3 + TBLNT * (3 + 2 * TBLNU))));
 
-  /* Close file... */
-  read_tbl_gas_close(&gas);
-}
-
-/*****************************************************************************/
-
-int read_tbl_gas_close(
-  tbl_gas_t *g) {
-
-  if (!g || !g->fp)
-    return -1;
-
-  if (g->dirty) {
-
-    /* Rewind to header... */
-    fseek(g->fp, 0, SEEK_SET);
-
-    /* Write header... */
-    const char magic[4] = { 'G', 'T', 'L', '1' };
-    FWRITE(magic, char,
-	   4,
-	   g->fp);
-    FWRITE(&g->ntables, int32_t, 1, g->fp);
-
-    /* Write updated index... */
-    FWRITE(g->index, tbl_gas_index_t, MAX_TABLES, g->fp);
-    fflush(g->fp);
-  }
-
-  /* Close file... */
-  fclose(g->fp);
-  free(g->index);
-  memset(g, 0, sizeof(*g));
-
-  return 0;
-}
-
-/*****************************************************************************/
-
-int read_tbl_gas_open(
-  const char *path,
-  tbl_gas_t *g) {
+  /* Allocate... */
+  uint8_t *work = NULL;
+  ALLOC(work, uint8_t, bufmax);
 
   /* Open file... */
-  memset(g, 0, sizeof(*g));
-  g->fp = fopen(path, "rb+");	/* MUST be rb+ for writing later */
-  if (!g->fp)
-    return -1;
-  char magic[4];
+  sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
+  NC(nc_open(filename, NC_NOWRITE, &ncid));
 
-  /* Read header... */
-  FREAD(magic, char,
-	4,
-	g->fp);
-  if (memcmp(magic, "GTL1", 4) != 0)
-    ERRMSG("Invalid gas-table file format!");
-  FREAD(&g->ntables, int32_t, 1, g->fp);
+  /* Read variable... */
+  sprintf(varname, "tbl_%.4f", ctl->nu[id]);
+  NC(nc_inq_varid(ncid, varname, &varid));
+  NC(nc_inq_vardimid(ncid, varid, &dimid));
+  NC(nc_inq_dimlen(ncid, dimid, &nbytes));
+  if (nbytes > bufmax)
+    ERRMSG("Table blob exceeds buffer!");
+  NC(nc_get_var_uchar(ncid, varid, (unsigned char *) work));
 
-  /* Read index... */
-  ALLOC(g->index, tbl_gas_index_t, MAX_TABLES);
-  FREAD(g->index, tbl_gas_index_t, MAX_TABLES, g->fp);
-  g->dirty = 0;
+  /* Unpack... */
+  tbl_unpack(tbl, id, ig, work);
 
-  return 0;
-}
+  /* Close file... */
+  NC(nc_close(ncid));
 
-/*****************************************************************************/
-
-int read_tbl_gas_single(
-  const tbl_gas_t *g,
-  const double freq,
-  tbl_t *tbl,
-  const int id,
-  const int ig) {
-
-  /* Find freq in index */
-  int idx = -1;
-  for (int i = 0; i < g->ntables; i++) {
-    if (g->index[i].freq == freq) {
-      idx = i;
-      break;
-    }
-  }
-  if (idx < 0) {
-    WARN("Frequency %.4f not found in gas table", freq);
-    return -1;
-  }
-
-  /* Seek to table block... */
-  if (fseek(g->fp, (long) g->index[idx].offset, SEEK_SET) != 0)
-    ERRMSG("Seek error in read_tbl_gas_single!");
-
-  /* Read number of pressures... */
-  FREAD(&tbl->np[id][ig], int,
-	1,
-	g->fp);
-  if (tbl->np[id][ig] > TBLNP)
-    ERRMSG("Too many pressure levels!");
-
-  /* Read pressure grid... */
-  FREAD(tbl->p[id][ig], double,
-	  (size_t) tbl->np[id][ig],
-	g->fp);
-
-  /* Loop over pressure levels... */
-  for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
-
-    /* Read number of temperatures... */
-    FREAD(&tbl->nt[id][ig][ip], int,
-	  1,
-	  g->fp);
-    if (tbl->nt[id][ig][ip] > TBLNT)
-      ERRMSG("Too many temperatures!");
-
-    /* Read temperature grid... */
-    FREAD(tbl->t[id][ig][ip], double,
-	    (size_t) tbl->nt[id][ig][ip],
-	  g->fp);
-
-    /* Loop over temperature levels... */
-    for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
-
-      /* Read number of u points... */
-      FREAD(&tbl->nu[id][ig][ip][it], int,
-	    1,
-	    g->fp);
-      if (tbl->nu[id][ig][ip][it] > TBLNU)
-	ERRMSG("Too many column densities!");
-
-      /* Read u grid... */
-      FREAD(tbl->u[id][ig][ip][it], float,
-	      (size_t) tbl->nu[id][ig][ip][it],
-	    g->fp);
-
-      /* Read emissivity grid... */
-      FREAD(tbl->eps[id][ig][ip][it], float,
-	      (size_t) tbl->nu[id][ig][ip][it],
-	    g->fp);
-    }
-  }
-
-  return 0;
+  /* Free... */
+  free(work);
 }
 
 /*****************************************************************************/
@@ -6726,6 +6601,106 @@ void tangent_point(
       v[i] = LIN(0.0, v0[i], x2, v2[i], x);
     cart2geo(v, &dummy, tplon, tplat);
   }
+}
+
+/*****************************************************************************/
+
+void tbl_pack(
+  const tbl_t *tbl,
+  int id,
+  int ig,
+  uint8_t *buf,
+  size_t *bytes_used) {
+
+  uint8_t *cur = buf;
+
+  int np = tbl->np[id][ig];
+  memcpy(cur, &np, sizeof(np));
+  cur += sizeof(np);
+
+  memcpy(cur, tbl->p[id][ig], (size_t) np * sizeof(double));
+  cur += ((size_t) np * sizeof(double));
+
+  for (int ip = 0; ip < np; ip++) {
+    int nt = tbl->nt[id][ig][ip];
+    memcpy(cur, &nt, sizeof(nt));
+    cur += sizeof(nt);
+
+    memcpy(cur, tbl->t[id][ig][ip], (size_t) nt * sizeof(double));
+    cur += ((size_t) nt * sizeof(double));
+
+    for (int it = 0; it < nt; it++) {
+      int nu = tbl->nu[id][ig][ip][it];
+      memcpy(cur, &nu, sizeof(nu));
+      cur += sizeof(nu);
+
+      memcpy(cur, tbl->u[id][ig][ip][it], (size_t) nu * sizeof(float));
+      cur += ((size_t) nu * sizeof(float));
+
+      memcpy(cur, tbl->eps[id][ig][ip][it], (size_t) nu * sizeof(float));
+      cur += ((size_t) nu * sizeof(float));
+    }
+  }
+
+  *bytes_used = (size_t) (cur - buf);
+}
+
+/*****************************************************************************/
+
+size_t tbl_unpack(
+  tbl_t *tbl,
+  int id,
+  int ig,
+  const uint8_t *buf) {
+
+  const uint8_t *cur = buf;
+
+  int np;
+  memcpy(&np, cur, sizeof(np));
+  cur += sizeof(np);
+
+  if (np < 0 || np > TBLNP)
+    ERRMSG("np out of range!");
+
+  tbl->np[id][ig] = np;
+
+  memcpy(tbl->p[id][ig], cur, (size_t) np * sizeof(double));
+  cur += ((size_t) np * sizeof(double));
+
+  for (int ip = 0; ip < np; ip++) {
+
+    int nt;
+    memcpy(&nt, cur, sizeof(nt));
+    cur += sizeof(nt);
+
+    if (nt < 0 || nt > TBLNT)
+      ERRMSG("nt out of range!");
+
+    tbl->nt[id][ig][ip] = nt;
+
+    memcpy(tbl->t[id][ig][ip], cur, (size_t) nt * sizeof(double));
+    cur += ((size_t) nt * sizeof(double));
+
+    for (int it = 0; it < nt; it++) {
+
+      int nu;
+      memcpy(&nu, cur, sizeof(nu));
+      cur += sizeof(nu);
+
+      if (nu < 0 || nu > TBLNU)
+	ERRMSG("nu out of range!");
+
+      tbl->nu[id][ig][ip][it] = nu;
+
+      memcpy(tbl->u[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
+      cur += ((size_t) nu * sizeof(float));
+
+      memcpy(tbl->eps[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
+      cur += ((size_t) nu * sizeof(float));
+    }
+  }
+
+  return (size_t) (cur - buf);
 }
 
 /*****************************************************************************/
@@ -7873,9 +7848,9 @@ void write_tbl(
   else if (ctl->tblfmt == 2)
     write_tbl_bin(ctl, tbl);
 
-  /* Write per-gas look-up tables... */
+  /* Write binary look-up tables... */
   else if (ctl->tblfmt == 3)
-    write_tbl_gas(ctl, tbl);
+    write_tbl_nc(ctl, tbl);
 
   /* Error message... */
   else
@@ -7984,170 +7959,72 @@ void write_tbl_bin(
 
 /*****************************************************************************/
 
-void write_tbl_gas(
+void write_tbl_nc(
   const ctl_t *ctl,
   const tbl_t *tbl) {
+
+  /* Maximum buffer size... */
+  const size_t bufmax =
+    (size_t) (4 * (1 + TBLNP * (3 + TBLNT * (3 + 2 * TBLNU))));
+
+  /* Allocate... */
+  uint8_t *work = NULL;
+  ALLOC(work, uint8_t, bufmax);
 
   /* Loop over emitters... */
   for (int ig = 0; ig < ctl->ng; ig++) {
 
-    /* Construct filename... */
+    /* Set filename... */
     char filename[2 * LEN];
-    sprintf(filename, "%s_%s.tbl", ctl->tblbase, ctl->emitter[ig]);
+    sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
 
-    /* Try to open existing file first... */
-    tbl_gas_t gas;
-    if (read_tbl_gas_open(filename, &gas) != 0) {
-      LOG(1, "Gas file does not exist, creating: %s", filename);
-
-      /* Create with capacity for all frequencies... */
-      if (write_tbl_gas_create(filename) != 0)
-	ERRMSG("Cannot create gas table file!");
-
-      /* Now open it... */
-      if (read_tbl_gas_open(filename, &gas) != 0)
-	ERRMSG("Cannot open newly created gas table file!");
+    /* Open or create file... */
+    int ncid;
+    if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR) {
+      NC(nc_create(filename, NC_NETCDF4 | NC_CLOBBER, &ncid));
+      NC_PUT_ATT_GLOBAL("format_version", "1");
+      NC_PUT_ATT_GLOBAL("emitter", ctl->emitter[ig]);
+      NC(nc_enddef(ncid));
     }
 
-    /* Loop over frequencies... */
+    /* Loop over detectors... */
     for (int id = 0; id < ctl->nd; id++) {
 
-      /* Write one frequency table block into the gas file... */
-      if (write_tbl_gas_single(&gas, ctl->nu[id], tbl, id, ig) != 0)
-	ERRMSG("Error writing table block!");
+      /* Set variable and dimension name... */
+      char varname[LEN], dimname[LEN];
+      sprintf(varname, "tbl_%.4f", ctl->nu[id]);
+      sprintf(dimname, "len_%.4f", ctl->nu[id]);
+
+      /* Pack table... */
+      size_t used = 0;
+      tbl_pack(tbl, id, ig, work, &used);
+      if (used > bufmax)
+	ERRMSG("Packed table exceeds buffer!");
+
+      /* Prevent overwrite... */
+      int tmp;
+      if (nc_inq_varid(ncid, varname, &tmp) == NC_NOERR)
+	ERRMSG("Table already present!");
+
+      /* Add dimension and variable... */
+      int dimid, varid;
+      NC(nc_redef(ncid));
+      NC(nc_def_dim(ncid, dimname, used, &dimid));
+      int dimids[1] = { dimid };
+      NC_DEF_VAR(varname, NC_UBYTE, 1, dimids,
+		 "Packed lookup table blob", "1", 0, 0);
+      NC(nc_enddef(ncid));
+
+      /* Write data... */
+      NC(nc_put_var_uchar(ncid, varid, (const unsigned char *) work));
     }
 
-    /* Close gas-table file (flushes index)... */
-    read_tbl_gas_close(&gas);
-  }
-}
-
-/*****************************************************************************/
-
-int write_tbl_gas_create(
-  const char *path) {
-
-  /* Open file... */
-  FILE *fp = fopen(path, "wb+");
-  if (!fp)
-    return -1;
-
-  const char magic[4] = { 'G', 'T', 'L', '1' };
-  int32_t ntables = 0;
-
-  /* Write header... */
-  FWRITE(magic, char,
-	 4,
-	 fp);
-  FWRITE(&ntables, int32_t, 1, fp);
-
-  /* Zeroed index... */
-  tbl_gas_index_t zero = { 0 };
-  for (int i = 0; i < MAX_TABLES; i++)
-    FWRITE(&zero, tbl_gas_index_t, 1, fp);
-
-  /* Close file... */
-  fflush(fp);
-  fclose(fp);
-
-  return 0;
-}
-
-/*****************************************************************************/
-
-int write_tbl_gas_single(
-  tbl_gas_t *g,
-  const double freq,
-  const tbl_t *tbl,
-  const int id,
-  const int ig) {
-
-  int idx = -1;
-
-  /* Check if a table for this frequency already exists... */
-  for (int i = 0; i < g->ntables; i++) {
-    if (g->index[i].freq == freq) {
-      idx = i;
-      break;
-    }
+    /* Close file... */
+    NC(nc_close(ncid));
   }
 
-  /* New entry if not found... */
-  if (idx < 0) {
-    idx = g->ntables++;
-    if (g->ntables > MAX_TABLES)
-      ERRMSG("Gas table index overflow!");
-  }
-
-  /* Append payload block at end of file... */
-  if (fseek(g->fp, 0, SEEK_END) != 0)
-    ERRMSG("Seek error in write_tbl_gas_single_flat!");
-
-  int64_t offset = (int64_t) ftell(g->fp);
-  if (offset < 0)
-    ERRMSG("ftell failed in write_tbl_gas_single_flat!");
-
-  long start = ftell(g->fp);
-  if (start < 0)
-    ERRMSG("ftell failed at payload start!");
-
-  /* Write number of pressures... */
-  FWRITE(&tbl->np[id][ig], int,
-	 1,
-	 g->fp);
-
-  /* Write pressure grid... */
-  FWRITE(tbl->p[id][ig], double,
-	   (size_t) tbl->np[id][ig],
-	 g->fp);
-
-  /* Loop over pressure levels... */
-  for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
-
-    /* Write number of temperatures... */
-    FWRITE(&tbl->nt[id][ig][ip], int,
-	   1,
-	   g->fp);
-
-    /* Write temperature grid... */
-    FWRITE(tbl->t[id][ig][ip], double,
-	     (size_t) tbl->nt[id][ig][ip],
-	   g->fp);
-
-    /* Loop over temperature levels... */
-    for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
-
-      /* Write number of u points... */
-      FWRITE(&tbl->nu[id][ig][ip][it], int,
-	     1,
-	     g->fp);
-
-      /* Write u array... */
-      FWRITE(tbl->u[id][ig][ip][it], float,
-	       (size_t) tbl->nu[id][ig][ip][it],
-	     g->fp);
-
-      /* Write emissivity array... */
-      FWRITE(tbl->eps[id][ig][ip][it], float,
-	       (size_t) tbl->nu[id][ig][ip][it],
-	     g->fp);
-    }
-  }
-
-  /* Update index entry... */
-  long end = ftell(g->fp);
-  if (end < 0)
-    ERRMSG("ftell failed at payload end!");
-
-  int64_t size = (int64_t) (end - start);
-
-  g->index[idx].freq = freq;
-  g->index[idx].offset = offset;
-  g->index[idx].size = size;
-
-  g->dirty = 1;
-
-  return 0;
+  /* Free... */
+  free(work);
 }
 
 /*****************************************************************************/

@@ -1315,7 +1315,7 @@ typedef struct {
   /*! Basename for table files and filter function files. */
   char tblbase[LEN];
 
-  /*! Look-up table file format (1=ASCII, 2=binary). */
+  /*! Look-up table file format (1=ASCII, 2=binary, 3=netCDF). */
   int tblfmt;
 
   /*! Atmospheric data file format (1=ASCII, 2=binary, 3=netCDF). */
@@ -1652,48 +1652,6 @@ typedef struct {
   double sr[TBLNS][ND];
 
 } tbl_t;
-
-/**
- * @brief On-disk index entry describing one frequency table block in a gas file.
- *
- * Each entry maps a unique frequency value to a serialized block stored
- * elsewhere in the file. All entries are stored in a fixed-size table of MAX_TABLES elements.
- */
-typedef struct {
-
-  /*! Frequency identifier ν_j for this table block. */
-  double freq;
-
-  /*! Byte offset in file where the serialized block begins. */
-  int64_t offset;
-
-  /*! Size of the serialized block (in bytes). */
-  int64_t size;
-
-} tbl_gas_index_t;
-
-/**
- * @brief In-memory representation of an open per-gas lookup-table file.
- *
- * This structure tracks the file pointer, the number of valid table entries,
- * and the full in-memory index of MAX_TABLES elements. When table blocks
- * are added or replaced, the index is marked dirty and rewritten on close.
- */
-typedef struct {
-
-  /*! Open file handle ("rb+"), NULL if not open. */
-  FILE *fp;
-
-  /*! Number of index entries currently in use. */
-  int32_t ntables;
-
-  /*! In-memory index table of length MAX_TABLES. */
-  tbl_gas_index_t *index;
-
-  /**< Non-zero if index was modified and must be rewritten on close. */
-  int dirty;
-
-} tbl_gas_t;
 
 /* ------------------------------------------------------------
    Functions...
@@ -3882,100 +3840,12 @@ void read_tbl_bin(
   const int id,
   const int ig);
 
-/**
- * @brief Read one frequency block from a per-gas binary table file.
- *
- * Opens the gas-specific table file (e.g., `base_emitter.tbl`) and
- * reads the table block corresponding to frequency `ctl->nu[id]`.
- * The block is appended to the in-memory `tbl_t`.
- *
- * @param ctl  Pointer to control structure containing table metadata.
- * @param tbl  Pointer to table structure to populate.
- * @param id   Frequency index.
- * @param ig   Gas index.
- *
- * @note Missing tables or missing frequency blocks only produce warnings.
- *
- * @author Lars Hoffmann
- */
-void read_tbl_gas(
+
+void read_tbl_nc(
   const ctl_t * ctl,
   tbl_t * tbl,
-  const int id,
-  const int ig);
-
-/**
- * @brief Close a per-gas binary table file and optionally rewrite metadata.
- *
- * If the table was modified (`g->dirty != 0`), the header and index are
- * rewritten before closing the file. After closing, memory associated
- * with the table index is freed.
- *
- * @param g  Pointer to an open gas-table handle.
- *
- * @return 0 on success, -1 on invalid handle.
- *
- * @author Lars Hoffmann
- */
-int read_tbl_gas_close(
-  tbl_gas_t * g);
-
-/**
- * @brief Open a per-gas binary table file for reading and writing.
- *
- * Reads and validates the file header, then loads the entire index
- * of table blocks. The resulting `tbl_gas_t` structure tracks the
- * file pointer, index, and table count.
- *
- * @param path  Path to the `.tbl` file.
- * @param g     Output parameter: populated table-file handle.
- *
- * @return 0 on success, -1 if the file cannot be opened.
- *
- * @warning Aborts via `ERRMSG()` on invalid magic or format.
- *
- * @author Lars Hoffmann
- */
-int read_tbl_gas_open(
-  const char *path,
-  tbl_gas_t * g);
-
-/**
- * @brief Read one emissivity table block from a per-gas table file.
- *
- * Locates the index entry corresponding to the requested frequency @p freq.
- * If found, seeks to the stored offset and reads:
- *
- *   - number of pressure levels
- *   - pressure grid
- *   - for each pressure:
- *       - number of temperatures
- *       - temperature grid
- *       - for each temperature:
- *           - number of column densities
- *           - u array
- *           - emissivity array
- *
- * The data are stored into `tbl[id][ig]`.
- *
- * @param g     Pointer to an open gas-table handle.
- * @param freq  Frequency to be read.
- * @param tbl   Pointer to output table structure.
- * @param id    Frequency index.
- * @param ig    Gas index.
- *
- * @return 0 on success, -1 if the frequency is not found.
- *
- * @warning Aborts on dimension overflow or seek errors.
- *
- * @author Lars Hoffmann
- */
-int read_tbl_gas_single(
-  const tbl_gas_t * g,
-  const double freq,
-  tbl_t * tbl,
-  const int id,
-  const int ig);
+  int id,
+  int ig);
 
 /**
  * @brief Scan control file or command-line arguments for a configuration variable.
@@ -4245,6 +4115,26 @@ void tangent_point(
   double *tpz,
   double *tplon,
   double *tplat);
+
+
+void tbl_pack(
+  const tbl_t * tbl,
+  int id,
+  int ig,
+  uint8_t * buf,
+  size_t *bytes_used);
+
+
+size_t tbl_unpack(
+  tbl_t * tbl,
+  int id,
+  int ig,
+  const uint8_t * buf);
+
+void write_tbl_nc(
+  const ctl_t * ctl,
+  const tbl_t * tbl);
+
 
 /**
  * @brief Converts time components to seconds since January 1, 2000, 12:00:00 UTC.
@@ -5016,70 +4906,6 @@ void write_tbl_bin(
 void write_tbl_gas(
   const ctl_t * ctl,
   const tbl_t * tbl);
-
-/**
- * @brief Create a new per-gas table file with an empty index.
- *
- * Writes the “GTL1” magic header, initializes the table count to zero,
- * and creates a MAX_TABLES-sized index whose entries are zeroed.
- *
- * The resulting file layout is:
- *
- *     magic[4] = "GTL1"
- *     ntables  = 0
- *     index[MAX_TABLES]  (all zero)
- *
- * @param path  Path to the table file to create.
- *
- * @return 0 on success, -1 if the file cannot be opened.
- *
- * @author Lars Hoffmann
- */
-int write_tbl_gas_create(
-  const char *path);
-
-/**
- * @brief Append or overwrite a single frequency-table block in a per-gas file.
- *
- * Searches the in-memory index for an entry matching @p freq. If found, the
- * corresponding block is updated. Otherwise a new entry is created (subject
- * to the MAX_TABLES limit) and the block is appended to the end of the file.
- *
- * The block format written is identical to the binary format used in write_tbl_bin():
- *
- *   - int     np
- *   - double  p[np]
- *   - for each pressure:
- *       - int     nt
- *       - double  t[nt]
- *       - for each temperature:
- *           - int     nu
- *           - float   u[nu]
- *           - float   eps[nu]
- *
- * The index entry is then updated with:
- *   - freq
- *   - offset (byte offset of the block)
- *   - size   (block size in bytes)
- *
- * @param g     Open gas-table handle obtained from read_tbl_gas_open().
- * @param freq  Frequency associated with the table block.
- * @param tbl   Full lookup table from which one block is extracted.
- * @param id    Frequency index into tbl.
- * @param ig    Gas index into tbl.
- *
- * @return 0 on success, non-zero on write failure.
- *
- * @warning Aborts via ERRMSG() if MAX_TABLES is exceeded or file seek fails.
- *
- * @author Lars Hoffmann
- */
-int write_tbl_gas_single(
-  tbl_gas_t * g,
-  const double freq,
-  const tbl_t * tbl,
-  const int id,
-  const int ig);
 
 /**
  * @brief Map retrieval state vector back to atmospheric structure.
