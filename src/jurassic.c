@@ -6246,54 +6246,40 @@ void read_tbl_bin(
 
   /* Set filename... */
   char filename[2 * LEN];
-  sprintf(filename, "%s_%.4f_%s.bin", ctl->tblbase,
-	  ctl->nu[id], ctl->emitter[ig]);
+  sprintf(filename, "%s_%.4f_%s.bin",
+	  ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
 
   /* Write info... */
   LOG(1, "Read emissivity table: %s", filename);
 
-  /* Try to open file... */
-  FILE *in;
-  if (!(in = fopen(filename, "r"))) {
+  /* Open file... */
+  FILE *in = fopen(filename, "rb");
+  if (!in) {
     WARN("Missing emissivity table: %s", filename);
     return;
   }
 
-  /* Read data... */
-  FREAD(&tbl->np[id][ig], int,
+  /* Read length.. */
+  size_t nbytes;
+  FREAD(&nbytes, size_t,
 	1,
 	in);
-  if (tbl->np[id][ig] > TBLNP)
-    ERRMSG("Too many pressure levels!");
-  FREAD(tbl->p[id][ig], double,
-	  (size_t) tbl->np[id][ig],
-	in);
-  for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
-    FREAD(&tbl->nt[id][ig][ip], int,
-	  1,
-	  in);
-    if (tbl->nt[id][ig][ip] > TBLNT)
-      ERRMSG("Too many temperatures!");
-    FREAD(tbl->t[id][ig][ip], double,
-	    (size_t) tbl->nt[id][ig][ip],
-	  in);
-    for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
-      FREAD(&tbl->nu[id][ig][ip][it], int,
-	    1,
-	    in);
-      if (tbl->nu[id][ig][ip][it] > TBLNU)
-	ERRMSG("Too many column densities!");
-      FREAD(tbl->u[id][ig][ip][it], float,
-	      (size_t) tbl->nu[id][ig][ip][it],
-	    in);
-      FREAD(tbl->eps[id][ig][ip][it], float,
-	      (size_t) tbl->nu[id][ig][ip][it],
-	    in);
-    }
-  }
+  if (nbytes <= 0 || nbytes > TBLBUF)
+    ERRMSG("Invalid packed table size!");
+
+  /* Read packed blob... */
+  uint8_t *work = NULL;
+  ALLOC(work, uint8_t, nbytes);
+  FREAD(work, uint8_t, nbytes, in);
+
+  /* Unpack... */
+  tbl_unpack(tbl, id, ig, work);
 
   /* Close file... */
   fclose(in);
+
+  /* Free... */
+  free(work);
 }
 
 /*****************************************************************************/
@@ -6310,13 +6296,9 @@ void read_tbl_nc(
 
   size_t nbytes;
 
-  /* Maximum buffer size... */
-  const size_t bufmax =
-    (size_t) (4 * (1 + TBLNP * (3 + TBLNT * (3 + 2 * TBLNU))));
-
   /* Allocate... */
   uint8_t *work = NULL;
-  ALLOC(work, uint8_t, bufmax);
+  ALLOC(work, uint8_t, TBLBUF);
 
   /* Open file... */
   sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
@@ -6327,7 +6309,7 @@ void read_tbl_nc(
   NC(nc_inq_varid(ncid, varname, &varid));
   NC(nc_inq_vardimid(ncid, varid, &dimid));
   NC(nc_inq_dimlen(ncid, dimid, &nbytes));
-  if (nbytes > bufmax)
+  if (nbytes > TBLBUF)
     ERRMSG("Table blob exceeds buffer!");
   NC(nc_get_var_uchar(ncid, varid, (unsigned char *) work));
 
@@ -6649,6 +6631,9 @@ void tbl_pack(
   }
 
   *bytes_used = (size_t) (cur - buf);
+
+  if (*bytes_used > TBLBUF)
+    ERRMSG("Packed table size exceeds buffer!");
 }
 
 /*****************************************************************************/
@@ -7854,7 +7839,7 @@ void write_tbl(
   else if (ctl->tblfmt == 2)
     write_tbl_bin(ctl, tbl);
 
-  /* Write binary look-up tables... */
+  /* Write netCDF look-up tables... */
   else if (ctl->tblfmt == 3)
     write_tbl_nc(ctl, tbl);
 
@@ -7914,53 +7899,43 @@ void write_tbl_bin(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
+  /* Allocate... */
+  uint8_t *work = NULL;
+  ALLOC(work, uint8_t, TBLBUF);
+
   /* Loop over emitters and detectors... */
   for (int ig = 0; ig < ctl->ng; ig++)
     for (int id = 0; id < ctl->nd; id++) {
 
       /* Set filename... */
       char filename[2 * LEN];
-      sprintf(filename, "%s_%.4f_%s.bin", ctl->tblbase,
-	      ctl->nu[id], ctl->emitter[ig]);
+      sprintf(filename, "%s_%.4f_%s.bin",
+	      ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
 
       /* Write info... */
       LOG(1, "Write emissivity table: %s", filename);
 
       /* Create file... */
-      FILE *out;
-      if (!(out = fopen(filename, "w")))
+      FILE *out = fopen(filename, "wb");
+      if (!out)
 	ERRMSG("Cannot create file!");
 
-      /* Write binary data... */
-      FWRITE(&tbl->np[id][ig], int,
+      /* Pack... */
+      size_t used = 0;
+      tbl_pack(tbl, id, ig, work, &used);
+
+      /* Write length and packed blob... */
+      FWRITE(&used, size_t,
 	     1,
 	     out);
-      FWRITE(tbl->p[id][ig], double,
-	       (size_t) tbl->np[id][ig],
-	     out);
-      for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
-	FWRITE(&tbl->nt[id][ig][ip], int,
-	       1,
-	       out);
-	FWRITE(tbl->t[id][ig][ip], double,
-	         (size_t) tbl->nt[id][ig][ip],
-	       out);
-	for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
-	  FWRITE(&tbl->nu[id][ig][ip][it], int,
-		 1,
-		 out);
-	  FWRITE(tbl->u[id][ig][ip][it], float,
-		   (size_t) tbl->nu[id][ig][ip][it],
-		 out);
-	  FWRITE(tbl->eps[id][ig][ip][it], float,
-		   (size_t) tbl->nu[id][ig][ip][it],
-		 out);
-	}
-      }
+      FWRITE(work, uint8_t, used, out);
 
       /* Close file... */
       fclose(out);
     }
+
+  /* Free... */
+  free(work);
 }
 
 /*****************************************************************************/
@@ -7969,13 +7944,9 @@ void write_tbl_nc(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
-  /* Maximum buffer size... */
-  const size_t bufmax =
-    (size_t) (4 * (1 + TBLNP * (3 + TBLNT * (3 + 2 * TBLNU))));
-
   /* Allocate... */
   uint8_t *work = NULL;
-  ALLOC(work, uint8_t, bufmax);
+  ALLOC(work, uint8_t, TBLBUF);
 
   /* Loop over emitters... */
   for (int ig = 0; ig < ctl->ng; ig++) {
@@ -8004,8 +7975,6 @@ void write_tbl_nc(
       /* Pack table... */
       size_t used = 0;
       tbl_pack(tbl, id, ig, work, &used);
-      if (used > bufmax)
-	ERRMSG("Packed table exceeds buffer!");
 
       /* Prevent overwrite... */
       int tmp;

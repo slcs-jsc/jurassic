@@ -318,9 +318,9 @@
 #define TBLNS 1200
 #endif
 
-/*! Maximum number of frequency-table entries allowed in a gas table file. */
-#ifndef MAX_TABLES
-#define MAX_TABLES 10000
+/*! Maximum buffer size for lookup tables... */
+#ifndef TBLBUF
+#define TBLBUF (4 * (1 + TBLNP * (3 + TBLNT * (3 + 2 * TBLNU))))
 #endif
 
 /*! Maximum number of RFM spectral grid points. */
@@ -3308,7 +3308,7 @@ void read_atm_nc(
   const char *filename,
   const ctl_t * ctl,
   atm_t * atm,
-  int dataset);
+  int profile);
 
 /**
  * @brief Read model control parameters from command-line and configuration input.
@@ -3756,25 +3756,36 @@ void read_shape(
   int *n);
 
 /**
- * @brief Read all emissivity lookup tables for all gases and frequencies.
+ * @brief Read look-up tables for all trace gases and channels.
  *
- * This function allocates a new `tbl_t` structure and fills it by reading
- * emissivity lookup tables for each trace gas (`ig`) and each frequency index
- * (`id`) specified in the control structure. The lookup tables may be read
- * from ASCII, binary, or per-gas table files depending on `ctl->tblfmt`.
+ * This function allocates and fills a `tbl_t` structure by reading
+ * look-up table data for every detector (`id`) and trace gas (`ig`)
+ * defined in the control structure. The actual reader used depends
+ * on the value of `ctl->tblfmt`:
+ *   - 1: ASCII format
+ *   - 2: Binary format
+ *   - 3: netCDF format
  *
- * After loading all tables, the source function is initialized with
- * `init_srcfunc()`.
+ * For each (id, ig) pair, the corresponding look-up table is loaded
+ * and basic diagnostic information about pressure, temperature,
+ * absorber amount, and emissivity grids is logged.
  *
- * @param ctl  Pointer to control structure containing table metadata,
- *             number of gases, number of frequencies, filenames, etc.
+ * After all tables are read, the source function tables are
+ * initialized via `init_srcfunc()`.
  *
- * @return Pointer to a newly allocated `tbl_t` structure containing all
- *         loaded lookup-table data. The caller owns the returned pointer
- *         and must free it when done.
+ * @param[in] ctl  Pointer to the control structure defining the number
+ *                 of detectors, trace gases, and the table format.
  *
- * @warning Aborts the program via `ERRMSG()` if unexpected table formats
- *          or dimension overflows occur.
+ * @return Pointer to a newly allocated and fully initialized
+ *         look-up table structure.
+ *
+ * @note Memory for the returned `tbl_t` object is allocated inside
+ *       this function. The caller is responsible for freeing it.
+ *
+ * @see read_tbl_asc()
+ * @see read_tbl_bin()
+ * @see read_tbl_nc()
+ * @see init_srcfunc()
  *
  * @author Lars Hoffmann
  */
@@ -4532,7 +4543,7 @@ void write_atm_nc(
   const char *filename,
   const ctl_t * ctl,
   const atm_t * atm,
-  int dataset);
+  int profile);
 
 /**
  * @brief Write atmospheric profile in RFM-compatible format.
@@ -4904,20 +4915,26 @@ void write_stddev(
   const gsl_matrix * s);
 
 /**
- * @brief Write all emissivity lookup tables in the format specified by the control structure.
+ * @brief Write look-up tables in the format specified by the control structure.
  *
- * This function dispatches to one of three table writers depending on
- * `ctl->tblfmt`:
+ * This function dispatches the look-up table output to the appropriate
+ * writer based on the value of `ctl->tblfmt`:
+ *   - 1: ASCII format
+ *   - 2: Binary format
+ *   - 3: netCDF format
  *
- *   - `1`: ASCII tables written by write_tbl_asc()
- *   - `2`: Binary tables written by write_tbl_bin()
- *   - `3`: Per-gas binary tables written by write_tbl_gas()
+ * If an unsupported format is specified, an error is raised.
  *
- * If an unknown format is given, the function aborts via ERRMSG().
+ * @param[in] ctl  Pointer to the control structure defining output format
+ *                 and other configuration options.
+ * @param[in] tbl  Pointer to the look-up table data to be written.
  *
- * @param ctl  Control structure specifying table format, filenames,
- *             number of gases, number of frequencies, etc.
- * @param tbl  Fully populated lookup-table structure to be written.
+ * @note This function does not return a value. Errors are reported via
+ *       the `ERRMSG` mechanism.
+ *
+ * @see write_tbl_asc()
+ * @see write_tbl_bin()
+ * @see write_tbl_nc()
  *
  * @author Lars Hoffmann
  */
@@ -5022,36 +5039,6 @@ void write_tbl_bin(
  * @author Lars Hoffmann
  */
 void write_tbl_nc(
-  const ctl_t * ctl,
-  const tbl_t * tbl);
-
-/**
- * @brief Write lookup tables into per-gas binary table files with indexed blocks.
- *
- * This function creates (if necessary) and updates gas-specific files of the form:
- *
- *     <base>_<emitter>.tbl
- *
- * Each file contains:
- *
- *   - A header ("GTL1")
- *   - A table count (ntables)
- *   - A fixed-size index of MAX_TABLES entries
- *   - One or more appended binary table blocks
- *
- * For each frequency index (`id`), a block is appended (or overwritten) using
- * write_tbl_gas_single(), which stores both the serialized table and its
- * offset/size in the on-disk index.
- *
- * @param ctl  Control structure containing spectral grid, emitters, and filenames.
- * @param tbl  Table data from which individual frequency blocks are extracted.
- *
- * @warning The file must have capacity for all required frequency entries
- *          (MAX_TABLES). Exceeding this capacity triggers a fatal error.
- *
- * @author Lars Hoffmann
- */
-void write_tbl_gas(
   const ctl_t * ctl,
   const tbl_t * tbl);
 
