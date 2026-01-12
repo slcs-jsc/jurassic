@@ -106,8 +106,8 @@ Mandatory build and runtime dependencies include:
 - netCDF-C for file input/output
 - a compiler with OpenMP support
 
-A complete list of mandatory and optional dependencies is provided in
-`DEPENDENCIES.md`.
+A complete list of mandatory and optional dependencies is provided in the
+[dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
 
 ### Installation
 
