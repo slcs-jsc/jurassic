@@ -99,10 +99,15 @@ research, operational, and development workflows:
 
 This documentation describes the installation of JURASSIC on a Linux
 system. A number of standard tools (gcc, git, make) and software
-libraries are needed to install JURASSIC. The [GNU Scientific
-Library](https://www.gnu.org/software/gsl) is required for numerical
-calculations. A copy of this library can be found in the git
-repository.
+libraries are needed to install JURASSIC.
+
+Mandatory build and runtime dependencies include:
+- GNU Scientific Library (GSL) for numerical calculations
+- netCDF-C for file input/output
+- a compiler with OpenMP support
+
+A complete list of mandatory and optional dependencies is provided in
+`DEPENDENCIES.md`.
 
 ### Installation
 
