@@ -1,4 +1,4 @@
-# JURASSIC Dependencies (Ubuntu 24.04 LTS)
+# JURASSIC Dependencies
 
 This file lists the software dependencies required to build and run JURASSIC.
 Versions correspond to the packages provided by Ubuntu 24.04 LTS (Noble Numbat),
@@ -26,24 +26,15 @@ which is the reference platform used for development and testing.
 
 ## Notes
 
-### Using bundled libraries
+- **Using bundled libraries:** JURASSIC includes a `libs/` directory that can build GSL and netCDF if system libraries are not available or if a self-contained build is preferred.
 
-JURASSIC includes a `libs/` directory that can build GSL and netCDF if system
-libraries are not available or if a self-contained build is preferred.
+- **netCDF version:** netCDF classic only requires `libnetcdf-dev`. netCDF-4 additionally requires HDF5 and zlib. Using filter-based compression (e.g. zstd) requires the HDF5 plugin package and possibly setting `HDF5_PLUGIN_PATH`.
 
-### netCDF classic vs netCDF-4
-
-- **netCDF classic** only requires `libnetcdf-dev`.
-- **netCDF-4** additionally requires **HDF5** and **zlib**.
-- If filter-based compression (e.g., zstd) is used, the HDF5 plugin package must be
-  installed and `HDF5_PLUGIN_PATH` may need to be set.
-
-### Static linking
-
-Fully static builds require static versions of all libraries and usually do not
-support HDF5 filter plugins. Dynamic linking is recommended for most users.
+- **Static linking**: Fully static builds require static versions of all libraries and usually do not support HDF5 filter plugins. Dynamic linking is recommended for most users.
 
 ## Installing dependencies (Ubuntu 24.04)
+
+Use the following commands to install the dependencies on Ubuntu 24.04 LTS.
 
 ```bash
 sudo apt update
