@@ -39,6 +39,12 @@ $jurassic/atmfmt nadir.ctl data/atm.bin 2 data/atm_from_bin.tab 1
 $jurassic/obsfmt nadir.ctl data/rad.tab 1 data/rad.bin 2
 $jurassic/obsfmt nadir.ctl data/rad.bin 2 data/rad_from_bin.tab 1
 
+# Test netCDF file-I/O...
+$jurassic/atmfmt nadir.ctl data/atm.tab 1 data/atm.nc 3
+$jurassic/atmfmt nadir.ctl data/atm.nc 3 data/atm_from_nc.tab 1
+$jurassic/obsfmt nadir.ctl data/rad.tab 1 data/rad.nc 3
+$jurassic/obsfmt nadir.ctl data/rad.nc 3 data/rad_from_nc.tab 1
+
 # Compare files...
 echo -e "\nCompare results..."
 error=0

@@ -5345,15 +5345,18 @@ void read_atm_nc(
   /* Open file... */
   NC(nc_open(filename, NC_NOWRITE, &ncid));
 
-  /* Set hyperslab... */
+  /* Initialize hyperslab... */
   size_t start[2] = { (size_t) profile, 0 };
-  size_t count[2] = { 1, (size_t) atm->np };
+  size_t count[2] = { 1, 0 };
 
   /* Determine atm->np... */
   NC(nc_inq_varid(ncid, "nlev", &var_nlev));
   NC(nc_get_vara_int(ncid, var_nlev, start, count, &atm->np));
   if (atm->np < 1 || atm->np > NP)
     ERRMSG("Number of level out of range!");
+
+  /* Update hyperslab... */
+  count[1] = (size_t) atm->np;
 
   /* Inquire core variables... */
   NC(nc_inq_varid(ncid, "time", &var_time));
@@ -5809,15 +5812,18 @@ void read_obs_nc(
   /* Open file... */
   NC(nc_open(filename, NC_NOWRITE, &ncid));
 
-  /* Hyperslab for variables (profile, ray)... */
+  /* Initialize hyperslab... */
   size_t start[2] = { (size_t) profile, 0 };
-  size_t count[2] = { 1, (size_t) obs->nr };
+  size_t count[2] = { 1, 0 };
 
   /* Read nray(profile) -> obs->nr */
   NC(nc_inq_varid(ncid, "nray", &var_nray));
   NC(nc_get_vara_int(ncid, var_nray, start, count, &obs->nr));
   if (obs->nr < 1 || obs->nr > NR)
     ERRMSG("Number of ray paths out of range!");
+
+  /* Update hyperslab... */
+  count[1] = (size_t) obs->nr;
 
   /* Inquire geometry variables... */
   NC(nc_inq_varid(ncid, "time", &var_time));
