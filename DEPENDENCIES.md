@@ -32,7 +32,7 @@ which is the reference platform used for development and testing.
 
 - **Static linking**: Fully static builds require static versions of all libraries and usually do not support HDF5 filter plugins. Dynamic linking is recommended for most users.
 
-## Installing dependencies (Ubuntu 24.04)
+## Installing dependencies
 
 Use the following commands to install the dependencies on Ubuntu 24.04 LTS.
 
