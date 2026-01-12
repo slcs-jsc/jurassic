@@ -51,7 +51,8 @@ JURASSIC has been applied in a wide range of atmospheric remote sensing studies 
 
 \autoref{fig:spectra} illustrates example mid-infrared limb and nadir radiance spectra simulated with JURASSIC, including the contributions of selected trace gases for a mid-latitude reference atmosphere.
 
-![Simulated mid-infrared radiance spectra for limb (a) and nadir (b) viewing geometries calculated with JURASSIC for mid-latitude atmospheric conditions at 1 cm$^{-1}$ spectral resolution.\label{fig:spectra}](fig_spectra.pdf)
+![Simulated mid-infrared limb (a) and nadir (b) spectra from JURASSIC for a mid-latitude atmosphere at 1 cm$^{-1}$ resolution. Coloured curves show single-gas contributions, and the black curve shows the total spectrum.
+\label{fig:spectra}](fig_spectra.pdf)
 
 # Model Assumptions and Extensions
 
