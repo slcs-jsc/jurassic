@@ -3840,7 +3840,42 @@ void read_tbl_bin(
   const int id,
   const int ig);
 
-
+/**
+ * @brief Read a packed lookup table from a NetCDF file.
+ *
+ * This function loads a previously stored lookup table for a specific
+ * emitter and detector from a NetCDF file created by write_tbl_nc().
+ * The table is read as a packed binary blob and unpacked into the
+ * provided table structure using tbl_unpack().
+ *
+ * The NetCDF filename is constructed as:
+ *   <ctl->tblbase>_<ctl->emitter[ig]>.nc
+ *
+ * Within that file, the variable name is derived from the detector
+ * frequency:
+ *   tbl_XXXX   (where XXXX is ctl->nu[id] formatted to four decimals)
+ *
+ * The variable is stored as an `NC_UBYTE` vector whose length is read
+ * from its associated dimension.
+ *
+ * @param[in]     ctl  Control structure defining emitters, detectors,
+ *                    base filename, and detector frequencies.
+ * @param[in,out] tbl  Table structure that will receive the unpacked data.
+ * @param[in]     id   Detector index selecting ctl->nu[id].
+ * @param[in]     ig   Emitter index selecting ctl->emitter[ig].
+ *
+ * @note A temporary buffer is allocated to hold the packed table blob
+ *       before unpacking.
+ *
+ * @warning The function terminates with an error if:
+ *          - The NetCDF file or variable cannot be found.
+ *          - The stored table size exceeds the maximum supported buffer.
+ *
+ * @see write_tbl_nc()
+ * @see tbl_unpack()
+ *
+ * @author Lars Hoffmann
+ */
 void read_tbl_nc(
   const ctl_t * ctl,
   tbl_t * tbl,
@@ -4116,7 +4151,43 @@ void tangent_point(
   double *tplon,
   double *tplat);
 
-
+/**
+ * @brief Pack a lookup table into a contiguous binary buffer.
+ *
+ * This function serializes the lookup table data for a given detector
+ * (`id`) and emitter (`ig`) into a compact, platform-native binary
+ * representation. The packed data can be written to disk (e.g., in a
+ * NetCDF variable) and later reconstructed using `tbl_unpack()`.
+ *
+ * The packed layout in `buf` is, in order:
+ *  - `int np`                          : number of pressure grid points
+ *  - `double p[np]`                   : pressure grid
+ *  - for each pressure index `ip`:
+ *      - `int nt`                     : number of temperature grid points
+ *      - `double t[nt]`               : temperature grid
+ *      - for each temperature index `it`:
+ *          - `int nu`                 : number of spectral grid points
+ *          - `float  u[nu]`           : spectral values
+ *          - `float  eps[nu]`         : associated epsilon values
+ *
+ * No byte-order conversion or padding is applied; the data are written
+ * exactly as laid out in memory.
+ *
+ * @param[in]  tbl         Table structure containing the lookup data.
+ * @param[in]  id          Detector index.
+ * @param[in]  ig          Emitter index.
+ * @param[out] buf         Destination buffer that will receive the packed
+ *                         binary data.
+ * @param[out] bytes_used  Number of bytes written to `buf`.
+ *
+ * @warning The caller must ensure that `buf` is large enough to hold the
+ *          packed data for the selected detector/emitter pair. No bounds
+ *          checking is performed inside this function.
+ *
+ * @see tbl_unpack()
+ *
+ * @author Lars Hoffmann
+ */
 void tbl_pack(
   const tbl_t * tbl,
   int id,
@@ -4124,17 +4195,49 @@ void tbl_pack(
   uint8_t * buf,
   size_t *bytes_used);
 
-
+/**
+ * @brief Unpack a lookup table from a contiguous binary buffer.
+ *
+ * This function reconstructs the lookup table data for a given detector
+ * (`id`) and emitter (`ig`) from a binary buffer previously produced by
+ * `tbl_pack()`. The packed data are read sequentially and copied into
+ * the corresponding fields of the `tbl` structure.
+ *
+ * The expected layout of `buf` is:
+ *  - `int np`
+ *  - `double p[np]`
+ *  - for each pressure index `ip`:
+ *      - `int nt`
+ *      - `double t[nt]`
+ *      - for each temperature index `it`:
+ *          - `int nu`
+ *          - `float u[nu]`
+ *          - `float eps[nu]`
+ *
+ * Range checks are applied to `np`, `nt`, and `nu` against the compile-time
+ * limits `TBLNP`, `TBLNT`, and `TBLNU` to prevent buffer overruns and
+ * invalid table sizes.
+ *
+ * @param[in,out] tbl  Table structure that will receive the unpacked data.
+ * @param[in]     id   Detector index.
+ * @param[in]     ig   Emitter index.
+ * @param[in]     buf  Source buffer containing the packed binary table.
+ *
+ * @return The number of bytes consumed from `buf`.
+ *
+ * @warning The buffer must contain a valid packed table created by
+ *          `tbl_pack()`. Supplying malformed or truncated data will
+ *          result in undefined behavior or an error.
+ *
+ * @see tbl_pack()
+ *
+ * @author Lars Hoffmann
+ */
 size_t tbl_unpack(
   tbl_t * tbl,
   int id,
   int ig,
   const uint8_t * buf);
-
-void write_tbl_nc(
-  const ctl_t * ctl,
-  const tbl_t * tbl);
-
 
 /**
  * @brief Converts time components to seconds since January 1, 2000, 12:00:00 UTC.
@@ -4874,6 +4977,51 @@ void write_tbl_asc(
  * @author Lars Hoffmann
  */
 void write_tbl_bin(
+  const ctl_t * ctl,
+  const tbl_t * tbl);
+
+/**
+ * @brief Write packed lookup tables to NetCDF files.
+ *
+ * This function serializes and stores lookup tables for all combinations
+ * of emitters and detectors into NetCDF4 files. One file is created (or
+ * opened) per emitter, and each detector’s table is written as a separate
+ * variable within that file.
+ *
+ * The output filename for each emitter is:
+ *   <ctl->tblbase>_<ctl->emitter[ig]>.nc
+ *
+ * For each detector frequency `ctl->nu[id]`, a variable named
+ * `tbl_XXXX` and a corresponding dimension `len_XXXX` (where `XXXX` is
+ * the formatted frequency) are created. Each variable contains a packed
+ * binary blob produced by `tbl_pack()`, stored as `NC_UBYTE`.
+ *
+ * If a file does not already exist, it is created and initialized with
+ * global attributes:
+ *  - `format_version = "1"`
+ *  - `emitter = ctl->emitter[ig]`
+ *
+ * If a variable for a given detector already exists in the file, the
+ * function aborts to prevent overwriting existing data.
+ *
+ * @param[in] ctl  Control structure defining emitters, detectors, base
+ *                 filename, and frequencies.
+ * @param[in] tbl  Table data structure containing the lookup tables to
+ *                 be packed and written.
+ *
+ * @note A single temporary buffer is allocated to hold the packed table
+ *       data. Its size is computed to be large enough for the largest
+ *       possible packed table.
+ *
+ * @warning The function terminates with an error if:
+ *          - A packed table exceeds the allocated buffer size.
+ *          - A table variable already exists in the target NetCDF file.
+ *
+ * @see tbl_pack()
+ *
+ * @author Lars Hoffmann
+ */
+void write_tbl_nc(
   const ctl_t * ctl,
   const tbl_t * tbl);
 
