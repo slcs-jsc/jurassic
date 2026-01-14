@@ -41,10 +41,10 @@ and performs radiative transfer calculations along curved ray paths
 that account for atmospheric refraction. The model supports multiple
 observation geometries, including:
 
-- limb sounding  
-- nadir viewing  
-- zenith viewing  
-- occultation geometries  
+- limb sounding
+- nadir viewing
+- zenith viewing
+- occultation geometry
 
 Radiative transfer calculations are based on fast spectral
 approximations, most notably the Emissivity Growth Approximation (EGA)

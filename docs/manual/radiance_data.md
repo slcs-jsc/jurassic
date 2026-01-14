@@ -101,7 +101,7 @@ observation geometry:
   tangent point derived from the actual refracted ray path.
 
 > Note: The exact interpretation of `vp*` and the use of tangent point
-> fields depends on geometry (limb, nadir, occultation). The key point
+> fields depends on geometry (limb, nadir, zenith, occultation). The key point
 > is that `rad.tab` should contain the *evaluated* geometry consistent
 > with the ray tracing used by the forward model.
 
