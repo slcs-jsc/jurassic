@@ -1190,7 +1190,6 @@ double cost_function(
 
   /* Allocate... */
   gsl_vector *x_aux = gsl_vector_alloc(n);
-  gsl_vector *y_aux = gsl_vector_alloc(m);
 
   /* Determine normalized cost function...
      (chi^2 = 1/m * [dy^T * S_eps^{-1} * dy + dx^T * S_a^{-1} * dx]) */
@@ -1201,8 +1200,7 @@ double cost_function(
 
   /* Free... */
   gsl_vector_free(x_aux);
-  gsl_vector_free(y_aux);
-
+  
   /* Return cost function value... */
   return (chisq_m + chisq_a) / (double) m;
 }
