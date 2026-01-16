@@ -3,7 +3,7 @@
 # ======================================================================
 
 # Table directory...
-TBLBASE = ../../tests/nadir_test/airs
+TBLBASE = ../../tests/data/airs
 
 # Emitters...
 NG = 1

@@ -3,7 +3,7 @@
 # ======================================================================
 
 # Table directory...
-TBLBASE = ../../tests/limb_test/boxcar
+TBLBASE = ../../tests/data/boxcar
 
 # Emitters...
 NG = 5
