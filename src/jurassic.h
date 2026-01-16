@@ -308,19 +308,14 @@
 #define TBLNT 30
 #endif
 
-/*! Maximum number of column densities in emissivity tables. */
+/*! Maximum number of column densities per emissivity curve. */
 #ifndef TBLNU
-#define TBLNU 320
+#define TBLNU 512
 #endif
 
 /*! Maximum number of source function temperature levels. */
 #ifndef TBLNS
 #define TBLNS 1200
-#endif
-
-/*! Maximum buffer size for lookup tables... */
-#ifndef TBLBUF
-#define TBLBUF (4 * (1 + TBLNP * (3 + TBLNT * (3 + 2 * TBLNU))))
 #endif
 
 /*! Maximum number of RFM spectral grid points. */
@@ -594,6 +589,34 @@
   (((y1)/(y0)>0) \
    ? ((y0)*exp(log((y1)/(y0))/((x1)-(x0))*((x)-(x0)))) \
    : LIN(x0, y0, x1, y1, x))
+
+/**
+ * @brief Compute logarithmic interpolation in both x and y (log-log space).
+ *
+ * Performs linear interpolation in log(x) versus log(y). This corresponds to
+ * a power-law variation between (x0,y0) and (x1,y1):
+ *   log(y) = log(y0) + (log(y1)-log(y0)) * (log(x/x0)/log(x1/x0))
+ *   => y = y0 * exp( log(y1/y0) * log(x/x0) / log(x1/x0) )
+ *
+ * If x/x0 or x1/x0 is nonpositive, reverts to LOGY (log in y, linear in x),
+ * which itself reverts to LIN if y1/y0 is nonpositive.
+ *
+ * @param[in] x0 Lower x-value.
+ * @param[in] y0 Function value at x₀.
+ * @param[in] x1 Upper x-value.
+ * @param[in] y1 Function value at x₁.
+ * @param[in] x  Interpolation point.
+ *
+ * @return Interpolated y-value at x.
+ *
+ * @see LIN, LOGX, LOGY
+ *
+ * @author Lars Hoffmann
+ */
+#define LOGXY(x0, y0, x1, y1, x) \
+  (((x)/(x0)>0 && (x1)/(x0)>0) \
+   ? ((y0) * exp( (log((y1)/(y0)) / log((x1)/(x0))) * log((x)/(x0)) )) \
+   : LOGY(x0, y0, x1, y1, x))
 
 /**
  * @brief Determine the maximum of two values.
@@ -1639,11 +1662,11 @@ typedef struct {
   /*! Temperature [K]. */
   double t[ND][NG][TBLNP][TBLNT];
 
-  /*! Column density [molecules/cm^2]. */
-  float u[ND][NG][TBLNP][TBLNT][TBLNU];
+  /*! Column density grid [molecules/cm^2] (allocated per (ip,it)). */
+  float *u[ND][NG][TBLNP][TBLNT];
 
-  /*! Emissivity. */
-  float eps[ND][NG][TBLNP][TBLNT][TBLNU];
+  /*! Emissivity grid (allocated per (ip,it)). */
+  float *eps[ND][NG][TBLNP][TBLNT];
 
   /*! Source function temperature [K]. */
   double st[TBLNS];
@@ -4205,6 +4228,21 @@ void tbl_pack(
   int ig,
   uint8_t * buf,
   size_t *bytes_used);
+
+/**
+ * @brief Compute required buffer size (in bytes) for tbl_pack().
+ *
+ * Returns the exact number of bytes that tbl_pack() will write for the
+ * given detector/emitter pair.
+ *
+ * @see tbl_pack()
+ *
+ * @author Lars Hoffmann
+ */
+size_t tbl_packed_size(
+  const tbl_t * tbl,
+  int id,
+  int ig);
 
 /**
  * @brief Unpack a lookup table from a contiguous binary buffer.

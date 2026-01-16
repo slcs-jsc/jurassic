@@ -1200,7 +1200,7 @@ double cost_function(
 
   /* Free... */
   gsl_vector_free(x_aux);
-  
+
   /* Return cost function value... */
   return (chisq_m + chisq_a) / (double) m;
 }
@@ -6193,6 +6193,12 @@ void read_tbl_asc(
 	ERRMSG("Too many temperatures!");
       tbl->nu[id][ig][tbl->np[id][ig]]
 	[tbl->nt[id][ig][tbl->np[id][ig]]] = -1;
+
+      /* Reset dynamic arrays for this (ip,it) node... */
+      tbl->u[id][ig][tbl->np[id][ig]]
+	[tbl->nt[id][ig][tbl->np[id][ig]]] = NULL;
+      tbl->eps[id][ig][tbl->np[id][ig]]
+	[tbl->nt[id][ig][tbl->np[id][ig]]] = NULL;
     }
 
     /* Determine column density index... */
@@ -6203,6 +6209,23 @@ void read_tbl_asc(
       if ((++tbl->nu[id][ig][tbl->np[id][ig]]
 	   [tbl->nt[id][ig][tbl->np[id][ig]]]) >= TBLNU)
 	ERRMSG("Too many column densities!");
+
+      /* Grow dynamic arrays (nu is used as an index during reading). */
+      const int ip = tbl->np[id][ig];
+      const int it = tbl->nt[id][ig][ip];
+      const int iu = tbl->nu[id][ig][ip][it];
+      const size_t nnew = (size_t) (iu + 1);
+
+      float *tmp = (float *) realloc(tbl->u[id][ig][ip][it],
+				     nnew * sizeof(float));
+      if (!tmp)
+	ERRMSG("Out of memory!");
+      tbl->u[id][ig][ip][it] = tmp;
+
+      tmp = (float *) realloc(tbl->eps[id][ig][ip][it], nnew * sizeof(float));
+      if (!tmp)
+	ERRMSG("Out of memory!");
+      tbl->eps[id][ig][ip][it] = tmp;
     }
 
     /* Store data... */
@@ -6262,7 +6285,7 @@ void read_tbl_bin(
   FREAD(&nbytes, size_t,
 	1,
 	in);
-  if (nbytes <= 0 || nbytes > TBLBUF)
+  if (nbytes <= 0)
     ERRMSG("Invalid packed table size!");
 
   /* Read packed blob... */
@@ -6294,21 +6317,19 @@ void read_tbl_nc(
 
   size_t nbytes;
 
-  /* Allocate... */
-  uint8_t *work = NULL;
-  ALLOC(work, uint8_t, TBLBUF);
-
   /* Open file... */
   sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
   NC(nc_open(filename, NC_NOWRITE, &ncid));
 
-  /* Read variable... */
+  /* Inquire variable... */
   sprintf(varname, "tbl_%.4f", ctl->nu[id]);
   NC(nc_inq_varid(ncid, varname, &varid));
   NC(nc_inq_vardimid(ncid, varid, &dimid));
   NC(nc_inq_dimlen(ncid, dimid, &nbytes));
-  if (nbytes > TBLBUF)
-    ERRMSG("Table blob exceeds buffer!");
+
+  /* Read variable... */
+  uint8_t *work = NULL;
+  ALLOC(work, uint8_t, nbytes);
   NC(nc_get_var_uchar(ncid, varid, (unsigned char *) work));
 
   /* Unpack... */
@@ -6629,9 +6650,39 @@ void tbl_pack(
   }
 
   *bytes_used = (size_t) (cur - buf);
+}
 
-  if (*bytes_used > TBLBUF)
-    ERRMSG("Packed table size exceeds buffer!");
+/*****************************************************************************/
+
+size_t tbl_packed_size(
+  const tbl_t *tbl,
+  int id,
+  int ig) {
+
+  size_t bytes = 0;
+
+  const int np = tbl->np[id][ig];
+  bytes += sizeof(int);		/* np */
+  bytes += (size_t) np *sizeof(
+  double);			/* p[np] */
+
+  for (int ip = 0; ip < np; ip++) {
+    const int nt = tbl->nt[id][ig][ip];
+    bytes += sizeof(int);	/* nt */
+    bytes += (size_t) nt *sizeof(
+  double);			/* t[nt] */
+
+    for (int it = 0; it < nt; it++) {
+      const int nu = tbl->nu[id][ig][ip][it];
+      bytes += sizeof(int);	/* nu */
+      bytes += (size_t) nu *sizeof(
+  float);			/* u[nu] */
+      bytes += (size_t) nu *sizeof(
+  float);			/* eps[nu] */
+    }
+  }
+
+  return bytes;
 }
 
 /*****************************************************************************/
@@ -6680,6 +6731,21 @@ size_t tbl_unpack(
 	ERRMSG("nu out of range!");
 
       tbl->nu[id][ig][ip][it] = nu;
+
+      /* Allocate dynamic arrays for this (ip,it) node... */
+      if (tbl->u[id][ig][ip][it])
+	free(tbl->u[id][ig][ip][it]);
+      if (tbl->eps[id][ig][ip][it])
+	free(tbl->eps[id][ig][ip][it]);
+
+      tbl->u[id][ig][ip][it] = NULL;
+      tbl->eps[id][ig][ip][it] = NULL;
+      if (nu > 0) {
+	ALLOC(tbl->u[id][ig][ip][it], float,
+	      nu);
+	ALLOC(tbl->eps[id][ig][ip][it], float,
+	      nu);
+      }
 
       memcpy(tbl->u[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
@@ -7897,9 +7963,7 @@ void write_tbl_bin(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
-  /* Allocate... */
-  uint8_t *work = NULL;
-  ALLOC(work, uint8_t, TBLBUF);
+  /* Work buffer will be allocated per table, sized to the packed blob. */
 
   /* Loop over emitters and detectors... */
   for (int ig = 0; ig < ctl->ng; ig++)
@@ -7920,7 +7984,12 @@ void write_tbl_bin(
 
       /* Pack... */
       size_t used = 0;
+      const size_t need = tbl_packed_size(tbl, id, ig);
+      uint8_t *work = NULL;
+      ALLOC(work, uint8_t, need);
       tbl_pack(tbl, id, ig, work, &used);
+      if (used != need)
+	ERRMSG("Internal error: packed size mismatch!");
 
       /* Write length and packed blob... */
       FWRITE(&used, size_t,
@@ -7930,10 +7999,10 @@ void write_tbl_bin(
 
       /* Close file... */
       fclose(out);
-    }
 
-  /* Free... */
-  free(work);
+      /* Free... */
+      free(work);
+    }
 }
 
 /*****************************************************************************/
@@ -7942,9 +8011,7 @@ void write_tbl_nc(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
-  /* Allocate... */
-  uint8_t *work = NULL;
-  ALLOC(work, uint8_t, TBLBUF);
+  /* Work buffer will be allocated per table, sized to the packed blob. */
 
   /* Loop over emitters... */
   for (int ig = 0; ig < ctl->ng; ig++) {
@@ -7972,7 +8039,12 @@ void write_tbl_nc(
 
       /* Pack table... */
       size_t used = 0;
+      const size_t need = tbl_packed_size(tbl, id, ig);
+      uint8_t *work = NULL;
+      ALLOC(work, uint8_t, need);
       tbl_pack(tbl, id, ig, work, &used);
+      if (used != need)
+	ERRMSG("Internal error: packed size mismatch!");
 
       /* Prevent overwrite... */
       int tmp;
@@ -7990,14 +8062,14 @@ void write_tbl_nc(
 
       /* Write data... */
       NC(nc_put_var_uchar(ncid, varid, (const unsigned char *) work));
+
+      /* Free... */
+      free(work);
     }
 
     /* Close file... */
     NC(nc_close(ncid));
   }
-
-  /* Free... */
-  free(work);
 }
 
 /*****************************************************************************/
