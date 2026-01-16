@@ -103,8 +103,8 @@ libraries are needed to install JURASSIC.
 
 Mandatory build and runtime dependencies include:
 - GNU Scientific Library (GSL) for numerical calculations
-- netCDF-C for file input/output
-- a compiler with OpenMP support
+- netCDF-C library for file input/output
+- GNU C compiler with OpenMP support
 
 A complete list of mandatory and optional dependencies is provided in the
 [dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
