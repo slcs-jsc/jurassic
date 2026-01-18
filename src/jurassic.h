@@ -1661,11 +1661,11 @@ typedef struct {
   /*! Temperature [K]. */
   double t[ND][NG][TBLNP][TBLNT];
 
-  /*! Column density grid [molecules/cm^2] (allocated per (ip,it)). */
-  float *u[ND][NG][TBLNP][TBLNT];
+  /*! Logarithm of column density [molecules/cm^2]. */
+  float *logu[ND][NG][TBLNP][TBLNT];
 
-  /*! Emissivity grid (allocated per (ip,it)). */
-  float *eps[ND][NG][TBLNP][TBLNT];
+  /*! Logarithm of emissivity. */
+  float *logeps[ND][NG][TBLNP][TBLNT];
 
   /*! Source function temperature [K]. */
   double st[TBLNS];

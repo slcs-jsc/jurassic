@@ -4240,25 +4240,39 @@ inline double intpol_tbl_eps(
   const double u) {
 
   const int nu = tbl->nu[id][ig][ip][it];
-  const float *u_arr = tbl->u[id][ig][ip][it];
-  const float *eps_arr = tbl->eps[id][ig][ip][it];
+  const float *logu_arr = tbl->logu[id][ig][ip][it];
+  const float *logeps_arr = tbl->logeps[id][ig][ip][it];
 
-  const double u_min = u_arr[0];
-  const double u_max = u_arr[nu - 1];
+  /* Work in log-space and only convert back when needed... */
+  const double lu = log(u);
+  const double logu_min = (double) logu_arr[0];
+  const double logu_max = (double) logu_arr[nu - 1];
 
-  /* Lower boundary extrapolation... */
-  if (u < u_min)
-    return eps_arr[0] * u / u_min;
-
-  /* Upper boundary extrapolation... */
-  if (u > u_max) {
-    const double a = log(1.0 - eps_arr[nu - 1]) / u_max;
-    return 1.0 - exp(a * u);
+  /* Lower boundary extrapolation (u < u_min)...
+     eps ~ eps_min * u/u_min => log(eps) = logeps_min + log(u) - log(u_min) */
+  if (lu < logu_min) {
+    const double logeps0 = (double) logeps_arr[0];
+    return exp(logeps0 + lu - logu_min);
   }
 
-  /* Interpolation... */
-  const int idx = locate_tbl(u_arr, nu, u);
-  return LOGXY(u_arr[idx], eps_arr[idx], u_arr[idx + 1], eps_arr[idx + 1], u);
+  /* Upper boundary extrapolation (u > u_max)...
+   * Assume eps(u) approaches 1 exponentially:
+   *   eps(u) = 1 - exp(a * u),  a < 0
+   * Continuity at (u_max, eps_max) gives
+   *   a = log(1 - eps_max) / u_max.
+   * Use log1p/expm1 and u/u_max = exp(log(u) - log(u_max)) for stability.
+   */
+  if (lu > logu_max) {
+    const double eps_max = exp((double) logeps_arr[nu - 1]);
+    const double l1m_eps_max = log1p(-eps_max);
+    const double r = exp(lu - logu_max);
+    return -expm1(l1m_eps_max * r);
+  }
+
+  /* Interpolation (log-log using precomputed logs)... */
+  const int idx = locate_tbl(logu_arr, nu, lu);
+  return exp(LIN(logu_arr[idx], logeps_arr[idx],
+		 logu_arr[idx + 1], logeps_arr[idx + 1], lu));
 }
 
 /*****************************************************************************/
@@ -4272,26 +4286,40 @@ inline double intpol_tbl_u(
   const double eps) {
 
   const int nu = tbl->nu[id][ig][ip][it];
-  const float *eps_arr = tbl->eps[id][ig][ip][it];
-  const float *u_arr = tbl->u[id][ig][ip][it];
+  const float *logeps_arr = tbl->logeps[id][ig][ip][it];
+  const float *logu_arr = tbl->logu[id][ig][ip][it];
 
-  const double eps_min = eps_arr[0];
-  const double eps_max = eps_arr[nu - 1];
+  /* Work in log-space and only convert back when needed.... */
+  const double le = log(eps);
+  const double logeps_min = (double) logeps_arr[0];
+  const double logeps_max = (double) logeps_arr[nu - 1];
 
-  /* Lower boundary extrapolation... */
-  if (eps < eps_min)
-    return u_arr[0] * eps / eps_min;
-
-  /* Upper boundary extrapolation... */
-  if (eps > eps_max) {
-    const double a = log(1.0 - eps_max) / u_arr[nu - 1];
-    return log(1.0 - eps) / a;
+  /* Lower boundary extrapolation (eps < eps_min)...
+     u ~ u_min * eps/eps_min => log(u) = log(u_min) + log(eps) - log(eps_min) */
+  if (le < logeps_min) {
+    const double logu_min = (double) logu_arr[0];
+    return exp(logu_min + le - logeps_min);
   }
 
-  /* Interpolation... */
-  const int idx = locate_tbl(eps_arr, nu, eps);
-  return LOGXY(eps_arr[idx], u_arr[idx], eps_arr[idx + 1], u_arr[idx + 1],
-	       eps);
+  /* Upper boundary extrapolation (eps > eps_max):
+   * Invert the exponential tail used for eps(u):
+   *   u = log(1 - eps) / a,
+   * with a = log(1 - eps_max) / u_max.
+   * Rewritten as
+   *   u = u_max * log(1 - eps) / log(1 - eps_max)
+   * for numerical stability (log1p).
+   */
+  if (le > logeps_max) {
+    const double u_max = exp((double) logu_arr[nu - 1]);
+    const double l1m_eps_max = log1p(-exp(logeps_max));
+    const double l1m_eps = log1p(-eps);
+    return u_max * (l1m_eps / l1m_eps_max);
+  }
+
+  /* Interpolation (log-log using precomputed logs)... */
+  const int idx = locate_tbl(logeps_arr, nu, le);
+  return exp(LIN(logeps_arr[idx], logu_arr[idx],
+		 logeps_arr[idx + 1], logu_arr[idx + 1], le));
 }
 
 /*****************************************************************************/
@@ -6124,10 +6152,10 @@ tbl_t *read_tbl(
 	    ip, tbl->p[id][ig][ip], tbl->nt[id][ig][ip] - 1,
 	    tbl->t[id][ig][ip][0],
 	    tbl->t[id][ig][ip][tbl->nt[id][ig][ip] - 1],
-	    tbl->nu[id][ig][ip][0] - 1, tbl->u[id][ig][ip][0][0],
-	    tbl->u[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1],
-	    tbl->nu[id][ig][ip][0] - 1, tbl->eps[id][ig][ip][0][0],
-	    tbl->eps[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1]);
+	    tbl->nu[id][ig][ip][0] - 1, exp(tbl->logu[id][ig][ip][0][0]),
+	    exp(tbl->logu[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1]),
+	    tbl->nu[id][ig][ip][0] - 1, exp(tbl->logeps[id][ig][ip][0][0]),
+	    exp(tbl->logeps[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1]));
     }
 
   /* Initialize source function... */
@@ -6196,9 +6224,9 @@ void read_tbl_asc(
 	[tbl->nt[id][ig][tbl->np[id][ig]]] = -1;
 
       /* Reset dynamic arrays for this (ip,it) node... */
-      tbl->u[id][ig][tbl->np[id][ig]]
+      tbl->logu[id][ig][tbl->np[id][ig]]
 	[tbl->nt[id][ig][tbl->np[id][ig]]] = NULL;
-      tbl->eps[id][ig][tbl->np[id][ig]]
+      tbl->logeps[id][ig][tbl->np[id][ig]]
 	[tbl->nt[id][ig][tbl->np[id][ig]]] = NULL;
     }
 
@@ -6217,28 +6245,29 @@ void read_tbl_asc(
       const int iu = tbl->nu[id][ig][ip][it];
       const size_t nnew = (size_t) (iu + 1);
 
-      float *tmp = (float *) realloc(tbl->u[id][ig][ip][it],
+      float *tmp = (float *) realloc(tbl->logu[id][ig][ip][it],
 				     nnew * sizeof(float));
       if (!tmp)
 	ERRMSG("Out of memory!");
-      tbl->u[id][ig][ip][it] = tmp;
+      tbl->logu[id][ig][ip][it] = tmp;
 
-      tmp = (float *) realloc(tbl->eps[id][ig][ip][it], nnew * sizeof(float));
+      tmp =
+	(float *) realloc(tbl->logeps[id][ig][ip][it], nnew * sizeof(float));
       if (!tmp)
 	ERRMSG("Out of memory!");
-      tbl->eps[id][ig][ip][it] = tmp;
+      tbl->logeps[id][ig][ip][it] = tmp;
     }
 
     /* Store data... */
     tbl->p[id][ig][tbl->np[id][ig]] = press;
     tbl->t[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
       = temp;
-    tbl->u[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
+    tbl->logu[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
       [tbl->nu[id][ig][tbl->np[id][ig]]
-       [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) u;
-    tbl->eps[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
+       [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) log(u);
+    tbl->logeps[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
       [tbl->nu[id][ig][tbl->np[id][ig]]
-       [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) eps;
+       [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) log(eps);
   }
 
   /* Increment counters... */
@@ -6642,10 +6671,10 @@ void tbl_pack(
       memcpy(cur, &nu, sizeof(nu));
       cur += sizeof(nu);
 
-      memcpy(cur, tbl->u[id][ig][ip][it], (size_t) nu * sizeof(float));
+      memcpy(cur, tbl->logu[id][ig][ip][it], (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
 
-      memcpy(cur, tbl->eps[id][ig][ip][it], (size_t) nu * sizeof(float));
+      memcpy(cur, tbl->logeps[id][ig][ip][it], (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
     }
   }
@@ -6734,24 +6763,24 @@ size_t tbl_unpack(
       tbl->nu[id][ig][ip][it] = nu;
 
       /* Allocate dynamic arrays for this (ip,it) node... */
-      if (tbl->u[id][ig][ip][it])
-	free(tbl->u[id][ig][ip][it]);
-      if (tbl->eps[id][ig][ip][it])
-	free(tbl->eps[id][ig][ip][it]);
+      if (tbl->logu[id][ig][ip][it])
+	free(tbl->logu[id][ig][ip][it]);
+      if (tbl->logeps[id][ig][ip][it])
+	free(tbl->logeps[id][ig][ip][it]);
 
-      tbl->u[id][ig][ip][it] = NULL;
-      tbl->eps[id][ig][ip][it] = NULL;
+      tbl->logu[id][ig][ip][it] = NULL;
+      tbl->logeps[id][ig][ip][it] = NULL;
       if (nu > 0) {
-	ALLOC(tbl->u[id][ig][ip][it], float,
+	ALLOC(tbl->logu[id][ig][ip][it], float,
 	      nu);
-	ALLOC(tbl->eps[id][ig][ip][it], float,
+	ALLOC(tbl->logeps[id][ig][ip][it], float,
 	      nu);
       }
 
-      memcpy(tbl->u[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
+      memcpy(tbl->logu[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
 
-      memcpy(tbl->eps[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
+      memcpy(tbl->logeps[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
     }
   }
@@ -7950,7 +7979,8 @@ void write_tbl_asc(
 	  for (int iu = 0; iu < tbl->nu[id][ig][ip][it]; iu++)
 	    fprintf(out, "%g %g %e %e\n",
 		    tbl->p[id][ig][ip], tbl->t[id][ig][ip][it],
-		    tbl->u[id][ig][ip][it][iu], tbl->eps[id][ig][ip][it][iu]);
+		    exp(tbl->logu[id][ig][ip][it][iu]),
+		    exp(tbl->logeps[id][ig][ip][it][iu]));
 	}
 
       /* Close file... */
