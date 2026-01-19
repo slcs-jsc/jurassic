@@ -28,6 +28,7 @@ src/retrieval
 src/tblfmt
 src/tblgen
 src/time2jsec
+src/zenith
 tab/
 tests/limb_test/data/
 tests/nadir_test/data/
