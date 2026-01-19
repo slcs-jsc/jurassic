@@ -4096,14 +4096,11 @@ void intpol_tbl_cga(
 	else {
 
 	  /* Get emissivities of extended path... */
-	  double eps00
-	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, los->cgu[ip][ig]);
-	  double eps01 =
-	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, los->cgu[ip][ig]);
-	  double eps10 =
-	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, los->cgu[ip][ig]);
-	  double eps11 =
-	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, los->cgu[ip][ig]);
+	  const double logu = log(los->cgu[ip][ig]);
+	  double eps00 = intpol_tbl_eps(tbl, ig, id, ipr, it0, logu);
+	  double eps01 = intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, logu);
+	  double eps10 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, logu);
+	  double eps11 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, logu);
 
 	  /* Interpolate with respect to temperature... */
 	  eps00 = LIN(tbl->t[id][ig][ipr][it0], eps00,
@@ -4185,22 +4182,24 @@ void intpol_tbl_ega(
 	else {
 
 	  /* Get emissivities of extended path... */
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, 1 - tau_path[id][ig]);
+	  const double logtau = log(tau_path[id][ig]);
+	  const double logeps = log(1.0 - tau_path[id][ig]);
+
+	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, logeps, logtau);
 	  double eps00
-	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, u + los->u[ip][ig]);
+	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, log(u + los->u[ip][ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, 1 - tau_path[id][ig]);
-	  double eps01 =
-	    intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, u + los->u[ip][ig]);
+	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, logeps, logtau);
+	  double eps01 = intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1,
+					log(u + los->u[ip][ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, 1 - tau_path[id][ig]);
-	  double eps10 =
-	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, u + los->u[ip][ig]);
+	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, logeps, logtau);
+	  double eps10 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1,
+					log(u + los->u[ip][ig]));
 
-	  u =
-	    intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, 1 - tau_path[id][ig]);
-	  double eps11 =
-	    intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1, u + los->u[ip][ig]);
+	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, logeps, logtau);
+	  double eps11 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1,
+					log(u + los->u[ip][ig]));
 
 	  /* Interpolate with respect to temperature... */
 	  eps00 = LIN(tbl->t[id][ig][ipr][it0], eps00,
@@ -4237,22 +4236,21 @@ inline double intpol_tbl_eps(
   const int id,
   const int ip,
   const int it,
-  const double u) {
+  const double logu) {
 
   const int nu = tbl->nu[id][ig][ip][it];
   const float *logu_arr = tbl->logu[id][ig][ip][it];
   const float *logeps_arr = tbl->logeps[id][ig][ip][it];
 
   /* Work in log-space and only convert back when needed... */
-  const double lu = log(u);
   const double logu_min = (double) logu_arr[0];
   const double logu_max = (double) logu_arr[nu - 1];
 
   /* Lower boundary extrapolation (u < u_min)...
      eps ~ eps_min * u/u_min => log(eps) = logeps_min + log(u) - log(u_min) */
-  if (lu < logu_min) {
-    const double logeps0 = (double) logeps_arr[0];
-    return exp(logeps0 + lu - logu_min);
+  if (logu < logu_min) {
+    const double logeps_min = (double) logeps_arr[0];
+    return exp(logeps_min + logu - logu_min);
   }
 
   /* Upper boundary extrapolation (u > u_max)...
@@ -4262,17 +4260,17 @@ inline double intpol_tbl_eps(
    *   a = log(1 - eps_max) / u_max.
    * Use log1p/expm1 and u/u_max = exp(log(u) - log(u_max)) for stability.
    */
-  if (lu > logu_max) {
+  if (logu > logu_max) {
     const double eps_max = exp((double) logeps_arr[nu - 1]);
     const double l1m_eps_max = log1p(-eps_max);
-    const double r = exp(lu - logu_max);
+    const double r = exp(logu - logu_max);
     return -expm1(l1m_eps_max * r);
   }
 
   /* Interpolation (log-log using precomputed logs)... */
-  const int idx = locate_tbl(logu_arr, nu, lu);
+  const int idx = locate_tbl(logu_arr, nu, logu);
   return exp(LIN(logu_arr[idx], logeps_arr[idx],
-		 logu_arr[idx + 1], logeps_arr[idx + 1], lu));
+		 logu_arr[idx + 1], logeps_arr[idx + 1], logu));
 }
 
 /*****************************************************************************/
@@ -4283,22 +4281,22 @@ inline double intpol_tbl_u(
   const int id,
   const int ip,
   const int it,
-  const double eps) {
+  const double logeps,
+  const double logtau) {
 
   const int nu = tbl->nu[id][ig][ip][it];
   const float *logeps_arr = tbl->logeps[id][ig][ip][it];
   const float *logu_arr = tbl->logu[id][ig][ip][it];
 
   /* Work in log-space and only convert back when needed.... */
-  const double le = log(eps);
   const double logeps_min = (double) logeps_arr[0];
   const double logeps_max = (double) logeps_arr[nu - 1];
 
   /* Lower boundary extrapolation (eps < eps_min)...
      u ~ u_min * eps/eps_min => log(u) = log(u_min) + log(eps) - log(eps_min) */
-  if (le < logeps_min) {
+  if (logeps < logeps_min) {
     const double logu_min = (double) logu_arr[0];
-    return exp(logu_min + le - logeps_min);
+    return exp(logu_min + logeps - logeps_min);
   }
 
   /* Upper boundary extrapolation (eps > eps_max):
@@ -4306,20 +4304,19 @@ inline double intpol_tbl_u(
    *   u = log(1 - eps) / a,
    * with a = log(1 - eps_max) / u_max.
    * Rewritten as
-   *   u = u_max * log(1 - eps) / log(1 - eps_max)
+   *   u = u_max * log(tau) / log(1 - eps_max)
    * for numerical stability (log1p).
    */
-  if (le > logeps_max) {
+  if (logeps > logeps_max) {
     const double u_max = exp((double) logu_arr[nu - 1]);
     const double l1m_eps_max = log1p(-exp(logeps_max));
-    const double l1m_eps = log1p(-eps);
-    return u_max * (l1m_eps / l1m_eps_max);
+    return u_max * (logtau / l1m_eps_max);
   }
 
   /* Interpolation (log-log using precomputed logs)... */
-  const int idx = locate_tbl(logeps_arr, nu, le);
+  const int idx = locate_tbl(logeps_arr, nu, logeps);
   return exp(LIN(logeps_arr[idx], logu_arr[idx],
-		 logeps_arr[idx + 1], logu_arr[idx + 1], le));
+		 logeps_arr[idx + 1], logu_arr[idx + 1], logeps));
 }
 
 /*****************************************************************************/

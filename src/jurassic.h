@@ -2646,34 +2646,28 @@ void intpol_tbl_ega(
   double tau_seg[ND]);
 
 /**
- * @brief Interpolate emissivity from lookup tables as a function
- *        of column density.
+ * @brief Interpolate gas emissivity as a function of column amount.
  *
- * Retrieves the emissivity corresponding to a given column density
- * `u` for a specific gas, channel, pressure level, and temperature
- * index from the precomputed emissivity tables.
+ * Computes emissivity \f$\varepsilon(u)\f$ from tabulated data using
+ * linear interpolation in \f$\log u\f$–\f$\log\varepsilon\f$ space.
+ * The input column amount must be provided as \f$\log(u)\f$.
  *
- * @param[in] tbl  Emissivity lookup tables (@ref tbl_t).
- * @param[in] ig   Gas index.
- * @param[in] id   Channel index.
- * @param[in] ip   Pressure level index.
- * @param[in] it   Temperature level index.
- * @param[in] u    Column density [molecules/cm²].
- * @return Interpolated emissivity value in the range [0, 1].
+ * Behavior:
+ * - For \f$u < u_{\min}\f$, emissivity scales linearly with column amount.
+ * - For \f$u > u_{\max}\f$, emissivity asymptotically approaches unity using
+ *   an exponential tail matched at \f$(u_{\max}, \varepsilon_{\max})\f$.
  *
- * @details
- * - Performs linear interpolation in column density between adjacent
- *   grid points using @ref LIN.
- * - Applies lower-bound extrapolation proportional to `u` for
- *   `u < u_min`.
- * - Applies exponential upper-bound extrapolation ensuring
- *   asymptotic emissivity growth (`eps → 1` as `u → ∞`).
- * - The input arrays are taken from `tbl->u` and `tbl->eps`.
+ * The implementation uses `log1p`/`expm1` for numerical stability and
+ * minimizes conversions between linear and logarithmic space.
  *
- * @see tbl_t, LIN, locate_tbl
+ * @param tbl   Lookup table structure.
+ * @param ig    Gas index.
+ * @param id    Spectral/channel index.
+ * @param ip    Pressure index.
+ * @param it    Temperature index.
+ * @param logu  Natural logarithm of the column amount [molecules/cm²].
  *
- * @note Used by both the Curtis–Godson (CGA) and Emissivity Growth
- *       Approximation (EGA) interpolation schemes.
+ * @return Emissivity in the range \f$[0,1]\f$.
  *
  * @author Lars Hoffmann
  */
@@ -2683,37 +2677,36 @@ double intpol_tbl_eps(
   const int id,
   const int ip,
   const int it,
-  const double u);
+  const double logu);
 
 /**
- * @brief Interpolate column density from lookup tables as a function
- *        of emissivity.
+ * @brief Interpolate column amount as a function of emissivity.
  *
- * Returns the column density corresponding to a given emissivity
- * `eps` for a specific gas, channel, pressure level, and temperature
- * index from the precomputed emissivity tables.
+ * Computes the column amount \f$u(\varepsilon)\f$ from tabulated data using
+ * linear interpolation in \f$\log\varepsilon\f$–\f$\log u\f$ space.
+ * The emissivity must be provided as \f$\log(\varepsilon)\f$ together with
+ * \f$\log(1-\varepsilon)\f$.
  *
- * @param[in] tbl  Emissivity lookup tables (@ref tbl_t).
- * @param[in] ig   Gas index.
- * @param[in] id   Channel index.
- * @param[in] ip   Pressure level index.
- * @param[in] it   Temperature level index.
- * @param[in] eps  Emissivity value (0–1).
- * @return Interpolated column density [molecules/cm²].
+ * Behavior:
+ * - For \f$\varepsilon < \varepsilon_{\min}\f$, column amount scales linearly
+ *   with emissivity.
+ * - For \f$\varepsilon > \varepsilon_{\max}\f$, the exponential tail used in
+ *   `intpol_tbl_eps()` is analytically inverted.
  *
- * @details
- * - Performs linear interpolation in emissivity between adjacent
- *   table entries using @ref LIN.
- * - For `eps < eps_min`, applies linear extrapolation proportional
- *   to emissivity.
- * - For `eps > eps_max`, applies exponential extrapolation
- *   following the emissivity growth law.
- * - The lookup is performed using `tbl->eps` and `tbl->u`.
+ * The implementation operates primarily in log-space and uses `log1p` for
+ * numerical stability near \f$\varepsilon \rightarrow 1\f$.
  *
- * @see tbl_t, LIN, locate_tbl
+ * @param tbl     Lookup table structure.
+ * @param ig      Gas index.
+ * @param id      Spectral/channel index.
+ * @param ip      Pressure index.
+ * @param it      Temperature index.
+ * @param logeps  Natural logarithm of emissivity (\f$\log\varepsilon\f$).
+ * @param logtau  Natural logarithm of transmittance (\f$\log(1-\varepsilon)\f$).
  *
- * @note Used in the Emissivity Growth Approximation (EGA) to
- *       determine effective column density from transmittance.
+ * @return Column amount \f$u\f$.
+ *
+ * @see intpol_tbl_eps
  *
  * @author Lars Hoffmann
  */
@@ -2723,7 +2716,8 @@ double intpol_tbl_u(
   const int id,
   const int ip,
   const int it,
-  const double eps);
+  const double logeps,
+  const double logtau);
 
 /**
  * @brief Converts Julian seconds to calendar date and time components.
