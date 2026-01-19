@@ -4182,22 +4182,21 @@ void intpol_tbl_ega(
 	else {
 
 	  /* Get emissivities of extended path... */
-	  const double logtau = log(tau_path[id][ig]);
 	  const double logeps = log(1.0 - tau_path[id][ig]);
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, logeps, logtau);
+	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, logeps);
 	  double eps00
 	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, log(u + los->u[ip][ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, logeps, logtau);
+	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, logeps);
 	  double eps01 = intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1,
 					log(u + los->u[ip][ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, logeps, logtau);
+	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, logeps);
 	  double eps10 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1,
 					log(u + los->u[ip][ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, logeps, logtau);
+	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, logeps);
 	  double eps11 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1,
 					log(u + los->u[ip][ig]));
 
@@ -4281,8 +4280,7 @@ inline double intpol_tbl_u(
   const int id,
   const int ip,
   const int it,
-  const double logeps,
-  const double logtau) {
+  const double logeps) {
 
   const int nu = tbl->nu[id][ig][ip][it];
   const float *logeps_arr = tbl->logeps[id][ig][ip][it];
@@ -4310,6 +4308,7 @@ inline double intpol_tbl_u(
   if (logeps > logeps_max) {
     const double u_max = exp((double) logu_arr[nu - 1]);
     const double l1m_eps_max = log1p(-exp(logeps_max));
+    const double logtau = log1p(-exp(logeps));
     return u_max * (logtau / l1m_eps_max);
   }
 

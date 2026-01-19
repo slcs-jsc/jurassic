@@ -2702,7 +2702,6 @@ double intpol_tbl_eps(
  * @param ip      Pressure index.
  * @param it      Temperature index.
  * @param logeps  Natural logarithm of emissivity (\f$\log\varepsilon\f$).
- * @param logtau  Natural logarithm of transmittance (\f$\log(1-\varepsilon)\f$).
  *
  * @return Column amount \f$u\f$.
  *
@@ -2716,8 +2715,7 @@ double intpol_tbl_u(
   const int id,
   const int ip,
   const int it,
-  const double logeps,
-  const double logtau);
+  const double logeps);
 
 /**
  * @brief Converts Julian seconds to calendar date and time components.
