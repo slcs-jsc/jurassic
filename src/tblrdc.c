@@ -34,12 +34,19 @@
 #define ABS_ERROR_VIOLATION(diff, val) \
     ((diff) > ABS_ERROR_RATE)
 
-
 /* Copy density entry for given indices... */
-static void copy_density(tbl_t *tbl,int id, int ig, int ip,int it, int dst, int src) {
-    tbl->u[id][ig][ip][it][dst] = tbl->u[id][ig][ip][it][src];
-    tbl->eps[id][ig][ip][it][dst] = tbl->eps[id][ig][ip][it][src];
+static void copy_density(
+  tbl_t *tbl,
+  int id,
+  int ig,
+  int ip,
+  int it,
+  int dst,
+  int src) {
+  tbl->logu[id][ig][ip][it][dst] = tbl->logu[id][ig][ip][it][src];
+  tbl->logeps[id][ig][ip][it][dst] = tbl->logeps[id][ig][ip][it][src];
 }
+
 /**
  * Adaptive reduction of a (u, eps) table segment.
  *
@@ -47,37 +54,57 @@ static void copy_density(tbl_t *tbl,int id, int ig, int ip,int it, int dst, int 
  * linear interpolation error exceeds the specified tolerance.
  * Reduction is performed in-place and preserves ordering in u.
  */
+static void reduction(
+  tbl_t *tbl,
+  int id,
+  int ig,
+  int ip,
+  int it,
+  int left,
+  int right,
+  int *write_idx) {
 
-static void reduction(tbl_t *tbl, int id, int ig, int ip,int it, int left, int right, int *write_idx){
-  int worstindex=-1;
-  double max_err=0.0;
-  /* Scan interior points and find the largest interpolation error */
-  for(int iu = left+1; iu < right; iu++){
-    double interp= LOGXY(tbl->u[id][ig][ip][it][left],tbl->eps[id][ig][ip][it][left],tbl->u[id][ig][ip][it][right],tbl->eps[id][ig][ip][it][right],tbl->u[id][ig][ip][it][iu]);
-    double diff=fabs(((tbl->eps[id][ig][ip][it][iu]) - interp ));
+  int worstindex = -1;
+  double max_err = 0.0;
 
-  if (REL_ERROR_VIOLATION(diff, tbl->eps[id][ig][ip][it][iu]) && diff > max_err) {
-      max_err=diff;
-      worstindex=iu;
+  /* Scan interior points and find the largest interpolation error... */
+  for (int iu = left + 1; iu < right; iu++) {
+
+    /* Linear interpolation in log-log space: interpolate log(eps) linearly over log(u)... */
+    const double interp_logeps =
+      LIN(tbl->logu[id][ig][ip][it][left], tbl->logeps[id][ig][ip][it][left],
+	  tbl->logu[id][ig][ip][it][right],
+	  tbl->logeps[id][ig][ip][it][right],
+	  tbl->logu[id][ig][ip][it][iu]);
+
+    /* Compute relative error in linear eps (eps = exp(logeps)) */
+    const double eps_i = exp((double) tbl->logeps[id][ig][ip][it][iu]);
+    const double interp_eps = exp(interp_logeps);
+    const double diff = fabs(eps_i - interp_eps);
+
+    /* Check interpolation errors and find maximum error... */
+    if (REL_ERROR_VIOLATION(diff, eps_i) && diff > max_err) {
+      max_err = diff;
+      worstindex = iu;
     }
   }
 
-  if(worstindex != -1){
-    /* Recursion on left Segment */
-    if(worstindex - left > 1){
+  /* Check whether any point violated the error threshold... */
+  if (worstindex != -1) {
+
+    /* Recursion on left segment... */
+    if (worstindex - left > 1)
       reduction(tbl, id, ig, ip, it, left, worstindex, write_idx);
-    }
-    /* Keep worst Entry */
-    copy_density(tbl,id,ig,ip,it,*write_idx,worstindex);
+
+    /* Keep worst entry... */
+    copy_density(tbl, id, ig, ip, it, *write_idx, worstindex);
     (*write_idx)++;
-    /*Recursion on right Segment */
-    if(right - worstindex > 1){
+
+    /* Recursion on right segment... */
+    if (right - worstindex > 1)
       reduction(tbl, id, ig, ip, it, worstindex, right, write_idx);
-    }
   }
 }
-
-
 
 
 int main(
@@ -98,49 +125,58 @@ int main(
   ctl.tblfmt = atoi(argv[3]);
   tbl_t *tbl = read_tbl(&ctl);
 
-  int total_input=0;
-  int total_output=0;
+  /* Loop over trace gases and channels... */
+  for (int id = 0; id < ctl.nd; id++)
+    for (int ig = 0; ig < ctl.ng; ig++) {
 
-  int id = 0;
-  int ig = 0;   
+      /* Init counters... */
+      int total_input = 0;
+      int total_output = 0;
 
-  for(int ip=0; ip < tbl->np[id][ig]; ip++){              //Loop Pressure Levels
-    for(int it=0; it< tbl->nt[id][ig][ip]; it++){         //Loop Temperatures
-      const int num_points = tbl->nu[id][ig][ip][it];
-      
-      /* First entry is implicitly kept (in-place reduction) */
-      int write_idx = 1;
+      /* Loop over (p, T) combinations... */
+      for (int ip = 0; ip < tbl->np[id][ig]; ip++) {
+	for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
 
-      /*Reduce Middle-Entries if more than 2 Entries */
-      if(num_points>2){
-      reduction(tbl, id, ig, ip, it, 0, num_points-1, &write_idx);
+	  const int num_points = tbl->nu[id][ig][ip][it];
+
+	  /* First entry is implicitly kept (in-place reduction)... */
+	  int write_idx = 1;
+
+	  /* Reduce Middle-Entries if more than 2 entries... */
+	  if (num_points > 2)
+	    reduction(tbl, id, ig, ip, it, 0, num_points - 1, &write_idx);
+
+	  /* Keep last entry if more than 1 entry... */
+	  if (num_points > 1) {
+	    copy_density(tbl, id, ig, ip, it, write_idx, num_points - 1);
+	    write_idx++;
+	  }
+
+	  /* Update number of kept points... */
+	  printf("Block of %d Entries has been reduced to: %d \n",
+		 num_points, write_idx);
+	  tbl->nu[id][ig][ip][it] = write_idx;
+	  total_input += num_points;
+	  total_output += write_idx;
+	}
       }
-    
-      /* Keep Last Entry if more than 1 Entry */
-      if (num_points>1) { 
-      copy_density(tbl,id,ig,ip,it,write_idx,num_points-1);
-      write_idx++;
-      }
 
-      /* Update number of kept points */
-      printf("Block of %d Entries has been reduced to: %d \n", num_points, write_idx);
-      tbl->nu[id][ig][ip][it] = write_idx;   
-      total_input+=num_points;
-      total_output+=write_idx;            
+      /* Write info... */
+      if (total_input != 0) {
+	printf
+	  ("\n In total the table has been reduced from %d entries down to %d entries, this represents a %.1f%% reduction.\n\n",
+	   total_input, total_output,
+	   100.0 * (total_input - total_output) / total_input);
+      }
     }
-  }
-  if(total_input != 0){
-  printf("\n In total the table has been reduced from %d Entries down to %d Entries, this represents a %.1f%% reduction \n\n",total_input,total_output,100.0 * (total_input - total_output) / total_input);
-  }
-  /* Write tables... */
 
+  /* Write tables... */
   sprintf(ctl.tblbase, "%s", argv[4]);
   ctl.tblfmt = atoi(argv[5]);
   write_tbl(&ctl, tbl);
 
   /* Free... */
   free(tbl);
-
 
   return EXIT_SUCCESS;
 }

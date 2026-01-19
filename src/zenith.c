@@ -45,7 +45,7 @@ int main(
   const double theta1 = scan_ctl(argc, argv, "THETA1", -1, "0.0", NULL);
   const double dtheta = scan_ctl(argc, argv, "DTHETA", -1, "1.0", NULL);
   const double obsz = scan_ctl(argc, argv, "OBSZ", -1, "0", NULL);
-  
+
   /* Set distances... */
   const double ro = RE + obsz;	/* observer radius */
   const double rv = RE + vpz;	/* shell radius */
