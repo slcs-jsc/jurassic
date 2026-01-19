@@ -40,6 +40,7 @@ int main(
   const double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
   const double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
   const double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
+  const double obsz = scan_ctl(argc, argv, "OBSZ", -1, "0", NULL);
   const double vpz = scan_ctl(argc, argv, "VPZ", -1, "700", NULL);
   const double theta0 = scan_ctl(argc, argv, "THETA0", -1, "0.0", NULL);
   const double theta1 = scan_ctl(argc, argv, "THETA1", -1, "0.0", NULL);
@@ -49,9 +50,10 @@ int main(
   for (double t = t0; t <= t1; t += dt)
     for (double theta = theta0; theta <= theta1; theta += dtheta) {
       obs.time[obs.nr] = t;
+      obs.obsz[obs.nr] = obsz;
       obs.vpz[obs.nr] = vpz;
       obs.vplat[obs.nr] =
-	theta - RAD2DEG(asin(RE / (RE + vpz) * sin(DEG2RAD(theta))));
+	theta - RAD2DEG(asin((RE + obsz) / (RE + vpz) * sin(DEG2RAD(theta))));
       if ((++obs.nr) >= NR)
 	ERRMSG("Too many rays!");
     }

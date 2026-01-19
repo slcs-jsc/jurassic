@@ -4925,9 +4925,10 @@ void raytrace(
   if (obs->obsz[ir] < zmin)
     ERRMSG("Observer below surface!");
 
-  /* Check view point altitude... */
-  if (obs->vpz[ir] > zmax)
-    return;
+  /* Check view point altitude...
+     if (obs->vpz[ir] > zmax)
+     return;
+   */
 
   /* Determine Cartesian coordinates for observer and view point... */
   geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xobs);

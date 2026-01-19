@@ -27,6 +27,7 @@ src/raytrace
 src/retrieval
 src/tblfmt
 src/tblgen
+src/tblrdc
 src/time2jsec
 src/zenith
 tab/
