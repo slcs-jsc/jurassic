@@ -40,12 +40,12 @@ int main(
   const double t0 = scan_ctl(argc, argv, "T0", -1, "0", NULL);
   const double t1 = scan_ctl(argc, argv, "T1", -1, "0", NULL);
   const double dt = scan_ctl(argc, argv, "DT", -1, "1", NULL);
-  const double obsz = scan_ctl(argc, argv, "OBSZ", -1, "0", NULL);
   const double vpz = scan_ctl(argc, argv, "VPZ", -1, "700", NULL);
   const double theta0 = scan_ctl(argc, argv, "THETA0", -1, "0.0", NULL);
   const double theta1 = scan_ctl(argc, argv, "THETA1", -1, "0.0", NULL);
   const double dtheta = scan_ctl(argc, argv, "DTHETA", -1, "1.0", NULL);
-
+  const double obsz = scan_ctl(argc, argv, "OBSZ", -1, "0", NULL);
+  
   /* Set distances... */
   const double ro = RE + obsz;	/* observer radius */
   const double rv = RE + vpz;	/* shell radius */
