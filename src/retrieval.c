@@ -24,6 +24,10 @@
 
 #include "jurassic.h"
 
+#ifdef MPI
+#include <mpi.h>
+#endif
+
 /* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
@@ -38,6 +42,17 @@ int main(
   static ret_t ret;
 
   FILE *dirlist;
+
+  /* MPI task distribution (optional)... */
+  int ntask = -1;
+  int rank = 0;
+  int size = 1;
+
+#ifdef MPI
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+#endif
 
   /* Check arguments... */
   if (argc < 3)
@@ -60,8 +75,16 @@ int main(
   /* Loop over directories... */
   while (fscanf(dirlist, "%4999s", ret.dir) != EOF) {
 
+    /* Distribute directories with MPI (optional)... */
+    if ((++ntask) % size != rank)
+      continue;
+
     /* Write info... */
-    LOG(1, "\nRetrieve in directory %s...\n", ret.dir);
+    if (size > 1) {
+      LOG(1, "\nRetrieve in directory %s on rank %d of %d...\n",
+	  ret.dir, rank + 1, size);
+    } else
+      LOG(1, "\nRetrieve in directory %s...\n", ret.dir);
 
     /* Read atmospheric data... */
     read_atm(ret.dir, "atm_apr.tab", &ctl, &atm_apr);
@@ -86,6 +109,10 @@ int main(
 
   /* Free... */
   free(tbl);
+
+#ifdef MPI
+  MPI_Finalize();
+#endif
 
   return EXIT_SUCCESS;
 }

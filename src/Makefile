@@ -17,11 +17,11 @@ INCDIR += -I ../libs/build/include
 # Library directories...
 LIBDIR += -L ../libs/build/lib
 
-# Path to JURASSIC-UNIFIED library...
-UNIDIR = ../../jurassic-unified
+# User-defined preprocessor macros...
+DEFINES ?=
 
-# Use JURASSIC-UNIFIED library...
-UNIFIED ?= 0
+# MPI compilation...
+MPI ?= 0
 
 # Static linking...
 STATIC ?= 0
@@ -38,15 +38,18 @@ PROF ?= 0
 # Compile for coverage report...
 COV ?= 0
 
+# Path to JURASSIC-UNIFIED library...
+UNIDIR = ../../jurassic-unified
+
+# Use JURASSIC-UNIFIED library...
+UNIFIED ?= 0
+
 # -----------------------------------------------------------------------------
 # Set flags for GNU compiler...
 # -----------------------------------------------------------------------------
 
 # Get git version...
 VERSION ?= $(shell git describe --abbrev=6 --dirty --always --tags)
-
-# Compiler...
-CC ?= gcc
 
 # CFLAGS...
 CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" $(OPT) -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
@@ -55,6 +58,16 @@ CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" $(OPT) -DHAVE_INLINE -DG
 LDFLAGS += $(LIBDIR) -lgsl -lgslcblas -lnetcdf -lm
 ifeq ($(STATIC),1)
   LDFLAGS += -lhdf5_hl -lhdf5 -lm -lz -lsz -lzstd
+endif
+
+# Compiler...
+ifeq ($(MPI),1)
+  CFLAGS += -DMPI
+  ifneq ($(origin CC),command line)
+    CC := mpicc
+  endif
+else
+  CC ?= gcc
 endif
 
 # Use JURASSIC-UNIFIED library...
@@ -91,11 +104,13 @@ endif
 
 # Static compilation...
 ifeq ($(STATIC),1)
+  ifeq ($(MPI),1)
+    $(error Static compilation does not work for MPI)
+  endif
   ifeq ($(UNIFIED),1)
     $(error Static compilation does not work for JURASSIC-UNIFIED)
-  else
-    CFLAGS += -static
   endif
+  CFLAGS += -static
 endif
 
 # -----------------------------------------------------------------------------
