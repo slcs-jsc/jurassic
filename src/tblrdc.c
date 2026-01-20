@@ -19,93 +19,41 @@
 
 /*! 
   \file
-  Reduce look-up table size using recursive, error-controlled
-  interpolation (Ramer-Douglas-Peucker-style).
+  Reduce look-up table size using recursive, error-controlled interpolation.
 */
-
 
 #include "jurassic.h"
 
-#define ABS_ERROR_RATE (1e-2)
-#define REL_ERROR_RATE (1e-2)
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
 
-#define REL_ERROR_VIOLATION(diff, val) \
-    ((diff) > (REL_ERROR_RATE * fabs(val)))
-#define ABS_ERROR_VIOLATION(diff, val) \
-    ((diff) > ABS_ERROR_RATE)
-
-/* Copy density entry for given indices... */
+/*! Copy density entry for given indices. */
 static void copy_density(
-  tbl_t *tbl,
+  tbl_t * tbl,
   int id,
   int ig,
   int ip,
   int it,
   int dst,
-  int src) {
-  tbl->logu[id][ig][ip][it][dst] = tbl->logu[id][ig][ip][it][src];
-  tbl->logeps[id][ig][ip][it][dst] = tbl->logeps[id][ig][ip][it][src];
-}
+  int src);
 
-/**
- * Adaptive reduction of a (u, eps) table segment.
- *
- * Endpoints are preserved; interior points are retained only if their
- * linear interpolation error exceeds the specified tolerance.
- * Reduction is performed in-place and preserves ordering in u.
- */
+/*! Adaptive reduction of a (u, eps) table segment. */
 static void reduction(
-  tbl_t *tbl,
+  tbl_t * tbl,
   int id,
   int ig,
   int ip,
   int it,
   int left,
   int right,
-  int *write_idx) {
+  int *write_idx,
+  double atol,
+  double rtol);
 
-  int worstindex = -1;
-  double max_err = 0.0;
-
-  /* Scan interior points and find the largest interpolation error... */
-  for (int iu = left + 1; iu < right; iu++) {
-
-    /* Linear interpolation in log-log space: interpolate log(eps) linearly over log(u)... */
-    const double interp_logeps =
-      LIN(tbl->logu[id][ig][ip][it][left], tbl->logeps[id][ig][ip][it][left],
-	  tbl->logu[id][ig][ip][it][right],
-	  tbl->logeps[id][ig][ip][it][right],
-	  tbl->logu[id][ig][ip][it][iu]);
-
-    /* Compute relative error in linear eps (eps = exp(logeps)) */
-    const double eps_i = exp((double) tbl->logeps[id][ig][ip][it][iu]);
-    const double interp_eps = exp(interp_logeps);
-    const double diff = fabs(eps_i - interp_eps);
-
-    /* Check interpolation errors and find maximum error... */
-    if (REL_ERROR_VIOLATION(diff, eps_i) && diff > max_err) {
-      max_err = diff;
-      worstindex = iu;
-    }
-  }
-
-  /* Check whether any point violated the error threshold... */
-  if (worstindex != -1) {
-
-    /* Recursion on left segment... */
-    if (worstindex - left > 1)
-      reduction(tbl, id, ig, ip, it, left, worstindex, write_idx);
-
-    /* Keep worst entry... */
-    copy_density(tbl, id, ig, ip, it, *write_idx, worstindex);
-    (*write_idx)++;
-
-    /* Recursion on right segment... */
-    if (right - worstindex > 1)
-      reduction(tbl, id, ig, ip, it, worstindex, right, write_idx);
-  }
-}
-
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
 
 int main(
   int argc,
@@ -119,6 +67,8 @@ int main(
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
+  const double atol = scan_ctl(argc, argv, "ATOL", -1, "1e-9", NULL);
+  const double rtol = scan_ctl(argc, argv, "RTOL", -1, "0.01", NULL);
 
   /* Read tables... */
   sprintf(ctl.tblbase, "%s", argv[2]);
@@ -144,7 +94,8 @@ int main(
 
 	  /* Reduce Middle-Entries if more than 2 entries... */
 	  if (num_points > 2)
-	    reduction(tbl, id, ig, ip, it, 0, num_points - 1, &write_idx);
+	    reduction(tbl, id, ig, ip, it, 0, num_points - 1, &write_idx,
+		      atol, rtol);
 
 	  /* Keep last entry if more than 1 entry... */
 	  if (num_points > 1) {
@@ -153,8 +104,6 @@ int main(
 	  }
 
 	  /* Update number of kept points... */
-	  printf("Block of %d Entries has been reduced to: %d \n",
-		 num_points, write_idx);
 	  tbl->nu[id][ig][ip][it] = write_idx;
 	  total_input += num_points;
 	  total_output += write_idx;
@@ -162,12 +111,10 @@ int main(
       }
 
       /* Write info... */
-      if (total_input != 0) {
-	printf
-	  ("\n In total the table has been reduced from %d entries down to %d entries, this represents a %.1f%% reduction.\n\n",
-	   total_input, total_output,
-	   100.0 * (total_input - total_output) / total_input);
-      }
+      LOG(1, "Reduction: %s | %.4f cm^-1 | n= %d | CR= %g", ctl.emitter[ig],
+	  ctl.nu[id], total_input,
+	  total_output > 0 ? (double) total_input / total_output : NAN);
+
     }
 
   /* Write tables... */
@@ -179,4 +126,76 @@ int main(
   free(tbl);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void copy_density(
+  tbl_t *tbl,
+  int id,
+  int ig,
+  int ip,
+  int it,
+  int dst,
+  int src) {
+
+  tbl->logu[id][ig][ip][it][dst] = tbl->logu[id][ig][ip][it][src];
+  tbl->logeps[id][ig][ip][it][dst] = tbl->logeps[id][ig][ip][it][src];
+}
+
+/*****************************************************************************/
+
+static void reduction(
+  tbl_t *tbl,
+  int id,
+  int ig,
+  int ip,
+  int it,
+  int left,
+  int right,
+  int *write_idx,
+  double atol,
+  double rtol) {
+
+  int worstindex = -1;
+  double max_err = 0.0;
+
+  /* Scan interior points and find the largest interpolation error... */
+  for (int iu = left + 1; iu < right; iu++) {
+
+    /* Linear interpolation in log-log space: interpolate log(eps) linearly over log(u)... */
+    const double interp_logeps =
+      LIN(tbl->logu[id][ig][ip][it][left], tbl->logeps[id][ig][ip][it][left],
+	  tbl->logu[id][ig][ip][it][right],
+	  tbl->logeps[id][ig][ip][it][right],
+	  tbl->logu[id][ig][ip][it][iu]);
+
+    /* Compute relative error in linear eps (eps = exp(logeps)) */
+    const double eps_i = exp((double) tbl->logeps[id][ig][ip][it][iu]);
+    const double interp_eps = exp(interp_logeps);
+    const double diff = fabs(eps_i - interp_eps);
+
+    /* Check interpolation errors and find maximum error... */
+    if (diff > atol + rtol * fabs(eps_i) && diff > max_err) {
+      max_err = diff;
+      worstindex = iu;
+    }
+  }
+
+  /* Check whether any point violated the error threshold... */
+  if (worstindex != -1) {
+
+    /* Recursion on left segment... */
+    if (worstindex - left > 1)
+      reduction(tbl, id, ig, ip, it, left, worstindex, write_idx, atol, rtol);
+
+    /* Keep worst entry... */
+    copy_density(tbl, id, ig, ip, it, *write_idx, worstindex);
+    (*write_idx)++;
+
+    /* Recursion on right segment... */
+    if (right - worstindex > 1)
+      reduction(tbl, id, ig, ip, it, worstindex, right, write_idx, atol,
+		rtol);
+  }
 }

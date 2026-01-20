@@ -591,33 +591,6 @@
    : LIN(x0, y0, x1, y1, x))
 
 /**
- * @brief Compute logarithmic interpolation in both x and y (log-log space).
- *
- * Performs linear interpolation in log(x) versus log(y). This corresponds to
- * a power-law variation between (x0,y0) and (x1,y1):
- *   log(y) = log(y0) + (log(y1)-log(y0)) * (log(x/x0)/log(x1/x0))
- *   => y = y0 * exp( log(y1/y0) * log(x/x0) / log(x1/x0) )
- *
- * If x/x0 or x1/x0 is nonpositive, reverts to LIN.
- *
- * @param[in] x0 Lower x-value.
- * @param[in] y0 Function value at x₀.
- * @param[in] x1 Upper x-value.
- * @param[in] y1 Function value at x₁.
- * @param[in] x  Interpolation point.
- *
- * @return Interpolated y-value at x.
- *
- * @see LIN
- *
- * @author Lars Hoffmann
- */
-#define LOGXY(x0, y0, x1, y1, x) \
-  (((x)/(x0)>0 && (x1)/(x0)>0) \
-   ? ((y0) * exp( (log((y1)/(y0)) / log((x1)/(x0))) * log((x)/(x0)) )) \
-   : LIN(x0, y0, x1, y1, x))
-
-/**
  * @brief Determine the maximum of two values.
  *
  * Returns the greater of two scalar values.
