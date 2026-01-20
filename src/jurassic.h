@@ -3779,7 +3779,7 @@ void read_shape(
  * @return Pointer to an allocated and fully initialized @c tbl_t structure
  *         containing emissivity lookup tables.
  *
- * @error If an unsupported emissivity lookup table format is specified via
+ * @warning If an unsupported emissivity lookup table format is specified via
  *        @c ctl->tblfmt, the function aborts with an error message.
  *
  * @note Memory for the returned structure is dynamically allocated and must
@@ -4945,7 +4945,7 @@ void write_stddev(
  * @param[in] tbl  Pointer to the lookup-table structure containing the
  *                 emissivity data and filter functions to be written.
  *
- * @error If an unsupported lookup table format is specified via
+ * @warning If an unsupported lookup table format is specified via
  *        @c ctl->tblfmt, the function aborts with an error message.
  *
  * @note The function performs no memory allocation; it only writes existing
