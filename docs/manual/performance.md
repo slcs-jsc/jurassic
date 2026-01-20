@@ -6,7 +6,8 @@ for achieving efficient runtimes on both local systems and HPC
 platforms.
 
 The focus is on **understanding where time is spent** and **how users
-can influence performance** through configuration and workflow design.
+can influence performance** through configuration and workflow design,
+given the *actual parallelization mechanisms implemented in JURASSIC*.
 
 ---
 
@@ -46,6 +47,9 @@ where:
 Limb geometries typically require more ray segments than nadir
 geometries and are therefore more expensive.
 
+Forward-model executables use **serial execution with optional OpenMP
+threading**.
+
 ---
 
 ## Kernel and retrieval performance
@@ -59,8 +63,10 @@ of:
 - **O(N_state)** relative to a pure forward run.
 
 Analytic Jacobians significantly reduce this overhead compared to
-finite-difference approaches but kernel runs are still substantially
-more expensive than forward simulations.
+finite-difference approaches, but kernel runs remain substantially more
+expensive than forward simulations.
+
+---
 
 ### Retrieval iterations
 
@@ -94,37 +100,64 @@ simulations.
 
 ## Parallel scaling behavior
 
-### Strong scaling
+### Workflow-level scaling
 
-JURASSIC shows good strong scaling as long as:
+The most common and scalable form of parallelism in JURASSIC is
+**workflow-level parallelization**, where independent simulations or
+retrievals are executed as separate jobs (e.g. job arrays, campaign
+splitting).
 
-- there are enough independent observations to distribute,
-- I/O does not dominate runtime.
-
-Scaling efficiency decreases when the number of observations per MPI
-process becomes too small.
-
-### Weak scaling
-
-Weak scaling is generally favorable because each MPI process performs a
-similar amount of work when observations are added proportionally to
-resources.
+This approach applies to *all* executables and scales trivially as long
+as sufficient resources are available.
 
 ---
 
-## MPI vs. OpenMP balance
+### MPI scaling
 
-Choosing an appropriate balance between MPI tasks and OpenMP threads is
-crucial for performance.
+MPI parallelization is implemented only in the retrieval executables
+and is used exclusively to distribute independent retrieval tasks
+across MPI ranks.
+
+- Each MPI rank processes a subset of retrieval cases.
+- There is no communication between ranks during execution.
+- Scaling is close to linear as long as enough retrieval cases are
+  available.
+
+Scaling efficiency decreases if the number of retrieval cases per MPI
+rank becomes too small or if I/O dominates runtime.
+
+---
+
+### OpenMP scaling
+
+OpenMP is used within a single process to accelerate computationally
+intensive loops, such as radiative transfer and spectral calculations.
+
+OpenMP scaling is typically limited by:
+
+- memory bandwidth,
+- cache behavior,
+- load imbalance in inner loops.
+
+Best performance is usually achieved with a moderate number of threads
+per process.
+
+---
+
+## MPI vs. OpenMP considerations
+
+There is no global hybrid MPI–OpenMP model across the entire JURASSIC
+code base.
 
 General guidance:
 
-- use MPI to distribute observations across nodes,
-- use OpenMP to exploit shared-memory parallelism within a node,
-- avoid oversubscription of CPU cores.
+- Use MPI only for retrieval workloads with many independent cases.
+- Use OpenMP to accelerate single-case computations.
+- Avoid oversubscription (MPI ranks × OpenMP threads > physical cores).
+- Running non-retrieval executables under `mpirun` provides no benefit.
 
-Optimal settings depend on node architecture and problem size and
-should be determined empirically.
+Optimal configurations depend on hardware and problem size and should
+be determined empirically.
 
 ---
 
@@ -167,8 +200,8 @@ Performance tuning should always be accompanied by validation:
 - ensure numerical accuracy remains acceptable,
 - benchmark representative workloads rather than minimal test cases.
 
-Small configuration changes can have a large impact on performance and
-accuracy.
+Small configuration changes can have a large impact on both performance
+and accuracy.
 
 ---
 
@@ -176,26 +209,31 @@ accuracy.
 
 - Start with example configurations and modify incrementally.
 - Disable diagnostics for production runs.
-- Use hybrid MPI–OpenMP execution on multicore nodes.
-- Split very large workloads into multiple jobs.
+- Use OpenMP to accelerate compute-heavy kernels.
+- Use MPI only for retrieval campaigns with many independent cases.
+- Split very large workloads into multiple jobs when appropriate.
 - Monitor runtime and scaling behavior during pilot runs.
 
 ---
 
 ## Summary
 
-JURASSIC is designed to deliver high performance for infrared radiative
-transfer and retrieval applications by combining efficient spectral
-approximations with scalable parallelization.
+JURASSIC performance is driven primarily by problem size, numerical
+configuration, and workflow design.
 
-By understanding the main performance drivers and tuning configuration
-and workflow parameters accordingly, users can achieve efficient and
-robust runtimes for both small experiments and large HPC campaigns.
+MPI parallelization is limited to retrieval executables and is used
+solely for distributing independent retrieval tasks. OpenMP provides
+shared-memory acceleration within a single process, while large-scale
+throughput is typically achieved via workflow-level parallelization.
+
+Understanding these distinctions allows users to choose efficient and
+robust execution strategies for both small experiments and large HPC
+campaigns.
 
 ---
 
 ## Related pages
 
-- [Parallelization](parallelization.md)
-- [HPC workflows](hpc_workflows.md)
-- [Configuration](configuration.md)
+- Parallelization
+- HPC workflows
+- Configuration

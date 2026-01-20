@@ -1,57 +1,80 @@
 # Parallelization and performance
 
 JURASSIC is designed for efficient execution on modern multicore CPUs
-and high-performance computing (HPC) systems. To achieve this, the code
-implements a **hybrid MPI–OpenMP parallelization model** that allows it
-to scale from laptops to large clusters.
+and high-performance computing (HPC) systems. Parallel execution is
+achieved through a combination of workflow-level parallelism,
+optional MPI task distribution in retrievals, and OpenMP
+threading.
 
-This page describes the parallelization strategy, typical execution
-modes, and best practices for performance tuning.
+This page describes the actual parallelization mechanisms implemented
+in JURASSIC, typical execution modes, and best practices for performance
+tuning.
 
 ---
 
 ## Parallelization model overview
 
-JURASSIC uses two complementary levels of parallelism:
+JURASSIC employs three complementary levels of parallelism:
 
-- **MPI (Message Passing Interface)** for distributed-memory
-  parallelism across nodes and processes
-- **OpenMP** for shared-memory parallelism within a single process
+- **Workflow-level parallelism**  
+  Independent jobs (e.g. different days, orbits, ensembles) submitted
+  via batch systems or job arrays.
 
-This hybrid approach is well suited for radiative transfer applications,
-where many calculations (e.g. individual rays or observations) are
-largely independent but each involves non-trivial computational work.
+- **MPI (Message Passing Interface)**  
+  MPI is used to distribute independent retrieval tasks across processes.
+  Optional and limited to retrieval executables only.
+
+- **OpenMP**  
+  Shared-memory parallelism within a single process, used by several
+  computational kernels.
+
+There is no global hybrid MPI–OpenMP model across the entire code
+base. MPI is currently implemented only in the retrieval code.
 
 ---
 
 ## MPI parallelization
 
+### Scope of MPI support
+
+MPI parallelization is implemented exclusively in the retrieval
+executable. No forward models, tools, or utilities use MPI internally.
+
+MPI support is optional and enabled at compile time.
+
+---
+
 ### What is parallelized?
 
-At the MPI level, JURASSIC typically parallelizes over:
+At the MPI level, retrieval runs are parallelized over:
 
-- independent **observations / rays**,
-- sets of profiles or time steps,
-- ensembles of forward or retrieval runs.
+- independent retrieval cases,
+- observation directories or datasets.
 
-Each MPI process works on a subset of the total workload, minimizing
-communication overhead.
+Each MPI rank processes a disjoint subset of retrieval tasks.
+
+---
 
 ### Characteristics
 
-- MPI communication is relatively light-weight.
-- Most computation occurs locally within each process.
-- Scaling is close to linear as long as enough independent work items
-  are available.
+- MPI is used only for task distribution.
+- There is no communication between MPI ranks during the retrieval.
+- No domain decomposition or collective algorithms are employed.
+- Each rank performs its own I/O.
 
-### Typical usage
+This design is robust and scales well for large numbers of independent
+retrievals.
+
+---
+
+### Typical usage (retrieval only)
 
 ```bash
-mpirun -np 16 ./formod run.ctl
+mpirun -np 16 ./retrieval ctl/retrieval.ctl
 ```
 
-This launches 16 MPI processes, each handling a portion of the
-observation set.
+Running non-retrieval executables under `mpirun` provides no performance
+benefit.
 
 ---
 
@@ -59,86 +82,76 @@ observation set.
 
 ### What is parallelized?
 
-Within each MPI process, OpenMP is used to parallelize:
+OpenMP is used to accelerate computationally intensive loops within a
+single process, such as:
 
-- ray tracing and radiative transfer along different rays,
-- loops over spectral channels or windows,
+- radiative transfer calculations,
+- spectral loops,
 - internal numerical kernels.
+
+OpenMP is available in both retrieval and non-retrieval executables.
+
+---
 
 ### Controlling OpenMP threads
 
-The number of OpenMP threads is controlled via the environment variable:
+The number of OpenMP threads is controlled via:
 
 ```bash
 export OMP_NUM_THREADS=4
 ```
 
-OpenMP threads share memory within a process and therefore have low
-overhead compared to MPI communication.
+OpenMP threads share memory and therefore incur low overhead.
 
 ---
 
-## Hybrid MPI–OpenMP execution
+## Combining MPI and OpenMP (retrieval only)
 
-In a hybrid setup, MPI distributes work across processes, while OpenMP
-accelerates computations within each process.
+For retrievals, MPI and OpenMP can be combined:
+
+- MPI distributes independent retrieval tasks across processes.
+- OpenMP accelerates computations within each retrieval.
 
 Example:
 
 ```bash
 export OMP_NUM_THREADS=4
-mpirun -np 8 ./formod run.ctl
+mpirun -np 8 ./retrieval ctl/retrieval.ctl
 ```
 
-This configuration uses up to **32 CPU cores** in total.
-
-Hybrid execution is usually more efficient than pure MPI or pure
-OpenMP, especially on multi-socket nodes.
+This configuration uses up to 32 CPU cores in total.
 
 ---
 
 ## Load balancing considerations
 
-For good scalability, it is important that each MPI process receives a
-similar amount of work.
+Since MPI distributes tasks statically, load balance depends on the
+uniformity of retrieval cases.
 
-Potential load-imbalance sources include:
+Potential imbalance sources include:
 
-- uneven distribution of observation geometries,
-- variable ray-path lengths (e.g. limb vs. nadir),
-- retrieval runs with different convergence behavior.
+- varying convergence behavior,
+- different observation geometries,
+- heterogeneous input datasets.
 
 **Best practices:**
 
-- group similar observation types together,
-- avoid mixing very small and very large workloads in one run,
-- test scaling behavior for representative cases.
-
----
-
-## Parallel retrievals
-
-Retrieval applications benefit strongly from parallelization because:
-
-- each observation can often be retrieved independently,
-- forward-model and Jacobian calculations are computationally intensive.
-
-MPI parallelization is usually applied across retrieval cases, while
-OpenMP accelerates the internal linear algebra and radiative transfer.
+- group similar retrieval cases together,
+- avoid mixing very small and very large problems in one run,
+- benchmark representative workloads.
 
 ---
 
 ## I/O considerations
 
-Parallel performance can be limited by file-system access if not
-handled carefully.
+Parallel performance can be limited by file-system access.
 
 Recommendations:
 
-- store lookup tables on fast local or parallel file systems,
-- avoid excessive per-process file I/O,
-- minimize diagnostic output in large production runs,
-- reuse lookup tables across many runs to amortize I/O cost.
+- store lookup tables on fast parallel file systems,
+- ensure unique output paths for each MPI rank,
+- minimize diagnostic output in large runs,
+- reuse lookup tables across many retrievals.
 
 ---
 
@@ -147,49 +160,50 @@ Recommendations:
 Due to parallel execution:
 
 - floating-point round-off differences may occur,
-- bitwise-identical results across different MPI/OpenMP layouts are not
-  guaranteed.
+- bitwise-identical results across different OpenMP thread counts or MPI
+  layouts are not guaranteed.
 
-These differences are typically negligible for scientific applications
-but should be considered when comparing results across platforms.
+These effects are typically small and scientifically insignificant but
+should be considered in regression testing.
 
 ---
 
 ## Performance tuning tips
 
-- Prefer **hybrid MPI–OpenMP** over pure MPI for multicore nodes.
-- Choose MPI process counts that align with node topology.
-- Tune `OMP_NUM_THREADS` to avoid oversubscription.
-- Validate performance with small test cases before large runs.
-- Disable expensive diagnostics unless explicitly needed.
+- Use MPI only for retrieval workloads.
+- Prefer OpenMP for accelerating single-case computations.
+- Avoid oversubscription (MPI ranks × OpenMP threads > available cores).
+- Validate scaling with small test cases before large campaigns.
+- Disable expensive diagnostics unless needed.
 
 ---
 
 ## Scaling expectations
 
-JURASSIC has demonstrated good scalability for:
+JURASSIC scales well for:
 
-- large numbers of independent observations,
-- global simulations,
-- long time series,
-- ensemble studies.
+- large numbers of independent retrieval cases,
+- ensemble and campaign-style workflows,
+- OpenMP-accelerated single-node execution.
 
-Actual scaling depends on the balance between computation and I/O and
-on the characteristics of the HPC system.
+Scaling efficiency depends primarily on I/O performance and workload
+uniformity.
 
 ---
 
 ## Summary
 
-The hybrid MPI–OpenMP parallelization in JURASSIC enables efficient use
-of modern HPC systems while remaining flexible for smaller-scale runs.
-With appropriate configuration, JURASSIC can process large atmospheric
-datasets and retrieval problems within practical time constraints.
+JURASSIC does not implement a general hybrid MPI–OpenMP model across
+the entire code base. MPI parallelization is currently limited to the
+retrieval executables and is used solely for distributing independent
+retrieval tasks. OpenMP provides shared-memory acceleration within a
+single process, and large-scale parallelism is typically achieved at
+the workflow level.
 
 ---
 
 ## Related pages
 
-- [Running JURASSIC](running.md)
-- [Building from source](building.md)
-- [Configuration](configuration.md)
+- Running JURASSIC
+- Building from source
+- Configuration

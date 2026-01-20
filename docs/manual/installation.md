@@ -12,14 +12,13 @@ source.
 JURASSIC is primarily developed and tested on Linux systems. The
 following requirements apply:
 
--   64-bit Linux operating system
--   C and Fortran compilers with OpenMP support
--   MPI library for distributed-memory parallel execution (optional but
-    recommended)
--   GNU Make or a compatible build system
+- 64-bit Linux operating system
+- C and Fortran compilers with OpenMP support
+- MPI library (optional, retrieval only)
+- GNU Make or a compatible build system
 
-The model is commonly deployed on HPC clusters, but it can also be run
-on modern workstations.
+MPI is required only if MPI-enabled retrieval executables are built.
+All other components can be built and run without MPI.
 
 ------------------------------------------------------------------------
 
@@ -27,28 +26,29 @@ on modern workstations.
 
 The following software components are required to build JURASSIC:
 
--   **Fortran compiler**\
-    A modern Fortran compiler such as:
+- **Fortran compiler**  
+  A modern Fortran compiler such as:
 
-    -   GNU Fortran (`gfortran`)
-    -   Intel oneAPI Fortran (`ifx` / `ifort`)
-    -   NVHPC Fortran (`nvfortran`)
+  - GNU Fortran (`gfortran`)
+  - Intel oneAPI Fortran (`ifx` / `ifort`)
+  - NVHPC Fortran (`nvfortran`)
 
--   **C compiler**\
-    Required for auxiliary components and libraries (e.g. `gcc`, `icc`).
+- **C compiler**  
+  Required for auxiliary components and libraries (e.g. `gcc`, `icc`).
 
--   **MPI library** (optional)\
-    For example:
+- **MPI library** (optional, retrieval only)  
+  For example:
 
-    -   OpenMPI
-    -   MPICH
-    -   Intel MPI
+  - OpenMPI
+  - MPICH
+  - Intel MPI
 
-    If MPI is not available, JURASSIC can still be built and run in
-    shared-memory (OpenMP-only) mode.
+  MPI is used exclusively by the retrieval code to distribute
+  independent retrieval tasks across processes. No other JURASSIC
+  executables use MPI internally.
 
--   **GNU Plot** (optional)\
-    Used by the example projects to generate diagnostic plots.
+- **GNU Plot** (optional)  
+  Used by example projects to generate diagnostic plots.
 
 ------------------------------------------------------------------------
 
@@ -57,7 +57,7 @@ The following software components are required to build JURASSIC:
 The JURASSIC source code is hosted on GitHub. Clone the repository
 using:
 
-``` bash
+```bash
 git clone https://github.com/slcs-jsc/jurassic.git
 cd jurassic
 ```
@@ -70,15 +70,15 @@ repository.
 ## Configuring the build
 
 JURASSIC uses a Makefile-based build system. Prior to compilation, you
-may need to edit the configuration files to match your local compiler
-and MPI setup.
+may need to edit the Makefile or set make variables to match your local
+compiler and MPI setup.
 
 Typical configuration options include:
 
--   Selection of the Fortran compiler
--   Compiler optimization and debugging flags
--   Enabling or disabling MPI support
--   Enabling OpenMP parallelization
+- Selection of the Fortran and C compilers
+- Compiler optimization and debugging flags
+- Enabling or disabling MPI support (retrieval only)
+- Enabling OpenMP parallelization
 
 On HPC systems, it is recommended to load the appropriate compiler and
 MPI modules before configuring the build.
@@ -87,20 +87,42 @@ MPI modules before configuring the build.
 
 ## Building JURASSIC
 
-To compile JURASSIC, run:
+### Default build (no MPI)
 
-``` bash
+To build JURASSIC without MPI support:
+
+```bash
 make
 ```
 
-This will build the JURASSIC executable and supporting libraries.
+This builds all executables in serial/OpenMP mode. MPI is not required
+for this configuration.
 
-On successful completion, the main executable will be available in the
-project directory.
+---
 
-To perform a clean rebuild, use:
+### Building with MPI-enabled retrieval
 
-``` bash
+To enable MPI support for the retrieval executable, build with:
+
+```bash
+make MPI=1
+```
+
+This will:
+
+- compile the retrieval code with MPI support,
+- automatically select `mpicc` (unless `CC` is set explicitly),
+- define the `MPI` preprocessor macro used by the retrieval source code.
+
+All other executables remain non-MPI and are unaffected by this option.
+
+---
+
+### Clean rebuild
+
+To perform a clean rebuild:
+
+```bash
 make clean
 make
 ```
@@ -123,14 +145,15 @@ expected.
 On shared HPC systems, JURASSIC is typically installed in a user
 workspace rather than system-wide. Recommended practices include:
 
--   Building JURASSIC with the same compiler and MPI library used for
-    production runs
--   Using environment modules to manage compiler and MPI versions
--   Testing scalability with a small number of MPI ranks before
-    large-scale production runs
+- Building JURASSIC with the same compiler and MPI library used for
+  production retrieval runs
+- Enabling MPI only when running MPI-enabled retrievals
+- Using environment modules to manage compiler and MPI versions
+- Testing retrieval scalability with a small number of MPI ranks before
+  large-scale production runs
 
-Further details on parallel execution and performance tuning are
-provided in the Advanced Usage section of the User Manual.
+Further details on MPI execution and performance considerations are
+provided in the HPC workflows documentation.
 
 ------------------------------------------------------------------------
 
@@ -138,9 +161,10 @@ provided in the Advanced Usage section of the User Manual.
 
 Common issues during installation include:
 
--   Missing or incompatible compiler versions
--   MPI library mismatches between compile time and runtime
--   Incorrect OpenMP settings
+- Missing or incompatible compiler versions
+- Using an MPI-enabled build without `mpicc` or an MPI runtime
+- Mismatches between compile-time and runtime MPI environments
+- Incorrect OpenMP settings
 
 If you encounter problems, consult the build output carefully and verify
 that your compiler and MPI environment are correctly configured.
