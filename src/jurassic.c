@@ -8045,9 +8045,7 @@ void write_tbl_bin(
 void write_tbl_nc(
   const ctl_t *ctl,
   const tbl_t *tbl) {
-
-  /* Work buffer will be allocated per table, sized to the packed blob. */
-
+  
   /* Loop over emitters... */
   for (int ig = 0; ig < ctl->ng; ig++) {
 
@@ -8072,11 +8070,13 @@ void write_tbl_nc(
       sprintf(varname, "tbl_%.4f", ctl->nu[id]);
       sprintf(dimname, "len_%.4f", ctl->nu[id]);
 
-      /* Pack table... */
+      /* Allocate work space... */
       size_t used = 0;
       const size_t need = tbl_packed_size(tbl, id, ig);
       uint8_t *work = NULL;
       ALLOC(work, uint8_t, need);
+      
+      /* Pack table... */
       tbl_pack(tbl, id, ig, work, &used);
       if (used != need)
 	ERRMSG("Internal error: packed size mismatch!");
