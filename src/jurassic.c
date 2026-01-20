@@ -3971,12 +3971,6 @@ void init_srcfunc(
   const ctl_t *ctl,
   tbl_t *tbl) {
 
-  char filename[2 * LEN];
-
-  double f[NSHAPE], nu[NSHAPE];
-
-  int n;
-
   /* Write info... */
   LOG(1, "Initialize source function table...");
   LOG(2, "Number of data points: %d", TBLNS);
@@ -3984,17 +3978,13 @@ void init_srcfunc(
   /* Loop over channels... */
   for (int id = 0; id < ctl->nd; id++) {
 
-    /* Read filter function... */
-    sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
-    read_shape(filename, nu, f, &n);
-
     /* Get minimum grid spacing... */
     double dnu = 1.0;
-    for (int i = 1; i < n; i++)
-      dnu = MIN(dnu, nu[i] - nu[i - 1]);
+    for (int i = 1; i < tbl->filt_n[id]; i++)
+      dnu = MIN(dnu, tbl->filt_nu[id][i] - tbl->filt_nu[id][i - 1]);
 
     /* Compute source function table... */
-#pragma omp parallel for default(none) shared(ctl,tbl,id,nu,f,n,dnu)
+#pragma omp parallel for default(none) shared(ctl,tbl,id,dnu)
     for (int it = 0; it < TBLNS; it++) {
 
       /* Set temperature... */
@@ -4002,9 +3992,12 @@ void init_srcfunc(
 
       /* Integrate Planck function... */
       double fsum = tbl->sr[it][id] = 0;
-      for (double fnu = nu[0]; fnu <= nu[n - 1]; fnu += dnu) {
-	const int i = locate_irr(nu, n, fnu);
-	const double ff = LIN(nu[i], f[i], nu[i + 1], f[i + 1], fnu);
+      for (double fnu = tbl->filt_nu[id][0];
+	   fnu <= tbl->filt_nu[id][tbl->filt_n[id] - 1]; fnu += dnu) {
+	const int i = locate_irr(tbl->filt_nu[id], tbl->filt_n[id], fnu);
+	const double ff = LIN(tbl->filt_nu[id][i], tbl->filt_f[id][i],
+			      tbl->filt_nu[id][i + 1], tbl->filt_f[id][i + 1],
+			      fnu);
 	fsum += ff;
 	tbl->sr[it][id] += ff * PLANCK(tbl->st[it], fnu);
       }
@@ -6155,7 +6148,14 @@ tbl_t *read_tbl(
 	    exp(tbl->logeps[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1]));
     }
 
-  /* Initialize source function... */
+  /* Read filter functions... */
+  for (int id = 0; id < ctl->nd; id++) {
+    char filename[2 * LEN];
+    sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
+    read_shape(filename, tbl->filt_nu[id], tbl->filt_f[id], &tbl->filt_n[id]);
+  }
+
+  /* Initialize source function lookup tables... */
   init_srcfunc(ctl, tbl);
 
   /* Return pointer... */
@@ -7937,6 +7937,13 @@ void write_tbl(
   /* Error message... */
   else
     ERRMSG("Unknown look-up table format!");
+
+  /* Write filter functions... */
+  for (int id = 0; id < ctl->nd; id++) {
+    char filename[2 * LEN];
+    sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
+    write_shape(filename, tbl->filt_nu[id], tbl->filt_f[id], tbl->filt_n[id]);
+  }
 }
 
 /*****************************************************************************/

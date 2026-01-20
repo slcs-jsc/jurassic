@@ -1640,6 +1640,15 @@ typedef struct {
   /*! Logarithm of emissivity. */
   float *logeps[ND][NG][TBLNP][TBLNT];
 
+  /*! Filter function number of spectral grid points. */
+  int filt_n[ND];
+
+  /*! Filter function spectral grid points [cm^-1]. */
+  double filt_nu[ND][NSHAPE];
+
+  /*! Filter function values. */
+  double filt_f[ND][NSHAPE];
+
   /*! Source function temperature [K]. */
   double st[TBLNS];
 
@@ -2467,30 +2476,31 @@ void idx2name(
   char *quantity);
 
 /**
- * @brief Initialize the source-function (Planck radiance) lookup table.
+ * @brief Initialize source function lookup tables from emissivity data.
  *
- * Computes channel-averaged Planck radiances for a range of temperatures
- * and stores them in the source-function table. For each spectral channel,
- * the Planck function is integrated over the instrument filter function
- * defined in the corresponding filter file (*.filt).
+ * This function computes channel-dependent source function lookup tables
+ * based on the spectral filter functions and the Planck function. For each
+ * spectral channel, the Planck radiance is integrated over the corresponding
+ * filter function and stored as a function of temperature.
  *
- * @param[in]  ctl  Control structure defining spectral channels and table base name.
- * @param[out] tbl  Emissivity and source-function lookup table to populate.
+ * The resulting source function table represents the **band-integrated
+ * thermal emission** associated with the emissivity lookup tables and is
+ * later used in radiative transfer calculations.
  *
- * @note The source function is tabulated for @ref TBLNS temperature levels
- *       uniformly distributed between @ref TMIN and @ref TMAX. Integration
- *       over the spectral response is performed using linear interpolation
- *       and uniform grid spacing.
+ * The temperature grid is uniformly sampled between @c TMIN and @c TMAX
+ * with @c TBLNS points. The spectral integration is performed on the finest
+ * frequency spacing present in the filter function.
  *
- * @see ctl_t, tbl_t, read_shape, locate_irr, LIN, PLANCK, TBLNS, TMIN, TMAX
- * 
- * @par Parallelization
- * Implemented with OpenMP to compute each temperature level concurrently.
+ * @param[in]  ctl  Pointer to the control structure defining the number of
+ *                  channels and their central wavenumbers.
+ * @param[in,out] tbl  Pointer to the lookup-table structure in which the
+ *                  source function tables and temperature grid are stored.
  *
- * @par Output
- * Writes diagnostic information via @ref LOG at verbosity levels 1 and 2.
+ * @note The computation is parallelized over temperature grid points using
+ *       OpenMP.
  *
- * @warning Requires valid filter files named `<tblbase>_<wavenumber>.filt`.
+ * @note The source function is normalized by the integral of the filter
+ *       function to yield a band-averaged Planck radiance.
  *
  * @author Lars Hoffmann
  */
@@ -3743,36 +3753,37 @@ void read_shape(
   int *n);
 
 /**
- * @brief Read look-up tables for all trace gases and channels.
+ * @brief Read and initialize emissivity lookup tables and related data.
  *
- * This function allocates and fills a `tbl_t` structure by reading
- * look-up table data for every detector (`id`) and trace gas (`ig`)
- * defined in the control structure. The actual reader used depends
- * on the value of `ctl->tblfmt`:
- *   - 1: ASCII format
- *   - 2: Binary format
- *   - 3: netCDF format
+ * This function allocates and fills a lookup-table structure containing
+ * pressure-, temperature-, absorber amount-, and **emissivity-dependent**
+ * data used for radiative transfer calculations. For each detector/channel
+ * and trace gas, emissivity lookup tables are read from disk in one of the
+ * supported formats:
+ *  - ASCII (@c ctl->tblfmt == 1)
+ *  - binary (@c ctl->tblfmt == 2)
+ *  - netCDF (@c ctl->tblfmt == 3)
  *
- * For each (id, ig) pair, the corresponding look-up table is loaded
- * and basic diagnostic information about pressure, temperature,
- * absorber amount, and emissivity grids is logged.
+ * The function also reads the corresponding spectral filter functions for
+ * each detector/channel and initializes source function lookup tables derived
+ * from the emissivity data.
  *
- * After all tables are read, the source function tables are
- * initialized via `init_srcfunc()`.
+ * Diagnostic information about the loaded emissivity tables (pressure levels,
+ * temperature ranges, absorber amounts, and emissivity values) is written to
+ * the log.
  *
- * @param[in] ctl  Pointer to the control structure defining the number
- *                 of detectors, trace gases, and the table format.
+ * @param[in] ctl  Pointer to the control structure defining emissivity lookup
+ *                 table format, dimensions, base filenames, and spectral
+ *                 channels.
  *
- * @return Pointer to a newly allocated and fully initialized
- *         look-up table structure.
+ * @return Pointer to an allocated and fully initialized @c tbl_t structure
+ *         containing emissivity lookup tables.
  *
- * @note Memory for the returned `tbl_t` object is allocated inside
- *       this function. The caller is responsible for freeing it.
+ * @error If an unsupported emissivity lookup table format is specified via
+ *        @c ctl->tblfmt, the function aborts with an error message.
  *
- * @see read_tbl_asc()
- * @see read_tbl_bin()
- * @see read_tbl_nc()
- * @see init_srcfunc()
+ * @note Memory for the returned structure is dynamically allocated and must
+ *       be released by the caller.
  *
  * @author Lars Hoffmann
  */
@@ -4917,26 +4928,28 @@ void write_stddev(
   const gsl_matrix * s);
 
 /**
- * @brief Write look-up tables in the format specified by the control structure.
+ * @brief Write emissivity lookup tables and filter functions to disk.
  *
- * This function dispatches the look-up table output to the appropriate
- * writer based on the value of `ctl->tblfmt`:
- *   - 1: ASCII format
- *   - 2: Binary format
- *   - 3: netCDF format
+ * This function writes the emissivity lookup tables stored in @p tbl to disk
+ * using the output format specified in the control structure @p ctl. The
+ * supported output formats are:
+ *  - ASCII (@c ctl->tblfmt == 1)
+ *  - binary (@c ctl->tblfmt == 2)
+ *  - netCDF (@c ctl->tblfmt == 3)
  *
- * If an unsupported format is specified, an error is raised.
+ * In addition to the emissivity lookup tables, the spectral filter functions
+ * associated with each detector/channel are written to separate files.
  *
- * @param[in] ctl  Pointer to the control structure defining output format
- *                 and other configuration options.
- * @param[in] tbl  Pointer to the look-up table data to be written.
+ * @param[in] ctl  Pointer to the control structure defining the lookup table
+ *                 output format, base filenames, and spectral channels.
+ * @param[in] tbl  Pointer to the lookup-table structure containing the
+ *                 emissivity data and filter functions to be written.
  *
- * @note This function does not return a value. Errors are reported via
- *       the `ERRMSG` mechanism.
+ * @error If an unsupported lookup table format is specified via
+ *        @c ctl->tblfmt, the function aborts with an error message.
  *
- * @see write_tbl_asc()
- * @see write_tbl_bin()
- * @see write_tbl_nc()
+ * @note The function performs no memory allocation; it only writes existing
+ *       emissivity lookup table data to disk.
  *
  * @author Lars Hoffmann
  */
