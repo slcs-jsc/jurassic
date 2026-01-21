@@ -3753,37 +3753,37 @@ void read_shape(
   int *n);
 
 /**
- * @brief Read and initialize emissivity lookup tables and related data.
+ * @brief Read emissivity lookup tables from disk.
  *
- * This function allocates and fills a lookup-table structure containing
- * pressure-, temperature-, absorber amount-, and **emissivity-dependent**
- * data used for radiative transfer calculations. For each detector/channel
- * and trace gas, emissivity lookup tables are read from disk in one of the
- * supported formats:
+ * Loads emissivity lookup tables for all detector/channel indices @c id and
+ * all emitter/gas indices @c ig according to the configured table format
+ * @c ctl->tblfmt:
  *  - ASCII (@c ctl->tblfmt == 1)
- *  - binary (@c ctl->tblfmt == 2)
+ *  - compact binary (@c ctl->tblfmt == 2)
  *  - netCDF (@c ctl->tblfmt == 3)
  *
- * The function also reads the corresponding spectral filter functions for
- * each detector/channel and initializes source function lookup tables derived
- * from the emissivity data.
+ * The function allocates and initializes a @c tbl_t structure, reads the
+ * corresponding lookup tables, and (depending on the table format) also loads
+ * filter functions.
  *
- * Diagnostic information about the loaded emissivity tables (pressure levels,
- * temperature ranges, absorber amounts, and emissivity values) is written to
- * the log.
+ * Missing per-table files (ASCII/binary) or missing netCDF files/variables are
+ * not fatal: the reader emits a warning and the corresponding lookup table is
+ * treated as empty (i.e., @c tbl->np[id][ig] == 0).
  *
- * @param[in] ctl  Pointer to the control structure defining emissivity lookup
- *                 table format, dimensions, base filenames, and spectral
- *                 channels.
+ * Diagnostic information about loaded tables (pressure levels, temperature
+ * ranges, absorber amounts, emissivity ranges) may be written to the log.
  *
- * @return Pointer to an allocated and fully initialized @c tbl_t structure
- *         containing emissivity lookup tables.
+ * @param[in] ctl  Pointer to the control structure defining lookup table format,
+ *                 filenames, emitters, and detector/channel frequencies.
  *
- * @warning If an unsupported emissivity lookup table format is specified via
- *        @c ctl->tblfmt, the function aborts with an error message.
+ * @return Pointer to an allocated and initialized @c tbl_t structure containing
+ *         the loaded lookup tables.
  *
- * @note Memory for the returned structure is dynamically allocated and must
- *       be released by the caller.
+ * @warning If an unsupported lookup table format is specified via
+ *          @c ctl->tblfmt, the function aborts with an error message.
+ *
+ * @note Memory for the returned structure is dynamically allocated and must be
+ *       released by the caller.
  *
  * @author Lars Hoffmann
  */
@@ -3793,22 +3793,35 @@ tbl_t *read_tbl(
 /**
  * @brief Read a single ASCII emissivity lookup table.
  *
- * This reads one ASCII table corresponding to frequency index @p id
- * and gas index @p ig. The table format is:
+ * Reads one ASCII table for detector/channel index @p id and emitter/gas index
+ * @p ig from a file named:
  *
- *     pressure   temperature   column_density   emissivity
+ *     <ctl->tblbase>_<ctl->nu[id]>_<ctl->emitter[ig]>.tab
  *
- * The function automatically determines the pressure, temperature,
- * and column-density indices based on new values appearing in the file.
+ * The table file contains four columns:
+ *  1. pressure [hPa]
+ *  2. temperature [K]
+ *  3. column density [molecules/cm^2]
+ *  4. emissivity [-]
  *
- * Out-of-range values for `u` or `eps` are skipped and counted.
+ * The routine infers the pressure/temperature/column-density indices from
+ * changes in the values read from the file. Values outside the supported ranges
+ * for column density or emissivity are skipped and counted.
  *
- * @param ctl  Pointer to control structure specifying filenames and grids.
- * @param tbl  Pointer to the table structure to be filled.
- * @param id   Frequency index.
- * @param ig   Gas index.
+ * If the file cannot be opened, a warning is issued and the table is treated
+ * as empty (i.e., @c tbl->np[id][ig] == 0).
  *
- * @warning Aborts via `ERRMSG()` if table dimensions exceed TBLNP/TBLNT/TBLNU.
+ * @param[in]     ctl  Pointer to control structure specifying filenames and grids.
+ * @param[in,out] tbl  Pointer to the table structure to be filled.
+ * @param[in]     id   Detector/channel index.
+ * @param[in]     ig   Emitter/gas index.
+ *
+ * @warning Aborts via @c ERRMSG() if table dimensions exceed @c TBLNP/@c TBLNT/@c TBLNU.
+ *
+ * @note Implementation detail: the ASCII reader may use an internal sentinel
+ *       during parsing (historically @c np == -1 such that the first increment
+ *       yields index 0). On return, @c tbl->np[id][ig] always represents the
+ *       number of pressure levels (0 for an empty table).
  *
  * @author Lars Hoffmann
  */
@@ -3819,27 +3832,33 @@ void read_tbl_asc(
   const int ig);
 
 /**
- * @brief Read a single binary emissivity lookup table.
+ * @brief Read a single compact binary emissivity lookup table.
  *
- * Reads the binary table stored as:
- *   - number of pressure levels
- *   - pressure grid
- *   - for each pressure:
- *       - number of temperatures
- *       - temperature grid
- *       - for each temperature:
- *           - number of column densities
- *           - u array
- *           - emissivity array
+ * Reads one binary table for detector/channel index @p id and emitter/gas index
+ * @p ig from a file named:
  *
- * The function fills the corresponding entries of the `tbl_t` structure.
+ *     <ctl->tblbase>_<ctl->nu[id]>_<ctl->emitter[ig]>.bin
  *
- * @param ctl  Pointer to control structure specifying filenames and grids.
- * @param tbl  Pointer to the table structure to be filled.
- * @param id   Frequency index.
- * @param ig   Gas index.
+ * The file contains a length field followed by a packed byte blob created by
+ * @c tbl_pack():
+ *  - @c size_t nbytes   : number of bytes in the packed blob
+ *  - @c uint8_t blob[]  : packed lookup table data
  *
- * @warning Aborts via `ERRMSG()` if table dimensions exceed TBLNP/TBLNT/TBLNU.
+ * The blob is unpacked into @p tbl using @c tbl_unpack().
+ *
+ * If the file cannot be opened, a warning is issued and the table is treated
+ * as empty (i.e., @c tbl->np[id][ig] == 0).
+ *
+ * @param[in]     ctl  Pointer to control structure specifying filenames and grids.
+ * @param[in,out] tbl  Pointer to the table structure to be filled.
+ * @param[in]     id   Detector/channel index.
+ * @param[in]     ig   Emitter/gas index.
+ *
+ * @warning Aborts via @c ERRMSG() if the file is malformed or unpacking fails.
+ *
+ * @see write_tbl_bin()
+ * @see tbl_pack()
+ * @see tbl_unpack()
  *
  * @author Lars Hoffmann
  */
@@ -3850,35 +3869,36 @@ void read_tbl_bin(
   const int ig);
 
 /**
- * @brief Read a packed lookup table from a NetCDF file.
+ * @brief Read one packed lookup table from a NetCDF file.
  *
- * This function loads a previously stored lookup table for a specific
- * emitter and detector from a NetCDF file created by write_tbl_nc().
- * The table is read as a packed binary blob and unpacked into the
- * provided table structure using tbl_unpack().
+ * Loads a previously stored lookup table for detector/channel index @p id and
+ * emitter/gas index @p ig from a NetCDF file written by @c write_tbl_nc().
  *
  * The NetCDF filename is constructed as:
- *   <ctl->tblbase>_<ctl->emitter[ig]>.nc
  *
- * Within that file, the variable name is derived from the detector
- * frequency:
- *   tbl_XXXX   (where XXXX is ctl->nu[id] formatted to four decimals)
+ *     <ctl->tblbase>_<ctl->emitter[ig]>.nc
  *
- * The variable is stored as an `NC_UBYTE` vector whose length is read
- * from its associated dimension.
+ * The variable name is derived from the detector/channel frequency:
  *
- * @param[in]     ctl  Control structure defining emitters, detectors,
- *                    base filename, and detector frequencies.
+ *     tbl_XXXX   (where XXXX is @c ctl->nu[id] formatted to four decimals)
+ *
+ * The variable is stored as an @c NC_UBYTE vector containing a packed lookup
+ * table byte blob, which is unpacked into @p tbl using @c tbl_unpack().
+ *
+ * Missing NetCDF files or missing variables are not fatal: the reader emits a
+ * warning and the corresponding table is treated as empty
+ * (i.e., @c tbl->np[id][ig] == 0).
+ *
+ * @param[in]     ctl  Control structure defining emitters, detectors, base filename,
+ *                    and detector/channel frequencies.
  * @param[in,out] tbl  Table structure that will receive the unpacked data.
- * @param[in]     id   Detector index selecting ctl->nu[id].
- * @param[in]     ig   Emitter index selecting ctl->emitter[ig].
+ * @param[in]     id   Detector/channel index selecting @c ctl->nu[id].
+ * @param[in]     ig   Emitter/gas index selecting @c ctl->emitter[ig].
  *
- * @note A temporary buffer is allocated to hold the packed table blob
- *       before unpacking.
+ * @note A temporary buffer is allocated to hold the packed table blob prior to unpacking.
  *
- * @warning The function terminates with an error if:
- *          - The NetCDF file or variable cannot be found.
- *          - The stored table size exceeds the maximum supported buffer.
+ * @warning Aborts via @c ERRMSG() if the NetCDF file/variable exists but cannot be
+ *          read or unpacked (e.g., corrupted contents).
  *
  * @see write_tbl_nc()
  * @see tbl_unpack()
@@ -4956,28 +4976,37 @@ void write_stddev(
   const gsl_matrix * s);
 
 /**
- * @brief Write emissivity lookup tables and filter functions to disk.
+ * @brief Write emissivity lookup tables to disk.
  *
- * This function writes the emissivity lookup tables stored in @p tbl to disk
- * using the output format specified in the control structure @p ctl. The
- * supported output formats are:
+ * Writes emissivity lookup tables stored in @p tbl using the output format
+ * specified by @c ctl->tblfmt:
  *  - ASCII (@c ctl->tblfmt == 1)
- *  - binary (@c ctl->tblfmt == 2)
+ *  - compact binary (@c ctl->tblfmt == 2)
  *  - netCDF (@c ctl->tblfmt == 3)
  *
- * In addition to the emissivity lookup tables, the spectral filter functions
- * associated with each detector/channel are written to separate files.
+ * The function iterates over all emitters (@p ig) and detectors/channels
+ * (@p id) and dispatches the corresponding per-table writer.
+ *
+ * Lookup tables with no pressure levels (i.e. @c tbl->np[id][ig] <= 0) are
+ * skipped intentionally. In this case, a warning is issued and no output
+ * artifact (file or NetCDF variable) is written for the affected table.
+ * This allows trace gases or channels with negligible contribution to be
+ * omitted cleanly from the output.
+ *
+ * After writing the lookup tables, the associated spectral filter functions
+ * are written to separate files (format-dependent).
  *
  * @param[in] ctl  Pointer to the control structure defining the lookup table
- *                 output format, base filenames, and spectral channels.
+ *                 output format, base filenames, emitters, and spectral channels.
  * @param[in] tbl  Pointer to the lookup-table structure containing the
  *                 emissivity data and filter functions to be written.
  *
  * @warning If an unsupported lookup table format is specified via
- *        @c ctl->tblfmt, the function aborts with an error message.
+ *          @c ctl->tblfmt, the function aborts with an error message.
  *
- * @note The function performs no memory allocation; it only writes existing
- *       emissivity lookup table data to disk.
+ * @note Missing output artifacts caused by skipped tables are handled
+ *       gracefully by the corresponding readers, which treat missing
+ *       tables as empty.
  *
  * @author Lars Hoffmann
  */
@@ -4986,96 +5015,96 @@ void write_tbl(
   const tbl_t * tbl);
 
 /**
- * @brief Write all lookup tables in human-readable ASCII format.
+ * @brief Write one emissivity lookup table in human-readable ASCII format.
  *
- * For every gas index (`ig`) and frequency index (`id`), the function
- * generates a file of the form:
+ * Writes the lookup table for detector/channel index @p id and emitter/gas
+ * index @p ig to a file named:
  *
- *     <base>_<nu[id]>_<emitter[ig]>.tab
+ *     <ctl->tblbase>_<ctl->nu[id]>_<ctl->emitter[ig]>.tab
  *
  * The ASCII file contains four columns:
+ *  1. pressure [hPa]
+ *  2. temperature [K]
+ *  3. column density [molecules/cm^2]
+ *  4. emissivity [-]
  *
- *     1. pressure [hPa]
- *     2. temperature [K]
- *     3. column density [molecules/cm²]
- *     4. emissivity [-]
+ * A header describing the columns is always written. If the table is empty
+ * (i.e. @c tbl->np[id][ig] == 0), the file will contain only the header.
  *
- * Table dimensions are taken from the `tbl_t` structure.  
- * Missing files cause the program to abort via ERRMSG().
- *
- * @param ctl  Control structure providing grid metadata and filename base.
- * @param tbl  Table data to be written.
+ * @param[in] ctl  Control structure providing filename base, frequencies, and
+ *                 emitter names.
+ * @param[in] tbl  Lookup table data to be written.
+ * @param[in] id   Detector/channel index.
+ * @param[in] ig   Emitter/gas index.
  *
  * @author Lars Hoffmann
  */
 void write_tbl_asc(
   const ctl_t * ctl,
-  const tbl_t * tbl);
+  const tbl_t * tbl,
+  const int id,
+  const int ig);
 
 /**
- * @brief Write all lookup tables in compact binary format.
+ * @brief Write one emissivity lookup table in compact binary format.
  *
- * For each gas index (`ig`) and frequency index (`id`), a binary file named
+ * Writes the lookup table for detector/channel index @p id and emitter/gas
+ * index @p ig to a file named:
  *
- *     <base>_<nu[id]>_<emitter[ig]>.bin
+ *     <ctl->tblbase>_<ctl->nu[id]>_<ctl->emitter[ig]>.bin
  *
- * is created. The format is:
+ * The file contains a length field followed by a packed byte blob produced by
+ * tbl_pack():
+ *  - @c size_t nbytes   : number of bytes in the packed blob
+ *  - @c uint8_t blob[]  : packed lookup table data (see tbl_pack())
  *
- *   - int     np                      (number of pressure levels)
- *   - double  p[np]
- *   - for each pressure:
- *       - int     nt                  (number of temperature levels)
- *       - double  t[nt]
- *       - for each temperature:
- *           - int     nu              (number of column-density points)
- *           - float   u[nu]
- *           - float   eps[nu]
+ * If the table is empty (@c tbl->np[id][ig] == 0), the packed blob still
+ * encodes this (it includes @c np = 0), so the file remains a valid
+ * representation of an empty table.
  *
- * @param ctl  Control structure containing filename base and spectral grid.
- * @param tbl  Table data to be serialized.
+ * @param[in] ctl  Control structure providing filename base, frequencies, and
+ *                 emitter names.
+ * @param[in] tbl  Lookup table data to be packed and written.
+ * @param[in] id   Detector/channel index.
+ * @param[in] ig   Emitter/gas index.
+ *
+ * @see tbl_pack()
  *
  * @author Lars Hoffmann
  */
 void write_tbl_bin(
   const ctl_t * ctl,
-  const tbl_t * tbl);
+  const tbl_t * tbl,
+  const int id,
+  const int ig);
 
 /**
- * @brief Write packed lookup tables to NetCDF files.
+ * @brief Write one packed lookup table to a NetCDF file.
  *
- * This function serializes and stores lookup tables for all combinations
- * of emitters and detectors into NetCDF4 files. One file is created (or
- * opened) per emitter, and each detector’s table is written as a separate
- * variable within that file.
+ * Writes the lookup table for detector/channel index @p id and emitter/gas
+ * index @p ig to the NetCDF file:
  *
- * The output filename for each emitter is:
- *   <ctl->tblbase>_<ctl->emitter[ig]>.nc
+ *     <ctl->tblbase>_<ctl->emitter[ig]>.nc
  *
- * For each detector frequency `ctl->nu[id]`, a variable named
- * `tbl_XXXX` and a corresponding dimension `len_XXXX` (where `XXXX` is
- * the formatted frequency) are created. Each variable contains a packed
- * binary blob produced by `tbl_pack()`, stored as `NC_UBYTE`.
+ * The table is stored as a packed byte blob (produced by tbl_pack()) in a
+ * variable named @c tbl_XXXX with a corresponding dimension @c len_XXXX,
+ * where @c XXXX is the formatted frequency @c ctl->nu[id]. The variable type
+ * is @c NC_UBYTE.
  *
- * If a file does not already exist, it is created and initialized with
+ * If the NetCDF file does not exist, it is created and initialized with the
  * global attributes:
- *  - `format_version = "1"`
- *  - `emitter = ctl->emitter[ig]`
+ *  - @c format_version = "1"
+ *  - @c emitter = ctl->emitter[ig]
  *
- * If a variable for a given detector already exists in the file, the
- * function aborts to prevent overwriting existing data.
+ * To prevent accidental overwrites, the function terminates with an error if
+ * the target variable already exists in the file.
  *
- * @param[in] ctl  Control structure defining emitters, detectors, base
- *                 filename, and frequencies.
- * @param[in] tbl  Table data structure containing the lookup tables to
+ * @param[in] ctl  Control structure defining emitter names, frequencies, and
+ *                 base filename.
+ * @param[in] tbl  Lookup table data structure containing the lookup table to
  *                 be packed and written.
- *
- * @note A single temporary buffer is allocated to hold the packed table
- *       data. Its size is computed to be large enough for the largest
- *       possible packed table.
- *
- * @warning The function terminates with an error if:
- *          - A packed table exceeds the allocated buffer size.
- *          - A table variable already exists in the target NetCDF file.
+ * @param[in] id   Detector/channel index.
+ * @param[in] ig   Emitter/gas index.
  *
  * @see tbl_pack()
  *
@@ -5083,7 +5112,9 @@ void write_tbl_bin(
  */
 void write_tbl_nc(
   const ctl_t * ctl,
-  const tbl_t * tbl);
+  const tbl_t * tbl,
+  const int id,
+  const int ig);
 
 /**
  * @brief Map retrieval state vector back to atmospheric structure.

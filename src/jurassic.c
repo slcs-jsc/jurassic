@@ -5155,10 +5155,6 @@ void read_atm(
   else if (ctl->atmfmt == 3)
     read_atm_nc(file, ctl, atm, 0);
 
-  /* Error... */
-  else
-    ERRMSG("Unknown atmospheric data file format, check ATMFMT!");
-
   /* Check number of points... */
   if (atm->np < 1)
     ERRMSG("Could not read any data!");
@@ -5511,10 +5507,16 @@ void read_ctl(
   /* Emissivity look-up tables... */
   scan_ctl(argc, argv, "TBLBASE", -1, "-", ctl->tblbase);
   ctl->tblfmt = (int) scan_ctl(argc, argv, "TBLFMT", -1, "1", NULL);
+  if (ctl->tblfmt < 1 || ctl->tblfmt > 3)
+    ERRMSG("Unknown look-up table file format, set TBLFMT to 1, 2, or 3!");
 
   /* File formats... */
   ctl->atmfmt = (int) scan_ctl(argc, argv, "ATMFMT", -1, "1", NULL);
+  if (ctl->atmfmt < 1 || ctl->atmfmt > 3)
+    ERRMSG("Unknown atmospheric file format, set ATMFMT to 1, 2, or 3!");
   ctl->obsfmt = (int) scan_ctl(argc, argv, "OBSFMT", -1, "1", NULL);
+  if (ctl->obsfmt < 1 || ctl->obsfmt > 3)
+    ERRMSG("Unknown observation file format, set OBSFMT to 1, 2, or 3!");
 
   /* Hydrostatic equilibrium... */
   ctl->hydz = scan_ctl(argc, argv, "HYDZ", -1, "-999", NULL);
@@ -5637,10 +5639,6 @@ void read_obs(
   /* Read netCDF data... */
   else if (ctl->obsfmt == 3)
     read_obs_nc(file, ctl, obs, 0);
-
-  /* Error... */
-  else
-    ERRMSG("Unknown observation file format!");
 
   /* Check number of points... */
   if (obs->nr < 1)
@@ -6131,10 +6129,6 @@ tbl_t *read_tbl(
       /* Read netCDF look-up tables... */
       else if (ctl->tblfmt == 3)
 	read_tbl_nc(ctl, tbl, id, ig);
-
-      /* Error message... */
-      else
-	ERRMSG("Unknown look-up table format!");
 
       /* Write info... */
       for (int ip = 0; ip < tbl->np[id][ig]; ip++)
@@ -7573,10 +7567,6 @@ void write_obs(
   else if (ctl->obsfmt == 3)
     write_obs_nc(file, ctl, obs, 0);
 
-  /* Error... */
-  else
-    ERRMSG("Unknown observation file format, check OBSFMT!");
-
   /* Write info... */
   double mini, maxi;
   LOG(2, "Number of ray paths: %d", obs->nr);
@@ -7987,21 +7977,29 @@ void write_tbl(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
-  /* Write ASCII look-up tables... */
-  if (ctl->tblfmt == 1)
-    write_tbl_asc(ctl, tbl);
+  /* Loop over emitters and detectors... */
+  for (int ig = 0; ig < ctl->ng; ig++)
+    for (int id = 0; id < ctl->nd; id++) {
+      
+      /* Skip empty tables... */
+      if (tbl->np[id][ig] <= 0) {
+        WARN("Skip writing empty emissivity table: emitter=%s, nu=%.4f",
+             ctl->emitter[ig], ctl->nu[id]);
+        continue;
+      }
+      
+      /* Write ASCII look-up tables... */
+      if (ctl->tblfmt == 1)
+	write_tbl_asc(ctl, tbl, id, ig);
 
-  /* Write binary look-up tables... */
-  else if (ctl->tblfmt == 2)
-    write_tbl_bin(ctl, tbl);
+      /* Write binary look-up tables... */
+      else if (ctl->tblfmt == 2)
+	write_tbl_bin(ctl, tbl, id, ig);
 
-  /* Write netCDF look-up tables... */
-  else if (ctl->tblfmt == 3)
-    write_tbl_nc(ctl, tbl);
-
-  /* Error message... */
-  else
-    ERRMSG("Unknown look-up table format!");
+      /* Write netCDF look-up tables... */
+      else if (ctl->tblfmt == 3)
+	write_tbl_nc(ctl, tbl, id, ig);
+    }
 
   /* Write filter functions... */
   if (ctl->tblfmt == 1)
@@ -8017,161 +8015,149 @@ void write_tbl(
 
 void write_tbl_asc(
   const ctl_t *ctl,
-  const tbl_t *tbl) {
+  const tbl_t *tbl,
+  const int id,
+  const int ig) {
 
-  /* Loop over emitters and detectors... */
-  for (int ig = 0; ig < ctl->ng; ig++)
-    for (int id = 0; id < ctl->nd; id++) {
+  /* Set filename... */
+  char filename[2 * LEN];
+  sprintf(filename, "%s_%.4f_%s.tab", ctl->tblbase,
+	  ctl->nu[id], ctl->emitter[ig]);
 
-      /* Set filename... */
-      char filename[2 * LEN];
-      sprintf(filename, "%s_%.4f_%s.tab", ctl->tblbase,
-	      ctl->nu[id], ctl->emitter[ig]);
+  /* Create file... */
+  FILE *out;
+  if (!(out = fopen(filename, "w"))) {
+    ERRMSG("Cannot create emissivity table: %s", filename);
+  } else
+    LOG(1, "Write emissivity table: %s", filename);
 
-      /* Create file... */
-      FILE *out;
-      if (!(out = fopen(filename, "w"))) {
-	ERRMSG("Cannot create emissivity table: %s", filename);
-      } else
-	LOG(1, "Write emissivity table: %s", filename);
+  /* Write header... */
+  fprintf(out,
+	  "# $1 = pressure [hPa]\n"
+	  "# $2 = temperature [K]\n"
+	  "# $3 = column density [molecules/cm^2]\n"
+	  "# $4 = emissivity [-]\n");
 
-      /* Write header... */
-      fprintf(out,
-	      "# $1 = pressure [hPa]\n"
-	      "# $2 = temperature [K]\n"
-	      "# $3 = column density [molecules/cm^2]\n"
-	      "# $4 = emissivity [-]\n");
-
-      /* Save table file... */
-      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
-	for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
-	  fprintf(out, "\n");
-	  for (int iu = 0; iu < tbl->nu[id][ig][ip][it]; iu++)
-	    fprintf(out, "%g %g %e %e\n",
-		    tbl->p[id][ig][ip], tbl->t[id][ig][ip][it],
-		    exp(tbl->logu[id][ig][ip][it][iu]),
-		    exp(tbl->logeps[id][ig][ip][it][iu]));
-	}
-
-      /* Close file... */
-      fclose(out);
+  /* Save table file... */
+  for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+    for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
+      fprintf(out, "\n");
+      for (int iu = 0; iu < tbl->nu[id][ig][ip][it]; iu++)
+	fprintf(out, "%g %g %e %e\n",
+		tbl->p[id][ig][ip], tbl->t[id][ig][ip][it],
+		exp(tbl->logu[id][ig][ip][it][iu]),
+		exp(tbl->logeps[id][ig][ip][it][iu]));
     }
+
+  /* Close file... */
+  fclose(out);
 }
 
 /*****************************************************************************/
 
 void write_tbl_bin(
   const ctl_t *ctl,
-  const tbl_t *tbl) {
+  const tbl_t *tbl,
+  const int id,
+  const int ig) {
 
-  /* Loop over emitters and detectors... */
-  for (int ig = 0; ig < ctl->ng; ig++)
-    for (int id = 0; id < ctl->nd; id++) {
+  /* Set filename... */
+  char filename[2 * LEN];
+  sprintf(filename, "%s_%.4f_%s.bin",
+	  ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
 
-      /* Set filename... */
-      char filename[2 * LEN];
-      sprintf(filename, "%s_%.4f_%s.bin",
-	      ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
+  /* Create file... */
+  FILE *out;
+  if (!(out = fopen(filename, "w"))) {
+    ERRMSG("Cannot create emissivity table: %s", filename);
+  } else
+    LOG(1, "Write emissivity table: %s", filename);
 
-      /* Create file... */
-      FILE *out;
-      if (!(out = fopen(filename, "w"))) {
-	ERRMSG("Cannot create emissivity table: %s", filename);
-      } else
-	LOG(1, "Write emissivity table: %s", filename);
+  /* Pack... */
+  size_t used = 0;
+  const size_t need = tbl_packed_size(tbl, id, ig);
+  uint8_t *work = NULL;
+  ALLOC(work, uint8_t, need);
+  tbl_pack(tbl, id, ig, work, &used);
+  if (used != need)
+    ERRMSG("Internal error: packed size mismatch!");
 
-      /* Pack... */
-      size_t used = 0;
-      const size_t need = tbl_packed_size(tbl, id, ig);
-      uint8_t *work = NULL;
-      ALLOC(work, uint8_t, need);
-      tbl_pack(tbl, id, ig, work, &used);
-      if (used != need)
-	ERRMSG("Internal error: packed size mismatch!");
+  /* Write length and packed blob... */
+  FWRITE(&used, size_t,
+	 1,
+	 out);
+  FWRITE(work, uint8_t, used, out);
 
-      /* Write length and packed blob... */
-      FWRITE(&used, size_t,
-	     1,
-	     out);
-      FWRITE(work, uint8_t, used, out);
+  /* Close file... */
+  fclose(out);
 
-      /* Close file... */
-      fclose(out);
-
-      /* Free... */
-      free(work);
-    }
+  /* Free... */
+  free(work);
 }
 
 /*****************************************************************************/
 
 void write_tbl_nc(
   const ctl_t *ctl,
-  const tbl_t *tbl) {
+  const tbl_t *tbl,
+  const int id,
+  const int ig) {
 
-  /* Loop over emitters... */
-  for (int ig = 0; ig < ctl->ng; ig++) {
+  /* Set filename... */
+  char filename[2 * LEN];
+  sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
 
-    /* Set filename... */
-    char filename[2 * LEN];
-    sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
-
-    /* Open or create file... */
-    int ncid;
-    if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR) {
-      if (nc_create(filename, NC_NETCDF4 | NC_CLOBBER, &ncid) != NC_NOERR)
-	ERRMSG("Cannot open or create emissivity table: %s", filename);
-      NC_PUT_ATT_GLOBAL("format_version", "1");
-      NC_PUT_ATT_GLOBAL("emitter", ctl->emitter[ig]);
-      NC(nc_enddef(ncid));
-    }
-
-    /* Loop over detectors... */
-    for (int id = 0; id < ctl->nd; id++) {
-
-      /* Set variable and dimension name... */
-      char varname[LEN], dimname[LEN];
-      sprintf(varname, "tbl_%.4f", ctl->nu[id]);
-      sprintf(dimname, "len_%.4f", ctl->nu[id]);
-
-      /* Write info... */
-      LOG(1, "Write emissivity table: %s in %s", varname, filename);
-
-      /* Allocate work space... */
-      size_t used = 0;
-      const size_t need = tbl_packed_size(tbl, id, ig);
-      uint8_t *work = NULL;
-      ALLOC(work, uint8_t, need);
-
-      /* Pack table... */
-      tbl_pack(tbl, id, ig, work, &used);
-      if (used != need)
-	ERRMSG("Internal error: packed size mismatch!");
-
-      /* Prevent overwrite... */
-      int tmp;
-      if (nc_inq_varid(ncid, varname, &tmp) == NC_NOERR)
-	ERRMSG("Table already present!");
-
-      /* Add dimension and variable... */
-      int dimid, varid;
-      NC(nc_redef(ncid));
-      NC(nc_def_dim(ncid, dimname, used, &dimid));
-      int dimids[1] = { dimid };
-      NC_DEF_VAR(varname, NC_UBYTE, 1, dimids,
-		 "Packed lookup table blob", "1", 0, 0);
-      NC(nc_enddef(ncid));
-
-      /* Write data... */
-      NC(nc_put_var_uchar(ncid, varid, (const unsigned char *) work));
-
-      /* Free... */
-      free(work);
-    }
-
-    /* Close file... */
-    NC(nc_close(ncid));
+  /* Open or create file... */
+  int ncid;
+  if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR) {
+    if (nc_create(filename, NC_NETCDF4 | NC_CLOBBER, &ncid) != NC_NOERR)
+      ERRMSG("Cannot open or create emissivity table: %s", filename);
+    NC_PUT_ATT_GLOBAL("format_version", "1");
+    NC_PUT_ATT_GLOBAL("emitter", ctl->emitter[ig]);
+    NC(nc_enddef(ncid));
   }
+
+  /* Set variable and dimension name... */
+  char varname[LEN], dimname[LEN];
+  sprintf(varname, "tbl_%.4f", ctl->nu[id]);
+  sprintf(dimname, "len_%.4f", ctl->nu[id]);
+
+  /* Write info... */
+  LOG(1, "Write emissivity table: %s in %s", varname, filename);
+
+  /* Allocate work space... */
+  size_t used = 0;
+  const size_t need = tbl_packed_size(tbl, id, ig);
+  uint8_t *work = NULL;
+  ALLOC(work, uint8_t, need);
+
+  /* Pack table... */
+  tbl_pack(tbl, id, ig, work, &used);
+  if (used != need)
+    ERRMSG("Internal error: packed size mismatch!");
+
+  /* Prevent overwrite... */
+  int tmp;
+  if (nc_inq_varid(ncid, varname, &tmp) == NC_NOERR)
+    ERRMSG("Table already present!");
+
+  /* Add dimension and variable... */
+  int dimid, varid;
+  NC(nc_redef(ncid));
+  NC(nc_def_dim(ncid, dimname, used, &dimid));
+  int dimids[1] = { dimid };
+  NC_DEF_VAR(varname, NC_UBYTE, 1, dimids,
+	     "Packed lookup table blob", "1", 0, 0);
+  NC(nc_enddef(ncid));
+
+  /* Write data... */
+  NC(nc_put_var_uchar(ncid, varid, (const unsigned char *) work));
+
+  /* Free... */
+  free(work);
+
+  /* Close file... */
+  NC(nc_close(ncid));
 }
 
 /*****************************************************************************/
