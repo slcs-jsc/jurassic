@@ -25,15 +25,13 @@ for filter in boxcar triangle gaussian sinc norton_beer ; do
     $jurassic/tblgen 1000 285 opt_01000.asc data/${filter}_$nu.filt > data/${filter}_${nu}_CO2.tab
 done
 
-# Convert table files from ASCII to binary...
+# Convert table files from ASCII to binary and netCDF...
 filter=boxcar
 ctl="ND 1 NU[0] $nu NG 1 EMITTER[0] CO2"
-$jurassic/tblfmt - data/${filter} 1 data/${filter}_bin 2 $ctl
-$jurassic/tblfmt - data/${filter} 1 data/${filter}_gas 3 $ctl
-cp data/${filter}_$nu.filt data/${filter}_bin_$nu.filt
-cp data/${filter}_$nu.filt data/${filter}_gas_$nu.filt
-$jurassic/tblfmt - data/${filter}_bin 2 data/${filter}_bin 1 $ctl
-$jurassic/tblfmt - data/${filter}_gas 3 data/${filter}_gas 1 $ctl
+$jurassic/tblfmt - data/${filter} 1 data/${filter}_asc2bin 2 $ctl
+$jurassic/tblfmt - data/${filter} 1 data/${filter}_asc2nc  3 $ctl
+$jurassic/tblfmt - data/${filter}_asc2bin 2 data/${filter}_bin2asc 1 $ctl
+$jurassic/tblfmt - data/${filter}_asc2nc  3 data/${filter}_nc2asc  1 $ctl
 
 # Compare files...
 echo -e "\nCompare results..."

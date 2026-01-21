@@ -4190,8 +4190,10 @@ void tangent_point(
  * @param[out] bytes_used  Number of bytes written to `buf`.
  *
  * @warning The caller must ensure that `buf` is large enough to hold the
- *          packed data for the selected detector/emitter pair. No bounds
- *          checking is performed inside this function.
+ *          packed data for the selected detector/emitter pair. The packed
+ *          representation includes the detector filter function (mandatory for
+ *          binary/netCDF formats). No bounds checking is performed inside this
+ *          function.
  *
  * @see tbl_unpack()
  *
@@ -4208,7 +4210,7 @@ void tbl_pack(
  * @brief Compute required buffer size (in bytes) for tbl_pack().
  *
  * Returns the exact number of bytes that tbl_pack() will write for the
- * given detector/emitter pair.
+ * given detector/emitter pair (including the mandatory filter function).
  *
  * @see tbl_pack()
  *
@@ -4262,6 +4264,7 @@ size_t tbl_unpack(
   int id,
   int ig,
   const uint8_t * buf);
+
 
 /**
  * @brief Converts time components to seconds since January 1, 2000, 12:00:00 UTC.

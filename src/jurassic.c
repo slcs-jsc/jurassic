@@ -6112,6 +6112,10 @@ tbl_t *read_tbl(
   tbl_t *tbl;
   ALLOC(tbl, tbl_t, 1);
 
+  /* Initialize filter function sizes (binary/netCDF reading will fill these). */
+  for (int id = 0; id < ctl->nd; id++)
+    tbl->filt_n[id] = 0;
+
   /* Loop over trace gases and channels... */
   for (int id = 0; id < ctl->nd; id++)
     for (int ig = 0; ig < ctl->ng; ig++) {
@@ -6149,11 +6153,13 @@ tbl_t *read_tbl(
     }
 
   /* Read filter functions... */
-  for (int id = 0; id < ctl->nd; id++) {
-    char filename[2 * LEN];
-    sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
-    read_shape(filename, tbl->filt_nu[id], tbl->filt_f[id], &tbl->filt_n[id]);
-  }
+  if (ctl->tblfmt == 1)
+    for (int id = 0; id < ctl->nd; id++) {
+      char filename[2 * LEN];
+      sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
+      read_shape(filename, tbl->filt_nu[id], tbl->filt_f[id],
+		 &tbl->filt_n[id]);
+    }
 
   /* Initialize source function lookup tables... */
   init_srcfunc(ctl, tbl);
@@ -6648,6 +6654,7 @@ void tbl_pack(
 
   uint8_t *cur = buf;
 
+  /* Pack lookup table... */
   int np = tbl->np[id][ig];
   memcpy(cur, &np, sizeof(np));
   cur += sizeof(np);
@@ -6676,6 +6683,17 @@ void tbl_pack(
     }
   }
 
+  /* Pack filter function... */
+  const int n = tbl->filt_n[id];
+  memcpy(cur, &n, sizeof(n));
+  cur += sizeof(n);
+
+  memcpy(cur, tbl->filt_nu[id], (size_t) n * sizeof(double));
+  cur += ((size_t) n * sizeof(double));
+
+  memcpy(cur, tbl->filt_f[id], (size_t) n * sizeof(double));
+  cur += ((size_t) n * sizeof(double));
+
   *bytes_used = (size_t) (cur - buf);
 }
 
@@ -6688,26 +6706,27 @@ size_t tbl_packed_size(
 
   size_t bytes = 0;
 
+  /* Size of lookup table... */
   const int np = tbl->np[id][ig];
-  bytes += sizeof(int);		/* np */
-  bytes += (size_t) np *sizeof(
-  double);			/* p[np] */
+  bytes += sizeof(int);
+  bytes += ((size_t) np * sizeof(double));
 
   for (int ip = 0; ip < np; ip++) {
     const int nt = tbl->nt[id][ig][ip];
-    bytes += sizeof(int);	/* nt */
-    bytes += (size_t) nt *sizeof(
-  double);			/* t[nt] */
+    bytes += sizeof(int);
+    bytes += ((size_t) nt * sizeof(double));
 
     for (int it = 0; it < nt; it++) {
       const int nu = tbl->nu[id][ig][ip][it];
-      bytes += sizeof(int);	/* nu */
-      bytes += (size_t) nu *sizeof(
-  float);			/* u[nu] */
-      bytes += (size_t) nu *sizeof(
-  float);			/* eps[nu] */
+      bytes += sizeof(int);
+      bytes += (2 * (size_t) nu * sizeof(float));
     }
   }
+
+  /* Size of filter function... */
+  const int n = tbl->filt_n[id];
+  bytes += sizeof(int);
+  bytes += (2 * (size_t) n * sizeof(double));
 
   return bytes;
 }
@@ -6722,13 +6741,13 @@ size_t tbl_unpack(
 
   const uint8_t *cur = buf;
 
+  /* Unpack lookup table... */
   int np;
   memcpy(&np, cur, sizeof(np));
   cur += sizeof(np);
 
   if (np < 0 || np > TBLNP)
     ERRMSG("np out of range!");
-
   tbl->np[id][ig] = np;
 
   memcpy(tbl->p[id][ig], cur, (size_t) np * sizeof(double));
@@ -6742,7 +6761,6 @@ size_t tbl_unpack(
 
     if (nt < 0 || nt > TBLNT)
       ERRMSG("nt out of range!");
-
     tbl->nt[id][ig][ip] = nt;
 
     memcpy(tbl->t[id][ig][ip], cur, (size_t) nt * sizeof(double));
@@ -6756,23 +6774,12 @@ size_t tbl_unpack(
 
       if (nu < 0 || nu > TBLNU)
 	ERRMSG("nu out of range!");
-
       tbl->nu[id][ig][ip][it] = nu;
 
-      /* Allocate dynamic arrays for this (ip,it) node... */
-      if (tbl->logu[id][ig][ip][it])
-	free(tbl->logu[id][ig][ip][it]);
-      if (tbl->logeps[id][ig][ip][it])
-	free(tbl->logeps[id][ig][ip][it]);
-
-      tbl->logu[id][ig][ip][it] = NULL;
-      tbl->logeps[id][ig][ip][it] = NULL;
-      if (nu > 0) {
-	ALLOC(tbl->logu[id][ig][ip][it], float,
-	      nu);
-	ALLOC(tbl->logeps[id][ig][ip][it], float,
-	      nu);
-      }
+      ALLOC(tbl->logu[id][ig][ip][it], float,
+	    nu);
+      ALLOC(tbl->logeps[id][ig][ip][it], float,
+	    nu);
 
       memcpy(tbl->logu[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
@@ -6781,6 +6788,21 @@ size_t tbl_unpack(
       cur += ((size_t) nu * sizeof(float));
     }
   }
+
+  /* Unpack filter function... */
+  int n;
+  memcpy(&n, cur, sizeof(n));
+  cur += sizeof(n);
+
+  if (n < 2 || n > NSHAPE)
+    ERRMSG("Missing or invalid filter function (filt_n) in packed table!");
+  tbl->filt_n[id] = n;
+
+  memcpy(tbl->filt_nu[id], cur, (size_t) n * sizeof(double));
+  cur += ((size_t) n * sizeof(double));
+
+  memcpy(tbl->filt_f[id], cur, (size_t) n * sizeof(double));
+  cur += ((size_t) n * sizeof(double));
 
   return (size_t) (cur - buf);
 }
@@ -7939,11 +7961,13 @@ void write_tbl(
     ERRMSG("Unknown look-up table format!");
 
   /* Write filter functions... */
-  for (int id = 0; id < ctl->nd; id++) {
-    char filename[2 * LEN];
-    sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
-    write_shape(filename, tbl->filt_nu[id], tbl->filt_f[id], tbl->filt_n[id]);
-  }
+  if (ctl->tblfmt == 1)
+    for (int id = 0; id < ctl->nd; id++) {
+      char filename[2 * LEN];
+      sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
+      write_shape(filename, tbl->filt_nu[id], tbl->filt_f[id],
+		  tbl->filt_n[id]);
+    }
 }
 
 /*****************************************************************************/
@@ -7998,8 +8022,6 @@ void write_tbl_bin(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
-  /* Work buffer will be allocated per table, sized to the packed blob. */
-
   /* Loop over emitters and detectors... */
   for (int ig = 0; ig < ctl->ng; ig++)
     for (int id = 0; id < ctl->nd; id++) {
@@ -8045,7 +8067,7 @@ void write_tbl_bin(
 void write_tbl_nc(
   const ctl_t *ctl,
   const tbl_t *tbl) {
-  
+
   /* Loop over emitters... */
   for (int ig = 0; ig < ctl->ng; ig++) {
 
@@ -8075,7 +8097,7 @@ void write_tbl_nc(
       const size_t need = tbl_packed_size(tbl, id, ig);
       uint8_t *work = NULL;
       ALLOC(work, uint8_t, need);
-      
+
       /* Pack table... */
       tbl_pack(tbl, id, ig, work, &used);
       if (used != need)
