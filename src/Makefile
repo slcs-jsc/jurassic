@@ -57,7 +57,7 @@ CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" $(OPT) -DHAVE_INLINE -DG
 # LDFLAGS...
 LDFLAGS += $(LIBDIR) -lgsl -lgslcblas -lnetcdf -lm
 ifeq ($(STATIC),1)
-  LDFLAGS += -lhdf5_hl -lhdf5 -lm -lz -lsz -lzstd
+  LDFLAGS += -lhdf5_hl -lhdf5 -lm -lz -lsz
 endif
 
 # Compiler...
