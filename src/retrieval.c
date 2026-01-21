@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -108,7 +108,7 @@ int main(
   TIMER("total", 3);
 
   /* Free... */
-  free(tbl);
+  tbl_free(&ctl, tbl);
 
 #ifdef MPI
   MPI_Finalize();

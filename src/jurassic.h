@@ -4161,6 +4161,31 @@ void tangent_point(
   double *tplat);
 
 /**
+ * @brief Free lookup table and all internally allocated memory.
+ *
+ * Frees all dynamically allocated memory owned by a ::tbl_t object,
+ * including the spectral lookup arrays (`logu` and `logeps`) for all
+ * detector/emitter/pressure/temperature combinations. The ::tbl_t
+ * structure itself is freed at the end.
+ *
+ * The function is safe to call with a NULL pointer and will return
+ * immediately in that case. Partially initialized tables are handled
+ * safely.
+ *
+ * @param[in,out] tbl  Pointer to the lookup table to be freed.
+ * @param[in]     ctl  Control structure providing the number of
+ *                     detectors and emitters used for looping.
+ *
+ * @note This function must be used instead of `free(tbl)` since ::tbl_t
+ *       contains nested dynamically allocated members.
+ *
+ * @author Lars Hoffmann
+ */
+void tbl_free(
+  const ctl_t * ctl,
+  tbl_t * tbl);
+
+/**
  * @brief Pack a lookup table into a contiguous binary buffer.
  *
  * This function serializes the lookup table data for a given detector

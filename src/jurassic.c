@@ -6645,6 +6645,45 @@ void tangent_point(
 
 /*****************************************************************************/
 
+void tbl_free(
+  const ctl_t *ctl,
+  tbl_t *tbl) {
+
+  /* Check pointer... */
+  if (!tbl)
+    return;
+
+  /* Loop over channels and emitters... */
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ig = 0; ig < ctl->ng; ig++) {
+
+      /* Check number of pressure levels... */
+      const int np = tbl->np[id][ig];
+      if (np < 0)
+	continue;
+
+      /* Loop over pressure levels... */
+      for (int ip = 0; ip < np; ip++) {
+
+	/* Loop over temperature levels... */
+	const int nt = tbl->nt[id][ig][ip];
+	for (int it = 0; it < nt; it++) {
+
+	  /* Free... */
+	  free(tbl->logu[id][ig][ip][it]);
+	  free(tbl->logeps[id][ig][ip][it]);
+	  tbl->logu[id][ig][ip][it] = NULL;
+	  tbl->logeps[id][ig][ip][it] = NULL;
+	}
+      }
+    }
+
+  /* Free... */
+  free(tbl);
+}
+
+/*****************************************************************************/
+
 void tbl_pack(
   const tbl_t *tbl,
   int id,

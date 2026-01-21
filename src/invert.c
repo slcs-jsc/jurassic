@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2019-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2019-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -352,7 +352,7 @@ int main(
 
   /* Free... */
   gsl_matrix_free(k);
-  free(tbl);
+  tbl_free(&ctl, tbl);
 
   return EXIT_SUCCESS;
 }
