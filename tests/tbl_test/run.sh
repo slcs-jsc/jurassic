@@ -33,6 +33,9 @@ $jurassic/tblfmt - data/${filter} 1 data/${filter}_asc2nc  3 $ctl
 $jurassic/tblfmt - data/${filter}_asc2bin 2 data/${filter}_bin2asc 1 $ctl
 $jurassic/tblfmt - data/${filter}_asc2nc  3 data/${filter}_nc2asc  1 $ctl
 
+# Compress table...
+$jurassic/tblrdc - data/${filter} 1 data/${filter}_rdc 1 $ctl
+
 # Compare files...
 echo -e "\nCompare results..."
 error=0
