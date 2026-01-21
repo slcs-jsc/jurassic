@@ -6112,16 +6112,13 @@ tbl_t *read_tbl(
   tbl_t *tbl;
   ALLOC(tbl, tbl_t, 1);
 
-  /* Initialize filter function sizes (binary/netCDF reading will fill these). */
+  /* Initialize filter function sizes... */
   for (int id = 0; id < ctl->nd; id++)
     tbl->filt_n[id] = 0;
 
   /* Loop over trace gases and channels... */
   for (int id = 0; id < ctl->nd; id++)
     for (int ig = 0; ig < ctl->ng; ig++) {
-
-      /* Initialize... */
-      tbl->np[id][ig] = -1;
 
       /* Read ASCII look-up tables... */
       if (ctl->tblfmt == 1)
@@ -6177,8 +6174,8 @@ void read_tbl_asc(
   const int ig) {
 
   /* Initialize... */
-  double eps, eps_old = -999, press, press_old = -999, temp, temp_old =
-    -999, u, u_old = -999;
+  double eps, eps_old = -999, press, press_old = -999, temp,
+    temp_old = -999, u, u_old = -999;
   int nrange = 0;
 
   /* Set filename... */
@@ -6186,15 +6183,16 @@ void read_tbl_asc(
   sprintf(filename, "%s_%.4f_%s.tab", ctl->tblbase,
 	  ctl->nu[id], ctl->emitter[ig]);
 
-  /* Write info... */
-  LOG(1, "Read emissivity table: %s", filename);
-
-  /* Try to open file... */
+  /* Open file... */
   FILE *in;
   if (!(in = fopen(filename, "r"))) {
     WARN("Missing emissivity table: %s", filename);
     return;
-  }
+  } else
+    LOG(1, "Read emissivity table: %s", filename);
+
+  /* Init pressure level counter... */
+  tbl->np[id][ig] = -1;
 
   /* Read data... */
   char line[LEN];
@@ -6303,15 +6301,13 @@ void read_tbl_bin(
   sprintf(filename, "%s_%.4f_%s.bin",
 	  ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
 
-  /* Write info... */
-  LOG(1, "Read emissivity table: %s", filename);
-
   /* Open file... */
   FILE *in = fopen(filename, "rb");
   if (!in) {
     WARN("Missing emissivity table: %s", filename);
     return;
-  }
+  } else
+    LOG(1, "Read emissivity table: %s", filename);
 
   /* Read length.. */
   size_t nbytes;
@@ -6352,11 +6348,19 @@ void read_tbl_nc(
 
   /* Open file... */
   sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
-  NC(nc_open(filename, NC_NOWRITE, &ncid));
+  if (nc_open(filename, NC_NOWRITE, &ncid) != NC_NOERR) {
+    WARN("Missing emissivity table: %s", filename);
+    return;
+  }
 
   /* Inquire variable... */
   sprintf(varname, "tbl_%.4f", ctl->nu[id]);
-  NC(nc_inq_varid(ncid, varname, &varid));
+  if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
+    WARN("Missing emissivity table: %s in %s", varname, filename);
+    nc_close(ncid);
+    return;
+  } else
+    LOG(1, "Read emissivity table: %s in %s", varname, filename);
   NC(nc_inq_vardimid(ncid, varid, &dimid));
   NC(nc_inq_dimlen(ncid, dimid, &nbytes));
 
@@ -8024,13 +8028,12 @@ void write_tbl_asc(
       sprintf(filename, "%s_%.4f_%s.tab", ctl->tblbase,
 	      ctl->nu[id], ctl->emitter[ig]);
 
-      /* Write info... */
-      LOG(1, "Write emissivity table: %s", filename);
-
       /* Create file... */
       FILE *out;
-      if (!(out = fopen(filename, "w")))
-	ERRMSG("Cannot create file!");
+      if (!(out = fopen(filename, "w"))) {
+	ERRMSG("Cannot create emissivity table: %s", filename);
+      } else
+	LOG(1, "Write emissivity table: %s", filename);
 
       /* Write header... */
       fprintf(out,
@@ -8070,13 +8073,12 @@ void write_tbl_bin(
       sprintf(filename, "%s_%.4f_%s.bin",
 	      ctl->tblbase, ctl->nu[id], ctl->emitter[ig]);
 
-      /* Write info... */
-      LOG(1, "Write emissivity table: %s", filename);
-
       /* Create file... */
-      FILE *out = fopen(filename, "wb");
-      if (!out)
-	ERRMSG("Cannot create file!");
+      FILE *out;
+      if (!(out = fopen(filename, "w"))) {
+	ERRMSG("Cannot create emissivity table: %s", filename);
+      } else
+	LOG(1, "Write emissivity table: %s", filename);
 
       /* Pack... */
       size_t used = 0;
@@ -8117,7 +8119,8 @@ void write_tbl_nc(
     /* Open or create file... */
     int ncid;
     if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR) {
-      NC(nc_create(filename, NC_NETCDF4 | NC_CLOBBER, &ncid));
+      if (nc_create(filename, NC_NETCDF4 | NC_CLOBBER, &ncid) != NC_NOERR)
+	ERRMSG("Cannot open or create emissivity table: %s", filename);
       NC_PUT_ATT_GLOBAL("format_version", "1");
       NC_PUT_ATT_GLOBAL("emitter", ctl->emitter[ig]);
       NC(nc_enddef(ncid));
@@ -8130,6 +8133,9 @@ void write_tbl_nc(
       char varname[LEN], dimname[LEN];
       sprintf(varname, "tbl_%.4f", ctl->nu[id]);
       sprintf(dimname, "len_%.4f", ctl->nu[id]);
+
+      /* Write info... */
+      LOG(1, "Write emissivity table: %s in %s", varname, filename);
 
       /* Allocate work space... */
       size_t used = 0;
