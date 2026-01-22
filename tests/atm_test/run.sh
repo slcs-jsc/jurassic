@@ -5,7 +5,6 @@ export LD_LIBRARY_PATH=../../libs/build/lib:${LD_LIBRARY_PATH}
 export OMP_NUM_THREADS=4
 export LANG=C
 export LC_ALL=C
-
 set -euo pipefail
 
 # Setup...
