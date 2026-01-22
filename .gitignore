@@ -31,6 +31,7 @@ src/tblrdc
 src/time2jsec
 src/zenith
 tab/
+tests/atm_test/data/
 tests/limb_test/data/
 tests/nadir_test/data/
 tests/ret_test/data/

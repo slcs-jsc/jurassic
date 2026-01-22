@@ -5182,12 +5182,12 @@ void read_atm(
     gsl_stats_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
     LOG(2, "Extinction range (window %d): %g ... %g km^-1", iw, mini, maxi);
   }
-  if (ctl->ncl > 0 && atm->np == 0) {
+  if (ctl->ncl > 0) {
     LOG(2, "Cloud layer: z= %g km | dz= %g km | k= %g ... %g km^-1",
 	atm->clz, atm->cldz, atm->clk[0], atm->clk[ctl->ncl - 1]);
   } else
     LOG(2, "Cloud layer: none");
-  if (ctl->nsf > 0 && atm->np == 0) {
+  if (ctl->nsf > 0) {
     LOG(2,
 	"Surface: T_s = %g K | eps= %g ... %g",
 	atm->sft, atm->sfeps[0], atm->sfeps[ctl->nsf - 1]);
@@ -6971,12 +6971,12 @@ void write_atm(
     gsl_stats_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
     LOG(2, "Extinction range (window %d): %g ... %g km^-1", iw, mini, maxi);
   }
-  if (ctl->ncl > 0 && atm->np == 0) {
+  if (ctl->ncl > 0) {
     LOG(2, "Cloud layer: z= %g km | dz= %g km | k= %g ... %g km^-1",
 	atm->clz, atm->cldz, atm->clk[0], atm->clk[ctl->ncl - 1]);
   } else
     LOG(2, "Cloud layer: none");
-  if (ctl->nsf > 0 && atm->np == 0) {
+  if (ctl->nsf > 0) {
     LOG(2,
 	"Surface: T_s = %g K | eps= %g ... %g",
 	atm->sft, atm->sfeps[0], atm->sfeps[ctl->nsf - 1]);
@@ -7298,9 +7298,8 @@ void write_atm_nc(
   if (ctl->ncl > 0) {
     NC_PUT_DOUBLE("cld_z", &atm->clz, 1);
     NC_PUT_DOUBLE("cld_dz", &atm->cldz, 1);
-
     for (int icl = 0; icl < ctl->ncl; icl++) {
-      sprintf(varname, "cld_k_%d", icl);
+      sprintf(varname, "cld_k_%.4f", ctl->clnu[icl]);
       NC_PUT_DOUBLE(varname, &atm->clk[icl], 1);
     }
   }
@@ -7308,9 +7307,8 @@ void write_atm_nc(
   /* Write surface variables... */
   if (ctl->nsf > 0) {
     NC_PUT_DOUBLE("srf_t", &atm->sft, 1);
-
     for (int isf = 0; isf < ctl->nsf; isf++) {
-      sprintf(varname, "srf_eps_%d", isf);
+      sprintf(varname, "srf_eps_%.4f", ctl->sfnu[isf]);
       NC_PUT_DOUBLE(varname, &atm->sfeps[isf], 1);
     }
   }
