@@ -1007,6 +1007,43 @@
 #define REFRAC(p, T) (7.753e-05 * (p) / (T))
 
 /**
+ * @brief Log detailed statistics of an emissivity look-up table.
+ *
+ * This macro logs pressure, temperature, absorber column, and emissivity
+ * ranges for all pressure levels of a given (channel, emitter) table.
+ * Output is written at verbosity level 2 and is intended for diagnostics
+ * and debugging.
+ *
+ * @param tbl Pointer to the look-up table structure.
+ * @param id  Channel (detector) index.
+ * @param ig  Emitter (trace gas) index.
+ *
+ * @author Lars Hoffmann
+ */
+#define TBL_LOG(tbl, id, ig)						\
+  do {									\
+    for (int ip = 0; ip < (tbl)->np[(id)][(ig)]; ip++)			\
+      LOG(2,								\
+          "p[%2d]= %.5e hPa | T[0:%2d]= %.2f ... %.2f K | "		\
+          "u[0:%3d]= %.5e ... %.5e molec/cm^2 | "			\
+          "eps[0:%3d]= %.5e ... %.5e",					\
+          (ip),								\
+          (tbl)->p[(id)][(ig)][(ip)],					\
+          (tbl)->nt[(id)][(ig)][(ip)] - 1,				\
+          (tbl)->t[(id)][(ig)][(ip)][0],				\
+          (tbl)->t[(id)][(ig)][(ip)]					\
+	  [(tbl)->nt[(id)][(ig)][(ip)] - 1],                            \
+          (tbl)->nu[(id)][(ig)][(ip)][0] - 1,				\
+          exp((tbl)->logu[(id)][(ig)][(ip)][0][0]),			\
+          exp((tbl)->logu[(id)][(ig)][(ip)][0]				\
+	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1]),			\
+          (tbl)->nu[(id)][(ig)][(ip)][0] - 1,				\
+          exp((tbl)->logeps[(id)][(ig)][(ip)][0][0]),			\
+          exp((tbl)->logeps[(id)][(ig)][(ip)][0]			\
+	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1]));			\
+  } while (0)
+
+/**
  * @brief Start or stop a named timer.
  *
  * Calls the `timer()` function with contextual information (file name, function
@@ -3869,35 +3906,40 @@ void read_tbl_bin(
   const int ig);
 
 /**
- * @brief Read one packed lookup table from a NetCDF file.
+ * @brief Read one packed emissivity lookup table from an open NetCDF file.
  *
- * Loads a previously stored lookup table for detector/channel index @p id and
- * emitter/gas index @p ig from a NetCDF file written by @c write_tbl_nc().
+ * Loads a previously stored emissivity lookup table for detector/channel
+ * index @p id and emitter (trace gas) index @p ig from an already opened
+ * NetCDF file. The file is expected to have been created by
+ * @c write_tbl_nc().
  *
- * The NetCDF filename is constructed as:
+ * The NetCDF variable name is derived from the detector/channel frequency:
  *
- *     <ctl->tblbase>_<ctl->emitter[ig]>.nc
+ *     tbl_XXXX
  *
- * The variable name is derived from the detector/channel frequency:
+ * where @c XXXX is @c ctl->nu[id] formatted to four decimal places.
  *
- *     tbl_XXXX   (where XXXX is @c ctl->nu[id] formatted to four decimals)
+ * Each variable is stored as a one-dimensional @c NC_UBYTE array containing
+ * a packed lookup-table byte stream. The data are unpacked into @p tbl
+ * using @c tbl_unpack().
  *
- * The variable is stored as an @c NC_UBYTE vector containing a packed lookup
- * table byte blob, which is unpacked into @p tbl using @c tbl_unpack().
+ * Missing variables are not fatal: a warning is issued and the corresponding
+ * table is left empty (i.e., @c tbl->np[id][ig] remains zero).
  *
- * Missing NetCDF files or missing variables are not fatal: the reader emits a
- * warning and the corresponding table is treated as empty
- * (i.e., @c tbl->np[id][ig] == 0).
+ * The NetCDF file handle @p ncid must refer to an open file and is not
+ * opened or closed by this function.
  *
- * @param[in]     ctl  Control structure defining emitters, detectors, base filename,
- *                    and detector/channel frequencies.
- * @param[in,out] tbl  Table structure that will receive the unpacked data.
- * @param[in]     id   Detector/channel index selecting @c ctl->nu[id].
- * @param[in]     ig   Emitter/gas index selecting @c ctl->emitter[ig].
+ * @param[in]     ctl   Control structure defining emitters, detectors, and
+ *                      detector/channel frequencies.
+ * @param[in,out] tbl   Table structure that receives the unpacked data.
+ * @param[in]     id    Detector/channel index selecting @c ctl->nu[id].
+ * @param[in]     ig    Emitter (trace gas) index selecting @c ctl->emitter[ig].
+ * @param[in]     ncid  NetCDF file identifier of an already opened file.
  *
- * @note A temporary buffer is allocated to hold the packed table blob prior to unpacking.
+ * @note A temporary buffer is allocated to hold the packed lookup-table data
+ *       prior to unpacking.
  *
- * @warning Aborts via @c ERRMSG() if the NetCDF file/variable exists but cannot be
+ * @warning Aborts via @c ERRMSG() if the NetCDF variable exists but cannot be
  *          read or unpacked (e.g., corrupted contents).
  *
  * @see write_tbl_nc()
@@ -3905,11 +3947,12 @@ void read_tbl_bin(
  *
  * @author Lars Hoffmann
  */
-void read_tbl_nc(
+void read_tbl_nc_channel(
   const ctl_t * ctl,
   tbl_t * tbl,
   int id,
-  int ig);
+  int ig,
+  int ncid);
 
 /**
  * @brief Scan control file or command-line arguments for a configuration variable.

@@ -6114,34 +6114,46 @@ tbl_t *read_tbl(
   for (int id = 0; id < ctl->nd; id++)
     tbl->filt_n[id] = 0;
 
-  /* Loop over trace gases and channels... */
-  for (int id = 0; id < ctl->nd; id++)
-    for (int ig = 0; ig < ctl->ng; ig++) {
+  /* Loop over trace gases... */
+  for (int ig = 0; ig < ctl->ng; ig++) {
 
-      /* Read ASCII look-up tables... */
-      if (ctl->tblfmt == 1)
+    /* Read ASCII look-up tables... */
+    if (ctl->tblfmt == 1)
+      for (int id = 0; id < ctl->nd; id++) {
 	read_tbl_asc(ctl, tbl, id, ig);
+	TBL_LOG(tbl, id, ig);
+      }
 
-      /* Read binary look-up tables... */
-      else if (ctl->tblfmt == 2)
+    /* Read binary look-up tables... */
+    else if (ctl->tblfmt == 2)
+      for (int id = 0; id < ctl->nd; id++) {
 	read_tbl_bin(ctl, tbl, id, ig);
+	TBL_LOG(tbl, id, ig);
+      }
 
-      /* Read netCDF look-up tables... */
-      else if (ctl->tblfmt == 3)
-	read_tbl_nc(ctl, tbl, id, ig);
+    /* Read netCDF look-up tables... */
+    else if (ctl->tblfmt == 3) {
 
-      /* Write info... */
-      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
-	LOG(2,
-	    "p[%2d]= %.5e hPa | T[0:%2d]= %.2f ... %.2f K | u[0:%3d]= %.5e ... %.5e molec/cm^2 | eps[0:%3d]= %.5e ... %.5e",
-	    ip, tbl->p[id][ig][ip], tbl->nt[id][ig][ip] - 1,
-	    tbl->t[id][ig][ip][0],
-	    tbl->t[id][ig][ip][tbl->nt[id][ig][ip] - 1],
-	    tbl->nu[id][ig][ip][0] - 1, exp(tbl->logu[id][ig][ip][0][0]),
-	    exp(tbl->logu[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1]),
-	    tbl->nu[id][ig][ip][0] - 1, exp(tbl->logeps[id][ig][ip][0][0]),
-	    exp(tbl->logeps[id][ig][ip][0][tbl->nu[id][ig][ip][0] - 1]));
+      /* Open file... */
+      int ncid;
+      char filename[2 * LEN];
+      sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
+      if (nc_open(filename, NC_NOWRITE, &ncid) != NC_NOERR) {
+	WARN("Missing emissivity table: %s", filename);
+	continue;
+      } else
+	LOG(1, "Read emissivity table: %s", filename);
+
+      /* Read channels... */
+      for (int id = 0; id < ctl->nd; id++) {
+	read_tbl_nc_channel(ctl, tbl, id, ig, ncid);
+	TBL_LOG(tbl, id, ig);
+      }
+
+      /* Close file... */
+      NC(nc_close(ncid));
     }
+  }
 
   /* Read filter functions... */
   if (ctl->tblfmt == 1)
@@ -6328,33 +6340,26 @@ void read_tbl_bin(
 
 /*****************************************************************************/
 
-void read_tbl_nc(
+void read_tbl_nc_channel(
   const ctl_t *ctl,
   tbl_t *tbl,
   int id,
-  int ig) {
+  int ig,
+  int ncid) {
 
-  char filename[2 * LEN], varname[LEN];
+  char varname[LEN];
 
-  int ncid, varid, dimid;
+  int varid, dimid;
 
   size_t nbytes;
-
-  /* Open file... */
-  sprintf(filename, "%s_%s.nc", ctl->tblbase, ctl->emitter[ig]);
-  if (nc_open(filename, NC_NOWRITE, &ncid) != NC_NOERR) {
-    WARN("Missing emissivity table: %s", filename);
-    return;
-  }
 
   /* Inquire variable... */
   sprintf(varname, "tbl_%.4f", ctl->nu[id]);
   if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
-    WARN("Missing emissivity table: %s in %s", varname, filename);
-    nc_close(ncid);
+    WARN("Missing emissivity table: %s", varname);
     return;
   } else
-    LOG(1, "Read emissivity table: %s in %s", varname, filename);
+    LOG(1, "Read emissivity table: %s", varname);
   NC(nc_inq_vardimid(ncid, varid, &dimid));
   NC(nc_inq_dimlen(ncid, dimid, &nbytes));
 
@@ -6365,9 +6370,6 @@ void read_tbl_nc(
 
   /* Unpack... */
   tbl_unpack(tbl, id, ig, work);
-
-  /* Close file... */
-  NC(nc_close(ncid));
 
   /* Free... */
   free(work);
@@ -7978,14 +7980,14 @@ void write_tbl(
   /* Loop over emitters and detectors... */
   for (int ig = 0; ig < ctl->ng; ig++)
     for (int id = 0; id < ctl->nd; id++) {
-      
+
       /* Skip empty tables... */
       if (tbl->np[id][ig] <= 0) {
-        WARN("Skip writing empty emissivity table: emitter=%s, nu=%.4f",
-             ctl->emitter[ig], ctl->nu[id]);
-        continue;
+	WARN("Skip writing empty emissivity table: emitter=%s, nu=%.4f",
+	     ctl->emitter[ig], ctl->nu[id]);
+	continue;
       }
-      
+
       /* Write ASCII look-up tables... */
       if (ctl->tblfmt == 1)
 	write_tbl_asc(ctl, tbl, id, ig);
@@ -7997,6 +7999,9 @@ void write_tbl(
       /* Write netCDF look-up tables... */
       else if (ctl->tblfmt == 3)
 	write_tbl_nc(ctl, tbl, id, ig);
+
+      /* Write info... */
+      TBL_LOG(tbl, id, ig);
     }
 
   /* Write filter functions... */
