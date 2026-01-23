@@ -3816,7 +3816,7 @@ tbl_t *read_tbl(
  * @param[in]     id   Detector/channel index.
  * @param[in]     ig   Emitter/gas index.
  *
- * @warning Aborts via @c ERRMSG() if table dimensions exceed @c TBLNP/@c TBLNT/@c TBLNU.
+ * @warning Aborts via @c ERRMSG() if table dimensions exceed @c TBLNP / @c TBLNT / @c TBLNU.
  *
  * @note Implementation detail: the ASCII reader may use an internal sentinel
  *       during parsing (historically @c np == -1 such that the first increment
