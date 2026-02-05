@@ -2349,37 +2349,46 @@ void formod_pencil(
   const int ir);
 
 /**
- * @brief Interface routine for the Reference Forward Model (RFM).
+ * @brief Compute radiances and transmittances using the Reference Forward Model (RFM).
  *
- * Prepares input data, executes the RFM executable, and imports
- * simulated radiances and transmittances into the observation structure.
- * The routine converts the atmospheric and geometric configuration from
- * internal JURASSIC data structures into RFM-compatible driver and
- * atmosphere files, then reads the RFM output spectra.
+ * This routine interfaces JURASSIC with the Oxford Reference Forward Model (RFM)
+ * to simulate high-resolution atmospheric spectra and convolve them with
+ * instrument filter functions.
  *
- * @param[in]  ctl  Control structure defining model configuration, RFM
- *                  executable path, HITRAN database, and spectral setup.
- * @param[in]  atm  Atmospheric state structure containing pressure,
- *                  temperature, and gas profiles.
- * @param[in,out] obs  Observation geometry and radiance data to be
- *                     populated with RFM-computed radiances and
- *                     transmittances.
+ * For each spectral channel and line of sight, the function:
+ * - Performs ray tracing through the atmosphere,
+ * - Determines the appropriate viewing geometry (limb, nadir, or zenith),
+ * - Constructs an RFM driver file,
+ * - Executes the external RFM binary,
+ * - Reads and integrates the resulting radiance and transmittance spectra.
  *
- * @note The function assumes identical observer positions across all
- *       ray paths and no extinction data in @p atm. It automatically
- *       determines whether the geometry is limb, nadir, or observer-based.
+ * Supported viewing geometries are:
+ * - Limb: specified by tangent altitude,
+ * - Nadir: downward-looking paths intersecting the surface,
+ * - Zenith: upward-looking paths exiting at the top of the atmosphere.
  *
- * @note Adds appropriate RFM flags (e.g., @c RAD, @c TRA, @c MIX, @c CTM)
- *       based on the control settings. Temporary files such as
- *       @c rfm.drv, @c rfm.atm, and @c rad_*.asc are created and removed
- *       automatically.
+ * For nadir and zenith geometries, the tangent parameter is interpreted as
+ * the air mass factor (secant of the zenith angle), as required by RFM.
  *
- * @see ctl_t, atm_t, obs_t, raytrace, write_atm_rfm,
- *      read_shape, read_obs_rfm, geo2cart, NORM, DOTP
+ * The routine requires all rays to share an identical observer position and
+ * does not support atmospheric extinction data.
  *
- * @throws ERRMSG on inconsistent geometry, failed I/O, or system call errors.
+ * Temporary files (driver, atmosphere, and output spectra) are created in the
+ * working directory and removed after execution.
  *
- * @warning Requires external RFM binary; ensure @ref ctl_t::rfmbin is set.
+ * @param[in]     ctl  Pointer to control structure containing RFM settings,
+ *                     spectral channels, gas lists, and executable paths.
+ * @param[in]     atm  Pointer to atmospheric state structure (profiles of
+ *                     altitude, temperature, and gas concentrations).
+ * @param[in,out] obs  Pointer to observation structure. On input, contains
+ *                     viewing geometry. On output, filled with simulated
+ *                     radiances and transmittances.
+ *
+ * @note The external RFM binary specified in @p ctl->rfmbin must be accessible
+ *       and executable.
+ *
+ * @warning The function terminates execution if inconsistent geometries,
+ *          unsupported data, or system errors are detected.
  *
  * @par Reference
  *   Dudhia, A., "The Reference Forward Model (RFM)", JQSRT 186, 243–253 (2017)

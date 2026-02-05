@@ -3705,7 +3705,7 @@ void formod_rfm(
   double f[NSHAPE], nu[NSHAPE], nu0, nu1, obsz = -999, tsurf,
     xd[3], xo[3], xv[3], z[NR], zmin, zmax;
 
-  int n, nadir = 0;
+  int n, nadir = 0, zenith = 0;
 
   /* Allocate... */
   ALLOC(los, los_t, 1);
@@ -3738,29 +3738,47 @@ void formod_rfm(
     /* Raytracing... */
     raytrace(ctl, atm, obs, los, ir);
 
-    /* Nadir? */
+    /* Nadir or zenith? (air mass factor / secant of zenith angle) */
     if (obs->tpz[ir] <= zmin) {
+
+      /* Nadir: path intersects the surface. */
       geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xo);
       geo2cart(obs->vpz[ir], obs->vplon[ir], obs->vplat[ir], xv);
       for (int i = 0; i < 3; i++)
 	xd[i] = xo[i] - xv[i];
       z[ir] = NORM(xo) * NORM(xd) / DOTP(xo, xd);
       nadir++;
+
+    } else if (obs->tpz[ir] >= zmax - 1e-3 && obs->vpz[ir] > obs->obsz[ir]) {
+
+      /* Zenith: upward-looking path leaves the atmosphere at the top boundary. */
+      geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xo);
+      geo2cart(obs->vpz[ir], obs->vplon[ir], obs->vplat[ir], xv);
+      for (int i = 0; i < 3; i++)
+	xd[i] = xv[i] - xo[i];
+      z[ir] = NORM(xo) * NORM(xd) / DOTP(xo, xd);
+      zenith++;
+
     } else
+      /* Limb: use tangent altitude. */
       z[ir] = obs->tpz[ir];
   }
-  if (nadir > 0 && nadir < obs->nr)
-    ERRMSG("Limb and nadir not simultaneously possible!");
+  if ((nadir > 0 && nadir < obs->nr)
+      || (zenith > 0 && zenith < obs->nr)
+      || (nadir > 0 && zenith > 0))
+    ERRMSG("Limb, nadir, and zenith not simultaneously possible!");
 
-  /* Nadir? */
+  /* Viewing geometry... */
   if (nadir)
     strcat(rfmflg, " NAD");
+  if (zenith)
+    strcat(rfmflg, " ZEN");
 
   /* Get surface temperature... */
   tsurf = atm->t[gsl_stats_min_index(atm->z, 1, (size_t) atm->np)];
 
   /* Refraction? */
-  if (!nadir && !ctl->refrac)
+  if (!nadir && !zenith && !ctl->refrac)
     strcat(rfmflg, " GEO");
 
   /* Continua? */
