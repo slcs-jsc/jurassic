@@ -2349,46 +2349,50 @@ void formod_pencil(
   const int ir);
 
 /**
- * @brief Compute radiances and transmittances using the Reference Forward Model (RFM).
+ * @brief Forward-model radiance and transmittance with the Reference Forward Model (RFM).
  *
- * This routine interfaces JURASSIC with the Oxford Reference Forward Model (RFM)
- * to simulate high-resolution atmospheric spectra and convolve them with
- * instrument filter functions.
+ * This routine provides the JURASSIC interface to the external RFM executable. It writes an
+ * RFM atmospheric profile file and a per-channel RFM driver file, runs RFM, and reads back
+ * the resulting radiance and transmittance spectra. The spectra are then convolved with the
+ * instrument channel filter functions and stored in the observation structure.
  *
- * For each spectral channel and line of sight, the function:
- * - Performs ray tracing through the atmosphere,
- * - Determines the appropriate viewing geometry (limb, nadir, or zenith),
- * - Constructs an RFM driver file,
- * - Executes the external RFM binary,
- * - Reads and integrates the resulting radiance and transmittance spectra.
+ * Filter functions are taken exclusively from the lookup-table container @p tbl
+ * (i.e., @c tbl->filt_n, @c tbl->filt_nu, @c tbl->filt_f). This makes the behavior independent
+ * of the lookup-table format (ASCII, binary, or netCDF) and avoids reliance on external
+ * per-channel ASCII filter files.
  *
- * Supported viewing geometries are:
- * - Limb: specified by tangent altitude,
- * - Nadir: downward-looking paths intersecting the surface,
- * - Zenith: upward-looking paths exiting at the top of the atmosphere.
+ * Viewing geometry is classified as one of:
+ * - limb: uses tangent altitude
+ * - nadir: path intersects the surface (secant/air-mass-factor geometry)
+ * - zenith: upward-looking path exits the atmosphere at the top boundary
  *
- * For nadir and zenith geometries, the tangent parameter is interpreted as
- * the air mass factor (secant of the zenith angle), as required by RFM.
+ * Mixed geometries (e.g., limb and nadir simultaneously) are not allowed and will trigger an error.
  *
- * The routine requires all rays to share an identical observer position and
- * does not support atmospheric extinction data.
+ * Limitations:
+ * - Requires identical observer positions for all rays.
+ * - Does not support extinction input data (atm->k must be zero everywhere).
+ * - Uses temporary files in the current working directory (e.g., @c rfm.atm, @c rfm.drv,
+ *   @c rad_*.asc, @c tra_*.asc) and removes them on completion.
  *
- * Temporary files (driver, atmosphere, and output spectra) are created in the
- * working directory and removed after execution.
+ * @param[in]  ctl  Control and configuration parameters (RFM binary path, HITRAN/XSC settings,
+ *                  channel definitions, flags such as refraction and continua).
+ * @param[in]  tbl  Lookup-table container providing per-channel filter functions.
+ * @param[in]  atm  Atmospheric state (altitude grid, temperature, and gas profiles).
+ * @param[out] obs  Observation geometry and output arrays; on return, @c obs->rad[id][ir]
+ *                  and @c obs->tau[id][ir] are filled for all channels and rays.
  *
- * @param[in]     ctl  Pointer to control structure containing RFM settings,
- *                     spectral channels, gas lists, and executable paths.
- * @param[in]     atm  Pointer to atmospheric state structure (profiles of
- *                     altitude, temperature, and gas concentrations).
- * @param[in,out] obs  Pointer to observation structure. On input, contains
- *                     viewing geometry. On output, filled with simulated
- *                     radiances and transmittances.
+ * @pre @p tbl contains valid filter functions for all channels used (@c tbl->filt_n[id] > 0).
+ * @pre All rays share identical observer position (@c obsz/obslon/obslat).
+ * @pre No extinction data is present (@c atm->k == 0 for all wavelengths/levels).
  *
- * @note The external RFM binary specified in @p ctl->rfmbin must be accessible
- *       and executable.
+ * @post @c obs->rad and @c obs->tau are updated with channel-integrated radiance and
+ *       transmittance computed by RFM.
  *
- * @warning The function terminates execution if inconsistent geometries,
- *          unsupported data, or system errors are detected.
+ * @note The surface temperature is taken as the temperature at the lowest altitude level
+ *       of the atmospheric grid.
+ *
+ * @warning This function executes external commands via @c system(), and creates/removes files
+ *          in the current working directory.
  *
  * @par Reference
  *   Dudhia, A., "The Reference Forward Model (RFM)", JQSRT 186, 243–253 (2017)
@@ -2397,6 +2401,7 @@ void formod_pencil(
  */
 void formod_rfm(
   const ctl_t * ctl,
+  const tbl_t * tbl,
   const atm_t * atm,
   obs_t * obs);
 

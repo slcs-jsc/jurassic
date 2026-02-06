@@ -3431,7 +3431,7 @@ void formod(
 
   /* Call RFM... */
   else if (ctl->formod == 2)
-    formod_rfm(ctl, atm, obs);
+    formod_rfm(ctl, tbl, atm, obs);
 
   /* Apply field-of-view convolution... */
   formod_fov(ctl, obs);
@@ -3692,6 +3692,7 @@ void formod_pencil(
 
 void formod_rfm(
   const ctl_t *ctl,
+  const tbl_t *tbl,
   const atm_t *atm,
   obs_t *obs) {
 
@@ -3699,8 +3700,7 @@ void formod_rfm(
 
   FILE *out;
 
-  char cmd[2 * LEN], filename[2 * LEN],
-    rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
+  char cmd[2 * LEN], rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
 
   double f[NSHAPE], nu[NSHAPE], nu0, nu1, obsz = -999, tsurf,
     xd[3], xo[3], xv[3], z[NR], zmin, zmax;
@@ -3791,9 +3791,12 @@ void formod_rfm(
   /* Loop over channels... */
   for (int id = 0; id < ctl->nd; id++) {
 
-    /* Read filter function... */
-    sprintf(filename, "%s_%.4f.filt", ctl->tblbase, ctl->nu[id]);
-    read_shape(filename, nu, f, &n);
+    /* Get filter function from lookup table... */
+    n = tbl->filt_n[id];
+    if (n <= 0 || n > NSHAPE)
+      ERRMSG("Missing or invalid filter function in lookup table!");
+    memcpy(nu, tbl->filt_nu[id], (size_t) n * sizeof(double));
+    memcpy(f, tbl->filt_f[id], (size_t) n * sizeof(double));
 
     /* Set spectral range... */
     nu0 = nu[0];
