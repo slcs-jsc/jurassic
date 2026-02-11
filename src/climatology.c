@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -45,6 +45,7 @@ int main(
   const double z0 = scan_ctl(argc, argv, "Z0", -1, "0", NULL);
   const double z1 = scan_ctl(argc, argv, "Z1", -1, "90", NULL);
   const double dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
+  const int zsurf = (int) scan_ctl(argc, argv, "ZSURF", -1, "0", NULL);
   const double clz = scan_ctl(argc, argv, "CLZ", -1, "0", NULL);
   const double cldz = scan_ctl(argc, argv, "CLDZ", -1, "0", NULL);
   for (int icl = 0; icl < ctl.ncl; icl++)
@@ -53,14 +54,33 @@ int main(
   for (int isf = 0; isf < ctl.nsf; isf++)
     sfeps[isf] = scan_ctl(argc, argv, "SFEPS", isf, "1", NULL);
 
-  /* Set atmospheric grid... */
-  for (double t = t0; t <= t1; t += dt)
-    for (double z = z0; z <= z1; z += dz) {
-      atm.time[atm.np] = t;
-      atm.z[atm.np] = z;
-      if ((++atm.np) >= NP)
-	ERRMSG("Too many atmospheric grid points!");
-    }
+  /* Loop over time steps... */
+  for (double t = t0; t <= t1 + 0.5 * dt; t += dt) {
+
+    /* Add near surface layer... */
+    if (zsurf) {
+      atm.np = 6;
+      atm.z[0] = 0;
+      atm.z[1] = 0.01;
+      atm.z[2] = 0.02;
+      atm.z[3] = 0.05;
+      atm.z[4] = 0.1;
+      atm.z[5] = 0.2;
+    } else
+      atm.np = 0;
+
+    /* Add heights... */
+    for (double z = z0; z <= z1; z += dz)
+      if (atm.np == 0 || z > atm.z[atm.np - 1]) {
+	atm.z[atm.np] = z;
+	if ((++atm.np) >= NP)
+	  ERRMSG("Too many atmospheric grid points!");
+      }
+
+    /* Set time... */
+    for (int ip = 0; ip < atm.np; ip++)
+      atm.time[ip] = t;
+  }
 
   /* Interpolate climatological data... */
   climatology(&ctl, &atm);
