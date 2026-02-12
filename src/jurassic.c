@@ -4221,9 +4221,9 @@ void intpol_tbl_ega(
 		      tbl->t[id][ig][ipr + 1][it1 + 1], eps11, los->t[ip]);
 
 	  /* Interpolate with respect to pressure... */
-	  eps00 = LIN(tbl->p[id][ig][ipr], eps00,
-		      tbl->p[id][ig][ipr + 1], eps11, los->p[ip]);
-
+	  eps00 = LOGX(tbl->p[id][ig][ipr], eps00,
+		       tbl->p[id][ig][ipr + 1], eps11, los->p[ip]);
+	  
 	  /* Check emissivity range... */
 	  eps00 = MAX(MIN(eps00, 1), 0);
 
