@@ -57,21 +57,29 @@ int main(
   /* Loop over time steps... */
   for (double t = t0; t <= t1 + 0.5 * dt; t += dt) {
 
-    /* Add near surface layer... */
+    /* Init... */
+    atm.np = 0;
+
+    /* Refine near-surface layer... */
     if (zsurf) {
-      atm.np = 6;
-      atm.z[0] = 0;
-      atm.z[1] = 0.01;
-      atm.z[2] = 0.02;
-      atm.z[3] = 0.05;
-      atm.z[4] = 0.1;
-      atm.z[5] = 0.2;
-    } else
-      atm.np = 0;
+      atm.np = 4;
+      atm.z[0] = z0;
+      atm.z[1] = z0 + 0.01;
+      atm.z[2] = z0 + 0.02;
+      atm.z[3] = z0 + 0.05;
+      if (dz > 0.1)
+	for (double z = 0.1; z <= 1.0 + 1e-9; z += 0.1)
+	  atm.z[atm.np++] = z0 + z;
+      if (dz > 0.2)
+	for (double z = 1.2; z <= 2.0 + 1e-9; z += 0.2)
+	  atm.z[atm.np++] = z0 + z;
+      if (atm.np >= NP)
+	ERRMSG("Too many atmospheric grid points!");
+    }
 
     /* Add heights... */
     for (double z = z0; z <= z1; z += dz)
-      if (atm.np == 0 || z > atm.z[atm.np - 1]) {
+      if (atm.np == 0 || z > atm.z[atm.np - 1] + 1e-9) {
 	atm.z[atm.np] = z;
 	if ((++atm.np) >= NP)
 	  ERRMSG("Too many atmospheric grid points!");
