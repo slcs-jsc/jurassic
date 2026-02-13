@@ -409,6 +409,28 @@
   (C2 * (nu) / gsl_log1p(C1 * POW3(nu) / (rad)))
 
 /**
+ * @brief Clamp a value to a specified range.
+ *
+ * Ensures that @p v lies between @p lo and @p hi.
+ * If @p v < @p lo, returns @p lo.
+ * If @p v > @p hi, returns @p hi.
+ * Otherwise, returns @p v unchanged.
+ *
+ * This macro works with any numeric type (e.g., int, float, double).
+ * All arguments are evaluated exactly once — avoid passing expressions
+ * with side effects (e.g., ++ operators or function calls).
+ *
+ * @param v   Input value to clamp.
+ * @param lo  Lower bound.
+ * @param hi  Upper bound.
+ * @return The clamped value between @p lo and @p hi.
+ *
+ * @author Lars Hoffmann
+ */
+#define CLAMP(v, lo, hi)				\
+  (((v) < (lo)) ? (lo) : (((v) > (hi)) ? (hi) : (v)))
+
+/**
  * @brief Convert degrees to radians.
  *
  * Converts an angle measured in degrees to radians using:
@@ -543,29 +565,6 @@
  */
 #define LIN(x0, y0, x1, y1, x) \
   ((y0)+((y1)-(y0))/((x1)-(x0))*((x)-(x0)))
-
-/**
- * @brief Compute logarithmic interpolation in x.
- *
- * Performs interpolation assuming logarithmic variation in the x-axis.
- * If either x/x₀ or x₁/x₀ is nonpositive, reverts to linear interpolation.
- *
- * @param[in] x0 Lower x-value.
- * @param[in] y0 Function value at x₀.
- * @param[in] x1 Upper x-value.
- * @param[in] y1 Function value at x₁.
- * @param[in] x Interpolation point.
- *
- * @return Interpolated y-value at x.
- *
- * @see LIN, LOGY
- *
- * @author Lars Hoffmann
- */
-#define LOGX(x0, y0, x1, y1, x) \
-  (((x)/(x0)>0 && (x1)/(x0)>0) \
-   ? ((y0)+((y1)-(y0))*log((x)/(x0))/log((x1)/(x0))) \
-   : LIN(x0, y0, x1, y1, x))
 
 /**
  * @brief Compute logarithmic interpolation in y.
@@ -1667,6 +1666,9 @@ typedef struct {
 
   /*! Pressure [hPa]. */
   double p[ND][NG][TBLNP];
+
+  /*! Log-pressure [hPa]. */
+  double lnp[ND][NG][TBLNP];
 
   /*! Temperature [K]. */
   double t[ND][NG][TBLNP][TBLNT];

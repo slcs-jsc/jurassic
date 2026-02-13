@@ -4068,7 +4068,11 @@ void intpol_tbl_cga(
   double tau_path[ND][NG],
   double tau_seg[ND]) {
 
-  double eps;
+  double eps, lnp[NG];
+
+  /* Precompute log-pressure... */
+  for (int ig = 0; ig < ctl->ng; ig++)
+    lnp[ig] = log(los->cgp[ip][ig]);
 
   /* Loop over channels... */
   for (int id = 0; id < ctl->nd; id++) {
@@ -4123,12 +4127,12 @@ void intpol_tbl_cga(
 		      tbl->t[id][ig][ipr + 1][it1 + 1],
 		      eps11, los->cgt[ip][ig]);
 
-	  /* Interpolate with respect to pressure... */
-	  eps00 = LOGX(tbl->p[id][ig][ipr], eps00,
-		       tbl->p[id][ig][ipr + 1], eps11, los->cgp[ip][ig]);
+	  /* Interpolate with respect to log-pressure... */
+	  eps00 = LIN(tbl->lnp[id][ig][ipr], eps00,
+		      tbl->lnp[id][ig][ipr + 1], eps11, lnp[ig]);
 
 	  /* Check emissivity range... */
-	  eps00 = MAX(MIN(eps00, 1), 0);
+	  eps00 = CLAMP(eps00, 0, 1);
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
@@ -4153,6 +4157,8 @@ void intpol_tbl_ega(
   const int ip,
   double tau_path[ND][NG],
   double tau_seg[ND]) {
+
+  const double lnp = log(los->p[ip]);
 
   double eps, u;
 
@@ -4220,12 +4226,12 @@ void intpol_tbl_ega(
 	  eps11 = LIN(tbl->t[id][ig][ipr + 1][it1], eps10,
 		      tbl->t[id][ig][ipr + 1][it1 + 1], eps11, los->t[ip]);
 
-	  /* Interpolate with respect to pressure... */
-	  eps00 = LOGX(tbl->p[id][ig][ipr], eps00,
-		       tbl->p[id][ig][ipr + 1], eps11, los->p[ip]);
-	  
+	  /* Interpolate with respect to log-pressure... */
+	  eps00 = LIN(tbl->lnp[id][ig][ipr], eps00,
+		      tbl->lnp[id][ig][ipr + 1], eps11, lnp);
+
 	  /* Check emissivity range... */
-	  eps00 = MAX(MIN(eps00, 1), 0);
+	  eps00 = CLAMP(eps00, 0, 1);
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
@@ -4761,10 +4767,10 @@ void optimal_estimation(
 
       /* Check atmospheric state... */
       for (int ip = 0; ip < atm_i->np; ip++) {
-	atm_i->p[ip] = MIN(MAX(atm_i->p[ip], 5e-7), 5e4);
-	atm_i->t[ip] = MIN(MAX(atm_i->t[ip], 100), 400);
+	atm_i->p[ip] = CLAMP(atm_i->p[ip], 5e-7, 5e4);
+	atm_i->t[ip] = CLAMP(atm_i->t[ip], 100, 400);
 	for (int ig = 0; ig < ctl->ng; ig++)
-	  atm_i->q[ig][ip] = MIN(MAX(atm_i->q[ig][ip], 0), 1);
+	  atm_i->q[ig][ip] = CLAMP(atm_i->q[ig][ip], 0, 1);
 	for (int iw = 0; iw < ctl->nw; iw++)
 	  atm_i->k[iw][ip] = MAX(atm_i->k[iw][ip], 0);
       }
@@ -4772,9 +4778,9 @@ void optimal_estimation(
       atm_i->cldz = MAX(atm_i->cldz, 0.1);
       for (int icl = 0; icl < ctl->ncl; icl++)
 	atm_i->clk[icl] = MAX(atm_i->clk[icl], 0);
-      atm_i->sft = MIN(MAX(atm_i->sft, 100), 400);
+      atm_i->sft = CLAMP(atm_i->sft, 100, 400);
       for (int isf = 0; isf < ctl->nsf; isf++)
-	atm_i->sfeps[isf] = MIN(MAX(atm_i->sfeps[isf], 0), 1);
+	atm_i->sfeps[isf] = CLAMP(atm_i->sfeps[isf], 0, 1);
 
       /* Forward calculation... */
       formod(ctl, tbl, atm_i, obs_i);
@@ -6175,6 +6181,12 @@ tbl_t *read_tbl(
       NC(nc_close(ncid));
     }
   }
+
+  /* Calculate log-pressure... */
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ig = 0; ig < ctl->ng; ig++)
+      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+	tbl->lnp[id][ig][ip] = log(tbl->p[id][ig][ip]);
 
   /* Read filter functions... */
   if (ctl->tblfmt == 1)
