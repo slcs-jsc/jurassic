@@ -176,19 +176,26 @@ also to store other experiments:
 
     cd [jurassic_directory]/projects
 
-This shows how to run the example for the nadir sounder:
-
-    cd nadir ./run.sh
-
 This shows how to run the example for the limb sounder:
 
-    cd ../limb ./run.sh
+    cd [jurassic_directory]/projects/limb
+    ./run.sh
 
-In both examples, we generate an observation geometry file,
+This shows how to run the example for the nadir sounder:
+
+    cd [jurassic_directory]/projects/nadir
+    ./run.sh
+
+This shows how to run the example for the zenith sounder:
+
+    cd [jurassic_directory]/projects/zenith
+    ./run.sh
+
+In every examples, we generate an observation geometry file,
 
     cat obs.tab
 
-a standard atmosphere for mid-latitudes,
+a standard atmosphere for mid-latitude conditions,
 
     cat atm.tab
 
@@ -197,28 +204,29 @@ channels:
 
     cat rad.tab
 
+Kernel functions are calculated using a finite difference method:
+
+    cat kernel.tab
+
 The output of the simulation is verified by comparing it to reference
-data.  Additionally, gnuplot is used to create plots of the radiance
-data:
+data. Additionally, gnuplot is used to create plots of the radiance data:
 
 <p align="center">
   <img src="projects/limb/plot_rad.png" alt="limb radiance data" width="45%"/>
   &emsp;
-  <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="45%"/>
+  <img src="projects/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="45%"/>
 </p>
 
-Kernel functions are calculated using a finite difference method:
-
 <p align="center">
-  <img src="projects/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="45%"/>
+  <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="45%"/>
   &emsp;
   <img src="projects/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="45%"/>
 </p>
 
 <p align="center">
-  <img src="projects/limb/plot_kernel_H2O_792.png" alt="limb water vapor kernel function" width="45%"/>
+  <img src="projects/zenith/plot_rad.png" alt="limb radiance data" width="45%"/>
   &emsp;
-  <img src="projects/nadir/plot_kernel_CO2_668.5410.png" alt="nadir water vapor kernel function" width="45%"/>
+  <img src="projects/zenith/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="45%"/>
 </p>
 
 ## Further information
