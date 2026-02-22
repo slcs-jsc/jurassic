@@ -28,7 +28,7 @@ set size ratio 0.75
 set title "JURASSIC | Nadir test case"
 
 set out "plot_rad.png"
-set xla "Latitude [deg]"
+set xla "View point latitude [deg]"
 set yla "Brightness temperature [K]"
 set mxtics
 set mytics
@@ -104,19 +104,11 @@ set pal def
 
 set out "plot_kernel_pressure_${nu}.png"
 set xla "Kernel function (pressure at $nu cm^{-1}) [K / hPa]"
-plot "< awk -v nu=$nu 'NF==0 || (\$8==\"PRESSURE\" && \$2==nu)' kernel.tab" u (1.0*\$13):(\$10):(1.0*\$6) w l lc pal z t ""
+plot "< awk -v nu=$nu 'NF==0 || (\$8==\"PRESSURE\" && \$2==nu)' kernel.tab" u (1.0*\$6 >= 0 ? 1.0*\$13 : 1/0):(\$10):(1.0*\$6) w l lc pal z t ""
 
 set out "plot_kernel_temperature_${nu}.png"
 set xla "Kernel function (temperature at $nu cm^{-1}) [K / K]"
-plot "< awk -v nu=$nu 'NF==0 || (\$8==\"TEMPERATURE\" && \$2==nu)' kernel.tab" u (1.0*\$13):(\$10):(1.0*\$6) w l lc pal z t ""
-
-set out "plot_kernel_CO2_${nu}.png"
-set xla "Kernel function (CO_2 at $nu cm^{-1}) [K / ppmv]"
-plot "< awk -v nu=$nu 'NF==0 || (\$8==\"CO2\" && \$2==nu)' kernel.tab" u (1e-6*\$13):(\$10):(1.0*\$6) w l lc pal z t ""
-
-set out "plot_kernel_extinction_${nu}.png"
-set xla "Kernel function (extinction at $nu cm^{-1}) [K / km^{-1}]"
-plot "< awk -v nu=$nu 'NF==0 || (\$8==\"EXTINCT_WINDOW_0\" && \$2==nu)' kernel.tab" u (1.0*\$13):(\$10):(1.0*\$6) w l lc pal z t ""
+plot "< awk -v nu=$nu 'NF==0 || (\$8==\"TEMPERATURE\" && \$2==nu)' kernel.tab" u (1.0*\$6 >= 0 ? 1.0*\$13 : 1/0):(\$10):(1.0*\$6) w l lc pal z t ""
 EOF
 done
 
