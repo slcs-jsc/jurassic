@@ -5,6 +5,7 @@ libs/build/
 projects/*
 !projects/limb/
 !projects/nadir/
+!projects/zenith/
 src/*.o
 src/atmfmt
 src/brightness
