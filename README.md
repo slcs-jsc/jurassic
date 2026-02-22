@@ -212,21 +212,19 @@ The output of the simulation is verified by comparing it to reference
 data. Additionally, gnuplot is used to create plots of the radiance data:
 
 <p align="center">
-  <img src="projects/limb/plot_rad.png" alt="limb radiance data" width="45%"/>
+  <img src="projects/limb/plot_rad.png" alt="limb radiance data" width="30%"/>
   &emsp;
-  <img src="projects/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="45%"/>
+  <img src="projects/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="30%"/>
+  &emsp;
+  <img src="projects/zenith/plot_rad.png" alt="limb radiance data" width="30%"/>
 </p>
 
 <p align="center">
-  <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="45%"/>
+  <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="30%"/>
   &emsp;
-  <img src="projects/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="45%"/>
-</p>
-
-<p align="center">
-  <img src="projects/zenith/plot_rad.png" alt="limb radiance data" width="45%"/>
+  <img src="projects/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="30%"/>
   &emsp;
-  <img src="projects/zenith/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="45%"/>
+  <img src="projects/zenith/plot_kernel_temperature_792.0000.png" alt="limb temperature kernel function" width="30%"/>
 </p>
 
 ## Further information
