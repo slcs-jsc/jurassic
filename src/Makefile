@@ -52,7 +52,7 @@ UNIFIED ?= 0
 VERSION ?= $(shell git describe --abbrev=6 --dirty --always --tags)
 
 # CFLAGS...
-CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" $(OPT) -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
+CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
 
 # LDFLAGS...
 LDFLAGS += $(LIBDIR) -lgsl -lgslcblas -lnetcdf -lm
@@ -94,7 +94,7 @@ endif
 
 # Compile for profiling...
 ifeq ($(PROF),1)
-  CFLAGS += -pg
+  CFLAGS += -pg -fno-omit-frame-pointer
 endif
 
 # Compile for coverage...
