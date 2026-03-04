@@ -292,7 +292,7 @@ void call_formod(
     if (task[0] == 't' || task[0] == 'T') {
 
       /* Init... */
-      double t_min, t_max, t_mean = 0, t_sd = 0;
+      double t_min = 0, t_max = 0, t_mean = 0, t_sd = 0;
       int n = 0;
 
       /* Initialize random number generator... */

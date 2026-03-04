@@ -34,17 +34,19 @@ void analyze_avk(
   const int *ipa,
   const gsl_matrix *avk) {
 
-  static atm_t atm_cont, atm_res;
-
-  size_t i, n0[NQ], n1[NQ];
+  /* Allocate... */
+  atm_t *atm_cont, *atm_res;
+  ALLOC(atm_cont, atm_t, 1);
+  ALLOC(atm_res, atm_t, 1);
 
   /* Get sizes... */
   const size_t n = avk->size1;
 
   /* Find sub-matrices for different quantities... */
+  size_t n0[NQ], n1[NQ];
   for (int iq = 0; iq < NQ; iq++) {
     n0[iq] = N;
-    for (i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
       if (iqa[i] == iq && n0[iq] == N)
 	n0[iq] = i;
       if (iqa[i] == iq)
@@ -53,32 +55,38 @@ void analyze_avk(
   }
 
   /* Initialize... */
-  copy_atm(ctl, &atm_cont, atm, 1);
-  copy_atm(ctl, &atm_res, atm, 1);
+  copy_atm(ctl, atm_cont, atm, 1);
+  copy_atm(ctl, atm_res, atm, 1);
 
   /* Analyze quantities... */
-  analyze_avk_quantity(avk, IDXP, ipa, n0, n1, atm_cont.p, atm_res.p);
-  analyze_avk_quantity(avk, IDXT, ipa, n0, n1, atm_cont.t, atm_res.t);
+  analyze_avk_quantity(avk, IDXP, ipa, n0, n1, atm_cont->p, atm_res->p);
+  analyze_avk_quantity(avk, IDXT, ipa, n0, n1, atm_cont->t, atm_res->t);
   for (int ig = 0; ig < ctl->ng; ig++)
     analyze_avk_quantity(avk, IDXQ(ig), ipa, n0, n1,
-			 atm_cont.q[ig], atm_res.q[ig]);
+			 atm_cont->q[ig], atm_res->q[ig]);
   for (int iw = 0; iw < ctl->nw; iw++)
     analyze_avk_quantity(avk, IDXK(iw), ipa, n0, n1,
-			 atm_cont.k[iw], atm_res.k[iw]);
-  analyze_avk_quantity(avk, IDXCLZ, ipa, n0, n1, &atm_cont.clz, &atm_res.clz);
-  analyze_avk_quantity(avk, IDXCLDZ, ipa, n0, n1, &atm_cont.cldz,
-		       &atm_res.cldz);
+			 atm_cont->k[iw], atm_res->k[iw]);
+  analyze_avk_quantity(avk, IDXCLZ, ipa, n0, n1, &atm_cont->clz,
+		       &atm_res->clz);
+  analyze_avk_quantity(avk, IDXCLDZ, ipa, n0, n1, &atm_cont->cldz,
+		       &atm_res->cldz);
   for (int icl = 0; icl < ctl->ncl; icl++)
     analyze_avk_quantity(avk, IDXCLK(icl), ipa, n0, n1,
-			 &atm_cont.clk[icl], &atm_res.clk[icl]);
-  analyze_avk_quantity(avk, IDXSFT, ipa, n0, n1, &atm_cont.sft, &atm_res.sft);
+			 &atm_cont->clk[icl], &atm_res->clk[icl]);
+  analyze_avk_quantity(avk, IDXSFT, ipa, n0, n1, &atm_cont->sft,
+		       &atm_res->sft);
   for (int isf = 0; isf < ctl->nsf; isf++)
     analyze_avk_quantity(avk, IDXSFEPS(isf), ipa, n0, n1,
-			 &atm_cont.sfeps[isf], &atm_res.sfeps[isf]);
+			 &atm_cont->sfeps[isf], &atm_res->sfeps[isf]);
 
   /* Write results to disk... */
-  write_atm(ret->dir, "atm_cont.tab", ctl, &atm_cont);
-  write_atm(ret->dir, "atm_res.tab", ctl, &atm_res);
+  write_atm(ret->dir, "atm_cont.tab", ctl, atm_cont);
+  write_atm(ret->dir, "atm_res.tab", ctl, atm_res);
+
+  /* Free... */
+  free(atm_cont);
+  free(atm_res);
 }
 
 /*****************************************************************************/
@@ -3410,9 +3418,8 @@ void formod(
   atm_t *atm,
   obs_t *obs) {
 
-  int *mask;
-
   /* Allocate... */
+  int *mask;
   ALLOC(mask, int,
 	ND * NR);
 
@@ -3494,8 +3501,6 @@ void formod_fov(
   const ctl_t *ctl,
   obs_t *obs) {
 
-  obs_t *obs2;
-
   double rad[ND][NR], tau[ND][NR], z[NR];
 
   /* Do not take into account FOV... */
@@ -3503,6 +3508,7 @@ void formod_fov(
     return;
 
   /* Allocate... */
+  obs_t *obs2;
   ALLOC(obs2, obs_t, 1);
 
   /* Copy observation data... */
@@ -3562,12 +3568,10 @@ void formod_pencil(
   obs_t *obs,
   const int ir) {
 
-  los_t *los;
-
-  double beta_ctm[ND], rad[ND], tau[ND], tau_refl[ND],
-    tau_path[ND][NG], tau_gas[ND], x0[3], x1[3];
+  double rad[ND], tau[ND], tau_path[ND][NG];
 
   /* Allocate... */
+  los_t *los;
   ALLOC(los, los_t, 1);
 
   /* Initialize... */
@@ -3585,12 +3589,14 @@ void formod_pencil(
   for (int ip = 0; ip < los->np; ip++) {
 
     /* Get trace gas transmittance... */
+    double tau_gas[ND];
     if (ctl->formod == 0)
       intpol_tbl_cga(ctl, tbl, los, ip, tau_path, tau_gas);
     else
       intpol_tbl_ega(ctl, tbl, los, ip, tau_path, tau_gas);
 
     /* Get continuum absorption... */
+    double beta_ctm[ND];
     formod_continua(ctl, los, ip, beta_ctm);
 
     /* Compute Planck function... */
@@ -3633,6 +3639,7 @@ void formod_pencil(
     if (refl) {
 
       /* Initialize... */
+      double tau_refl[ND];
       for (int id = 0; id < ctl->nd; id++)
 	tau_refl[id] = 1;
 
@@ -3659,6 +3666,7 @@ void formod_pencil(
 	if (cos_sza_val > 1e-6) {
 
 	  /* Compute incidence direction cosine... */
+	  double x0[3], x1[3];
 	  geo2cart(los->z[los->np - 1], los->lon[los->np - 1],
 		   los->lat[los->np - 1], x0);
 	  geo2cart(los->z[0], los->lon[0], los->lat[0], x1);
@@ -3697,8 +3705,6 @@ void formod_rfm(
   obs_t *obs) {
 
   los_t *los;
-
-  FILE *out;
 
   char cmd[2 * LEN], rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
 
@@ -3803,6 +3809,7 @@ void formod_rfm(
     nu1 = nu[n - 1];
 
     /* Create RFM driver file... */
+    FILE *out;
     if (!(out = fopen("rfm.drv", "w")))
       ERRMSG("Cannot create file!");
     fprintf(out, "*HDR\nRFM call by JURASSIC.\n");
@@ -3876,10 +3883,8 @@ void geo2cart(
   double *x) {
 
   const double radius = z + RE;
-
   const double latrad = lat / 180. * M_PI;
   const double lonrad = lon / 180. * M_PI;
-
   const double coslat = cos(latrad);
 
   x[0] = radius * coslat * cos(lonrad);
@@ -4380,8 +4385,6 @@ void kernel(
   obs_t *obs,
   gsl_matrix *k) {
 
-  int *iqa;
-
   /* Get sizes... */
   const size_t m = k->size1;
   const size_t n = k->size2;
@@ -4389,6 +4392,7 @@ void kernel(
   /* Allocate... */
   gsl_vector *x0 = gsl_vector_alloc(n);
   gsl_vector *yy0 = gsl_vector_alloc(m);
+  int *iqa;
   ALLOC(iqa, int,
 	N);
 
@@ -4651,13 +4655,18 @@ void optimal_estimation(
   atm_t *atm_i,
   double *chisq) {
 
-  static int ipa[N], iqa[N];
-
   double disq = 0, lmpar = 0.001;
 
   /* ------------------------------------------------------------
      Initialize...
      ------------------------------------------------------------ */
+
+  /* Allocate... */
+  int *ipa, *iqa;
+  ALLOC(ipa, int,
+	N);
+  ALLOC(iqa, int,
+	N);
 
   /* Get sizes... */
   const size_t m = obs2y(ctl, obs_meas, NULL, NULL, NULL);
@@ -4909,6 +4918,9 @@ void optimal_estimation(
   gsl_vector_free(y_aux);
   gsl_vector_free(y_i);
   gsl_vector_free(y_m);
+
+  free(ipa);
+  free(iqa);
 }
 
 /*****************************************************************************/
@@ -5147,12 +5159,11 @@ void read_atm(
   const ctl_t *ctl,
   atm_t *atm) {
 
-  char file[LEN];
-
   /* Init... */
   atm->np = 0;
 
   /* Set filename... */
+  char file[LEN];
   if (dirname != NULL)
     sprintf(file, "%s/%s", dirname, filename);
   else
@@ -5220,8 +5231,6 @@ void read_atm_asc(
   const ctl_t *ctl,
   atm_t *atm) {
 
-  char line[LEN], *tok;
-
   /* Init... */
   atm->np = 0;
 
@@ -5231,6 +5240,7 @@ void read_atm_asc(
     ERRMSG("Cannot open file!");
 
   /* Read line... */
+  char line[LEN], *tok;
   while (fgets(line, LEN, in)) {
 
     /* Read data... */
@@ -5594,8 +5604,6 @@ void read_matrix(
   const char *filename,
   gsl_matrix *matrix) {
 
-  FILE *in;
-
   char dum[LEN], file[LEN], line[LEN];
 
   double value;
@@ -5612,6 +5620,7 @@ void read_matrix(
   LOG(1, "Read matrix: %s", file);
 
   /* Open file... */
+  FILE *in;
   if (!(in = fopen(file, "r")))
     ERRMSG("Cannot open file!");
 
@@ -5635,9 +5644,8 @@ void read_obs(
   const ctl_t *ctl,
   obs_t *obs) {
 
-  char file[LEN];
-
   /* Set filename... */
+  char file[LEN];
   if (dirname != NULL)
     sprintf(file, "%s/%s", dirname, filename);
   else
@@ -5711,8 +5719,6 @@ void read_obs_asc(
   const ctl_t *ctl,
   obs_t *obs) {
 
-  char line[LEN], *tok;
-
   /* Init... */
   obs->nr = 0;
 
@@ -5722,6 +5728,7 @@ void read_obs_asc(
     ERRMSG("Cannot open file!");
 
   /* Read line... */
+  char line[LEN], *tok;
   while (fgets(line, LEN, in)) {
 
     /* Read data... */
@@ -5840,8 +5847,6 @@ void read_obs_nc(
     -1, var_tpz = -1, var_tplon = -1, var_tplat =
     -1, var_rad[ND], var_tau[ND];
 
-  char varname[LEN];
-
   /* Open file... */
   NC(nc_open(filename, NC_NOWRITE, &ncid));
 
@@ -5874,6 +5879,8 @@ void read_obs_nc(
 
   /* Inquire spectral variables per channel... */
   for (int id = 0; id < ctl->nd; id++) {
+    char varname[LEN];
+
     sprintf(varname, "rad_%.4f", ctl->nu[id]);
     NC(nc_inq_varid(ncid, varname, &var_rad[id]));
 
@@ -5914,11 +5921,7 @@ double read_obs_rfm(
   const double *f,
   const int n) {
 
-  FILE *in;
-
-  char filename[LEN];
-
-  double filt, fsum = 0, nu2[NSHAPE], *nurfm, *rad, radsum = 0;
+  double fsum = 0, nu2[NSHAPE], *nurfm, *rad, radsum = 0;
 
   int npts;
 
@@ -5929,6 +5932,8 @@ double read_obs_rfm(
 	RFMNPTS);
 
   /* Search RFM spectrum... */
+  FILE *in;
+  char filename[LEN];
   sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000));
   if (!(in = fopen(filename, "r"))) {
     sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000) + 1);
@@ -5950,7 +5955,8 @@ double read_obs_rfm(
   for (int ipts = 0; ipts < npts; ipts++)
     if (nurfm[ipts] >= nu2[0] && nurfm[ipts] <= nu2[n - 1]) {
       const int idx = locate_irr(nu2, n, nurfm[ipts]);
-      filt = LIN(nu2[idx], f[idx], nu2[idx + 1], f[idx + 1], nurfm[ipts]);
+      const double filt =
+	LIN(nu2[idx], f[idx], nu2[idx + 1], f[idx + 1], nurfm[ipts]);
       fsum += filt;
       radsum += filt * rad[ipts];
     }
@@ -6024,8 +6030,6 @@ void read_rfm_spec(
   double *rad,
   int *npts) {
 
-  FILE *in;
-
   char *line = NULL, *tok;
 
   size_t line_buf_size = 0;
@@ -6038,6 +6042,7 @@ void read_rfm_spec(
   LOG(1, "Read RFM data: %s", filename);
 
   /* Open file... */
+  FILE *in;
   if (!(in = fopen(filename, "r")))
     ERRMSG("Cannot open file!");
 
@@ -6085,14 +6090,13 @@ void read_shape(
   double *y,
   int *n) {
 
-  FILE *in;
-
   char line[LEN];
 
   /* Write info... */
   LOG(1, "Read shape function: %s", filename);
 
   /* Open file... */
+  FILE *in;
   if (!(in = fopen(filename, "r")))
     ERRMSG("Cannot open file!");
 
@@ -6409,18 +6413,17 @@ double scan_ctl(
   const char *defvalue,
   char *value) {
 
-  FILE *in = NULL;
-
   char dummy[LEN], fullname1[LEN], fullname2[LEN], line[LEN],
     rvarname[LEN], rval[LEN];
 
   int contain = 0;
 
   /* Open file... */
+  FILE *in = NULL;
   if (argv[1][0] != '-')
     if (!(in = fopen(argv[1], "r")))
       ERRMSG("Cannot open file!");
-
+  
   /* Set full variable name... */
   if (arridx >= 0) {
     sprintf(fullname1, "%s[%d]", varname, arridx);
@@ -6589,26 +6592,28 @@ void set_cov_meas(
   gsl_vector *sig_formod,
   gsl_vector *sig_eps_inv) {
 
-  static obs_t obs_err;
+  /* Allocate... */
+  obs_t *obs_err;
+  ALLOC(obs_err, obs_t, 1);
 
   /* Get size... */
   const size_t m = sig_eps_inv->size;
 
   /* Noise error (always considered in retrieval fit)... */
-  copy_obs(ctl, &obs_err, obs, 1);
-  for (int ir = 0; ir < obs_err.nr; ir++)
+  copy_obs(ctl, obs_err, obs, 1);
+  for (int ir = 0; ir < obs_err->nr; ir++)
     for (int id = 0; id < ctl->nd; id++)
-      obs_err.rad[id][ir]
+      obs_err->rad[id][ir]
 	= (isfinite(obs->rad[id][ir]) ? ret->err_noise[id] : NAN);
-  obs2y(ctl, &obs_err, sig_noise, NULL, NULL);
+  obs2y(ctl, obs_err, sig_noise, NULL, NULL);
 
   /* Forward model error (always considered in retrieval fit)... */
-  copy_obs(ctl, &obs_err, obs, 1);
-  for (int ir = 0; ir < obs_err.nr; ir++)
+  copy_obs(ctl, obs_err, obs, 1);
+  for (int ir = 0; ir < obs_err->nr; ir++)
     for (int id = 0; id < ctl->nd; id++)
-      obs_err.rad[id][ir]
+      obs_err->rad[id][ir]
 	= fabs(ret->err_formod[id] / 100 * obs->rad[id][ir]);
-  obs2y(ctl, &obs_err, sig_formod, NULL, NULL);
+  obs2y(ctl, obs_err, sig_formod, NULL, NULL);
 
   /* Total error... */
   for (size_t i = 0; i < m; i++)
@@ -6621,6 +6626,9 @@ void set_cov_meas(
   for (size_t i = 0; i < m; i++)
     if (gsl_vector_get(sig_eps_inv, i) <= 0)
       ERRMSG("Check measurement errors (zero standard deviation)!");
+
+  /* Free... */
+  free(obs_err);
 }
 
 /*****************************************************************************/
@@ -6630,8 +6638,6 @@ void tangent_point(
   double *tpz,
   double *tplon,
   double *tplat) {
-
-  double dummy, v[3], v0[3], v2[3];
 
   /* Find minimum altitude... */
   const size_t ip = gsl_stats_min_index(los->z, 1, (size_t) los->np);
@@ -6657,6 +6663,7 @@ void tangent_point(
     const double c = yy0;
 
     /* Get tangent point location... */
+    double dummy, v[3], v0[3], v2[3];
     const double x = -b / (2 * a);
     *tpz = a * x * x + b * x + c;
     geo2cart(los->z[ip - 1], los->lon[ip - 1], los->lat[ip - 1], v0);
@@ -6947,9 +6954,8 @@ void write_atm(
   const ctl_t *ctl,
   const atm_t *atm) {
 
-  char file[LEN];
-
   /* Set filename... */
+  char file[LEN];
   if (dirname != NULL)
     sprintf(file, "%s/%s", dirname, filename);
   else
@@ -7351,12 +7357,11 @@ void write_atm_rfm(
   const ctl_t *ctl,
   const atm_t *atm) {
 
-  FILE *out;
-
   /* Write info... */
   LOG(1, "Write RFM data: %s", filename);
 
   /* Create file... */
+  FILE *out;
   if (!(out = fopen(filename, "w")))
     ERRMSG("Cannot create file!");
 
@@ -7394,8 +7399,6 @@ void write_matrix(
   const char *rowspace,
   const char *colspace,
   const char *sort) {
-
-  FILE *out;
 
   char file[LEN], quantity[LEN];
 
@@ -7435,6 +7438,7 @@ void write_matrix(
   LOG(1, "Write matrix: %s", file);
 
   /* Create file... */
+  FILE *out;
   if (!(out = fopen(file, "w")))
     ERRMSG("Cannot create file!");
 
@@ -7568,9 +7572,8 @@ void write_obs(
   const ctl_t *ctl,
   const obs_t *obs) {
 
-  char file[LEN];
-
   /* Set filename... */
+  char file[LEN];
   if (dirname != NULL)
     sprintf(file, "%s/%s", dirname, filename);
   else
@@ -7940,12 +7943,11 @@ void write_shape(
   const double *y,
   const int n) {
 
-  FILE *out;
-
   /* Write info... */
   LOG(1, "Write shape function: %s", filename);
 
   /* Create file... */
+  FILE *out;
   if (!(out = fopen(filename, "w")))
     ERRMSG("Cannot create file!");
 
@@ -7971,14 +7973,12 @@ void write_stddev(
   const atm_t *atm,
   const gsl_matrix *s) {
 
-  static atm_t atm_aux;
-
-  char filename[LEN];
-
   /* Get sizes... */
   const size_t n = s->size1;
 
   /* Allocate... */
+  atm_t *atm_aux;
+  ALLOC(atm_aux, atm_t, 1);
   gsl_vector *x_aux = gsl_vector_alloc(n);
 
   /* Compute standard deviation... */
@@ -7986,10 +7986,11 @@ void write_stddev(
     gsl_vector_set(x_aux, i, sqrt(gsl_matrix_get(s, i, i)));
 
   /* Write to disk... */
-  copy_atm(ctl, &atm_aux, atm, 1);
-  x2atm(ctl, x_aux, &atm_aux);
+  char filename[LEN];
+  copy_atm(ctl, atm_aux, atm, 1);
+  x2atm(ctl, x_aux, atm_aux);
   sprintf(filename, "atm_err_%s.tab", quantity);
-  write_atm(ret->dir, filename, ctl, &atm_aux);
+  write_atm(ret->dir, filename, ctl, atm_aux);
 
   /* Free... */
   gsl_vector_free(x_aux);
