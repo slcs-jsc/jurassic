@@ -167,22 +167,6 @@ To verify the installation, run the test suite:
 This will execute a series of tests sequentially. If any test fails,
 check the log messages for further details.
 
-### Lookup tables
-
-JURASSIC relies on precomputed spectroscopic lookup tables derived from
-high-resolution line-by-line calculations. These tables provide band
-transmittances used by the radiative transfer approximations implemented
-in the model.
-
-Precomputed lookup tables for common configurations are available from
-the [JURASSIC data repository](https://datapub.fz-juelich.de/slcs/jurassic/).
-
-Users may either download these datasets or generate custom lookup
-tables tailored to specific spectral bands or instrument configurations.
-Creating custom lookup tables requires access to a line-by-line
-radiative transfer model capable of calculating high-resolution
-absorption spectra of a homogeneous gas cell.
-
 ### Run the examples
 
 JURASSIC includes a `projects` directory containing example setups
@@ -244,6 +228,22 @@ to generate plots of the simulated radiances and kernel functions.
   &emsp;
   <img src="projects/zenith/plot_kernel_temperature_792.0000.png" alt="zenith temperature kernel function" width="30%"/>
 </p>
+
+### Lookup tables
+
+JURASSIC relies on precomputed spectroscopic lookup tables derived from
+high-resolution line-by-line calculations. These tables provide band
+transmittances used by the radiative transfer approximations implemented
+in the model.
+
+Precomputed lookup tables for common configurations are available from
+the [JURASSIC data repository](https://datapub.fz-juelich.de/slcs/jurassic/).
+
+Users may either download these datasets or generate custom lookup
+tables tailored to specific spectral bands or instrument configurations.
+Creating custom lookup tables requires access to a line-by-line
+radiative transfer model capable of calculating high-resolution
+absorption spectra of a homogeneous gas cell.
 
 ## Further information
 
