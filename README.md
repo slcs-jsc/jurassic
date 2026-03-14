@@ -16,8 +16,6 @@ remote sensing measurements.
 [![codecov](https://codecov.io/gh/slcs-jsc/jurassic/branch/master/graph/badge.svg?token=TYGWEJMOLI)](https://codecov.io/gh/slcs-jsc/jurassic)
 [![tests](https://img.shields.io/github/actions/workflow/status/slcs-jsc/jurassic/tests.yml?branch=master&label=tests)](https://github.com/slcs-jsc/jurassic/actions)
 [![docs](https://img.shields.io/github/actions/workflow/status/slcs-jsc/jurassic/docs.yml?branch=master&label=docs)](https://slcs-jsc.github.io/jurassic)
-[![HiRSE Code Promo Badge](https://img.shields.io/badge/Promo-8db427?label=HiRSE&labelColor=005aa0&link=https%3A%2F%2Fgo.fzj.de%2FCodePromo)](https://go.fzj.de/CodePromo)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/slcs-jsc/jurassic)
 [![license](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/blob/master/COPYING)
 [![doi](https://zenodo.org/badge/DOI/10.5281/zenodo.4572889.svg)](https://doi.org/10.5281/zenodo.4572889)
 [![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/slcs-jsc/jurassic/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/slcs-jsc/jurassic)
@@ -27,8 +25,8 @@ remote sensing measurements.
 The Jülich Rapid Spectral Simulation Code (JURASSIC) is a radiative
 transfer model for simulating infrared radiation in the Earth's
 atmosphere. It is designed to provide a balance between computational
-efficiency and physical accuracy, making it suitable for a range of
-applications in atmospheric and remote sensing research.
+efficiency and physical accuracy, making it suitable for a wide range
+of applications in atmospheric and remote sensing research.
 
 JURASSIC applies established spectral approximations together with
 precomputed lookup tables derived from detailed line-by-line
@@ -88,7 +86,7 @@ research, operational, and development workflows:
     large datasets, global simulations, or long time series with
     excellent scalability.
 
-- **Open source and community oriented**: JURASSIC is distributed
+- **Open source and community-oriented**: JURASSIC is distributed
     under the GNU General Public License (GPL), fostering
     transparency, collaboration, and community-driven development
     within the atmospheric and remote sensing research community.
@@ -169,54 +167,74 @@ To verify the installation, run the test suite:
 This will execute a series of tests sequentially. If any test fails,
 check the log messages for further details.
 
+### Lookup tables
+
+JURASSIC relies on precomputed spectroscopic lookup tables derived from
+high-resolution line-by-line calculations. These tables provide band
+transmittances used by the radiative transfer approximations implemented
+in the model.
+
+Precomputed lookup tables for common configurations are available from
+the [JURASSIC data repository](https://datapub.fz-juelich.de/slcs/jurassic/).
+
+Users may either download these datasets or generate custom lookup
+tables tailored to specific spectral bands or instrument configurations.
+Creating custom lookup tables requires access to a line-by-line
+radiative transfer model capable of calculating high-resolution
+absorption spectra of a homogeneous gas cell.
+
 ### Run the examples
 
-JURASSIC provides a project directory for testing the examples and
-also to store other experiments:
+JURASSIC includes a `projects` directory containing example setups
+that demonstrate different observation geometries and typical model
+workflows. This directory can also be used to store your own
+experiments.
+
+Navigate to the projects directory:
 
     cd [jurassic_directory]/projects
 
-This shows how to run the example for the limb sounder:
+Running the examples provided in the `projects` directory is a convenient
+way to verify that the installation was successful. Example simulations
+are provided for three observation geometries:
 
-    cd [jurassic_directory]/projects/limb
-    ./run.sh
+    # Limb
+    cd limb && ./run.sh
+    
+    # Nadir
+    cd ../nadir && ./run.sh
 
-This shows how to run the example for the nadir sounder:
+    # Zenith
+    cd ../zenith && ./run.sh
 
-    cd [jurassic_directory]/projects/nadir
-    ./run.sh
-
-This shows how to run the example for the zenith sounder:
-
-    cd [jurassic_directory]/projects/zenith
-    ./run.sh
-
-In every examples, we generate an observation geometry file,
+Each example performs a complete radiative transfer simulation. The
+scripts generate an observation geometry file,
 
     cat obs.tab
 
-a standard atmosphere for mid-latitude conditions,
+a standard mid-latitude atmospheric profile,
 
     cat atm.tab
 
-and conduct radiative transfer calculations for two or three detector
-channels:
+and simulated radiances for two or three detector channels:
 
     cat rad.tab
 
-Kernel functions are calculated using a finite difference method:
+Kernel functions (Jacobians) are calculated using a finite-difference
+method:
 
     cat kernel.tab
 
-The output of the simulation is verified by comparing it to reference
-data. Additionally, gnuplot is used to create plots of the radiance data:
+The simulation output is automatically compared with reference data to
+verify the correctness of the results. Additionally, `gnuplot` is used
+to generate plots of the simulated radiances and kernel functions.
 
 <p align="center">
   <img src="projects/limb/plot_rad.png" alt="limb radiance data" width="30%"/>
   &emsp;
   <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="30%"/>
   &emsp;
-  <img src="projects/zenith/plot_rad.png" alt="limb radiance data" width="30%"/>
+  <img src="projects/zenith/plot_rad.png" alt="zenith radiance data" width="30%"/>
 </p>
 
 <p align="center">
@@ -224,7 +242,7 @@ data. Additionally, gnuplot is used to create plots of the radiance data:
   &emsp;
   <img src="projects/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="30%"/>
   &emsp;
-  <img src="projects/zenith/plot_kernel_temperature_792.0000.png" alt="limb temperature kernel function" width="30%"/>
+  <img src="projects/zenith/plot_kernel_temperature_792.0000.png" alt="zenith temperature kernel function" width="30%"/>
 </p>
 
 ## Further information
@@ -254,7 +272,7 @@ scientific publications:
 * You can cite the source code of JURASSIC by using the DOI
   <https://doi.org/10.5281/zenodo.4572889>. This DOI represents all
   versions, and will always resolve to the latest one. Specific DOIs
-  for each release of JURASSIC can be found on the zenodo web site.
+  for each release of JURASSIC can be found on the Zenodo website.
 
 Please see the [citation file](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff)
 for further information.
@@ -262,7 +280,7 @@ for further information.
 ## Contributing
 
 We are interested in sharing JURASSIC for operational or research
-applications. Please do not hesitate to contact us, if you have any
+applications. Please do not hesitate to contact us if you have any
 further questions or need support.
 
 ## License
