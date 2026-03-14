@@ -22,6 +22,11 @@ which is the reference platform used for development and testing.
 | zlib | 1.3.1 | Required for netCDF-4 compression |
 | Zstandard (zstd) | 1.5.5 | Optional netCDF/HDF5 filter-based compression |
 | gnuplot | 6.0 | Used by example scripts |
+| Cppcheck | 2.13 | Static code analysis  |
+| gprofng | 2.42 | Performance profiling tool |
+| gcov | 13.2.0 | Coverage testing tool |
+| lcov | 2.0 | Code coverage visualization tool |
+| Doxygen | 1.9.8 | Automatic source code documentation |
 | MkDocs | 1.5.3 | Build documentation locally |
 
 ## Notes
@@ -42,11 +47,20 @@ sudo apt install \
   git make gcc \
   libgsl-dev \
   libnetcdf-dev
+```
 
-# Optional netCDF-4 and compression support
+Optional netCDF-4 and compression support:
+
+```bash
 sudo apt install \
-  libhdf5-dev zlib1g-dev libzstd-dev libhdf5-plugin-dev
+  libhdf5-dev zlib1g-dev libzstd-dev
+```
 
-# Optional tools
-sudo apt install gnuplot python3-mkdocs
+Optional tools:
+
+```bash
+sudo apt install \
+  binutils cppcheck lcov \
+  doxygen mkdocs \
+  gnuplot
 ```
