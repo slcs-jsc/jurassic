@@ -101,8 +101,9 @@ libraries are needed to install JURASSIC.
 
 Mandatory build and runtime dependencies include:
 - GNU Scientific Library (GSL) for numerical calculations
-- netCDF-C library for file input/output
+- netCDF-C library (version **4.9.1 or later**) for file input/output
 - GNU C compiler with OpenMP support
+- GNU C++ compiler (`g++` / `gcc-c++`), required to build the bundled HDF5 library
 
 A complete list of mandatory and optional dependencies is provided in the
 [dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
@@ -129,10 +130,22 @@ The JURASSIC git repository includes a copy of the GNU GSL library
 that can be compiled and installed using a build script:
 
     cd [jurassic_directory]/libs
-    ./build.sh -a
+    bash build.sh
+
+This builds GSL, zlib, szip, HDF5, and netCDF-C 4.9.2 into `libs/build/`.
+Before running the script, ensure that a C++ compiler is installed, as it
+is required to build HDF5:
+
+    # Debian/Ubuntu
+    sudo apt install g++
+
+    # Fedora/RHEL
+    sudo dnf install gcc-c++
 
 Alternatively, if you prefer to use existing system libraries, install
-the dependencies manually.
+the dependencies manually. Note that netCDF-C **4.9.1 or later** is
+required. Many Linux distributions (e.g. Fedora 36, Ubuntu 22.04) ship
+older versions, in which case the bundled build path above is recommended.
 
 **3. Configure the Makefile**
 
@@ -146,13 +159,17 @@ Pay special attention to the following settings:
 * Edit the `LIBDIR` and `INCDIR` paths to point to the directories
   where the necessary libraries are located on your system.
 
-* By default, the JURASSIC binaries are linked dynamically. Ensure
-  that the `LD_LIBRARY_PATH` is properly configured to include the
-  paths to the shared libraries. If you prefer static linking, you can
-  enable it by setting the `STATIC` flag, which allows you to copy and
-  use the binaries on other machines. However, in some cases, either
-  static or dynamic linking may not be feasible or could cause
-  specific issues.
+* By default, the JURASSIC binaries are linked dynamically. If you
+  used the bundled libs, set `LD_LIBRARY_PATH` before running any
+  JURASSIC binary:
+
+      export LD_LIBRARY_PATH=[jurassic_directory]/libs/build/lib:$LD_LIBRARY_PATH
+
+  If you installed system libraries in standard paths, this step is
+  not needed. If you prefer static linking, you can enable it by
+  setting the `STATIC` flag, which allows you to copy and use the
+  binaries on other machines. However, in some cases, either static
+  or dynamic linking may not be feasible or could cause specific issues.
 
 **4. Compile and test the installation**
 
