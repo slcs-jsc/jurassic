@@ -34,13 +34,13 @@ cd $target/src/$dir \
 # HDF5...
 dir=hdf5-1.14.4-3
 cd $target/src/$dir \
-    && ./configure --prefix=$target --with-zlib=$target --with-szlib=$target --enable-hl --disable-fortran \
+    && ./configure --prefix=$target --with-zlib=$target --with-szlib=$target --enable-hl --disable-fortran --disable-cxx --enable-shared --enable-static \
     && make -j && make check && make install && make clean \
 	|| exit
 
 # netCDF...
 dir=netcdf-c-4.9.2
 cd $target/src/$dir \
-    && CPPFLAGS=-I$target/include LDFLAGS=-L$target/lib ./configure --prefix=$target --disable-dap --disable-byterange --disable-nczarr --disable-libxml2 \
+    && CPPFLAGS=-I$target/include LDFLAGS=-L$target/lib ./configure --prefix=$target --with-plugin-dir=$target/share/netcdf-plugins --disable-dap --disable-byterange --disable-nczarr --disable-libxml2 \
     && make -j && make install && make clean \
 	|| exit
