@@ -5544,6 +5544,9 @@ void read_ctl(
   ctl->obsfmt = (int) scan_ctl(argc, argv, "OBSFMT", -1, "1", NULL);
   if (ctl->obsfmt < 1 || ctl->obsfmt > 3)
     ERRMSG("Unknown observation file format, set OBSFMT to 1, 2, or 3!");
+  ctl->matrixfmt = (int) scan_ctl(argc, argv, "MATRIXFMT", -1, "1", NULL);
+  if (ctl->matrixfmt < 1 || ctl->matrixfmt > 3)
+    ERRMSG("Unknown matrix file format, set MATRIXFMT to 1, 2, or 3!");
 
   /* Hydrostatic equilibrium... */
   ctl->hydz = scan_ctl(argc, argv, "HYDZ", -1, "-999", NULL);
@@ -5601,6 +5604,31 @@ void read_ctl(
 void read_matrix(
   const char *dirname,
   const char *filename,
+  const ctl_t *ctl,
+  gsl_matrix *matrix) {
+
+  /* Read ASCII data... */
+  if (ctl->matrixfmt == 1)
+    read_matrix_asc(dirname, filename, matrix);
+
+  /* Read binary data... */
+  else if (ctl->matrixfmt == 2)
+    read_matrix_bin(dirname, filename, matrix);
+
+  /* Read netCDF data... */
+  else if (ctl->matrixfmt == 3)
+    read_matrix_nc(dirname, filename, matrix, 0);
+
+  /* Error... */
+  else
+    ERRMSG("Unknown matrix file format, check MATRIXFMT!");
+}
+
+/*****************************************************************************/
+
+void read_matrix_asc(
+  const char *dirname,
+  const char *filename,
   gsl_matrix *matrix) {
 
   char dum[LEN], file[LEN], line[LEN];
@@ -5633,6 +5661,108 @@ void read_matrix(
 
   /* Close file... */
   fclose(in);
+}
+
+/*****************************************************************************/
+
+void read_matrix_bin(
+  const char *dirname,
+  const char *filename,
+  gsl_matrix *matrix) {
+
+  char file[LEN], magic[4];
+  size_t nr, nc;
+
+  /* Set filename... */
+  if (dirname != NULL)
+    sprintf(file, "%s/%s", dirname, filename);
+  else
+    sprintf(file, "%s", filename);
+
+  /* Write info... */
+  LOG(1, "Read matrix: %s", file);
+
+  /* Open file... */
+  FILE *in;
+  if (!(in = fopen(file, "r")))
+    ERRMSG("Cannot open file!");
+
+  /* Read header... */
+  FREAD(magic, char,
+	4,
+	in);
+  if (memcmp(magic, "MAT1", 4) != 0)
+    ERRMSG("Invalid magic string!");
+  FREAD(&nr, size_t,
+	1,
+	in);
+  FREAD(&nc, size_t,
+	1,
+	in);
+  if (nr != matrix->size1 || nc != matrix->size2)
+    ERRMSG("Error reading file header!");
+
+  /* Read data... */
+  for (size_t i = 0; i < nr; i++)
+    for (size_t j = 0; j < nc; j++) {
+      double value;
+      FREAD(&value, double,
+	    1,
+	    in);
+      gsl_matrix_set(matrix, i, j, value);
+    }
+
+  /* Close file... */
+  fclose(in);
+}
+
+/*****************************************************************************/
+
+void read_matrix_nc(
+  const char *dirname,
+  const char *filename,
+  gsl_matrix *matrix,
+  int dataset) {
+
+  char file[LEN];
+
+  int ncid, dimid_row, dimid_col, varid;
+
+  size_t nr, nc;
+
+  /* Set filename... */
+  if (dirname != NULL)
+    sprintf(file, "%s/%s", dirname, filename);
+  else
+    sprintf(file, "%s", filename);
+
+  /* Write info... */
+  LOG(1, "Read matrix: %s", file);
+
+  /* Open file... */
+  NC(nc_open(file, NC_NOWRITE, &ncid));
+
+  /* Read dimensions... */
+  NC(nc_inq_dimid(ncid, "row", &dimid_row));
+  NC(nc_inq_dimid(ncid, "col", &dimid_col));
+  NC(nc_inq_dimlen(ncid, dimid_row, &nr));
+  NC(nc_inq_dimlen(ncid, dimid_col, &nc));
+  if (nr != matrix->size1 || nc != matrix->size2)
+    ERRMSG("Error reading file header!");
+
+  /* Read data... */
+  NC(nc_inq_varid(ncid, "matrix", &varid));
+  for (size_t i = 0; i < nr; i++)
+    for (size_t j = 0; j < nc; j++) {
+      double value;
+      size_t start[3] = { (size_t) dataset, i, j };
+      size_t count[3] = { 1, 1, 1 };
+      NC(nc_get_vara_double(ncid, varid, start, count, &value));
+      gsl_matrix_set(matrix, i, j, value);
+    }
+
+  /* Close file... */
+  NC(nc_close(ncid));
 }
 
 /*****************************************************************************/
@@ -7398,15 +7528,47 @@ void write_matrix(
   const char *colspace,
   const char *sort) {
 
+  /* Check output flag... */
+  if (!ctl->write_matrix)
+    return;
+
+  /* Write ASCII data... */
+  if (ctl->matrixfmt == 1)
+    write_matrix_asc(dirname, filename, ctl, matrix, atm, obs,
+		     rowspace, colspace, sort);
+
+  /* Write binary data... */
+  else if (ctl->matrixfmt == 2)
+    write_matrix_bin(dirname, filename, matrix);
+
+  /* Write netCDF data... */
+  else if (ctl->matrixfmt == 3)
+    write_matrix_nc(dirname, filename, ctl, matrix, atm, obs,
+		    rowspace, colspace, sort, 0);
+
+  /* Error... */
+  else
+    ERRMSG("Unknown matrix file format, check MATRIXFMT!");
+}
+
+/*****************************************************************************/
+
+void write_matrix_asc(
+  const char *dirname,
+  const char *filename,
+  const ctl_t *ctl,
+  const gsl_matrix *matrix,
+  const atm_t *atm,
+  const obs_t *obs,
+  const char *rowspace,
+  const char *colspace,
+  const char *sort) {
+
   char file[LEN], quantity[LEN];
 
   int *cida, *ciqa, *cipa, *cira, *rida, *riqa, *ripa, *rira;
 
   size_t i, j, nc, nr;
-
-  /* Check output flag... */
-  if (!ctl->write_matrix)
-    return;
 
   /* Allocate... */
   ALLOC(cida, int,
@@ -7550,6 +7712,312 @@ void write_matrix(
 
   /* Close file... */
   fclose(out);
+
+  /* Free... */
+  free(cida);
+  free(ciqa);
+  free(cipa);
+  free(cira);
+  free(rida);
+  free(riqa);
+  free(ripa);
+  free(rira);
+}
+
+/*****************************************************************************/
+
+void write_matrix_bin(
+  const char *dirname,
+  const char *filename,
+  const gsl_matrix *matrix) {
+
+  char file[LEN];
+  const size_t nr = matrix->size1;
+  const size_t nc = matrix->size2;
+
+  /* Set filename... */
+  if (dirname != NULL)
+    sprintf(file, "%s/%s", dirname, filename);
+  else
+    sprintf(file, "%s", filename);
+
+  /* Write info... */
+  LOG(1, "Write matrix: %s", file);
+
+  /* Create file... */
+  FILE *out;
+  if (!(out = fopen(file, "w")))
+    ERRMSG("Cannot create file!");
+
+  /* Write header... */
+  FWRITE("MAT1", char,
+	 4,
+	 out);
+  FWRITE(&nr, size_t,
+	 1,
+	 out);
+  FWRITE(&nc, size_t,
+	 1,
+	 out);
+
+  /* Write data... */
+  for (size_t i = 0; i < nr; i++)
+    for (size_t j = 0; j < nc; j++) {
+      double value = gsl_matrix_get(matrix, i, j);
+      FWRITE(&value, double,
+	     1,
+	     out);
+    }
+
+  /* Close file... */
+  fclose(out);
+}
+
+/*****************************************************************************/
+
+void write_matrix_nc(
+  const char *dirname,
+  const char *filename,
+  const ctl_t *ctl,
+  const gsl_matrix *matrix,
+  const atm_t *atm,
+  const obs_t *obs,
+  const char *rowspace,
+  const char *colspace,
+  const char *sort,
+  int dataset) {
+
+  char file[LEN];
+  char quantity[LEN];
+  const size_t name_strlen = 100;
+
+  int ncid, dimid_dataset, dimid_row, dimid_col, dimid_name, varid;
+  int *cida, *ciqa, *cipa, *cira, *rida, *riqa, *ripa, *rira;
+
+  size_t nr = matrix->size1, nc = matrix->size2, naux;
+
+  /* Allocate metadata index arrays... */
+  ALLOC(cida, int,
+	M);
+  ALLOC(ciqa, int,
+	N);
+  ALLOC(cipa, int,
+	N);
+  ALLOC(cira, int,
+	M);
+  ALLOC(rida, int,
+	M);
+  ALLOC(riqa, int,
+	N);
+  ALLOC(ripa, int,
+	N);
+  ALLOC(rira, int,
+	M);
+
+  /* Set filename... */
+  if (dirname != NULL)
+    sprintf(file, "%s/%s", dirname, filename);
+  else
+    sprintf(file, "%s", filename);
+
+  /* Write info... */
+  LOG(1, "Write matrix: %s", file);
+
+  /* Open or create file... */
+  if (nc_open(file, NC_WRITE, &ncid) != NC_NOERR)
+    NC(nc_create(file, NC_NETCDF4, &ncid));
+
+  /* Enter define mode... */
+  int r = nc_redef(ncid);
+  if (r != NC_NOERR && r != NC_EINDEFINE)
+    NC(r);
+
+  /* Define dataset dimension (unlimited)... */
+  if (nc_inq_dimid(ncid, "dataset", &dimid_dataset) != NC_NOERR)
+    NC(nc_def_dim(ncid, "dataset", NC_UNLIMITED, &dimid_dataset));
+
+  /* Define row dimension (fixed)... */
+  if (nc_inq_dimid(ncid, "row", &dimid_row) == NC_NOERR) {
+    NC(nc_inq_dimlen(ncid, dimid_row, &naux));
+    if (naux != nr)
+      ERRMSG("matrix row dimension is incompatible!");
+  } else
+    NC(nc_def_dim(ncid, "row", nr, &dimid_row));
+
+  /* Define col dimension (fixed)... */
+  if (nc_inq_dimid(ncid, "col", &dimid_col) == NC_NOERR) {
+    NC(nc_inq_dimlen(ncid, dimid_col, &naux));
+    if (naux != nc)
+      ERRMSG("matrix col dimension is incompatible!");
+  } else
+    NC(nc_def_dim(ncid, "col", nc, &dimid_col));
+
+  /* Define fixed-length name dimension... */
+  if (nc_inq_dimid(ncid, "name_strlen", &dimid_name) == NC_NOERR) {
+    NC(nc_inq_dimlen(ncid, dimid_name, &naux));
+    if (naux != name_strlen)
+      ERRMSG("matrix name_strlen dimension is incompatible!");
+  } else
+    NC(nc_def_dim(ncid, "name_strlen", name_strlen, &dimid_name));
+
+  /* Define variables... */
+  int dimids3[3] = { dimid_dataset, dimid_row, dimid_col };
+  int dimids1[1] = { dimid_dataset };
+  int dimids2_row[2] = { dimid_dataset, dimid_row };
+  int dimids2_col[2] = { dimid_dataset, dimid_col };
+  int dimids3_rowname[3] = { dimid_dataset, dimid_row, dimid_name };
+  int dimids3_colname[3] = { dimid_dataset, dimid_col, dimid_name };
+  if (nc_inq_varid(ncid, "matrix", &varid) != NC_NOERR) {
+    NC(nc_def_var(ncid, "matrix", NC_DOUBLE, 3, dimids3, &varid));
+    NC(nc_put_att_text(ncid, varid, "long_name", 14, "matrix element"));
+    NC(nc_put_att_text(ncid, varid, "units", 1, "1"));
+  }
+  if (nc_inq_varid(ncid, "rowspace", &varid) != NC_NOERR)
+    NC_DEF_VAR("rowspace", NC_CHAR, 1, dimids1,
+	       "row space selector", "1", 0, 0);
+  if (nc_inq_varid(ncid, "colspace", &varid) != NC_NOERR)
+    NC_DEF_VAR("colspace", NC_CHAR, 1, dimids1,
+	       "column space selector", "1", 0, 0);
+  if (nc_inq_varid(ncid, "sort", &varid) != NC_NOERR)
+    NC_DEF_VAR("sort", NC_CHAR, 1, dimids1,
+	       "matrix sort selector", "1", 0, 0);
+  if (nc_inq_varid(ncid, "row_nu", &varid) != NC_NOERR)
+    NC_DEF_VAR("row_nu", NC_DOUBLE, 2, dimids2_row,
+	       "row channel wavenumber", "cm^-1", 0, 0);
+  if (nc_inq_varid(ncid, "row_time", &varid) != NC_NOERR)
+    NC_DEF_VAR("row_time", NC_DOUBLE, 2, dimids2_row,
+	       "row time since 2000-01-01T00:00Z", "s", 0, 0);
+  if (nc_inq_varid(ncid, "row_z", &varid) != NC_NOERR)
+    NC_DEF_VAR("row_z", NC_DOUBLE, 2, dimids2_row,
+	       "row altitude", "km", 0, 0);
+  if (nc_inq_varid(ncid, "row_lon", &varid) != NC_NOERR)
+    NC_DEF_VAR("row_lon", NC_DOUBLE, 2, dimids2_row,
+	       "row longitude", "degrees_east", 0, 0);
+  if (nc_inq_varid(ncid, "row_lat", &varid) != NC_NOERR)
+    NC_DEF_VAR("row_lat", NC_DOUBLE, 2, dimids2_row,
+	       "row latitude", "degrees_north", 0, 0);
+  if (nc_inq_varid(ncid, "row_quantity", &varid) != NC_NOERR)
+    NC_DEF_VAR("row_quantity", NC_CHAR, 3, dimids3_rowname,
+	       "row state quantity name", "1", 0, 0);
+  if (nc_inq_varid(ncid, "col_nu", &varid) != NC_NOERR)
+    NC_DEF_VAR("col_nu", NC_DOUBLE, 2, dimids2_col,
+	       "column channel wavenumber", "cm^-1", 0, 0);
+  if (nc_inq_varid(ncid, "col_time", &varid) != NC_NOERR)
+    NC_DEF_VAR("col_time", NC_DOUBLE, 2, dimids2_col,
+	       "column time since 2000-01-01T00:00Z", "s", 0, 0);
+  if (nc_inq_varid(ncid, "col_z", &varid) != NC_NOERR)
+    NC_DEF_VAR("col_z", NC_DOUBLE, 2, dimids2_col,
+	       "column altitude", "km", 0, 0);
+  if (nc_inq_varid(ncid, "col_lon", &varid) != NC_NOERR)
+    NC_DEF_VAR("col_lon", NC_DOUBLE, 2, dimids2_col,
+	       "column longitude", "degrees_east", 0, 0);
+  if (nc_inq_varid(ncid, "col_lat", &varid) != NC_NOERR)
+    NC_DEF_VAR("col_lat", NC_DOUBLE, 2, dimids2_col,
+	       "column latitude", "degrees_north", 0, 0);
+  if (nc_inq_varid(ncid, "col_quantity", &varid) != NC_NOERR)
+    NC_DEF_VAR("col_quantity", NC_CHAR, 3, dimids3_colname,
+	       "column state quantity name", "1", 0, 0);
+
+  /* Leave define mode... */
+  NC(nc_enddef(ncid));
+
+  /* Write metadata... */
+  size_t start1[1] = { (size_t) dataset };
+  size_t count1[1] = { 1 };
+  NC(nc_inq_varid(ncid, "rowspace", &varid));
+  NC(nc_put_vara_text(ncid, varid, start1, count1, rowspace));
+  NC(nc_inq_varid(ncid, "colspace", &varid));
+  NC(nc_put_vara_text(ncid, varid, start1, count1, colspace));
+  NC(nc_inq_varid(ncid, "sort", &varid));
+  NC(nc_put_vara_text(ncid, varid, start1, count1, sort));
+
+  /* Set row and column metadata indices... */
+  if (rowspace[0] == 'y')
+    nr = obs2y(ctl, obs, NULL, rida, rira);
+  else
+    nr = atm2x(ctl, atm, NULL, riqa, ripa);
+  if (colspace[0] == 'y')
+    nc = obs2y(ctl, obs, NULL, cida, cira);
+  else
+    nc = atm2x(ctl, atm, NULL, ciqa, cipa);
+
+  /* Write row metadata... */
+  for (size_t i = 0; i < nr; i++) {
+    const double nu = rowspace[0] == 'y' ? ctl->nu[rida[i]] : GSL_NAN;
+    const double time = rowspace[0] == 'y' ? obs->time[rira[i]] : atm->time[ripa[i]];
+    const double z = rowspace[0] == 'y' ? obs->vpz[rira[i]] : atm->z[ripa[i]];
+    const double lon = rowspace[0] == 'y' ? obs->vplon[rira[i]] : atm->lon[ripa[i]];
+    const double lat = rowspace[0] == 'y' ? obs->vplat[rira[i]] : atm->lat[ripa[i]];
+    char qbuf[LEN] = { 0 };
+    size_t start2[2] = { (size_t) dataset, i };
+    size_t count2[2] = { 1, 1 };
+    size_t start3n[3] = { (size_t) dataset, i, 0 };
+    size_t count3n[3] = { 1, 1, name_strlen };
+
+    if (rowspace[0] != 'y') {
+      idx2name(ctl, riqa[i], quantity);
+      snprintf(qbuf, LEN, "%s", quantity);
+    }
+
+    NC(nc_inq_varid(ncid, "row_nu", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &nu));
+    NC(nc_inq_varid(ncid, "row_time", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &time));
+    NC(nc_inq_varid(ncid, "row_z", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &z));
+    NC(nc_inq_varid(ncid, "row_lon", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &lon));
+    NC(nc_inq_varid(ncid, "row_lat", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &lat));
+    NC(nc_inq_varid(ncid, "row_quantity", &varid));
+    NC(nc_put_vara_text(ncid, varid, start3n, count3n, qbuf));
+  }
+
+  /* Write column metadata... */
+  for (size_t j = 0; j < nc; j++) {
+    const double nu = colspace[0] == 'y' ? ctl->nu[cida[j]] : GSL_NAN;
+    const double time = colspace[0] == 'y' ? obs->time[cira[j]] : atm->time[cipa[j]];
+    const double z = colspace[0] == 'y' ? obs->vpz[cira[j]] : atm->z[cipa[j]];
+    const double lon = colspace[0] == 'y' ? obs->vplon[cira[j]] : atm->lon[cipa[j]];
+    const double lat = colspace[0] == 'y' ? obs->vplat[cira[j]] : atm->lat[cipa[j]];
+    char qbuf[LEN] = { 0 };
+    size_t start2[2] = { (size_t) dataset, j };
+    size_t count2[2] = { 1, 1 };
+    size_t start3n[3] = { (size_t) dataset, j, 0 };
+    size_t count3n[3] = { 1, 1, name_strlen };
+
+    if (colspace[0] != 'y') {
+      idx2name(ctl, ciqa[j], quantity);
+      snprintf(qbuf, LEN, "%s", quantity);
+    }
+
+    NC(nc_inq_varid(ncid, "col_nu", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &nu));
+    NC(nc_inq_varid(ncid, "col_time", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &time));
+    NC(nc_inq_varid(ncid, "col_z", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &z));
+    NC(nc_inq_varid(ncid, "col_lon", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &lon));
+    NC(nc_inq_varid(ncid, "col_lat", &varid));
+    NC(nc_put_vara_double(ncid, varid, start2, count2, &lat));
+    NC(nc_inq_varid(ncid, "col_quantity", &varid));
+    NC(nc_put_vara_text(ncid, varid, start3n, count3n, qbuf));
+  }
+
+  /* Write matrix data... */
+  NC(nc_inq_varid(ncid, "matrix", &varid));
+  for (size_t i = 0; i < nr; i++)
+    for (size_t j = 0; j < nc; j++) {
+      const double value = gsl_matrix_get(matrix, i, j);
+      size_t start3[3] = { (size_t) dataset, i, j };
+      size_t count3[3] = { 1, 1, 1 };
+      NC(nc_put_vara_double(ncid, varid, start3, count3, &value));
+    }
+
+  /* Close file... */
+  NC(nc_sync(ncid));
+  NC(nc_close(ncid));
 
   /* Free... */
   free(cida);

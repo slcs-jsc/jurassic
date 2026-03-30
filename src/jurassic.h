@@ -1373,6 +1373,9 @@ typedef struct {
   /*! Observation data file format (1=ASCII, 2=binary, 3=netCDF). */
   int obsfmt;
 
+  /*! Matrix data file format (1=ASCII, 2=binary, 3=netCDF). */
+  int matrixfmt;
+
   /*! Reference height for hydrostatic pressure profile (-999 to skip) [km]. */
   double hydz;
 
@@ -3426,6 +3429,28 @@ void read_ctl(
   ctl_t * ctl);
 
 /**
+ * @brief Read a numerical matrix from a file.
+ *
+ * Dispatches matrix input according to the configured matrix file format.
+ * Supported formats are ASCII (`MATRIXFMT=1`), binary (`MATRIXFMT=2`), and
+ * netCDF (`MATRIXFMT=3`).
+ *
+ * @param[in]  dirname   Directory path containing the matrix file (may be NULL).
+ * @param[in]  filename  Name of the matrix file to read.
+ * @param[in]  ctl       Control structure defining the matrix file format.
+ * @param[out] matrix    Pointer to the GSL matrix to be filled with values.
+ *
+ * @see read_matrix_asc(), read_matrix_bin(), read_matrix_nc()
+ *
+ * @author Lars Hoffmann
+ */
+void read_matrix(
+  const char *dirname,
+  const char *filename,
+  const ctl_t * ctl,
+  gsl_matrix * matrix);
+
+/**
  * @brief Read a numerical matrix from an ASCII file.
  *
  * Loads values into a GSL matrix from a text file containing
@@ -3456,10 +3481,59 @@ void read_ctl(
  *
  * @author Lars Hoffmann
  */
-void read_matrix(
+void read_matrix_asc(
   const char *dirname,
   const char *filename,
   gsl_matrix * matrix);
+
+/**
+ * @brief Read a numerical matrix from a binary file.
+ *
+ * Loads values into a GSL matrix from a compact binary file containing a
+ * magic identifier, matrix dimensions, and all matrix elements in row-major
+ * order.
+ *
+ * @param[in]  dirname   Directory path containing the matrix file (may be NULL).
+ * @param[in]  filename  Name of the matrix file to read.
+ * @param[out] matrix    Pointer to the preallocated GSL matrix to be filled.
+ *
+ * @warning
+ * - Aborts if the file cannot be opened.
+ * - The stored matrix dimensions must match the size of @p matrix.
+ *
+ * @author Lars Hoffmann
+ */
+void read_matrix_bin(
+  const char *dirname,
+  const char *filename,
+  gsl_matrix * matrix);
+
+/**
+ * @brief Read a numerical matrix from a netCDF file.
+ *
+ * Loads one matrix record into a GSL matrix from a netCDF file containing an
+ * unlimited dimension \c dataset, fixed dimensions \c row and \c col, and a
+ * variable \c matrix(dataset,row,col). The schema also stores per-dataset
+ * selectors \c rowspace, \c colspace, and \c sort, along with per-row and
+ * per-column metadata variables for channel wavenumber, time, position, and
+ * state quantity names.
+ *
+ * @param[in]  dirname   Directory path containing the matrix file (may be NULL).
+ * @param[in]  filename  Name of the matrix file to read.
+ * @param[out] matrix    Pointer to the preallocated GSL matrix to be filled.
+ * @param[in]  dataset   Zero-based index along the unlimited \c dataset dimension.
+ *
+ * @warning
+ * - Aborts if the file cannot be opened.
+ * - The stored matrix dimensions must match the size of @p matrix.
+ *
+ * @author Lars Hoffmann
+ */
+void read_matrix_nc(
+  const char *dirname,
+  const char *filename,
+  gsl_matrix * matrix,
+  int dataset);
 
 /**
  * @brief Read observation data from an input file.
@@ -4749,6 +4823,28 @@ void write_atm_rfm(
 /**
  * @brief Write a fully annotated matrix (e.g., Jacobian or gain matrix) to file.
  *
+ * Dispatches matrix output according to the configured matrix file format.
+ * Supported formats are ASCII (`MATRIXFMT=1`), binary (`MATRIXFMT=2`), and
+ * netCDF (`MATRIXFMT=3`).
+ *
+ * @see write_matrix_asc(), write_matrix_bin(), write_matrix_nc()
+ *
+ * @author Lars Hoffmann
+ */
+void write_matrix(
+  const char *dirname,
+  const char *filename,
+  const ctl_t * ctl,
+  const gsl_matrix * matrix,
+  const atm_t * atm,
+  const obs_t * obs,
+  const char *rowspace,
+  const char *colspace,
+  const char *sort);
+
+/**
+ * @brief Write a fully annotated matrix (e.g., Jacobian or gain matrix) to an ASCII file.
+ *
  * Outputs a numerical matrix along with detailed metadata describing
  * the row and column spaces. Depending on configuration, the rows
  * and columns may correspond to measurement or state variables.
@@ -4793,7 +4889,7 @@ void write_atm_rfm(
  *
  * @author Lars Hoffmann
  */
-void write_matrix(
+void write_matrix_asc(
   const char *dirname,
   const char *filename,
   const ctl_t * ctl,
@@ -4803,6 +4899,63 @@ void write_matrix(
   const char *rowspace,
   const char *colspace,
   const char *sort);
+
+/**
+ * @brief Write a numerical matrix to a binary file.
+ *
+ * Stores a compact binary representation consisting of a magic identifier,
+ * matrix dimensions, and all matrix elements in row-major order. Unlike the
+ * ASCII format, this binary format does not include annotated row/column
+ * metadata.
+ *
+ * @param[in] dirname   Output directory path (may be `NULL`).
+ * @param[in] filename  Output file name.
+ * @param[in] matrix    Pointer to GSL matrix to write.
+ *
+ * @author Lars Hoffmann
+ */
+void write_matrix_bin(
+  const char *dirname,
+  const char *filename,
+  const gsl_matrix * matrix);
+
+/**
+ * @brief Write a numerical matrix to a netCDF file.
+ *
+ * Stores one matrix record in a netCDF file using an unlimited dimension
+ * \c dataset, fixed dimensions \c row and \c col, and a variable
+ * \c matrix(dataset,row,col). The file also records the row space, column
+ * space, and sort order in per-dataset auxiliary variables. Per-row and
+ * per-column metadata are stored in auxiliary variables
+ * \c row_nu, \c row_time, \c row_z, \c row_lon, \c row_lat,
+ * \c row_quantity, \c col_nu, \c col_time, \c col_z, \c col_lon,
+ * \c col_lat, and \c col_quantity. Quantity-name strings use the fixed
+ * netCDF dimension \c name_strlen = 100.
+ *
+ * @param[in] dirname   Output directory path (may be `NULL`).
+ * @param[in] filename  Output file name.
+ * @param[in] ctl       Pointer to control structure.
+ * @param[in] matrix    Pointer to GSL matrix to write.
+ * @param[in] atm       Pointer to atmospheric data structure.
+ * @param[in] obs       Pointer to observation data structure.
+ * @param[in] rowspace  Row-space selector to store as metadata.
+ * @param[in] colspace  Column-space selector to store as metadata.
+ * @param[in] sort      Sort-order selector to store as metadata.
+ * @param[in] dataset   Zero-based index along the unlimited \c dataset dimension.
+ *
+ * @author Lars Hoffmann
+ */
+void write_matrix_nc(
+  const char *dirname,
+  const char *filename,
+  const ctl_t * ctl,
+  const gsl_matrix * matrix,
+  const atm_t * atm,
+  const obs_t * obs,
+  const char *rowspace,
+  const char *colspace,
+  const char *sort,
+  int dataset);
 
 /**
  * @brief Write observation data to an output file in ASCII or binary format.
