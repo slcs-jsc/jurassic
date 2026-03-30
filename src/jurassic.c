@@ -5845,6 +5845,7 @@ void read_obs_nc(
     -1, var_obslat = -1, var_vpz = -1, var_vplon = -1, var_vplat =
     -1, var_tpz = -1, var_tplon = -1, var_tplat =
     -1, var_rad[ND], var_tau[ND];
+  const char *spec_prefix = ctl->write_bbt ? "bt" : "rad";
 
   /* Open file... */
   NC(nc_open(filename, NC_NOWRITE, &ncid));
@@ -5880,7 +5881,7 @@ void read_obs_nc(
   for (int id = 0; id < ctl->nd; id++) {
     char varname[LEN];
 
-    sprintf(varname, "rad_%.4f", ctl->nu[id]);
+    sprintf(varname, "%s_%.4f", spec_prefix, ctl->nu[id]);
     NC(nc_inq_varid(ncid, varname, &var_rad[id]));
 
     sprintf(varname, "tau_%.4f", ctl->nu[id]);
@@ -7768,6 +7769,7 @@ void write_obs_nc(
   const int profile) {
 
   char longname[LEN], varname[LEN];
+  const char *spec_prefix = ctl->write_bbt ? "bt" : "rad";
 
   int ncid, varid, dim_profile, dim_ray;
 
@@ -7854,7 +7856,7 @@ void write_obs_nc(
   /* Define radiance/transmittance per channel (2D profile,ray)... */
   for (int id = 0; id < ctl->nd; id++) {
 
-    sprintf(varname, "rad_%.4f", ctl->nu[id]);
+    sprintf(varname, "%s_%.4f", spec_prefix, ctl->nu[id]);
     if (nc_inq_varid(ncid, varname, &varid) != NC_NOERR) {
       if (ctl->write_bbt) {
 	sprintf(longname, "brightness temperature (%.4f cm^-1)", ctl->nu[id]);
@@ -7920,7 +7922,7 @@ void write_obs_nc(
 
   /* Write spectral variables per channel... */
   for (int id = 0; id < ctl->nd; id++) {
-    sprintf(varname, "rad_%.4f", ctl->nu[id]);
+    sprintf(varname, "%s_%.4f", spec_prefix, ctl->nu[id]);
     NC(nc_inq_varid(ncid, varname, &varid));
     NC(nc_put_vara_double(ncid, varid, start, count, obs->rad[id]));
 

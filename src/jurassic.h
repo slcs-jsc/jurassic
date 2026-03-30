@@ -3602,7 +3602,8 @@ void read_obs_bin(
  *      - \c vp_z,  \c vp_lon,  \c vp_lat
  *      - \c tp_z,  \c tp_lon,  \c tp_lat
  *  - Spectral variables with dimensions \c (profile, ray), one per channel:
- *      - \c rad_%.4f  (radiance or brightness temperature)
+ *      - \c rad_%.4f  (radiance, if \c ctl->write_bbt == 0)
+ *      - \c bt_%.4f   (brightness temperature, if \c ctl->write_bbt != 0)
  *      - \c tau_%.4f  (transmittance)
  *    where the formatted frequency corresponds to \c ctl->nu[id].
  *
@@ -4941,14 +4942,16 @@ void write_obs_bin(
  *      - \c vp_z,  \c vp_lon,  \c vp_lat
  *      - \c tp_z,  \c tp_lon,  \c tp_lat
  *  - Spectral variables with dimensions \c (profile, ray), one per channel:
- *      - \c rad_%.4f  (radiance or brightness temperature)
+ *      - \c rad_%.4f  (radiance, if \c ctl->write_bbt == 0)
+ *      - \c bt_%.4f   (brightness temperature, if \c ctl->write_bbt != 0)
  *      - \c tau_%.4f  (transmittance)
  *    where the formatted frequency corresponds to \c ctl->nu[id].
  *
- * Radiance is written either as physical radiance or as brightness
- * temperature depending on \c ctl->write_bbt. The ray dimension is fixed
- * on first creation and all subsequently written profiles must not exceed
- * this number of rays.
+ * Spectral data are written as physical radiance in \c rad_%.4f variables
+ * when \c ctl->write_bbt == 0, or as brightness temperature in
+ * \c bt_%.4f variables when \c ctl->write_bbt != 0. The ray dimension is
+ * fixed on first creation and all subsequently written profiles must not
+ * exceed this number of rays.
  *
  * @param filename  Path to the NetCDF observation file.
  * @param ctl       Pointer to the control structure defining spectral channels.
