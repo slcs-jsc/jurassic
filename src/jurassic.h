@@ -3356,8 +3356,10 @@ void read_atm_bin(
  * - Trace gases (2-D): one variable per species named @c ctl->emitter[ig]
  *   with dimensions @c (profile,level)
  * - Extinction windows (2-D): @c ext_win_%d(profile,level)
- * - Clouds (1-D, optional if @c ctl->ncl>0): @c cld_z, cld_dz, cld_k_%d(profile)
- * - Surface (1-D, optional if @c ctl->nsf>0): @c sf_t, sf_eps_%d(profile)
+ * - Clouds (1-D, optional if @c ctl->ncl>0): @c cld_z, @c cld_dz,
+ *   @c cld_k_%.4f(profile)
+ * - Surface (1-D, optional if @c ctl->nsf>0): @c srf_t,
+ *   @c srf_eps_%.4f(profile)
  *
  * @param filename Input netCDF file name.
  * @param ctl      Control structure (defines numbers/names of optional fields,
@@ -4658,8 +4660,10 @@ void write_atm_bin(
  * - Trace gases (2-D): one variable per species named @c ctl->emitter[ig]
  *   with dimensions @c (profile,level)
  * - Extinction windows (2-D): @c ext_win_%d(profile,level)
- * - Clouds (1-D, optional if @c ctl->ncl>0): @c cld_z, cld_dz, cld_k_%d(profile)
- * - Surface (1-D, optional if @c ctl->nsf>0): @c sf_t, sf_eps_%d(profile)
+ * - Clouds (1-D, optional if @c ctl->ncl>0): @c cld_z, @c cld_dz,
+ *   @c cld_k_%.4f(profile)
+ * - Surface (1-D, optional if @c ctl->nsf>0): @c srf_t,
+ *   @c srf_eps_%.4f(profile)
  *
  * Only the first @c atm->np elements along @c level are written for 2-D
  * variables. The effective number of levels is stored in @c nlev(profile).
