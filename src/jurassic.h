@@ -3508,9 +3508,10 @@ void read_obs(
  * specified by its filename and stores it in the provided ::obs_t structure.
  * Each line in the input file is expected to contain numerical values
  * representing a single observation record, including time, observer
- * coordinates, view point coordinates, tangent point coordinates, radiance
- * or brightness temperature values, and transmittances. The number of radiance
- * and transmittance values per record is determined by \c ctl->nd.
+ * coordinates, view point coordinates, tangent point coordinates, spectral
+ * values stored as radiance or brightness temperature depending on
+ * \c ctl->write_bbt, and transmittances. The number of spectral-value and
+ * transmittance columns per record is determined by \c ctl->nd.
  *
  * The function reads the file line by line, tokenizes the data fields, and
  * fills the corresponding observation arrays. The number of successfully
@@ -3554,10 +3555,11 @@ void read_obs_asc(
  *
  * After verifying the header, the function reads the number of ray paths and
  * then sequentially loads arrays corresponding to observation time, observer
- * location, view point location, tangent point location, radiance (or
- * brightness temperature), and transmittance data. The number of ray paths is
- * assigned to \c obs->nr. All arrays must have been allocated prior to calling
- * this function.
+ * location, view point location, tangent point location, spectral values
+ * stored as radiance or brightness temperature depending on
+ * \c ctl->write_bbt, and transmittance data. The number of ray paths is
+ * assigned to \c obs->nr. All arrays must have been allocated prior to
+ * calling this function.
  *
  * @param filename
  *        Path to the binary file containing the observation data.
@@ -4814,9 +4816,10 @@ void write_matrix(
  *
  * After writing, the function prints diagnostic information showing ranges of
  * times, observer coordinates, view point coordinates, tangent point
- * coordinates, radiance or brightness temperature values (depending on
- * `ctl->write_bbt`), and transmittances. These diagnostics provide useful
- * verification that the output data is valid and consistent.
+ * coordinates, and spectral values stored as radiance or brightness
+ * temperature depending on \c ctl->write_bbt, as well as transmittances.
+ * These diagnostics provide useful verification that the output data is valid
+ * and consistent.
  *
  * @param[in] dirname  Optional directory path. If NULL, only @p filename is used.
  * @param[in] filename Name of the output observation file.
@@ -4852,10 +4855,10 @@ void write_obs(
  * via \c ctl->write_bbt.
  *
  * The function then writes one line of data per ray path, including the base
- * geometric information followed by radiance or brightness temperature values
- * and transmittances for each spectral channel. Blank lines are inserted
- * whenever the time stamp changes, providing visual separation of distinct
- * observation groups.
+ * geometric information followed by spectral values labeled as radiance or
+ * brightness temperature according to \c ctl->write_bbt, and transmittances
+ * for each spectral channel. Blank lines are inserted whenever the time stamp
+ * changes, providing visual separation of distinct observation groups.
  *
  * @param filename
  *        Path to the ASCII output file.
@@ -4894,9 +4897,10 @@ void write_obs_asc(
  *
  * Following the header, the function writes the number of ray paths and then
  * sequentially outputs arrays of observation metadata, geometric parameters,
- * radiance or brightness temperature values, and transmittances. All values
- * are written in native binary representation using the FWRITE() macro, which
- * performs buffered writes and error checking.
+ * spectral values stored as radiance or brightness temperature depending on
+ * \c ctl->write_bbt, and transmittances. All values are written in native
+ * binary representation using the FWRITE() macro, which performs buffered
+ * writes and error checking.
  *
  * @param filename
  *        Path to the binary output file.

@@ -5704,10 +5704,8 @@ void read_obs(
   }
   for (int id = 0; id < ctl->nd; id++) {
     gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
-    if (ctl->write_bbt) {
-      LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
-	  ctl->nu[id], mini, maxi);
-    }
+    LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
+	ctl->nu[id], mini, maxi);
   }
 }
 
@@ -7629,10 +7627,8 @@ void write_obs(
   }
   for (int id = 0; id < ctl->nd; id++) {
     gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
-    if (ctl->write_bbt) {
-      LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
-	  ctl->nu[id], mini, maxi);
-    }
+    LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
+	ctl->nu[id], mini, maxi);
   }
 }
 
