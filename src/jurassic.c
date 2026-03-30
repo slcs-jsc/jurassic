@@ -1114,8 +1114,7 @@ void climatology(
 
     /* Set CO2... */
     if (ctl->ig_co2 >= 0)
-      atm->q[ctl->ig_co2][ip] =
-	371.789948e-6 + 2.026214e-6 * (atm->time[ip] - 63158400.) / 31557600.;
+      atm->q[ctl->ig_co2][ip] = CO2_FIT(atm->time[ip]);
 
     /* Set N2... */
     if (ctl->ig_n2 >= 0)
@@ -6423,7 +6422,7 @@ double scan_ctl(
   if (argv[1][0] != '-')
     if (!(in = fopen(argv[1], "r")))
       ERRMSG("Cannot open file!");
-  
+
   /* Set full variable name... */
   if (arridx >= 0) {
     sprintf(fullname1, "%s[%d]", varname, arridx);

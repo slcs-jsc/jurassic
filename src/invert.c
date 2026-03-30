@@ -213,8 +213,7 @@ int main(
       atm.q[0][atm.np] = rso2[il] * scl;
       atm.q[1][atm.np] = rh2o[il];
       atm.q[2][atm.np] = ro3[il];
-      atm.q[3][atm.np] = 371.789948e-6 + 2.026214e-6
-	* (atm.time[atm.np] - 63158400.) / 31557600.;
+      atm.q[3][atm.np] = CO2_FIT(atm.time[atm.np]);
       if ((++atm.np) > NP)
 	ERRMSG("Too many data points!");
     }

@@ -431,6 +431,24 @@
   (((v) < (lo)) ? (lo) : (((v) > (hi)) ? (hi) : (v)))
 
 /**
+ * @brief Climatological CO2 volume mixing ratio as a quadratic function of time.
+ *
+ * This macro evaluates a hardwired quadratic fit of the global mean CO2 volume
+ * mixing ratio in [ppv]. The fit is based on NOAA global annual mean CO2 data
+ * covering the period from 1980 to 2025.
+ *
+ * @param TIME Time in seconds since 2000-01-01T00:00Z.
+ * @return Climatological CO2 volume mixing ratio in [ppv].
+ *
+ * @author Lars Hoffmann
+ */
+#define CO2_FIT(TIME) \
+  (373.87884731310215e-6 \
+   + 1.9021498612395775e-6 * (((TIME) - 94694400.) / 31557600.) \
+   + 0.016490044598136553e-6 \
+   * POW2((((TIME) - 94694400.) / 31557600.)))
+
+/**
  * @brief Convert degrees to radians.
  *
  * Converts an angle measured in degrees to radians using:
