@@ -1,8 +1,9 @@
 #! /bin/bash
 
 # Set environment...
-export LD_LIBRARY_PATH=../../libs/build/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=../../libs/build/lib:${LD_LIBRARY_PATH:-}
 export OMP_NUM_THREADS=4
+set -euo pipefail
 
 # Setup...
 trac=../../src
@@ -31,7 +32,7 @@ $trac/brightness 1e-8 0.1 0.01 500 3000 100 > data/brightness.tab
 # Compare files...
 echo -e "\nCompare results..."
 error=0
-for f in $(ls data.ref/*.tab) ; do
+for f in data.ref/*.tab ; do
     diff -q -s data/"$(basename "$f")" "$f" || error=1
 done
 exit $error
