@@ -65,7 +65,7 @@ post-processing.
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
-srun ./bin/formod ctl/run.ctl
+srun ./bin/formod ctl/run.ctl input/obs/obs.tab input/atm/atm.tab output/radiance/rad.tab
 ```
 
 Key points:
@@ -80,7 +80,8 @@ Key points:
 
 ### General guidelines
 
-- Use **MPI** to distribute independent observations.
+- Use **workflow-level parallelism** or job arrays for independent forward-model runs.
+- Use **MPI** only for retrieval workloads that process directory lists.
 - Use **OpenMP** to accelerate per-observation computations.
 - Avoid oversubscription (total threads > physical cores).
 
@@ -149,7 +150,10 @@ Example (Slurm):
 ```bash
 #SBATCH --array=0-31
 
-./bin/formod ctl/run_${SLURM_ARRAY_TASK_ID}.ctl
+./bin/formod ctl/run_${SLURM_ARRAY_TASK_ID}.ctl \
+  input/obs/obs_${SLURM_ARRAY_TASK_ID}.tab \
+  input/atm/atm_${SLURM_ARRAY_TASK_ID}.tab \
+  output/radiance/rad_${SLURM_ARRAY_TASK_ID}.tab
 ```
 
 Each array element runs an independent JURASSIC configuration.

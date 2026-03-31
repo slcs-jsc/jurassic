@@ -7,7 +7,7 @@ for radiative transfer and retrieval calculations.
 
 In JURASSIC, the atmospheric data represent the **model state**, while
 observation geometry and radiances are handled separately (see
-*Observation and radiance files*).
+[Observation and radiance files](radiance_data.md)).
 
 ---
 
@@ -193,5 +193,5 @@ results.
 ## Related pages
 
 - [Configuration](configuration.md)
-- Observation and radiance files (radiance_data.md)
+- [Observation and radiance files](radiance_data.md)
 - [Spectroscopic data & LUTs](lookup_tables.md)

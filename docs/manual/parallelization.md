@@ -28,8 +28,8 @@ JURASSIC employs three complementary levels of parallelism:
   Shared-memory parallelism within a single process, used by several
   computational kernels.
 
-There is no global hybrid MPI–OpenMP model across the entire code
-base. MPI is currently implemented only in the retrieval code.
+There is no general hybrid MPI–OpenMP execution model across the full
+tool suite. MPI is currently implemented only in the retrieval code.
 
 ---
 
@@ -70,7 +70,7 @@ retrievals.
 ### Typical usage (retrieval only)
 
 ```bash
-mpirun -np 16 ./retrieval ctl/retrieval.ctl
+mpirun -np 16 ./retrieval ctl/retrieval.ctl dirlist.txt
 ```
 
 Running non-retrieval executables under `mpirun` provides no performance
@@ -116,7 +116,7 @@ Example:
 
 ```bash
 export OMP_NUM_THREADS=4
-mpirun -np 8 ./retrieval ctl/retrieval.ctl
+mpirun -np 8 ./retrieval ctl/retrieval.ctl dirlist.txt
 ```
 
 This configuration uses up to 32 CPU cores in total.
@@ -193,8 +193,8 @@ uniformity.
 
 ## Summary
 
-JURASSIC does not implement a general hybrid MPI–OpenMP model across
-the entire code base. MPI parallelization is currently limited to the
+JURASSIC does not implement a general hybrid MPI–OpenMP execution model
+across the full tool suite. MPI parallelization is limited to the
 retrieval executables and is used solely for distributing independent
 retrieval tasks. OpenMP provides shared-memory acceleration within a
 single process, and large-scale parallelism is typically achieved at
@@ -204,6 +204,6 @@ the workflow level.
 
 ## Related pages
 
-- Running JURASSIC
-- Building from source
-- Configuration
+- [Running JURASSIC](running.md)
+- [Building from source](building.md)
+- [Configuration](configuration.md)

@@ -223,7 +223,7 @@ The exact argument lists and memory ownership rules are documented in
 
 ## Adding a new small tool
 
-A typical new tool (e.g. `tools/mytool.c`) should:
+A typical new tool (e.g. `src/mytool.c`) should:
 
 1. include `jurassic.h`
 2. parse command-line arguments consistently with other tools

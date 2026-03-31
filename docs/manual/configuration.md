@@ -43,7 +43,7 @@ EMITTER[1] = H2O
 All control keywords can also be provided on the command line as pairs:
 
 ```bash
-./formod run.ctl RAYDS 5 REFRAC 0
+./formod run.ctl obs.tab atm.tab rad.tab RAYDS 5 REFRAC 0
 ```
 
 Command-line values override values from the control file.
@@ -240,21 +240,20 @@ CTM_O2  = 1
 Run (example):
 
 ```bash
-./formod minimal_forward.ctl
+./formod minimal_forward.ctl obs.tab atm.tab rad.tab
 ```
 
 ### Overriding parameters on the command line
 
 ```bash
-./formod minimal_forward.ctl RAYDS 5 REFRAC 0
+./formod minimal_forward.ctl obs.tab atm.tab rad.tab RAYDS 5 REFRAC 0
 ```
 
 ---
 
 ## Tips for robust configurations
 
-- Start from the **example projects** (`projects/limb`, `projects/nadir`) and modify incrementally.
+- Start from the **example projects** (`projects/limb`, `projects/nadir`, `projects/zenith`) and modify incrementally.
 - Keep `ND`, `NW`, and `WINDOW[i]` consistent; mismatches are a common source of confusing results.
 - When changing `NG`/`EMITTER`, ensure the corresponding lookup tables exist under `TBLBASE`.
 - If you tune `RAYDS`/`RAYDZ`, validate against reference output to ensure accuracy remains acceptable.
-

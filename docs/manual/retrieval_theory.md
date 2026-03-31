@@ -72,9 +72,10 @@ model, including ray tracing, spectral approximations, and emissivity
 lookup tables.
 
 For retrieval applications, the forward model must be differentiable
-with respect to the state vector. JURASSIC therefore provides analytic
-or semi-analytic **Jacobians** (also referred to as weighting functions
-or kernels).
+with respect to the state vector. JURASSIC therefore provides
+numerically evaluated **Jacobians** (also referred to as weighting
+functions or kernels) that are computed consistently with the forward
+model.
 
 ---
 
@@ -87,10 +88,10 @@ the measurements to changes in the state vector:
 K_{ij} = \frac{\partial y_i}{\partial x_j}
 \]
 
-In JURASSIC, Jacobians are computed consistently with the forward model
-using the same numerical discretization and spectral approximations.
-This consistency is essential for stable and physically meaningful
-retrievals.
+In JURASSIC, Jacobians are computed by finite differences using the
+same forward-model components, numerical discretization, and spectral
+approximations as the radiance calculation itself. This consistency is
+essential for stable and physically meaningful retrievals.
 
 Jacobians can be computed for individual atmospheric quantities, such
 as temperature or trace gas concentrations, and are reused within the
@@ -203,9 +204,9 @@ lead to biased or unstable retrievals.
 
 JURASSIC implements a physically consistent and well-established
 optimal estimation retrieval framework that is tightly integrated with
-its forward radiative transfer model. The use of analytic Jacobians and
-shared numerical infrastructure ensures stable and efficient retrieval
-calculations.
+its forward radiative transfer model. The use of forward-model-consistent
+finite-difference Jacobians and shared numerical infrastructure ensures
+stable and efficient retrieval calculations.
 
 For a detailed theoretical treatment of optimal estimation, users are
 referred to Rodgers (2000) and the references listed in the

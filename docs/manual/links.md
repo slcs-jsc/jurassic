@@ -2,7 +2,7 @@
 
 These links provide further information for users and developers of JURASSIC:
 
-* [README file](https://github.com/slcs-jsc/jurassic/blob/master/README.md)
+* [README file](https://github.com/slcs-jsc/jurassic/blob/HEAD/README.md)
 
 * [User manual](https://slcs-jsc.github.io/jurassic)
 
@@ -14,15 +14,15 @@ These links provide further information for users and developers of JURASSIC:
 
 * [Other references](https://slcs-jsc.github.io/jurassic/references)
 
-* [Citation file](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff)
+* [Citation file](https://github.com/slcs-jsc/jurassic/blob/HEAD/CITATION.cff)
 
-* [Code of conduct](https://github.com/slcs-jsc/jurassic/blob/master/CODE_OF_CONDUCT.md)
+* [Code of conduct](https://github.com/slcs-jsc/jurassic/blob/HEAD/CODE_OF_CONDUCT.md)
 
-* [Contributing guidelines](https://github.com/slcs-jsc/jurassic/blob/master/CONTRIBUTING.md)
+* [Contributing guidelines](https://github.com/slcs-jsc/jurassic/blob/HEAD/CONTRIBUTING.md)
 
-* [Software dependencies](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md)
+* [Software dependencies](https://github.com/slcs-jsc/jurassic/blob/HEAD/DEPENDENCIES.md)
 
-* [License](https://github.com/slcs-jsc/jurassic/blob/master/COPYING)
+* [License](https://github.com/slcs-jsc/jurassic/blob/HEAD/COPYING)
 
 Links to external resources:
 
@@ -33,5 +33,3 @@ Links to external resources:
 * [Data repository](https://datapub.fz-juelich.de/slcs/jurassic)
 
 * [Nightly builds](https://datapub.fz-juelich.de/slcs/jurassic/nightly_builds)
-
-* [JURASSIC data repository](https://datapub.fz-juelich.de/slcs/jurassic)

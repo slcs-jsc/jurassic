@@ -57,14 +57,14 @@ threading**.
 ### Jacobians
 
 Kernel calculations require evaluating sensitivities with respect to
-each retrieved parameter. This typically increases runtime by a factor
-of:
+each retrieved parameter. In JURASSIC this is done by finite differences,
+so runtime typically increases by a factor of:
 
 - **O(N_state)** relative to a pure forward run.
 
-Analytic Jacobians significantly reduce this overhead compared to
-finite-difference approaches, but kernel runs remain substantially more
-expensive than forward simulations.
+Because the Jacobians are evaluated by repeated forward-model calls,
+kernel runs remain substantially more expensive than pure forward
+simulations.
 
 ---
 
@@ -146,8 +146,8 @@ per process.
 
 ## MPI vs. OpenMP considerations
 
-There is no global hybrid MPI–OpenMP model across the entire JURASSIC
-code base.
+There is no general hybrid MPI–OpenMP execution model across the full
+tool suite.
 
 General guidance:
 
@@ -234,6 +234,6 @@ campaigns.
 
 ## Related pages
 
-- Parallelization
-- HPC workflows
-- Configuration
+- [Parallelization](parallelization.md)
+- [HPC workflows](hpc_workflows.md)
+- [Configuration](configuration.md)

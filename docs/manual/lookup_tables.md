@@ -135,18 +135,26 @@ and gas concentrations expected in your application.
 
 ## Generating lookup tables
 
-Lookup tables are generated **outside** the core JURASSIC workflow,
-typically using a line-by-line radiative transfer model and a chosen
-spectroscopic database.
+The underlying spectroscopic content for lookup tables is typically
+prepared **outside** the core JURASSIC runtime, for example with a
+line-by-line radiative transfer model and a chosen spectroscopic
+database.
 
-While JURASSIC is agnostic to the specific tool used for table
-generation, commonly used approaches include:
+While JURASSIC is agnostic to the specific external spectroscopy tool,
+the repository does include utilities that support table workflows:
 
-- line-by-line reference models,
-- consistent spectroscopic databases (e.g. HITRAN-based).
+- `tblgen` for generating table files from prepared spectroscopy inputs,
+- `tblfmt` for converting between ASCII, binary, and netCDF formats,
+- `tblrdc` for reducing or repacking table files.
 
-Table generation workflows are often highly application-specific and
-are therefore not part of the core JURASSIC distribution.
+These tools are part of the JURASSIC distribution, but the upstream
+line-by-line spectroscopy setup and application-specific table design
+remain external responsibilities.
+
+In practice, JURASSIC lookup tables are often generated with the
+[Reference Forward Model (RFM) from the University of Oxford](https://eodg.atm.ox.ac.uk/RFM/).
+The control parameters `RFMBIN`, `RFMHIT`, and `RFMXSC[i]` support
+RFM-based workflows where applicable.
 
 ---
 

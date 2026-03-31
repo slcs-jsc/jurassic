@@ -13,7 +13,7 @@ JURASSIC is primarily developed and tested on Linux systems. The
 following requirements apply:
 
 - 64-bit Linux operating system
-- C and Fortran compilers with OpenMP support
+- C compiler with OpenMP support
 - MPI library (optional, retrieval only)
 - GNU Make or a compatible build system
 
@@ -26,15 +26,11 @@ All other components can be built and run without MPI.
 
 The following software components are required to build JURASSIC:
 
-- **Fortran compiler**  
-  A modern Fortran compiler such as:
-
-  - GNU Fortran (`gfortran`)
-  - Intel oneAPI Fortran (`ifx` / `ifort`)
-  - NVHPC Fortran (`nvfortran`)
-
 - **C compiler**  
   Required for auxiliary components and libraries (e.g. `gcc`, `icc`).
+
+- **GNU Make**  
+  Required to build the bundled libraries and the JURASSIC executables.
 
 - **MPI library** (optional, retrieval only)  
   For example:
@@ -49,6 +45,11 @@ The following software components are required to build JURASSIC:
 
 - **GNU Plot** (optional)  
   Used by example projects to generate diagnostic plots.
+
+- **Optional Fortran compiler**  
+  A Fortran compiler is not required for the default repository build. It may
+  be useful on HPC systems or when integrating external tooling that depends on
+  Fortran-enabled libraries.
 
 ------------------------------------------------------------------------
 
@@ -69,13 +70,13 @@ repository.
 
 ## Configuring the build
 
-JURASSIC uses a Makefile-based build system. Prior to compilation, you
-may need to edit the Makefile or set make variables to match your local
-compiler and MPI setup.
+JURASSIC uses a Makefile-based build system in `src/Makefile`. Prior to
+compilation, you may need to edit that file or set make variables to match
+your local compiler and MPI setup.
 
 Typical configuration options include:
 
-- Selection of the Fortran and C compilers
+- Selection of the C compiler and any optional external toolchains
 - Compiler optimization and debugging flags
 - Enabling or disabling MPI support (retrieval only)
 - Enabling OpenMP parallelization
@@ -87,11 +88,25 @@ MPI modules before configuring the build.
 
 ## Building JURASSIC
 
+### Build bundled dependencies
+
+For the default repository build, first compile the bundled third-party
+libraries:
+
+```bash
+cd libs
+bash build.sh
+```
+
+This populates `libs/build/`, which is the default include/library location
+used by `src/Makefile`.
+
 ### Default build (no MPI)
 
 To build JURASSIC without MPI support:
 
 ```bash
+cd src
 make
 ```
 
@@ -105,6 +120,7 @@ for this configuration.
 To enable MPI support for the retrieval executable, build with:
 
 ```bash
+cd src
 make MPI=1
 ```
 
@@ -123,6 +139,7 @@ All other executables remain non-MPI and are unaffected by this option.
 To perform a clean rebuild:
 
 ```bash
+cd src
 make clean
 make
 ```
@@ -131,12 +148,16 @@ make
 
 ## Verifying the installation
 
-After compilation, verify the installation by running the example
-projects described in the [Quickstart](quickstart.md).
+After compilation, verify the installation by running the test suite or the
+example projects described in the [Quickstart](quickstart.md).
 
-A successful run of the example simulations indicates that JURASSIC has
-been built correctly and that all required dependencies are working as
-expected.
+```bash
+cd src
+make check
+```
+
+A successful test run or example simulation indicates that JURASSIC has been
+built correctly and that all required dependencies are working as expected.
 
 ------------------------------------------------------------------------
 

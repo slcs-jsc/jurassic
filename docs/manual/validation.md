@@ -85,8 +85,8 @@ peer-reviewed studies.
 
 ## Example projects and regression tests
 
-The JURASSIC distribution includes example projects (e.g. limb and
-nadir configurations) that serve as both tutorials and regression
+The JURASSIC distribution includes example projects (e.g. limb, nadir,
+and zenith configurations) that serve as both tutorials and regression
 tests.
 
 These examples:

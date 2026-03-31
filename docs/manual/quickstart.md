@@ -28,12 +28,14 @@ cases and serve as regression tests. These projects are located in the
 cd jurassic/projects
 ```
 
-Two example observation geometries are provided:
+Three example observation geometries are provided:
 
 -   **Nadir sounding**, representative of satellite instruments viewing
     the atmosphere from above
 -   **Limb sounding**, representative of instruments observing along the
     atmospheric limb
+-   **Zenith sounding**, representative of upward-looking observations
+    from the ground
 
 ### Nadir sounder example
 
@@ -53,6 +55,15 @@ cd ../limb
 ./run.sh
 ```
 
+### Zenith sounder example
+
+To run the zenith sounder example:
+
+``` bash
+cd ../zenith
+./run.sh
+```
+
 Each example is executed via a simple wrapper script that prepares the
 input data, runs the radiative transfer calculations, and performs basic
 verification steps.
@@ -61,7 +72,7 @@ verification steps.
 
 ## Input files
 
-In both examples, the following input files are generated or used:
+In these examples, the following files are generated or used:
 
 -   **Observation geometry**\
     The file `obs.tab` defines the viewing geometry of the instrument,
@@ -80,9 +91,9 @@ In both examples, the following input files are generated or used:
     cat atm.tab
     ```
 
--   **Radiative transfer configuration**\
-    The file `rad.tab` specifies the detector channels and spectral
-    configuration used for the radiative transfer calculations.
+-   **Radiative transfer output**\
+    The file `rad.tab` contains the simulated radiances written by the
+    forward model for the configured detector channels.
 
     ``` bash
     cat rad.tab

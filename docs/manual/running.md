@@ -10,10 +10,11 @@ overview of runtime usage.
 ## General execution model
 
 JURASSIC is provided as a set of small command-line applications (e.g.
-`formod`, `kernel`, `retrieval`). **All applications take a control file
-and, depending on the application, additional positional input/output
-files on the command line.** Control parameters may optionally be
-overridden via `KEY VALUE` pairs.
+`formod`, `kernel`, `retrieval`). Many of the scientific applications take a
+control file plus additional positional input/output files on the command
+line. Smaller utilities such as `day2doy`, `time2jsec`, `planck`, and
+`brightness` accept only direct numeric arguments. For control-file-driven
+applications, parameters may optionally be overridden via `KEY VALUE` pairs.
 
 ### Common pattern
 
@@ -22,8 +23,8 @@ overridden via `KEY VALUE` pairs.
 ```
 
 - `positional-args` are **application-specific** (see below).
-- `KEY VALUE` pairs override control-file settings (e.g. `RAYDS 5 REFRAC 0`).
-  Place overrides **after** the positional arguments.
+- `KEY VALUE` pairs apply only to applications that read a control file.
+- Place overrides **after** the positional arguments.
 
 ---
 
@@ -123,7 +124,8 @@ enabled via control parameters.
 
 Parallel execution in JURASSIC is achieved through workflow-level
 parallelism, optional MPI in retrievals, and OpenMP threading.
-There is no global hybrid MPI–OpenMP model across all executables.
+There is no general hybrid MPI–OpenMP execution model across the full
+tool suite. MPI is limited to retrieval workflows.
 
 ---
 
@@ -214,6 +216,6 @@ To ensure reproducible runs:
 
 ## Related pages
 
-- Quickstart
-- Configuration
-- Parallelization
+- [Quickstart](quickstart.md)
+- [Configuration](configuration.md)
+- [Parallelization](parallelization.md)

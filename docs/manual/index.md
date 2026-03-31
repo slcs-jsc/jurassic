@@ -54,11 +54,11 @@ research, operational, and development workflows:
     ensuring reliable performance and scientific credibility across a
     wide range of atmospheric conditions.
 
-- **Hybrid parallelization for HPC environments**: JURASSIC enables
-    hybrid MPI–OpenMP parallelization for highly efficient execution
-    on multicore CPUs and HPC clusters, enabling the processing of
-    large datasets, global simulations, or long time series with
-    excellent scalability.
+- **Parallel execution for HPC environments**: JURASSIC supports
+    workflow-level parallelism, OpenMP acceleration across the tool
+    suite, and MPI-based task distribution for retrieval workloads.
+    This enables efficient execution on multicore CPUs and HPC
+    clusters for large datasets and campaign-style processing.
 
 - **Open source and community oriented**: JURASSIC is distributed
     under the GNU General Public License (GPL), fostering

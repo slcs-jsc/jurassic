@@ -123,9 +123,11 @@ maintainability and long-term sustainability.
 
 JURASSIC is implemented in the C programming language with a modular
 architecture that separates ray tracing, radiative transfer,
-spectroscopy, and retrieval components. The model supports hybrid
-MPI–OpenMP parallelization and is designed for efficient execution on
-multicore CPUs and high-performance computing systems.
+spectroscopy, and retrieval components. The model supports
+workflow-level parallelism, OpenMP acceleration across the tool suite,
+and MPI-based task distribution for retrieval workflows, and is
+designed for efficient execution on multicore CPUs and high-performance
+computing systems.
 
 Automated tests and example projects are provided to verify correct
 installation and numerical behaviour. Model outputs have been
