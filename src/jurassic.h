@@ -577,7 +577,7 @@
  *
  * @return Linearly interpolated y-value at x.
  *
- * @see LOGX, LOGY
+ * @see LOGY
  *
  * @author Lars Hoffmann
  */
@@ -598,7 +598,7 @@
  *
  * @return Interpolated y-value at x.
  *
- * @see LIN, LOGX
+ * @see LIN
  *
  * @author Lars Hoffmann
  */
@@ -2639,12 +2639,12 @@ void intpol_atm(
  *
  * @details
  * - Uses pretabulated emissivity data (`tbl->eps`) for each gas and channel.
- * - Applies logarithmic interpolation in pressure (@ref LOGX)
+ * - Applies logarithmic interpolation in pressure
  *   and linear interpolation in temperature (@ref LIN).
  * - Enforces emissivity limits in the range [0, 1].
  * - Returns unity transmittance if data are missing or column density ≤ 0.
  *
- * @see ctl_t, tbl_t, los_t, intpol_tbl_eps, LIN, LOGX, locate_irr, locate_reg
+ * @see ctl_t, tbl_t, los_t, intpol_tbl_eps, LIN, locate_irr, locate_reg
  * 
  * @author Lars Hoffmann
  */
@@ -2875,9 +2875,9 @@ void kernel(
  * - Uses a binary search algorithm with \f$ O(\log n) \f$ complexity.  
  * - Handles both increasing and decreasing grids automatically.  
  * - Returns the index of the lower neighbor suitable for use in
- *   interpolation routines such as @ref LIN, @ref LOGX, or @ref LOGY.
+ *   interpolation routines such as @ref LIN or @ref LOGY.
  *
- * @see LIN, LOGX, LOGY, locate_reg, locate_tbl
+ * @see LIN, LOGY, locate_reg, locate_tbl
  *
  * @warning Assumes `x` lies within the range of `xx`; no bounds checking
  *          beyond the first and last grid points is performed.
@@ -2908,7 +2908,7 @@ int locate_irr(
  * - Suitable for use with uniform grids such as pressure, temperature,
  *   or wavelength tables.
  *
- * @see locate_irr, locate_tbl, LIN, LOGX, LOGY
+ * @see locate_irr, locate_tbl, LIN, LOGY
  * 
  * @warning Assumes uniform grid spacing; results are invalid for
  *          irregularly spaced arrays.
