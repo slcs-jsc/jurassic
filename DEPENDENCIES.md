@@ -33,11 +33,15 @@ which is the reference platform used for development and testing.
 
 - **Using bundled libraries:** JURASSIC includes a `libs/` directory that can build GSL and netCDF if system libraries are not available or if a self-contained build is preferred.
 
+- **Bundled build toolchain:** `libs/build.sh` builds HDF5 with the C++ interface disabled (`--disable-cxx`). A GNU C compiler is required, but a C++ compiler is not required for the bundled-library build.
+
 - **netCDF version:** netCDF classic only requires `libnetcdf-dev`. netCDF-4 additionally requires HDF5 and zlib. Using filter-based compression (e.g. zstd) requires the HDF5 plugin package and possibly setting `HDF5_PLUGIN_PATH`.
 
 - **Static linking**: Fully static builds require static versions of all libraries and usually do not support HDF5 filter plugins. Dynamic linking is recommended for most users.
 
 ## Installing dependencies
+
+### Ubuntu 24.04 LTS
 
 Use the following commands to install the dependencies on Ubuntu 24.04 LTS.
 
@@ -60,6 +64,33 @@ Optional tools:
 
 ```bash
 sudo apt install \
+  binutils cppcheck lcov \
+  doxygen mkdocs \
+  gnuplot
+```
+
+### Fedora
+
+Use the following commands to install the dependencies on Fedora.
+
+```bash
+sudo dnf install \
+  git make gcc \
+  gsl-devel \
+  netcdf-devel
+```
+
+Optional netCDF-4 and compression support:
+
+```bash
+sudo dnf install \
+  hdf5-devel zlib-devel libzstd-devel
+```
+
+Optional tools:
+
+```bash
+sudo dnf install \
   binutils cppcheck lcov \
   doxygen mkdocs \
   gnuplot

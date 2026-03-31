@@ -101,9 +101,8 @@ libraries are needed to install JURASSIC.
 
 Mandatory build and runtime dependencies include:
 - GNU Scientific Library (GSL) for numerical calculations
-- netCDF-C library (version **4.9.1 or later**) for file input/output
+- netCDF-C library for file input/output
 - GNU C compiler with OpenMP support
-- GNU C++ compiler (`g++` / `gcc-c++`), required to build the bundled HDF5 library
 
 A complete list of mandatory and optional dependencies is provided in the
 [dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
@@ -133,19 +132,11 @@ that can be compiled and installed using a build script:
     bash build.sh
 
 This builds GSL, zlib, szip, HDF5, and netCDF-C 4.9.2 into `libs/build/`.
-Before running the script, ensure that a C++ compiler is installed, as it
-is required to build HDF5:
-
-    # Debian/Ubuntu
-    sudo apt install g++
-
-    # Fedora/RHEL
-    sudo dnf install gcc-c++
 
 Alternatively, if you prefer to use existing system libraries, install
-the dependencies manually. Note that netCDF-C **4.9.1 or later** is
-required. Many Linux distributions (e.g. Fedora 36, Ubuntu 22.04) ship
-older versions, in which case the bundled build path above is recommended.
+the dependencies manually. Distribution-specific package information and
+version details are collected in the
+[dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
 
 **3. Configure the Makefile**
 
