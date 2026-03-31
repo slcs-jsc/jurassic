@@ -123,22 +123,34 @@ Alternatively, to get the latest development version, clone the GitHub repositor
 
     git clone https://github.com/slcs-jsc/jurassic.git
 
-**2. Install required libraries**
+**2. Install dependencies**
 
-The JURASSIC git repository includes a copy of the GNU GSL library
-that can be compiled and installed using a build script:
+For the default build, the JURASSIC git repository includes bundled
+third-party libraries that can be compiled and installed using a build
+script:
 
     cd [jurassic_directory]/libs
     bash build.sh
 
-This builds GSL, zlib, szip, HDF5, and netCDF-C 4.9.2 into `libs/build/`.
+This builds the bundled third-party libraries into `libs/build/`.
 
 Alternatively, if you prefer to use existing system libraries, install
-the dependencies manually. Distribution-specific package information and
-version details are collected in the
+the required dependencies manually. Distribution-specific package
+information, optional tools, and version details are collected in the
 [dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
 
-**3. Configure the Makefile**
+**3. Compile JURASSIC**
+
+For the default bundled-library build, no changes to the `Makefile` are
+usually required:
+
+    cd [jurassic_directory]/src
+    make [-j]
+    make check
+
+This uses the include and library paths prepared by `libs/build.sh`.
+
+**4. Optional: adjust the Makefile for non-default setups**
 
 Navigate to the source directory and adjust the `Makefile` as needed:
 
@@ -151,29 +163,14 @@ Pay special attention to the following settings:
   where the necessary libraries are located on your system.
 
 * By default, the JURASSIC binaries are linked dynamically. If you
-  used the bundled libs, set `LD_LIBRARY_PATH` before running any
-  JURASSIC binary:
-
-      export LD_LIBRARY_PATH=[jurassic_directory]/libs/build/lib:$LD_LIBRARY_PATH
-
-  If you installed system libraries in standard paths, this step is
-  not needed. If you prefer static linking, you can enable it by
-  setting the `STATIC` flag, which allows you to copy and use the
-  binaries on other machines. However, in some cases, either static
-  or dynamic linking may not be feasible or could cause specific issues.
-
-**4. Compile and test the installation**
-
-Once the Makefile is configured, compile the code using:
-
-    make [-j]
-
-To verify the installation, run the test suite:
-
-    make check
-
-This will execute a series of tests sequentially. If any test fails,
-check the log messages for further details.
+  used the bundled libs, ensure that your runtime environment can find
+  the shared libraries in `libs/build/lib`. The example scripts in
+  `projects/` set this automatically. If you installed system libraries
+  in standard paths, no additional setup is needed. If you prefer
+  static linking, you can enable it by setting the `STATIC` flag, which
+  allows you to copy and use the binaries on other machines. However,
+  in some cases, either static or dynamic linking may not be feasible
+  or could cause specific issues.
 
 ### Run the examples
 
@@ -188,7 +185,9 @@ Navigate to the projects directory:
 
 Running the examples provided in the `projects` directory is a convenient
 way to verify that the installation was successful. Example simulations
-are provided for three observation geometries:
+are provided for three observation geometries. The example scripts set
+the runtime library path for the bundled-library build automatically and
+use `gnuplot` to generate diagnostic plots:
 
     # Limb
     cd limb && ./run.sh

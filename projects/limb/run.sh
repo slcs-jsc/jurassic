@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# Set environment...
+export LD_LIBRARY_PATH=../../libs/build/lib:$LD_LIBRARY_PATH
+
 # Setup...
 jurassic=../../src
 
