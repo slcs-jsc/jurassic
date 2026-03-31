@@ -7944,10 +7944,13 @@ void write_matrix_nc(
   /* Write row metadata... */
   for (size_t i = 0; i < nr; i++) {
     const double nu = rowspace[0] == 'y' ? ctl->nu[rida[i]] : GSL_NAN;
-    const double time = rowspace[0] == 'y' ? obs->time[rira[i]] : atm->time[ripa[i]];
+    const double time =
+      rowspace[0] == 'y' ? obs->time[rira[i]] : atm->time[ripa[i]];
     const double z = rowspace[0] == 'y' ? obs->vpz[rira[i]] : atm->z[ripa[i]];
-    const double lon = rowspace[0] == 'y' ? obs->vplon[rira[i]] : atm->lon[ripa[i]];
-    const double lat = rowspace[0] == 'y' ? obs->vplat[rira[i]] : atm->lat[ripa[i]];
+    const double lon =
+      rowspace[0] == 'y' ? obs->vplon[rira[i]] : atm->lon[ripa[i]];
+    const double lat =
+      rowspace[0] == 'y' ? obs->vplat[rira[i]] : atm->lat[ripa[i]];
     char qbuf[LEN] = { 0 };
     size_t start2[2] = { (size_t) dataset, i };
     size_t count2[2] = { 1, 1 };
@@ -7976,10 +7979,13 @@ void write_matrix_nc(
   /* Write column metadata... */
   for (size_t j = 0; j < nc; j++) {
     const double nu = colspace[0] == 'y' ? ctl->nu[cida[j]] : GSL_NAN;
-    const double time = colspace[0] == 'y' ? obs->time[cira[j]] : atm->time[cipa[j]];
+    const double time =
+      colspace[0] == 'y' ? obs->time[cira[j]] : atm->time[cipa[j]];
     const double z = colspace[0] == 'y' ? obs->vpz[cira[j]] : atm->z[cipa[j]];
-    const double lon = colspace[0] == 'y' ? obs->vplon[cira[j]] : atm->lon[cipa[j]];
-    const double lat = colspace[0] == 'y' ? obs->vplat[cira[j]] : atm->lat[cipa[j]];
+    const double lon =
+      colspace[0] == 'y' ? obs->vplon[cira[j]] : atm->lon[cipa[j]];
+    const double lat =
+      colspace[0] == 'y' ? obs->vplat[cira[j]] : atm->lat[cipa[j]];
     char qbuf[LEN] = { 0 };
     size_t start2[2] = { (size_t) dataset, j };
     size_t count2[2] = { 1, 1 };
