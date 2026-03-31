@@ -4,19 +4,19 @@ The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast
 infrared radiative transfer model for the analysis of atmospheric
 remote sensing measurements.
 
-![logo](https://github.com/slcs-jsc/jurassic/blob/master/docs/logo/JURASSIC_320px.png)
+![logo](https://github.com/slcs-jsc/jurassic/blob/HEAD/docs/logo/JURASSIC_320px.png)
 
 [![release (latest by date)](https://img.shields.io/github/v/release/slcs-jsc/jurassic)](https://github.com/slcs-jsc/jurassic/releases)
-[![commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/slcs-jsc/jurassic/latest)](https://github.com/slcs-jsc/jurassic/commits/master)
-[![last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/master)
-[![top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
-[![code size](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
-[![repo size](https://img.shields.io/github/repo-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/master/src)
+[![commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/slcs-jsc/jurassic/latest)](https://github.com/slcs-jsc/jurassic/commits/HEAD)
+[![last commit](https://img.shields.io/github/last-commit/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/commits/HEAD)
+[![top language](https://img.shields.io/github/languages/top/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/HEAD/src)
+[![code size](https://img.shields.io/github/languages/code-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/HEAD/src)
+[![repo size](https://img.shields.io/github/repo-size/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/tree/HEAD/src)
 [![codacy](https://api.codacy.com/project/badge/Grade/aaba414eaf9e4e6784f13458a285ec2f)](https://app.codacy.com/gh/slcs-jsc/jurassic?utm_source=github.com&utm_medium=referral&utm_content=slcs-jsc/jurassic&utm_campaign=Badge_Grade_Settings)
-[![codecov](https://codecov.io/gh/slcs-jsc/jurassic/branch/master/graph/badge.svg?token=TYGWEJMOLI)](https://codecov.io/gh/slcs-jsc/jurassic)
-[![tests](https://img.shields.io/github/actions/workflow/status/slcs-jsc/jurassic/tests.yml?branch=master&label=tests)](https://github.com/slcs-jsc/jurassic/actions)
-[![docs](https://img.shields.io/github/actions/workflow/status/slcs-jsc/jurassic/docs.yml?branch=master&label=docs)](https://slcs-jsc.github.io/jurassic)
-[![license](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/blob/master/COPYING)
+[![codecov](https://codecov.io/gh/slcs-jsc/jurassic/graph/badge.svg?token=TYGWEJMOLI)](https://codecov.io/gh/slcs-jsc/jurassic)
+[![tests](https://img.shields.io/github/actions/workflow/status/slcs-jsc/jurassic/tests.yml?label=tests)](https://github.com/slcs-jsc/jurassic/actions)
+[![docs](https://img.shields.io/github/actions/workflow/status/slcs-jsc/jurassic/docs.yml?label=docs)](https://slcs-jsc.github.io/jurassic)
+[![license](https://img.shields.io/github/license/slcs-jsc/jurassic.svg)](https://github.com/slcs-jsc/jurassic/blob/HEAD/COPYING)
 [![doi](https://zenodo.org/badge/DOI/10.5281/zenodo.4572889.svg)](https://doi.org/10.5281/zenodo.4572889)
 [![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/slcs-jsc/jurassic/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/slcs-jsc/jurassic)
 
@@ -80,11 +80,11 @@ research, operational, and development workflows:
     ensuring reliable performance and scientific credibility across a
     wide range of atmospheric conditions.
 
-- **Hybrid parallelization for HPC environments**: JURASSIC enables
-    hybrid MPI–OpenMP parallelization for highly efficient execution
-    on multicore CPUs and HPC clusters, enabling the processing of
-    large datasets, global simulations, or long time series with
-    excellent scalability.
+- **Parallel execution for HPC environments**: JURASSIC supports
+    workflow-level parallelism, OpenMP acceleration across the tool
+    suite, and MPI-based task distribution for retrieval workloads.
+    This enables efficient execution on multicore CPUs and HPC
+    clusters for large datasets and campaign-style processing.
 
 - **Open source and community-oriented**: JURASSIC is distributed
     under the GNU General Public License (GPL), fostering
@@ -105,7 +105,7 @@ Mandatory build and runtime dependencies include:
 - GNU C compiler with OpenMP support
 
 A complete list of mandatory and optional dependencies is provided in the
-[dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
+[dependencies file](https://github.com/slcs-jsc/jurassic/blob/HEAD/DEPENDENCIES.md).
 
 ### Installation
 
@@ -137,7 +137,7 @@ This builds the bundled third-party libraries into `libs/build/`.
 Alternatively, if you prefer to use existing system libraries, install
 the required dependencies manually. Distribution-specific package
 information, optional tools, and version details are collected in the
-[dependencies file](https://github.com/slcs-jsc/jurassic/blob/master/DEPENDENCIES.md).
+[dependencies file](https://github.com/slcs-jsc/jurassic/blob/HEAD/DEPENDENCIES.md).
 
 **3. Compile JURASSIC**
 
@@ -148,7 +148,7 @@ usually required:
     make [-j]
     make check
 
-This uses the include and library paths prepared by `libs/build.sh`.
+This uses the include and library paths prepared in `libs/build/`.
 
 **4. Optional: adjust the Makefile for non-default setups**
 
@@ -250,7 +250,9 @@ Users may either download these datasets or generate custom lookup
 tables tailored to specific spectral bands or instrument configurations.
 Creating custom lookup tables requires access to a line-by-line
 radiative transfer model capable of calculating high-resolution
-absorption spectra of a homogeneous gas cell.
+absorption spectra of a homogeneous gas cell. In practice, the
+[Reference Forward Model (RFM) from the University of Oxford](https://eodg.atm.ox.ac.uk/RFM/)
+is commonly used for this purpose.
 
 ## Further information
 
@@ -281,7 +283,7 @@ scientific publications:
   versions, and will always resolve to the latest one. Specific DOIs
   for each release of JURASSIC can be found on the Zenodo website.
 
-Please see the [citation file](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff)
+Please see the [citation file](https://github.com/slcs-jsc/jurassic/blob/HEAD/CITATION.cff)
 for further information.
 
 ## Contributing
@@ -293,7 +295,7 @@ further questions or need support.
 ## License
 
 JURASSIC is distributed under the
-[GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/master/COPYING).
+[GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/HEAD/COPYING).
 
 ## Contact
 
