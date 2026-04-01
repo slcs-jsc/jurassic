@@ -29,6 +29,7 @@ int main(
   char *argv[]) {
 
   ctl_t ctl;
+  int prof_in, prof_out;
 
   static atm_t atm;
   static obs_t obs;
@@ -40,10 +41,15 @@ int main(
   /* Check arguments... */
   if (argc < 11)
     ERRMSG("Give parameters: <ctl> <atm> <obs> <rowspace> <colspace> <sort>"
-	   " <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out>");
+	   " <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out>"
+	   " [PROF_IN n] [PROF_OUT n]");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
+
+  /* Read dataset indices... */
+  prof_in = (int) scan_ctl(argc, argv, "PROF_IN", -1, "0", NULL);
+  prof_out = (int) scan_ctl(argc, argv, "PROF_OUT", -1, "0", NULL);
 
   /* Check matrix metadata... */
   if (argv[4][0] != 'x' && argv[4][0] != 'y')
@@ -77,13 +83,13 @@ int main(
 
   /* Read matrix data... */
   ctl.matrixfmt = atoi(argv[8]);
-  read_matrix(NULL, argv[7], &ctl, matrix);
+  read_matrix(NULL, argv[7], &ctl, matrix, prof_in);
 
   /* Write matrix data... */
   ctl.write_matrix = 1;
   ctl.matrixfmt = atoi(argv[10]);
   write_matrix(NULL, argv[9], &ctl, matrix, &atm, &obs, argv[4], argv[5],
-	       argv[6]);
+	       argv[6], prof_out);
 
   /* Free... */
   gsl_matrix_free(matrix);

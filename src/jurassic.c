@@ -4709,7 +4709,7 @@ void optimal_estimation(
   /* Set inverse a priori covariance S_a^-1... */
   set_cov_apr(ret, ctl, atm_apr, iqa, ipa, s_a_inv);
   write_matrix(ret->dir, "matrix_cov_apr.tab", ctl, s_a_inv,
-	       atm_i, obs_i, "x", "x", "r");
+	       atm_i, obs_i, "x", "x", "r", 0);
   matrix_invert(s_a_inv);
 
   /* Get measurement errors... */
@@ -4836,7 +4836,7 @@ void optimal_estimation(
     write_atm(ret->dir, "atm_final.tab", ctl, atm_i, 0);
     write_obs(ret->dir, "obs_final.tab", ctl, obs_i, 0);
     write_matrix(ret->dir, "matrix_kernel.tab", ctl, k_i,
-		 atm_i, obs_i, "y", "x", "r");
+		 atm_i, obs_i, "y", "x", "r", 0);
 
     /* Allocate... */
     gsl_matrix *auxnm = gsl_matrix_alloc(n, m);
@@ -4851,7 +4851,7 @@ void optimal_estimation(
     /* Compute retrieval covariance... */
     matrix_invert(cov);
     write_matrix(ret->dir, "matrix_cov_ret.tab", ctl, cov,
-		 atm_i, obs_i, "x", "x", "r");
+		 atm_i, obs_i, "x", "x", "r", 0);
     write_stddev("total", ret, ctl, atm_i, cov);
 
     /* Compute correlation matrix... */
@@ -4861,7 +4861,7 @@ void optimal_estimation(
 		       / sqrt(gsl_matrix_get(cov, i, i))
 		       / sqrt(gsl_matrix_get(cov, j, j)));
     write_matrix(ret->dir, "matrix_corr.tab", ctl, corr,
-		 atm_i, obs_i, "x", "x", "r");
+		 atm_i, obs_i, "x", "x", "r", 0);
 
     /* Compute gain matrix...
        G = cov * K^T * S_eps^{-1} */
@@ -4871,7 +4871,7 @@ void optimal_estimation(
 		       * POW2(gsl_vector_get(sig_eps_inv, j)));
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, cov, auxnm, 0.0, gain);
     write_matrix(ret->dir, "matrix_gain.tab", ctl, gain,
-		 atm_i, obs_i, "x", "y", "c");
+		 atm_i, obs_i, "x", "y", "c", 0);
 
     /* Compute retrieval error due to noise... */
     matrix_product(gain, sig_noise, 2, a);
@@ -4885,7 +4885,7 @@ void optimal_estimation(
        A = G * K ... */
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, gain, k_i, 0.0, a);
     write_matrix(ret->dir, "matrix_avk.tab", ctl, a,
-		 atm_i, obs_i, "x", "x", "r");
+		 atm_i, obs_i, "x", "x", "r", 0);
 
     /* Analyze averaging kernel matrix... */
     analyze_avk(ret, ctl, atm_i, iqa, ipa, a);
@@ -5606,7 +5606,8 @@ void read_matrix(
   const char *dirname,
   const char *filename,
   const ctl_t *ctl,
-  gsl_matrix *matrix) {
+  gsl_matrix *matrix,
+  int dataset) {
 
   /* Read ASCII data... */
   if (ctl->matrixfmt == 1)
@@ -5618,7 +5619,7 @@ void read_matrix(
 
   /* Read netCDF data... */
   else if (ctl->matrixfmt == 3)
-    read_matrix_nc(dirname, filename, matrix, 0);
+    read_matrix_nc(dirname, filename, matrix, dataset);
 
   /* Error... */
   else
@@ -7533,7 +7534,8 @@ void write_matrix(
   const obs_t *obs,
   const char *rowspace,
   const char *colspace,
-  const char *sort) {
+  const char *sort,
+  int dataset) {
 
   /* Check output flag... */
   if (!ctl->write_matrix)
@@ -7551,7 +7553,7 @@ void write_matrix(
   /* Write netCDF data... */
   else if (ctl->matrixfmt == 3)
     write_matrix_nc(dirname, filename, ctl, matrix, atm, obs,
-		    rowspace, colspace, sort, 0);
+		    rowspace, colspace, sort, dataset);
 
   /* Error... */
   else

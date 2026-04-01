@@ -134,7 +134,7 @@ void call_kernel(
   kernel(ctl, tbl, &atm, &obs, k);
 
   /* Write matrix to file... */
-  write_matrix(wrkdir, kernelfile, ctl, k, &atm, &obs, "y", "x", "r");
+  write_matrix(wrkdir, kernelfile, ctl, k, &atm, &obs, "y", "x", "r", 0);
 
   /* Free... */
   gsl_matrix_free(k);

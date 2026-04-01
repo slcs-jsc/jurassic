@@ -3449,7 +3449,8 @@ void read_matrix(
   const char *dirname,
   const char *filename,
   const ctl_t * ctl,
-  gsl_matrix * matrix);
+  gsl_matrix * matrix,
+  int dataset);
 
 /**
  * @brief Read a numerical matrix from an ASCII file.
@@ -4845,7 +4846,8 @@ void write_matrix(
   const obs_t * obs,
   const char *rowspace,
   const char *colspace,
-  const char *sort);
+  const char *sort,
+  int dataset);
 
 /**
  * @brief Write a fully annotated matrix (e.g., Jacobian or gain matrix) to an ASCII file.
