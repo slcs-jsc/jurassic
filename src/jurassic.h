@@ -4719,7 +4719,7 @@ void write_atm_bin(
  * This routine writes a single profile from an @ref atm_t structure into a
  * netCDF file using an unlimited record dimension. Multiple profiles can be
  * stored in the same file by calling this function repeatedly with increasing
- * @p profile indices.
+ * @p profile indices, provided they fit the file's fixed @c level dimension.
  *
  * The function creates the file if it does not exist (netCDF-4/HDF5) and
  * defines missing dimensions/variables on the fly. Existing definitions are
@@ -4744,6 +4744,8 @@ void write_atm_bin(
  *
  * Only the first @c atm->np elements along @c level are written for 2-D
  * variables. The effective number of levels is stored in @c nlev(profile).
+ * The file uses one shared fixed @c level dimension for all profiles, so any
+ * later profile must satisfy @c atm->np <= level.
  * (If a profile is overwritten with fewer levels than previously written, old
  * values above @c nlev may remain unless explicitly filled by the caller.)
  *

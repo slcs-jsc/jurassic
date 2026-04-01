@@ -7309,6 +7309,10 @@ void write_atm_nc(
 
   size_t level_max;
 
+  /* Check number of levels... */
+  if (atm->np < 1 || atm->np > NP)
+    ERRMSG("Number of levels out of range!");
+
   /* Open or create file... */
   if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR)
     NC(nc_create(filename, NC_NETCDF4, &ncid));

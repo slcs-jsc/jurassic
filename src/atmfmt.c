@@ -35,18 +35,28 @@ int main(
   /* Check arguments... */
   if (argc < 6)
     ERRMSG("Give parameters: <ctl> <atm_in> <atmfmt_in>"
-	   " <atm_out> <atmfmt_out>");
+	   " <atm_out> <atmfmt_out> [PROF_IN n] [PROF_OUT n]");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
 
+  /* Read profile indices... */
+  int prof_in = (int) scan_ctl(argc, argv, "PROF_IN", -1, "0", NULL);
+  int prof_out = (int) scan_ctl(argc, argv, "PROF_OUT", -1, "0", NULL);
+
   /* Read atmospheric data... */
   ctl.atmfmt = atoi(argv[3]);
-  read_atm(NULL, argv[2], &ctl, &atm);
+  if (ctl.atmfmt == 3)
+    read_atm_nc(argv[2], &ctl, &atm, prof_in);
+  else
+    read_atm(NULL, argv[2], &ctl, &atm);
 
   /* Write atmospheric data... */
   ctl.atmfmt = atoi(argv[5]);
-  write_atm(NULL, argv[4], &ctl, &atm);
+  if (ctl.atmfmt == 3)
+    write_atm_nc(argv[4], &ctl, &atm, prof_out);
+  else
+    write_atm(NULL, argv[4], &ctl, &atm);
 
   return EXIT_SUCCESS;
 }

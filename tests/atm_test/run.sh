@@ -31,10 +31,18 @@ $jurassic/atmfmt atm.ctl data/atm_asc2bin.bin 2 data/atm_bin2asc.tab 1
 $jurassic/atmfmt atm.ctl data/atm.tab 1 data/atm_asc2nc.nc 3
 $jurassic/atmfmt atm.ctl data/atm_asc2nc.nc 3 data/atm_nc2asc.tab 1
 
+# Test netCDF file-I/O with appending...
+$jurassic/atmfmt atm.ctl data/atm.tab 1 data/atm_append.nc 3
+$jurassic/atmfmt atm.ctl data/atm_hyd.tab 1 data/atm_append.nc 3 PROF_OUT 1
+$jurassic/atmfmt atm.ctl data/atm_append.nc 3 data/atm_append_p0.tab 1
+$jurassic/atmfmt atm.ctl data/atm_append.nc 3 data/atm_append_p1.tab 1 PROF_IN 1
+
 # Compare files...
 echo -e "\nCompare results..."
 error=0
 for f in $(ls data.ref/*.tab) ; do
     diff -q -s data/"$(basename "$f")" "$f" || error=1
 done
+diff -q -s data/atm_append_p0.tab data/atm.tab || error=1
+diff -q -s data/atm_append_p1.tab data/atm_hyd.tab || error=1
 exit $error
