@@ -122,7 +122,8 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
   Base path/prefix for emissivity lookup tables.
 
 - `TBLFMT` *(default: `1`)*  
-  Lookup table format selector.
+  Lookup table format selector:
+  `1` = ASCII, `2` = binary, `3` = netCDF.
 
 - `ATMFMT` *(default: `1`)*  
   Atmosphere file format selector.
@@ -133,6 +134,8 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
 > Notes:
 > - In the example projects, the formats and table layout are chosen to match the provided `atm.tab`, `obs.tab`,
 >   `rad.tab`, and associated lookup tables.
+> - For `TBLFMT = 3`, JURASSIC stores one netCDF file per emitter and one packed
+>   lookup-table variable per channel inside that file.
 > - If you introduce new formats, keep the “format selectors” consistent across applications.
 
 ### Hydrostasy

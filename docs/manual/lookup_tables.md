@@ -95,6 +95,17 @@ Common formats include:
 
 - **ASCII tables** (human-readable, larger, slower to read),
 - **binary tables** (compact, fast I/O, preferred for production use).
+- **netCDF tables** (portable container format; tables for one emitter are
+  grouped into a single file with one packed variable per channel).
+
+For the current table I/O implementation, the naming conventions are:
+
+- ASCII: one file per channel and emitter, for example
+  `TBLBASE_792.0000_CO2.tab`
+- binary: one file per channel and emitter, for example
+  `TBLBASE_792.0000_CO2.bin`
+- netCDF: one file per emitter, for example `TBLBASE_CO2.nc`, containing
+  one packed variable per channel such as `tbl_792.0000` and `tbl_832.0000`
 
 The example projects included with JURASSIC demonstrate working table
 layouts and formats and are the recommended starting point for new
@@ -161,6 +172,8 @@ RFM-based workflows where applicable.
 ## Performance considerations
 
 - Binary lookup tables significantly reduce I/O overhead.
+- netCDF lookup tables can be convenient when multiple channels for one
+  emitter should be bundled into a single file.
 - Keeping tables on fast local or parallel file systems improves
   performance for large runs.
 - Table reuse across many simulations amortizes the offline generation

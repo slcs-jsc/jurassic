@@ -95,8 +95,8 @@ For netCDF formats, they select the record along the unlimited dimension.
 Lookup tables are handled via the `tbl_t` / `tbl_gas_t` family and helpers such as:
 
 - Read/write:
-  - `read_tbl_asc`, `read_tbl_bin`, `read_tbl_gas*`
-  - `write_tbl_asc`, `write_tbl_bin`, `write_tbl_gas*`
+  - `read_tbl`, `read_tbl_asc`, `read_tbl_bin`, `read_tbl_nc_channel`
+  - `write_tbl`, `write_tbl_asc`, `write_tbl_bin`, `write_tbl_nc`
 - Interpolation utilities:
   - `intpol_tbl_ega`, `intpol_tbl_cga`, `intpol_tbl_eps`, `intpol_tbl_u`
   - `locate_tbl`
