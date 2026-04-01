@@ -26,6 +26,26 @@
 
 /*****************************************************************************/
 
+static const char *ret_output_target(
+  const ret_t *ret,
+  const char *shared_file,
+  const char *legacy_file,
+  const char **dirname,
+  int *profile) {
+
+  if (shared_file[0] != '-') {
+    *dirname = NULL;
+    *profile = ret->profile;
+    return shared_file;
+  }
+
+  *dirname = ret->dir;
+  *profile = 0;
+  return legacy_file;
+}
+
+/*****************************************************************************/
+
 void analyze_avk(
   const ret_t *ret,
   const ctl_t *ctl,
@@ -81,8 +101,15 @@ void analyze_avk(
 			 &atm_cont->sfeps[isf], &atm_res->sfeps[isf]);
 
   /* Write results to disk... */
-  write_atm(ret->dir, "atm_cont.tab", ctl, atm_cont, 0);
-  write_atm(ret->dir, "atm_res.tab", ctl, atm_res, 0);
+  const char *dirname;
+  int profile;
+  const char *filename =
+    ret_output_target(ret, ret->atm_cont_file, "atm_cont.tab",
+		      &dirname, &profile);
+  write_atm(dirname, filename, ctl, atm_cont, profile);
+  filename = ret_output_target(ret, ret->atm_res_file, "atm_res.tab",
+			       &dirname, &profile);
+  write_atm(dirname, filename, ctl, atm_res, profile);
 
   /* Free... */
   free(atm_cont);
@@ -4708,8 +4735,13 @@ void optimal_estimation(
 
   /* Set inverse a priori covariance S_a^-1... */
   set_cov_apr(ret, ctl, atm_apr, iqa, ipa, s_a_inv);
-  write_matrix(ret->dir, "matrix_cov_apr.tab", ctl, s_a_inv,
-	       atm_i, obs_i, "x", "x", "r", 0);
+  const char *dirname;
+  int profile;
+  const char *filename =
+    ret_output_target(ret, ret->matrix_cov_apr_file, "matrix_cov_apr.tab",
+		      &dirname, &profile);
+  write_matrix(dirname, filename, ctl, s_a_inv,
+	       atm_i, obs_i, "x", "x", "r", profile);
   matrix_invert(s_a_inv);
 
   /* Get measurement errors... */
@@ -4833,10 +4865,17 @@ void optimal_estimation(
   if (ret->err_ana) {
 
     /* Store results... */
-    write_atm(ret->dir, "atm_final.tab", ctl, atm_i, 0);
-    write_obs(ret->dir, "obs_final.tab", ctl, obs_i, 0);
-    write_matrix(ret->dir, "matrix_kernel.tab", ctl, k_i,
-		 atm_i, obs_i, "y", "x", "r", 0);
+    filename = ret_output_target(ret, ret->atm_final_file, "atm_final.tab",
+				 &dirname, &profile);
+    write_atm(dirname, filename, ctl, atm_i, profile);
+    filename = ret_output_target(ret, ret->obs_final_file, "obs_final.tab",
+				 &dirname, &profile);
+    write_obs(dirname, filename, ctl, obs_i, profile);
+    filename =
+      ret_output_target(ret, ret->matrix_kernel_file, "matrix_kernel.tab",
+			&dirname, &profile);
+    write_matrix(dirname, filename, ctl, k_i,
+		 atm_i, obs_i, "y", "x", "r", profile);
 
     /* Allocate... */
     gsl_matrix *auxnm = gsl_matrix_alloc(n, m);
@@ -4850,8 +4889,11 @@ void optimal_estimation(
 
     /* Compute retrieval covariance... */
     matrix_invert(cov);
-    write_matrix(ret->dir, "matrix_cov_ret.tab", ctl, cov,
-		 atm_i, obs_i, "x", "x", "r", 0);
+    filename =
+      ret_output_target(ret, ret->matrix_cov_ret_file, "matrix_cov_ret.tab",
+			&dirname, &profile);
+    write_matrix(dirname, filename, ctl, cov,
+		 atm_i, obs_i, "x", "x", "r", profile);
     write_stddev("total", ret, ctl, atm_i, cov);
 
     /* Compute correlation matrix... */
@@ -4860,8 +4902,10 @@ void optimal_estimation(
 	gsl_matrix_set(corr, i, j, gsl_matrix_get(cov, i, j)
 		       / sqrt(gsl_matrix_get(cov, i, i))
 		       / sqrt(gsl_matrix_get(cov, j, j)));
-    write_matrix(ret->dir, "matrix_corr.tab", ctl, corr,
-		 atm_i, obs_i, "x", "x", "r", 0);
+    filename = ret_output_target(ret, ret->matrix_corr_file,
+				 "matrix_corr.tab", &dirname, &profile);
+    write_matrix(dirname, filename, ctl, corr,
+		 atm_i, obs_i, "x", "x", "r", profile);
 
     /* Compute gain matrix...
        G = cov * K^T * S_eps^{-1} */
@@ -4870,8 +4914,10 @@ void optimal_estimation(
 	gsl_matrix_set(auxnm, i, j, gsl_matrix_get(k_i, j, i)
 		       * POW2(gsl_vector_get(sig_eps_inv, j)));
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, cov, auxnm, 0.0, gain);
-    write_matrix(ret->dir, "matrix_gain.tab", ctl, gain,
-		 atm_i, obs_i, "x", "y", "c", 0);
+    filename = ret_output_target(ret, ret->matrix_gain_file,
+				 "matrix_gain.tab", &dirname, &profile);
+    write_matrix(dirname, filename, ctl, gain,
+		 atm_i, obs_i, "x", "y", "c", profile);
 
     /* Compute retrieval error due to noise... */
     matrix_product(gain, sig_noise, 2, a);
@@ -4884,8 +4930,10 @@ void optimal_estimation(
     /* Compute averaging kernel matrix
        A = G * K ... */
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, gain, k_i, 0.0, a);
-    write_matrix(ret->dir, "matrix_avk.tab", ctl, a,
-		 atm_i, obs_i, "x", "x", "r", 0);
+    filename = ret_output_target(ret, ret->matrix_avk_file,
+				 "matrix_avk.tab", &dirname, &profile);
+    write_matrix(dirname, filename, ctl, a,
+		 atm_i, obs_i, "x", "x", "r", profile);
 
     /* Analyze averaging kernel matrix... */
     analyze_avk(ret, ctl, atm_i, iqa, ipa, a);
@@ -6107,6 +6155,31 @@ void read_ret(
   char *argv[],
   const ctl_t *ctl,
   ret_t *ret) {
+
+  /* Shared retrieval I/O... */
+  ret->profile = 0;
+  scan_ctl(argc, argv, "PROFLIST", -1, "-", ret->proflist);
+  scan_ctl(argc, argv, "ATM_APR_FILE", -1, "-", ret->atm_apr_file);
+  scan_ctl(argc, argv, "OBS_MEAS_FILE", -1, "-", ret->obs_meas_file);
+  scan_ctl(argc, argv, "ATM_FINAL_FILE", -1, "-", ret->atm_final_file);
+  scan_ctl(argc, argv, "OBS_FINAL_FILE", -1, "-", ret->obs_final_file);
+  scan_ctl(argc, argv, "MATRIX_COV_APR_FILE", -1, "-",
+	   ret->matrix_cov_apr_file);
+  scan_ctl(argc, argv, "MATRIX_KERNEL_FILE", -1, "-",
+	   ret->matrix_kernel_file);
+  scan_ctl(argc, argv, "MATRIX_COV_RET_FILE", -1, "-",
+	   ret->matrix_cov_ret_file);
+  scan_ctl(argc, argv, "MATRIX_CORR_FILE", -1, "-", ret->matrix_corr_file);
+  scan_ctl(argc, argv, "MATRIX_GAIN_FILE", -1, "-", ret->matrix_gain_file);
+  scan_ctl(argc, argv, "MATRIX_AVK_FILE", -1, "-", ret->matrix_avk_file);
+  scan_ctl(argc, argv, "ATM_ERR_TOTAL_FILE", -1, "-",
+	   ret->atm_err_total_file);
+  scan_ctl(argc, argv, "ATM_ERR_NOISE_FILE", -1, "-",
+	   ret->atm_err_noise_file);
+  scan_ctl(argc, argv, "ATM_ERR_FORMOD_FILE", -1, "-",
+	   ret->atm_err_formod_file);
+  scan_ctl(argc, argv, "ATM_CONT_FILE", -1, "-", ret->atm_cont_file);
+  scan_ctl(argc, argv, "ATM_RES_FILE", -1, "-", ret->atm_res_file);
 
   /* Iteration control... */
   ret->kernel_recomp =
@@ -8472,10 +8545,21 @@ void write_stddev(
 
   /* Write to disk... */
   char filename[LEN];
+  const char *dirname;
+  int profile;
+  const char *shared_file = "-";
   copy_atm(ctl, atm_aux, atm, 1);
   x2atm(ctl, x_aux, atm_aux);
+  if (strcmp(quantity, "total") == 0)
+    shared_file = ret->atm_err_total_file;
+  else if (strcmp(quantity, "noise") == 0)
+    shared_file = ret->atm_err_noise_file;
+  else if (strcmp(quantity, "formod") == 0)
+    shared_file = ret->atm_err_formod_file;
   sprintf(filename, "atm_err_%s.tab", quantity);
-  write_atm(ret->dir, filename, ctl, atm_aux, 0);
+  const char *target =
+    ret_output_target(ret, shared_file, filename, &dirname, &profile);
+  write_atm(dirname, target, ctl, atm_aux, profile);
 
   /* Free... */
   gsl_vector_free(x_aux);

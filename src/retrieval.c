@@ -29,6 +29,28 @@
 #endif
 
 /* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+static const char *ret_input_target(
+  const ret_t *ret,
+  const char *shared_file,
+  const char *legacy_file,
+  const char **dirname,
+  int *profile) {
+
+  if (shared_file[0] != '-') {
+    *dirname = NULL;
+    *profile = ret->profile;
+    return shared_file;
+  }
+
+  *dirname = ret->dir;
+  *profile = 0;
+  return legacy_file;
+}
+
+/* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
 
@@ -42,6 +64,7 @@ int main(
   static ret_t ret;
 
   FILE *dirlist;
+  FILE *proflist = NULL;
 
   /* MPI task distribution (optional)... */
   int ntask = -1;
@@ -69,28 +92,77 @@ int main(
   tbl_t *tbl = read_tbl(&ctl);
 
   /* Open directory list... */
-  if (!(dirlist = fopen(argv[2], "r")))
-    ERRMSG("Cannot open directory list!");
+  dirlist = NULL;
+  if (argv[2][0] != '-') {
+    if (!(dirlist = fopen(argv[2], "r")))
+      ERRMSG("Cannot open directory list!");
+  }
+  if (ret.proflist[0] != '-')
+    if (!(proflist = fopen(ret.proflist, "r")))
+      ERRMSG("Cannot open profile list!");
+  if (dirlist == NULL && proflist == NULL)
+    ERRMSG("Give a directory list or set PROFLIST!");
 
-  /* Loop over directories... */
-  while (fscanf(dirlist, "%4999s", ret.dir) != EOF) {
+  /* Loop over retrieval cases... */
+  while (1) {
+
+    int have_dir = 0, have_profile = 0;
+
+    if (dirlist != NULL)
+      have_dir = fscanf(dirlist, "%4999s", ret.dir) == 1;
+    else {
+      sprintf(ret.dir, ".");
+      have_dir = 1;
+    }
+
+    if (proflist != NULL)
+      have_profile = fscanf(proflist, "%d", &ret.profile) == 1;
+    else {
+      ret.profile = 0;
+      have_profile = 1;
+    }
+
+    if ((dirlist != NULL && !have_dir) || (proflist != NULL && !have_profile)) {
+      if ((dirlist != NULL && have_dir) || (proflist != NULL && have_profile))
+	ERRMSG("DIRLIST and PROFLIST have different lengths!");
+      break;
+    }
 
     /* Distribute directories with MPI (optional)... */
     if ((++ntask) % size != rank)
       continue;
 
     /* Write info... */
-    if (size > 1) {
+    if (size > 1 && proflist != NULL && dirlist != NULL) {
+      LOG(1,
+	  "\nRetrieve profile %d in directory %s on rank %d of %d...\n",
+	  ret.profile, ret.dir, rank + 1, size);
+    } else if (size > 1 && proflist != NULL) {
+      LOG(1, "\nRetrieve profile %d on rank %d of %d...\n",
+	  ret.profile, rank + 1, size);
+    } else if (size > 1) {
       LOG(1, "\nRetrieve in directory %s on rank %d of %d...\n",
 	  ret.dir, rank + 1, size);
+    } else if (proflist != NULL && dirlist != NULL) {
+      LOG(1, "\nRetrieve profile %d in directory %s...\n",
+	  ret.profile, ret.dir);
+    } else if (proflist != NULL) {
+      LOG(1, "\nRetrieve profile %d...\n", ret.profile);
     } else
       LOG(1, "\nRetrieve in directory %s...\n", ret.dir);
 
     /* Read atmospheric data... */
-    read_atm(ret.dir, "atm_apr.tab", &ctl, &atm_apr, 0);
+    const char *dirname;
+    int profile;
+    const char *filename =
+      ret_input_target(&ret, ret.atm_apr_file, "atm_apr.tab",
+		       &dirname, &profile);
+    read_atm(dirname, filename, &ctl, &atm_apr, profile);
 
     /* Read observation data... */
-    read_obs(ret.dir, "obs_meas.tab", &ctl, &obs_meas, 0);
+    filename = ret_input_target(&ret, ret.obs_meas_file, "obs_meas.tab",
+				&dirname, &profile);
+    read_obs(dirname, filename, &ctl, &obs_meas, profile);
 
     /* Run retrieval... */
     double chisq;
@@ -108,6 +180,10 @@ int main(
   TIMER("total", 3);
 
   /* Free... */
+  if (dirlist != NULL)
+    fclose(dirlist);
+  if (proflist != NULL)
+    fclose(proflist);
   tbl_free(&ctl, tbl);
 
 #ifdef MPI

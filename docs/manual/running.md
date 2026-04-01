@@ -104,6 +104,32 @@ estimation.
 Here, `dirlist.txt` is a plain text file containing one working directory
 per line. Each directory is processed independently.
 
+For shared netCDF workflows, retrieval can also read and write selected
+profile records from common files. In that mode, pass `-` instead of a
+directory list and provide:
+
+- `PROFLIST` — a text file with one profile index per line
+- shared input files such as `ATM_APR_FILE` and `OBS_MEAS_FILE`
+- optional shared output files such as `ATM_FINAL_FILE`,
+  `OBS_FINAL_FILE`, and `MATRIX_KERNEL_FILE`
+
+Example:
+
+```bash
+./retrieval run.ctl - \
+  PROFLIST proflist.txt \
+  ATMFMT 3 OBSFMT 3 MATRIXFMT 3 \
+  ATM_APR_FILE atm_apr.nc \
+  OBS_MEAS_FILE obs_meas.nc \
+  ATM_FINAL_FILE atm_final.nc \
+  OBS_FINAL_FILE obs_final.nc \
+  MATRIX_KERNEL_FILE matrix_kernel.nc
+```
+
+In that shared-file mode, atmospheric and observation data use the
+profile index from `PROFLIST`, while matrix products use the same index
+as the netCDF dataset selector.
+
 ### Inputs expected in each working directory
 
 - `atm_apr.tab` — a priori atmospheric state

@@ -178,6 +178,29 @@ These keywords are used by applications that perform optimal-estimation retrieva
 (These switches enable/disable optional retrieval degrees of freedom. Exact interpretation depends on the chosen
 retrieval application and state-vector definition.)
 
+**Shared retrieval file mode:**
+
+- `PROFLIST` *(default: `-`)*  
+  Optional text file containing one retrieval profile index per line.
+
+- `ATM_APR_FILE`, `OBS_MEAS_FILE` *(default: `-`)*  
+  Optional shared retrieval input files. When set together with
+  `PROFLIST`, the retrieval application reads atmospheric and
+  observation records from these files instead of from per-directory
+  `atm_apr.*` / `obs_meas.*` files.
+
+- `ATM_FINAL_FILE`, `OBS_FINAL_FILE` *(default: `-`)*  
+  Optional shared retrieval output files.
+
+- `MATRIX_COV_APR_FILE`, `MATRIX_KERNEL_FILE`, `MATRIX_COV_RET_FILE`,
+  `MATRIX_CORR_FILE`, `MATRIX_GAIN_FILE`, `MATRIX_AVK_FILE`
+  *(default: `-`)*  
+  Optional shared matrix output files.
+
+- `ATM_ERR_TOTAL_FILE`, `ATM_ERR_NOISE_FILE`, `ATM_ERR_FORMOD_FILE`,
+  `ATM_CONT_FILE`, `ATM_RES_FILE` *(default: `-`)*  
+  Optional shared atmospheric diagnostic output files.
+
 ### Output control
 
 - `WRITE_BBT` *(default: `0`)*  

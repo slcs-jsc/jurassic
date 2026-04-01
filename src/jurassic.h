@@ -1597,6 +1597,57 @@ typedef struct {
   /*! Working directory. */
   char dir[LEN];
 
+  /*! Profile index used for shared netCDF retrieval inputs and outputs. */
+  int profile;
+
+  /*! Optional file containing retrieval profile indices. */
+  char proflist[LEN];
+
+  /*! Optional shared atmospheric a priori input file. */
+  char atm_apr_file[LEN];
+
+  /*! Optional shared measured-observation input file. */
+  char obs_meas_file[LEN];
+
+  /*! Optional shared retrieved-atmosphere output file. */
+  char atm_final_file[LEN];
+
+  /*! Optional shared retrieved-observation output file. */
+  char obs_final_file[LEN];
+
+  /*! Optional shared a priori covariance output file. */
+  char matrix_cov_apr_file[LEN];
+
+  /*! Optional shared kernel matrix output file. */
+  char matrix_kernel_file[LEN];
+
+  /*! Optional shared retrieval covariance output file. */
+  char matrix_cov_ret_file[LEN];
+
+  /*! Optional shared correlation matrix output file. */
+  char matrix_corr_file[LEN];
+
+  /*! Optional shared gain matrix output file. */
+  char matrix_gain_file[LEN];
+
+  /*! Optional shared averaging-kernel matrix output file. */
+  char matrix_avk_file[LEN];
+
+  /*! Optional shared total retrieval-error output file. */
+  char atm_err_total_file[LEN];
+
+  /*! Optional shared noise retrieval-error output file. */
+  char atm_err_noise_file[LEN];
+
+  /*! Optional shared forward-model retrieval-error output file. */
+  char atm_err_formod_file[LEN];
+
+  /*! Optional shared averaging-kernel contribution output file. */
+  char atm_cont_file[LEN];
+
+  /*! Optional shared averaging-kernel resolution output file. */
+  char atm_res_file[LEN];
+
   /*! Re-computation of kernel matrix (number of iterations). */
   int kernel_recomp;
 
@@ -3780,30 +3831,37 @@ double read_obs_rfm(
  *    - `CONV_ITMAX` — maximum number of retrieval iterations.  
  *    - `CONV_DMIN` — minimum normalized step size for convergence.
  *
- * 2. **Error analysis flag**
+ * 2. **Optional shared-file retrieval I/O**
+ *    - `PROFLIST` — optional file containing profile indices for batch mode.
+ *    - `ATM_APR_FILE`, `OBS_MEAS_FILE` — optional shared input files.
+ *    - `ATM_FINAL_FILE`, `OBS_FINAL_FILE` — optional shared output files.
+ *    - `MATRIX_*_FILE`, `ATM_ERR_*_FILE`, `ATM_CONT_FILE`, `ATM_RES_FILE`
+ *      — optional shared diagnostic output files.
+ *
+ * 3. **Error analysis flag**
  *    - `ERR_ANA` — enables or disables retrieval error analysis (0 = off, 1 = on).
  *
- * 3. **Instrument and forward model errors**
+ * 4. **Instrument and forward model errors**
  *    - `ERR_FORMOD[id]` — relative (%) forward model uncertainty per detector channel.  
  *    - `ERR_NOISE[id]` — absolute instrument noise per detector channel  
  *      [W/(m²·sr·cm⁻¹)] or [K] depending on `write_bbt`.
  *
- * 4. **Pressure and temperature retrieval uncertainties**
+ * 5. **Pressure and temperature retrieval uncertainties**
  *    - `ERR_PRESS`, `ERR_PRESS_CZ`, `ERR_PRESS_CH` — pressure error [%] and correlation lengths [km].  
  *    - `ERR_TEMP`, `ERR_TEMP_CZ`, `ERR_TEMP_CH` — temperature error [K] and correlation lengths [km].
  *
- * 5. **Volume mixing ratio (VMR) errors**
+ * 6. **Volume mixing ratio (VMR) errors**
  *    - `ERR_Q[ig]`, `ERR_Q_CZ[ig]`, `ERR_Q_CH[ig]` — per gas [%] and correlation lengths [km].
  *
- * 6. **Extinction errors**
+ * 7. **Extinction errors**
  *    - `ERR_K[iw]`, `ERR_K_CZ[iw]`, `ERR_K_CH[iw]` — per spectral window [km⁻¹] and correlation lengths [km].
  *
- * 7. **Cloud retrieval parameters**
+ * 8. **Cloud retrieval parameters**
  *    - `ERR_CLZ` — cloud top height error [km].  
  *    - `ERR_CLDZ` — cloud depth error [km].  
  *    - `ERR_CLK[icl]` — cloud extinction error per frequency [km⁻¹].
  *
- * 8. **Surface retrieval parameters**
+ * 9. **Surface retrieval parameters**
  *    - `ERR_SFT` — surface temperature error [K].  
  *    - `ERR_SFEPS[isf]` — surface emissivity errors (dimensionless).
  *
