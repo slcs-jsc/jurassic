@@ -160,8 +160,9 @@ int main(
     read_atm(dirname, filename, &ctl, &atm_apr, profile);
 
     /* Read observation data... */
-    filename = ret_input_target(&ret, ret.shared_io_obs_meas_file, "obs_meas.tab",
-				&dirname, &profile);
+    filename =
+      ret_input_target(&ret, ret.shared_io_obs_meas_file, "obs_meas.tab",
+		       &dirname, &profile);
     read_obs(dirname, filename, &ctl, &obs_meas, profile);
 
     /* Run retrieval... */

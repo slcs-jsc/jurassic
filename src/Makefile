@@ -117,7 +117,7 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
-.PHONY : all check clean coverage cppcheck dist doxygen indent  install lizard mkdocs strip uninstall
+.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test strip uninstall
 
 all: $(EXC)
 	rm -f *~
@@ -133,7 +133,7 @@ jurassic.o: jurassic.c jurassic.h Makefile
 
 check: $(TESTS)
 
-$(TESTS): all
+$(TESTS) mpi_test: all
 	@(echo "\n===== Running \"$@\" ... =====") ; \
 	  cd ../tests/$@ ; bash ./run.sh \
 	  && (echo "\n===== Test \"$@\" passed! =====") \

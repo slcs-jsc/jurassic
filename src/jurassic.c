@@ -85,11 +85,10 @@ void analyze_avk(
   int profile;
   const char *filename =
     shared_io_output_target(ret, ret->shared_io_atm_cont_file, "atm_cont.tab",
-		      &dirname, &profile);
+			    &dirname, &profile);
   write_atm(dirname, filename, ctl, atm_cont, profile);
   filename = shared_io_output_target(ret, ret->shared_io_atm_res_file,
-                                     "atm_res.tab",
-			       &dirname, &profile);
+				     "atm_res.tab", &dirname, &profile);
   write_atm(dirname, filename, ctl, atm_res, profile);
 
   /* Free... */
@@ -4721,7 +4720,7 @@ void optimal_estimation(
   int profile;
   const char *filename =
     shared_io_output_target(ret, ret->shared_io_matrix_cov_apr_file,
-                            "matrix_cov_apr.tab", &dirname, &profile);
+			    "matrix_cov_apr.tab", &dirname, &profile);
   write_matrix(dirname, filename, ctl, s_a_inv,
 	       atm_i, obs_i, "x", "x", "r", profile);
   shared_io_unlock(lockfd);
@@ -4850,14 +4849,14 @@ void optimal_estimation(
     /* Store results... */
     lockfd = shared_io_lock(ret);
     filename = shared_io_output_target(ret, ret->shared_io_atm_final_file,
-                                       "atm_final.tab", &dirname, &profile);
+				       "atm_final.tab", &dirname, &profile);
     write_atm(dirname, filename, ctl, atm_i, profile);
     filename = shared_io_output_target(ret, ret->shared_io_obs_final_file,
-                                       "obs_final.tab", &dirname, &profile);
+				       "obs_final.tab", &dirname, &profile);
     write_obs(dirname, filename, ctl, obs_i, profile);
     filename =
       shared_io_output_target(ret, ret->shared_io_matrix_kernel_file,
-                              "matrix_kernel.tab", &dirname, &profile);
+			      "matrix_kernel.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, k_i,
 		 atm_i, obs_i, "y", "x", "r", profile);
 
@@ -4875,7 +4874,7 @@ void optimal_estimation(
     matrix_invert(cov);
     filename =
       shared_io_output_target(ret, ret->shared_io_matrix_cov_ret_file,
-                              "matrix_cov_ret.tab", &dirname, &profile);
+			      "matrix_cov_ret.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, cov,
 		 atm_i, obs_i, "x", "x", "r", profile);
     write_stddev("total", ret, ctl, atm_i, cov);
@@ -4887,7 +4886,7 @@ void optimal_estimation(
 		       / sqrt(gsl_matrix_get(cov, i, i))
 		       / sqrt(gsl_matrix_get(cov, j, j)));
     filename = shared_io_output_target(ret, ret->shared_io_matrix_corr_file,
-                                       "matrix_corr.tab", &dirname, &profile);
+				       "matrix_corr.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, corr,
 		 atm_i, obs_i, "x", "x", "r", profile);
 
@@ -4899,7 +4898,7 @@ void optimal_estimation(
 		       * POW2(gsl_vector_get(sig_eps_inv, j)));
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, cov, auxnm, 0.0, gain);
     filename = shared_io_output_target(ret, ret->shared_io_matrix_gain_file,
-                                       "matrix_gain.tab", &dirname, &profile);
+				       "matrix_gain.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, gain,
 		 atm_i, obs_i, "x", "y", "c", profile);
 
@@ -4915,7 +4914,7 @@ void optimal_estimation(
        A = G * K ... */
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, gain, k_i, 0.0, a);
     filename = shared_io_output_target(ret, ret->shared_io_matrix_avk_file,
-                                       "matrix_avk.tab", &dirname, &profile);
+				       "matrix_avk.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, a,
 		 atm_i, obs_i, "x", "x", "r", profile);
 
@@ -6188,15 +6187,15 @@ void read_ret(
   /* Shared retrieval I/O... */
   ret->shared_io_profile = 0;
   scan_ctl(argc, argv, "SHARED_IO_PROFLIST", -1, "-",
-           ret->shared_io_proflist);
+	   ret->shared_io_proflist);
   scan_ctl(argc, argv, "SHARED_IO_ATM_APR_FILE", -1, "-",
-           ret->shared_io_atm_apr_file);
+	   ret->shared_io_atm_apr_file);
   scan_ctl(argc, argv, "SHARED_IO_OBS_MEAS_FILE", -1, "-",
-           ret->shared_io_obs_meas_file);
+	   ret->shared_io_obs_meas_file);
   scan_ctl(argc, argv, "SHARED_IO_ATM_FINAL_FILE", -1, "-",
-           ret->shared_io_atm_final_file);
+	   ret->shared_io_atm_final_file);
   scan_ctl(argc, argv, "SHARED_IO_OBS_FINAL_FILE", -1, "-",
-           ret->shared_io_obs_final_file);
+	   ret->shared_io_obs_final_file);
   scan_ctl(argc, argv, "SHARED_IO_MATRIX_COV_APR_FILE", -1, "-",
 	   ret->shared_io_matrix_cov_apr_file);
   scan_ctl(argc, argv, "SHARED_IO_MATRIX_KERNEL_FILE", -1, "-",
@@ -6204,11 +6203,11 @@ void read_ret(
   scan_ctl(argc, argv, "SHARED_IO_MATRIX_COV_RET_FILE", -1, "-",
 	   ret->shared_io_matrix_cov_ret_file);
   scan_ctl(argc, argv, "SHARED_IO_MATRIX_CORR_FILE", -1, "-",
-           ret->shared_io_matrix_corr_file);
+	   ret->shared_io_matrix_corr_file);
   scan_ctl(argc, argv, "SHARED_IO_MATRIX_GAIN_FILE", -1, "-",
-           ret->shared_io_matrix_gain_file);
+	   ret->shared_io_matrix_gain_file);
   scan_ctl(argc, argv, "SHARED_IO_MATRIX_AVK_FILE", -1, "-",
-           ret->shared_io_matrix_avk_file);
+	   ret->shared_io_matrix_avk_file);
   scan_ctl(argc, argv, "SHARED_IO_ATM_ERR_TOTAL_FILE", -1, "-",
 	   ret->shared_io_atm_err_total_file);
   scan_ctl(argc, argv, "SHARED_IO_ATM_ERR_NOISE_FILE", -1, "-",
@@ -6216,9 +6215,9 @@ void read_ret(
   scan_ctl(argc, argv, "SHARED_IO_ATM_ERR_FORMOD_FILE", -1, "-",
 	   ret->shared_io_atm_err_formod_file);
   scan_ctl(argc, argv, "SHARED_IO_ATM_CONT_FILE", -1, "-",
-           ret->shared_io_atm_cont_file);
+	   ret->shared_io_atm_cont_file);
   scan_ctl(argc, argv, "SHARED_IO_ATM_RES_FILE", -1, "-",
-           ret->shared_io_atm_res_file);
+	   ret->shared_io_atm_res_file);
 }
 
 /*****************************************************************************/

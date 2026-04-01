@@ -36,6 +36,7 @@ tab/
 tests/atm_test/data/
 tests/formod_test/data/
 tests/mat_test/data/
+tests/mpi_test/data/
 tests/obs_test/data/
 tests/ret_test/data/
 tests/tbl_test/data/
