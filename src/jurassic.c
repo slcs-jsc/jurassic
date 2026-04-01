@@ -8249,6 +8249,10 @@ void write_obs_nc(
 
   size_t ray_max;
 
+  /* Check number of rays... */
+  if (obs->nr < 1 || obs->nr > NR)
+    ERRMSG("Number of ray paths out of range!");
+
   /* Open or create file... */
   if (nc_open(filename, NC_WRITE, &ncid) != NC_NOERR)
     NC(nc_create(filename, NC_NETCDF4, &ncid));

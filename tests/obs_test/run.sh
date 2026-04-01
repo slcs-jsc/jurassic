@@ -18,6 +18,7 @@ $jurassic/climatology obs.ctl data/atm.tab
 
 # Create observation geomtry...
 $jurassic/zenith obs.ctl data/obs.tab
+$jurassic/zenith obs.ctl data/obs_alt.tab OBSZ 9.0
 
 # Test raytracer...
 $jurassic/raytrace obs.ctl data/obs.tab data/atm.tab data/raytrace.tab LOSBASE data/los
@@ -33,6 +34,12 @@ $jurassic/obsfmt obs.ctl data/obs_asc2bin.bin 2 data/obs_bin2asc.tab 1
 $jurassic/obsfmt obs.ctl data/obs.tab 1 data/obs_asc2nc.nc 3
 $jurassic/obsfmt obs.ctl data/obs_asc2nc.nc 3 data/obs_nc2asc.tab 1
 
+# Test netCDF file-I/O with appending...
+$jurassic/obsfmt obs.ctl data/obs.tab 1 data/obs_append.nc 3
+$jurassic/obsfmt obs.ctl data/obs_alt.tab 1 data/obs_append.nc 3 PROF_OUT 1
+$jurassic/obsfmt obs.ctl data/obs_append.nc 3 data/obs_append_p0.tab 1
+$jurassic/obsfmt obs.ctl data/obs_append.nc 3 data/obs_append_p1.tab 1 PROF_IN 1
+
 
 
 
@@ -42,4 +49,6 @@ error=0
 for f in $(ls data.ref/*.tab) ; do
     diff -q -s data/"$(basename "$f")" "$f" || error=1
 done
+diff -q -s data/obs_append_p0.tab data/obs.tab || error=1
+diff -q -s data/obs_append_p1.tab data/obs_alt.tab || error=1
 exit $error
