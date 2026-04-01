@@ -27,24 +27,57 @@
   
   The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast
   infrared radiative transfer model for the analysis of atmospheric
-  remote sensing measurements.
+  remote sensing measurements. It combines efficient spectral
+  approximations with precomputed lookup tables to model gaseous
+  absorption, emission, and transmission in a form suitable for large
+  simulation ensembles, retrieval studies, and operational workflows.
 
-  \section Introduction
+  \section overview Overview
 
-  The source code of JURASSIC is available from the
-  [git repository](https://github.com/slcs-jsc/jurassic). Please see the
-  [README.md](https://github.com/slcs-jsc/jurassic/blob/master/README.md)
-  in the git repository for introductory information. More information
-  can be found in the [user manual](https://slcs-jsc.github.io/jurassic).
+  JURASSIC is designed to provide a practical balance between physical
+  realism and computational efficiency. Typical applications include
+  satellite radiance simulations, retrieval algorithm development,
+  sensitivity studies, and campaign-style processing of atmospheric
+  datasets.
+
+  The code base contains both forward-model components and retrieval
+  functionality. The public declarations in \c jurassic.h provide a
+  compact entry point to the core data structures and library
+  interfaces used throughout the project.
+
+  \section capabilities Key capabilities
+
+  - Fast infrared radiative transfer based on the Emissivity Growth
+    Approximation (EGA) and Curtis-Godson Approximation (CGA).
+  - Spectroscopic lookup tables derived from detailed line-by-line
+    calculations.
+  - Forward modelling for limb, nadir, and zenith observation
+    geometries.
+  - Optimal-estimation retrieval workflows for atmospheric state
+    variables.
+  - OpenMP and MPI support for large-scale and HPC-oriented use cases.
+
+  \section documentation Documentation map
+
+  Different parts of the documentation serve different purposes:
+
+  - The [README.md](https://github.com/slcs-jsc/jurassic/blob/HEAD/README.md)
+    gives a concise project introduction and installation overview.
+  - The [user manual](https://slcs-jsc.github.io/jurassic) covers
+    theory, configuration, workflows, performance, and validation.
+  - This Doxygen documentation focuses on the source-level API,
+    algorithms, and internal data structures.
+
+  Recommended starting points in the user manual are:
+
+  - [Overview](https://slcs-jsc.github.io/jurassic/overview)
+  - [Quickstart](https://slcs-jsc.github.io/jurassic/quickstart)
+  - [Code structure](https://slcs-jsc.github.io/jurassic/code_structure)
   
-  This doxygen manual contains information about the algorithms and
-  data structures used in the code. Please refer to the `jurassic.h'
-  documentation for a first overview.
-  
-  \section References
+  \section references References
   
   For citing the model in scientific publications, please see
-  [CITATION.cff](https://github.com/slcs-jsc/jurassic/blob/master/CITATION.cff)
+  [CITATION.cff](https://github.com/slcs-jsc/jurassic/blob/HEAD/CITATION.cff)
   and refer to the following papers:
   
   _Baumeister, P. F. and Hoffmann, L.: Fast infrared radiative
@@ -66,18 +99,18 @@
   Additional references are collected here:
   https://slcs-jsc.github.io/jurassic/references
   
-  \section License
+  \section license License
   
-  JURASSIC is being develop at the Jülich Supercomputing Centre,
+  JURASSIC is being developed at the Jülich Supercomputing Centre,
   Forschungszentrum Jülich, Germany.
   
   JURASSIC is distributed under the terms of the
-  [GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/master/COPYING).
+  [GNU General Public License v3.0](https://github.com/slcs-jsc/jurassic/blob/HEAD/COPYING).
   
-  \section Contributing
+  \section contributing Contributing
   
-  We are interested in supporting operational and research
-  applications with JURASSIC.
+  Contributions that improve scientific robustness, documentation,
+  portability, performance, and usability are welcome.
   
   You can submit bug reports or feature requests on the
   [issue tracker](https://github.com/slcs-jsc/jurassic/issues).
@@ -88,7 +121,7 @@
   Please do not hesitate to contact us if you have any questions or
   need assistance.
   
-  \section Contact
+  \section contact Contact
   
   Dr. Lars Hoffmann
   
@@ -4420,46 +4453,6 @@ void shared_io_unlock(
  */
 const char *shared_io_output_file(
   const ret_t * ret);
-
-/**
- * @brief Compute the solar zenith angle for a given time and location.
- *
- * Calculates the apparent solar zenith angle (SZA) [deg] based on
- * the observer’s longitude, latitude, and time since 2000-01-01 T00:00 Z.
- *
- * @param[in] sec  Seconds since 2000-01-01 T00:00 Z.
- * @param[in] lon  Observer longitude [deg].
- * @param[in] lat  Observer latitude [deg].
- *
- * @return Solar zenith angle [deg].
- *
- * @details
- * - Implements a simplified astronomical model based on the Sun’s
- *   apparent ecliptic longitude and the Earth’s mean obliquity.
- * - Uses the following steps:
- *   1. Compute the number of days since J2000 noon epoch.
- *   2. Determine the Sun’s apparent ecliptic longitude and declination.
- *   3. Compute the local hour angle from Greenwich Mean Sidereal Time.
- *   4. Derive the solar zenith angle via spherical trigonometry:
- *      @f[
- *      \cos(\theta) = \sin(\varphi)\sin(\delta)
- *                   + \cos(\varphi)\cos(\delta)\cos(h)
- *      @f]
- *   where @f$\varphi@f$ = latitude, @f$\delta@f$ = declination, @f$h@f$ = hour angle.
- *
- * @see formod_pencil, ctl_t::sfsza
- *
- * @note
- * - Neglects atmospheric refraction and seasonal perturbations.
- * - Accuracy is sufficient for radiative transfer applications (<0.1°).
- * - Longitude positive eastward, latitude positive northward.
- *
- * @author Lars Hoffmann
- */
-double sza(
-  double sec,
-  double lon,
-  double lat);
 
 /**
  * @brief Determine the tangent point along a line of sight (LOS).
