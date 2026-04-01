@@ -49,10 +49,10 @@ UNIFIED ?= 0
 # -----------------------------------------------------------------------------
 
 # Get git version...
-VERSION ?= $(shell git describe --abbrev=6 --dirty --always --tags)
+VERSION ?= $(shell git describe --abbrev=6 --dirty --always --tags 2>/dev/null || echo unknown)
 
 # CFLAGS...
-CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" -DHAVE_INLINE -DGSL_DISABLE_DEPRACTED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
+CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" -DHAVE_INLINE -DGSL_DISABLE_DEPRECATED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
 
 # LDFLAGS...
 LDFLAGS += $(LIBDIR) -lgsl -lgslcblas -lnetcdf -lm
@@ -117,7 +117,7 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
-.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test strip uninstall
+.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test strip uninstall $(TESTS)
 
 all: $(EXC)
 	rm -f *~
@@ -143,17 +143,20 @@ clean:
 	rm -rf $(EXC) *.o *.gcda *.gcno *.gcov coverage* *~
 
 coverage:
-	lcov --capture --directory . --output-file=coverage.info ; \
-	genhtml coverage.info --legend --frames --output-directory=coverage ; \
-	gcov -abcfu *.c ; echo "FINISHED" || true
+	$(MAKE) clean
+	$(MAKE) COV=1 all
+	$(MAKE) COV=1 check
+	lcov --capture --directory . --output-file=coverage.info
+	genhtml coverage.info --legend --frames --output-directory=coverage
+	gcov -abcfu *.c || true
 
 cppcheck:
 	cppcheck --enable=all ./
 
 dist:
-	cd ..  && tar cvfz jurassic_$(VERSION).tgz bin/* \
-          docs/Doxyfile libs/build.sh libs/*bz2 \
-          projects/limb/* projects/nadir/* src/* tests/*
+	cd .. && git ls-files -z | tar --null --files-from=- \
+          --transform 's|^|jurassic_$(VERSION)/|' \
+          -czvf jurassic_$(VERSION).tgz
 
 doxygen:
 	cd ../docs && doxygen
@@ -161,7 +164,7 @@ doxygen:
 indent:
 	indent -br -brf -brs -bfda -ce -cdw -lp -npcs -npsl *.c *.h
 
-install:
+install: all
 	mkdir -p $(DESTDIR) && cp $(EXC) $(DESTDIR)
 
 lizard:
