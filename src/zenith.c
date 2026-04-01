@@ -128,7 +128,7 @@ int main(
   }
 
   /* Write observation data... */
-  write_obs(NULL, argv[2], &ctl, &obs);
+  write_obs(NULL, argv[2], &ctl, &obs, 0);
 
   return EXIT_SUCCESS;
 }

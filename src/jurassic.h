@@ -3229,7 +3229,8 @@ void read_atm(
   const char *dirname,
   const char *filename,
   const ctl_t * ctl,
-  atm_t * atm);
+  atm_t * atm,
+  int profile);
 
 /**
  * @brief Read atmospheric data in ASCII format.
@@ -3573,7 +3574,8 @@ void read_obs(
   const char *dirname,
   const char *filename,
   const ctl_t * ctl,
-  obs_t * obs);
+  obs_t * obs,
+  int profile);
 
 /**
  * @brief Read ASCII-formatted observation data from a file.
@@ -4597,7 +4599,8 @@ void write_atm(
   const char *dirname,
   const char *filename,
   const ctl_t * ctl,
-  const atm_t * atm);
+  const atm_t * atm,
+  int profile);
 
 /**
  * @brief Write atmospheric data to an ASCII file.
@@ -4996,7 +4999,8 @@ void write_obs(
   const char *dirname,
   const char *filename,
   const ctl_t * ctl,
-  const obs_t * obs);
+  const obs_t * obs,
+  int profile);
 
 /**
  * @brief Write observation data to an ASCII text file.

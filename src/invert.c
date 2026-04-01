@@ -344,7 +344,7 @@ int main(
   kernel(&ctl, tbl, &atm2, &obs, k);
 
   /* Write atmospheric data... */
-  write_atm(NULL, argv[4], &ctl, &atm);
+  write_atm(NULL, argv[4], &ctl, &atm, 0);
 
   /* Write matrix to file... */
   write_matrix(NULL, argv[5], &ctl, k, &atm2, &obs, "y", "x", "r");

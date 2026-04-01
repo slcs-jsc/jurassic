@@ -75,17 +75,17 @@ int main(
   static obs_t obs;
 
   /* Read observation geometry... */
-  read_obs(NULL, argv[2], &ctl, &obs);
+  read_obs(NULL, argv[2], &ctl, &obs, 0);
 
   /* Read atmospheric data... */
-  read_atm(NULL, argv[3], &ctl, &atm);
+  read_atm(NULL, argv[3], &ctl, &atm, 0);
 
   /* Call forward model... */
   jur_unified_init(argc, argv);
   jur_unified_formod_multiple_packages(&atm, &obs, 1, NULL);
 
   /* Save radiance data... */
-  write_obs(NULL, argv[4], &ctl, &obs);
+  write_obs(NULL, argv[4], &ctl, &obs, 0);
 
 #else
 
@@ -154,10 +154,10 @@ void call_formod(
   static obs_t obs, obs2;
 
   /* Read atmospheric data... */
-  read_atm(wrkdir, atmfile, ctl, &atm);
+  read_atm(wrkdir, atmfile, ctl, &atm, 0);
 
   /* Read observation geometry... */
-  read_obs(wrkdir, obsfile, ctl, &obs);
+  read_obs(wrkdir, obsfile, ctl, &obs, 0);
 
   /* Compute multiple profiles... */
   if (task[0] == 'p' || task[0] == 'P') {
@@ -207,7 +207,7 @@ void call_formod(
     }
 
     /* Write radiance data... */
-    write_obs(wrkdir, radfile, ctl, &obs);
+    write_obs(wrkdir, radfile, ctl, &obs, 0);
   }
 
   /* Compute single profile... */
@@ -217,13 +217,13 @@ void call_formod(
     formod(ctl, tbl, &atm, &obs);
 
     /* Save radiance data... */
-    write_obs(wrkdir, radfile, ctl, &obs);
+    write_obs(wrkdir, radfile, ctl, &obs, 0);
 
     /* Evaluate results... */
     if (obsref[0] != '-') {
 
       /* Read reference data... */
-      read_obs(wrkdir, obsref, ctl, &obs2);
+      read_obs(wrkdir, obsref, ctl, &obs2, 0);
 
       /* Calculate relative errors... */
       double mre[ND], sdre[ND], minre[ND], maxre[ND];
@@ -269,7 +269,7 @@ void call_formod(
 
 	/* Save radiance data... */
 	sprintf(filename, "%s.%s", radfile, ctl->emitter[ig]);
-	write_obs(wrkdir, filename, ctl, &obs);
+	write_obs(wrkdir, filename, ctl, &obs, 0);
       }
 
       /* Copy atmospheric data... */
@@ -285,7 +285,7 @@ void call_formod(
 
       /* Save radiance data... */
       sprintf(filename, "%s.EXTINCT", radfile);
-      write_obs(wrkdir, filename, ctl, &obs);
+      write_obs(wrkdir, filename, ctl, &obs, 0);
     }
 
     /* Measure CPU-time... */

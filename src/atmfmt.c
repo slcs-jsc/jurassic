@@ -46,17 +46,11 @@ int main(
 
   /* Read atmospheric data... */
   ctl.atmfmt = atoi(argv[3]);
-  if (ctl.atmfmt == 3)
-    read_atm_nc(argv[2], &ctl, &atm, prof_in);
-  else
-    read_atm(NULL, argv[2], &ctl, &atm);
+  read_atm(NULL, argv[2], &ctl, &atm, prof_in);
 
   /* Write atmospheric data... */
   ctl.atmfmt = atoi(argv[5]);
-  if (ctl.atmfmt == 3)
-    write_atm_nc(argv[4], &ctl, &atm, prof_out);
-  else
-    write_atm(NULL, argv[4], &ctl, &atm);
+  write_atm(NULL, argv[4], &ctl, &atm, prof_out);
 
   return EXIT_SUCCESS;
 }

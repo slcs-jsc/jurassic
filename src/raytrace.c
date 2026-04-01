@@ -50,10 +50,10 @@ int main(
   scan_ctl(argc, argv, "LOSBASE", -1, "los", losbase);
 
   /* Read observation geometry... */
-  read_obs(NULL, argv[2], &ctl, &obs);
+  read_obs(NULL, argv[2], &ctl, &obs, 0);
 
   /* Read atmospheric data... */
-  read_atm(NULL, argv[3], &ctl, &atm);
+  read_atm(NULL, argv[3], &ctl, &atm, 0);
 
   /* Write info... */
   LOG(1, "Write raytrace data: %s", argv[4]);

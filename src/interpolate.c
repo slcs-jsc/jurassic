@@ -43,8 +43,8 @@ int main(
   read_ctl(argc, argv, &ctl);
 
   /* Read atmospheric data... */
-  read_atm(NULL, argv[2], &ctl, &atm_in);
-  read_atm(NULL, argv[3], &ctl, &atm_pts);
+  read_atm(NULL, argv[2], &ctl, &atm_in, 0);
+  read_atm(NULL, argv[3], &ctl, &atm_pts, 0);
 
   /* Interpolate atmospheric data... */
   for (int ip = 0; ip < atm_pts.np; ip++) {
@@ -57,7 +57,7 @@ int main(
   }
 
   /* Save interpolated data... */
-  write_atm(NULL, argv[4], &ctl, &atm_pts);
+  write_atm(NULL, argv[4], &ctl, &atm_pts, 0);
 
   return EXIT_SUCCESS;
 }

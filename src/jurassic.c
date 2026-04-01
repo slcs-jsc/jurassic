@@ -81,8 +81,8 @@ void analyze_avk(
 			 &atm_cont->sfeps[isf], &atm_res->sfeps[isf]);
 
   /* Write results to disk... */
-  write_atm(ret->dir, "atm_cont.tab", ctl, atm_cont);
-  write_atm(ret->dir, "atm_res.tab", ctl, atm_res);
+  write_atm(ret->dir, "atm_cont.tab", ctl, atm_cont, 0);
+  write_atm(ret->dir, "atm_res.tab", ctl, atm_res, 0);
 
   /* Free... */
   free(atm_cont);
@@ -4833,8 +4833,8 @@ void optimal_estimation(
   if (ret->err_ana) {
 
     /* Store results... */
-    write_atm(ret->dir, "atm_final.tab", ctl, atm_i);
-    write_obs(ret->dir, "obs_final.tab", ctl, obs_i);
+    write_atm(ret->dir, "atm_final.tab", ctl, atm_i, 0);
+    write_obs(ret->dir, "obs_final.tab", ctl, obs_i, 0);
     write_matrix(ret->dir, "matrix_kernel.tab", ctl, k_i,
 		 atm_i, obs_i, "y", "x", "r");
 
@@ -5156,7 +5156,8 @@ void read_atm(
   const char *dirname,
   const char *filename,
   const ctl_t *ctl,
-  atm_t *atm) {
+  atm_t *atm,
+  int profile) {
 
   /* Init... */
   atm->np = 0;
@@ -5181,7 +5182,7 @@ void read_atm(
 
   /* Read netCDF data... */
   else if (ctl->atmfmt == 3)
-    read_atm_nc(file, ctl, atm, 0);
+    read_atm_nc(file, ctl, atm, profile);
 
   /* Check number of points... */
   if (atm->np < 1)
@@ -5771,7 +5772,8 @@ void read_obs(
   const char *dirname,
   const char *filename,
   const ctl_t *ctl,
-  obs_t *obs) {
+  obs_t *obs,
+  int profile) {
 
   /* Set filename... */
   char file[LEN];
@@ -5793,7 +5795,7 @@ void read_obs(
 
   /* Read netCDF data... */
   else if (ctl->obsfmt == 3)
-    read_obs_nc(file, ctl, obs, 0);
+    read_obs_nc(file, ctl, obs, profile);
 
   /* Check number of points... */
   if (obs->nr < 1)
@@ -7080,7 +7082,8 @@ void write_atm(
   const char *dirname,
   const char *filename,
   const ctl_t *ctl,
-  const atm_t *atm) {
+  const atm_t *atm,
+  int profile) {
 
   /* Set filename... */
   char file[LEN];
@@ -7102,7 +7105,7 @@ void write_atm(
 
   /* Write netCDF data... */
   else if (ctl->atmfmt == 3)
-    write_atm_nc(file, ctl, atm, 0);
+    write_atm_nc(file, ctl, atm, profile);
 
   /* Error... */
   else
@@ -8046,7 +8049,8 @@ void write_obs(
   const char *dirname,
   const char *filename,
   const ctl_t *ctl,
-  const obs_t *obs) {
+  const obs_t *obs,
+  int profile) {
 
   /* Set filename... */
   char file[LEN];
@@ -8068,7 +8072,7 @@ void write_obs(
 
   /* Write netCDF data... */
   else if (ctl->obsfmt == 3)
-    write_obs_nc(file, ctl, obs, 0);
+    write_obs_nc(file, ctl, obs, profile);
 
   /* Write info... */
   double mini, maxi;
@@ -8469,7 +8473,7 @@ void write_stddev(
   copy_atm(ctl, atm_aux, atm, 1);
   x2atm(ctl, x_aux, atm_aux);
   sprintf(filename, "atm_err_%s.tab", quantity);
-  write_atm(ret->dir, filename, ctl, atm_aux);
+  write_atm(ret->dir, filename, ctl, atm_aux, 0);
 
   /* Free... */
   gsl_vector_free(x_aux);

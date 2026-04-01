@@ -105,7 +105,7 @@ int main(
     atm.sfeps[isf] = sfeps[isf];
 
   /* Write data to disk... */
-  write_atm(NULL, argv[2], &ctl, &atm);
+  write_atm(NULL, argv[2], &ctl, &atm, 0);
 
   return EXIT_SUCCESS;
 }

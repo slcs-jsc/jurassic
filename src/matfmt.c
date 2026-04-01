@@ -55,11 +55,11 @@ int main(
 
   /* Read atmospheric data if needed... */
   if (argv[4][0] == 'x' || argv[5][0] == 'x')
-    read_atm(NULL, argv[2], &ctl, &atm);
+    read_atm(NULL, argv[2], &ctl, &atm, 0);
 
   /* Read observation data if needed... */
   if (argv[4][0] == 'y' || argv[5][0] == 'y')
-    read_obs(NULL, argv[3], &ctl, &obs);
+    read_obs(NULL, argv[3], &ctl, &obs, 0);
 
   /* Determine matrix size... */
   if (argv[4][0] == 'y')

@@ -112,10 +112,10 @@ void call_kernel(
   static obs_t obs;
 
   /* Read observation geometry... */
-  read_obs(wrkdir, obsfile, ctl, &obs);
+  read_obs(wrkdir, obsfile, ctl, &obs, 0);
 
   /* Read atmospheric data... */
-  read_atm(wrkdir, atmfile, ctl, &atm);
+  read_atm(wrkdir, atmfile, ctl, &atm, 0);
 
   /* Get sizes... */
   const size_t n = atm2x(ctl, &atm, NULL, NULL, NULL);

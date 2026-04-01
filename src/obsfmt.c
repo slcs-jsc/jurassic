@@ -46,17 +46,11 @@ int main(
 
   /* Read observation data... */
   ctl.obsfmt = atoi(argv[3]);
-  if (ctl.obsfmt == 3)
-    read_obs_nc(argv[2], &ctl, &obs, prof_in);
-  else
-    read_obs(NULL, argv[2], &ctl, &obs);
+  read_obs(NULL, argv[2], &ctl, &obs, prof_in);
 
   /* Write observation data... */
   ctl.obsfmt = atoi(argv[5]);
-  if (ctl.obsfmt == 3)
-    write_obs_nc(argv[4], &ctl, &obs, prof_out);
-  else
-    write_obs(NULL, argv[4], &ctl, &obs);
+  write_obs(NULL, argv[4], &ctl, &obs, prof_out);
 
   return EXIT_SUCCESS;
 }

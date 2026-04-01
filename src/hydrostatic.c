@@ -43,13 +43,13 @@ int main(
     ERRMSG("Set HYDZ>=0!");
 
   /* Read atmospheric data... */
-  read_atm(NULL, argv[2], &ctl, &atm);
+  read_atm(NULL, argv[2], &ctl, &atm, 0);
 
   /* Build atmosphere based on hydrostatic equilibrium... */
   hydrostatic(&ctl, &atm);
 
   /* Write atmospheric data... */
-  write_atm(NULL, argv[3], &ctl, &atm);
+  write_atm(NULL, argv[3], &ctl, &atm, 0);
 
   return EXIT_SUCCESS;
 }

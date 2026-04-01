@@ -87,10 +87,10 @@ int main(
       LOG(1, "\nRetrieve in directory %s...\n", ret.dir);
 
     /* Read atmospheric data... */
-    read_atm(ret.dir, "atm_apr.tab", &ctl, &atm_apr);
+    read_atm(ret.dir, "atm_apr.tab", &ctl, &atm_apr, 0);
 
     /* Read observation data... */
-    read_obs(ret.dir, "obs_meas.tab", &ctl, &obs_meas);
+    read_obs(ret.dir, "obs_meas.tab", &ctl, &obs_meas, 0);
 
     /* Run retrieval... */
     double chisq;

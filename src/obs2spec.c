@@ -50,7 +50,7 @@ int main(
   read_ctl(argc, argv, &ctl);
 
   /* Read observation geometry... */
-  read_obs(NULL, argv[2], &ctl, obs);
+  read_obs(NULL, argv[2], &ctl, obs, 0);
 
   /* Write info... */
   LOG(1, "Write spectra: %s", argv[3]);
