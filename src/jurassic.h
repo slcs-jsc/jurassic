@@ -3215,6 +3215,10 @@ void raytrace(
  *        the values read from the file. The structure must be allocated
  *        before calling this function.
  *
+ * @param profile
+ *        Zero-based profile index for netCDF input. Ignored for ASCII and
+ *        binary formats.
+ *
  * @note The function aborts execution using ERRMSG on critical errors,
  *       such as failure to open the file, unknown file format, or absence
  *       of readable data.
@@ -3440,6 +3444,8 @@ void read_ctl(
  * @param[in]  filename  Name of the matrix file to read.
  * @param[in]  ctl       Control structure defining the matrix file format.
  * @param[out] matrix    Pointer to the GSL matrix to be filled with values.
+ * @param[in]  dataset   Zero-based dataset index for netCDF input. Ignored for
+ *                       ASCII and binary formats.
  *
  * @see read_matrix_asc(), read_matrix_bin(), read_matrix_nc()
  *
@@ -3559,6 +3565,8 @@ void read_matrix_nc(
  * @param[in] filename Name of the observation file to read.
  * @param[in] ctl      Pointer to a control structure specifying file format and other options.
  * @param[out] obs     Pointer to an observation structure where the data will be stored.
+ * @param[in] profile  Zero-based profile index for netCDF input. Ignored for
+ *                     ASCII and binary formats.
  *
  * @note The function terminates with an error message if the file cannot be
  *       opened, the observation format is unknown, or no valid data is read.
@@ -4591,6 +4599,10 @@ void timer(
  *        Pointer to the atmospheric data structure whose contents will be written.
  *        All required fields must be initialized and contain `atm->np` valid data points.
  *
+ * @param profile
+ *        Zero-based profile index for netCDF output. Ignored for ASCII and
+ *        binary formats.
+ *
  * @note The function aborts execution using `ERRMSG` if the file cannot be created
  *       or if an unsupported output format is requested.
  *
@@ -4833,6 +4845,18 @@ void write_atm_rfm(
  * Supported formats are ASCII (`MATRIXFMT=1`), binary (`MATRIXFMT=2`), and
  * netCDF (`MATRIXFMT=3`).
  *
+ * @param[in] dirname  Output directory path. If `NULL`, only @p filename is used.
+ * @param[in] filename Output matrix file name.
+ * @param[in] ctl      Control structure defining output format and metadata interpretation.
+ * @param[in] matrix   Matrix to be written.
+ * @param[in] atm      Atmospheric reference state used for state-space metadata.
+ * @param[in] obs      Observation reference state used for measurement-space metadata.
+ * @param[in] rowspace Row-space selector passed to the backend writer.
+ * @param[in] colspace Column-space selector passed to the backend writer.
+ * @param[in] sort     Sort-order selector passed to the backend writer.
+ * @param[in] dataset  Zero-based dataset index for netCDF output. Ignored for
+ *                     ASCII and binary formats.
+ *
  * @see write_matrix_asc(), write_matrix_bin(), write_matrix_nc()
  *
  * @author Lars Hoffmann
@@ -4986,6 +5010,8 @@ void write_matrix_nc(
  * @param[in] ctl      Control structure specifying output format, spectral
  *                     channel configuration, and brightness-temperature mode.
  * @param[in] obs      Observation structure containing the data to be written.
+ * @param[in] profile  Zero-based profile index for netCDF output. Ignored for
+ *                     ASCII and binary formats.
  *
  * @note This is a C function. The output file is always overwritten if it
  *       already exists.

@@ -74,12 +74,18 @@ Typical project-style tools rely on table-based I/O helpers:
 - Control / configuration:
   - `read_ctl`, `scan_ctl`
 - Atmosphere and observation:
-  - `read_atm`, `write_atm`
-  - `read_obs`, `write_obs`
+  - `read_atm(dirname, filename, ctl, atm, profile)`
+  - `write_atm(dirname, filename, ctl, atm, profile)`
+  - `read_obs(dirname, filename, ctl, obs, profile)`
+  - `write_obs(dirname, filename, ctl, obs, profile)`
 - Retrieval configuration:
   - `read_ret`, `write_ret` (where applicable)
 - Generic helpers:
-  - `write_matrix` (often used for kernels / Jacobians)
+  - `read_matrix(dirname, filename, ctl, matrix, dataset)`
+  - `write_matrix(dirname, filename, ctl, matrix, atm, obs, rowspace, colspace, sort, dataset)`
+
+For ASCII and binary formats, the `profile` / `dataset` arguments are ignored.
+For netCDF formats, they select the record along the unlimited dimension.
 
 > Tip: the small example tools (`formod.c`, `kernel.c`, `retrieval.c`)
 > are good minimal references for correct I/O sequences.
@@ -180,8 +186,8 @@ obs_t obs;
 tbl_t *tbl = ...; /* load tables as required */
 
 read_ctl(argc, argv, &ctl);
-read_obs(argc, argv, &obs);
-read_atm(argc, argv, &atm);
+read_obs(NULL, "obs.tab", &ctl, &obs, 0);
+read_atm(NULL, "atm.tab", &ctl, &atm, 0);
 
 formod(&ctl, tbl, &atm, &obs);
 
@@ -192,15 +198,15 @@ formod(&ctl, tbl, &atm, &obs);
 
 ```c
 read_ctl(argc, argv, &ctl);
-read_obs(argc, argv, &obs);
-read_atm(argc, argv, &atm);
+read_obs(NULL, "obs.tab", &ctl, &obs, 0);
+read_atm(NULL, "atm.tab", &ctl, &atm, 0);
 
 atm2x(&ctl, &atm, x);
 obs2y(&ctl, &obs, y);
 
 kernel(&ctl, tbl, &atm, &obs, K);
 
-/* write_matrix(..., K, ...) */
+/* write_matrix(NULL, "matrix.nc", &ctl, K, &atm, &obs, "y", "x", "r", 0) */
 ```
 
 ### Retrieval (optimal estimation)
@@ -208,8 +214,8 @@ kernel(&ctl, tbl, &atm, &obs, K);
 ```c
 read_ctl(argc, argv, &ctl);
 read_ret(argc, argv, &ret);
-read_obs(argc, argv, &obs);
-read_atm(argc, argv, &atm);
+read_obs(NULL, "obs_meas.tab", &ctl, &obs, 0);
+read_atm(NULL, "atm_apr.tab", &ctl, &atm, 0);
 
 optimal_estimation(&ctl, tbl, &ret, &atm, &obs);
 
