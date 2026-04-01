@@ -133,6 +133,10 @@ The retrieval layer implements an optimal estimation workflow:
   - `levenberg_marquardt(...)`
   - `cost_function(...)`
   - `analyze_avk(...)`, `analyze_avk_quantity(...)` (averaging kernels / diagnostics)
+- shared-output helpers:
+  - `shared_io_output_target(...)` (select legacy vs shared retrieval output target)
+  - `shared_io_output_file(...)`, `shared_io_lock(...)`, `shared_io_unlock(...)`
+    (coordinate shared netCDF retrieval output)
 
 ---
 

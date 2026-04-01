@@ -108,26 +108,27 @@ For shared netCDF workflows, retrieval can also read and write selected
 profile records from common files. In that mode, pass `-` instead of a
 directory list and provide:
 
-- `PROFLIST` — a text file with one profile index per line
-- shared input files such as `ATM_APR_FILE` and `OBS_MEAS_FILE`
-- optional shared output files such as `ATM_FINAL_FILE`,
-  `OBS_FINAL_FILE`, and `MATRIX_KERNEL_FILE`
+- `SHARED_IO_PROFLIST` — a text file with one profile index per line
+- shared input files such as `SHARED_IO_ATM_APR_FILE` and
+  `SHARED_IO_OBS_MEAS_FILE`
+- optional shared output files such as `SHARED_IO_ATM_FINAL_FILE`,
+  `SHARED_IO_OBS_FINAL_FILE`, and `SHARED_IO_MATRIX_KERNEL_FILE`
 
 Example:
 
 ```bash
 ./retrieval run.ctl - \
-  PROFLIST proflist.txt \
+  SHARED_IO_PROFLIST proflist.txt \
   ATMFMT 3 OBSFMT 3 MATRIXFMT 3 \
-  ATM_APR_FILE atm_apr.nc \
-  OBS_MEAS_FILE obs_meas.nc \
-  ATM_FINAL_FILE atm_final.nc \
-  OBS_FINAL_FILE obs_final.nc \
-  MATRIX_KERNEL_FILE matrix_kernel.nc
+  SHARED_IO_ATM_APR_FILE atm_apr.nc \
+  SHARED_IO_OBS_MEAS_FILE obs_meas.nc \
+  SHARED_IO_ATM_FINAL_FILE atm_final.nc \
+  SHARED_IO_OBS_FINAL_FILE obs_final.nc \
+  SHARED_IO_MATRIX_KERNEL_FILE matrix_kernel.nc
 ```
 
 In that shared-file mode, atmospheric and observation data use the
-profile index from `PROFLIST`, while matrix products use the same index
+profile index from `SHARED_IO_PROFLIST`, while matrix products use the same index
 as the netCDF dataset selector.
 
 ### Inputs expected in each working directory

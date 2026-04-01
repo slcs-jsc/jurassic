@@ -26,26 +26,6 @@
 
 /*****************************************************************************/
 
-static const char *ret_output_target(
-  const ret_t *ret,
-  const char *shared_file,
-  const char *legacy_file,
-  const char **dirname,
-  int *profile) {
-
-  if (shared_file[0] != '-') {
-    *dirname = NULL;
-    *profile = ret->profile;
-    return shared_file;
-  }
-
-  *dirname = ret->dir;
-  *profile = 0;
-  return legacy_file;
-}
-
-/*****************************************************************************/
-
 void analyze_avk(
   const ret_t *ret,
   const ctl_t *ctl,
@@ -104,10 +84,11 @@ void analyze_avk(
   const char *dirname;
   int profile;
   const char *filename =
-    ret_output_target(ret, ret->atm_cont_file, "atm_cont.tab",
+    shared_io_output_target(ret, ret->shared_io_atm_cont_file, "atm_cont.tab",
 		      &dirname, &profile);
   write_atm(dirname, filename, ctl, atm_cont, profile);
-  filename = ret_output_target(ret, ret->atm_res_file, "atm_res.tab",
+  filename = shared_io_output_target(ret, ret->shared_io_atm_res_file,
+                                     "atm_res.tab",
 			       &dirname, &profile);
   write_atm(dirname, filename, ctl, atm_res, profile);
 
@@ -4735,13 +4716,15 @@ void optimal_estimation(
 
   /* Set inverse a priori covariance S_a^-1... */
   set_cov_apr(ret, ctl, atm_apr, iqa, ipa, s_a_inv);
+  int lockfd = shared_io_lock(ret);
   const char *dirname;
   int profile;
   const char *filename =
-    ret_output_target(ret, ret->matrix_cov_apr_file, "matrix_cov_apr.tab",
-		      &dirname, &profile);
+    shared_io_output_target(ret, ret->shared_io_matrix_cov_apr_file,
+                            "matrix_cov_apr.tab", &dirname, &profile);
   write_matrix(dirname, filename, ctl, s_a_inv,
 	       atm_i, obs_i, "x", "x", "r", profile);
+  shared_io_unlock(lockfd);
   matrix_invert(s_a_inv);
 
   /* Get measurement errors... */
@@ -4865,15 +4848,16 @@ void optimal_estimation(
   if (ret->err_ana) {
 
     /* Store results... */
-    filename = ret_output_target(ret, ret->atm_final_file, "atm_final.tab",
-				 &dirname, &profile);
+    lockfd = shared_io_lock(ret);
+    filename = shared_io_output_target(ret, ret->shared_io_atm_final_file,
+                                       "atm_final.tab", &dirname, &profile);
     write_atm(dirname, filename, ctl, atm_i, profile);
-    filename = ret_output_target(ret, ret->obs_final_file, "obs_final.tab",
-				 &dirname, &profile);
+    filename = shared_io_output_target(ret, ret->shared_io_obs_final_file,
+                                       "obs_final.tab", &dirname, &profile);
     write_obs(dirname, filename, ctl, obs_i, profile);
     filename =
-      ret_output_target(ret, ret->matrix_kernel_file, "matrix_kernel.tab",
-			&dirname, &profile);
+      shared_io_output_target(ret, ret->shared_io_matrix_kernel_file,
+                              "matrix_kernel.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, k_i,
 		 atm_i, obs_i, "y", "x", "r", profile);
 
@@ -4890,8 +4874,8 @@ void optimal_estimation(
     /* Compute retrieval covariance... */
     matrix_invert(cov);
     filename =
-      ret_output_target(ret, ret->matrix_cov_ret_file, "matrix_cov_ret.tab",
-			&dirname, &profile);
+      shared_io_output_target(ret, ret->shared_io_matrix_cov_ret_file,
+                              "matrix_cov_ret.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, cov,
 		 atm_i, obs_i, "x", "x", "r", profile);
     write_stddev("total", ret, ctl, atm_i, cov);
@@ -4902,8 +4886,8 @@ void optimal_estimation(
 	gsl_matrix_set(corr, i, j, gsl_matrix_get(cov, i, j)
 		       / sqrt(gsl_matrix_get(cov, i, i))
 		       / sqrt(gsl_matrix_get(cov, j, j)));
-    filename = ret_output_target(ret, ret->matrix_corr_file,
-				 "matrix_corr.tab", &dirname, &profile);
+    filename = shared_io_output_target(ret, ret->shared_io_matrix_corr_file,
+                                       "matrix_corr.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, corr,
 		 atm_i, obs_i, "x", "x", "r", profile);
 
@@ -4914,8 +4898,8 @@ void optimal_estimation(
 	gsl_matrix_set(auxnm, i, j, gsl_matrix_get(k_i, j, i)
 		       * POW2(gsl_vector_get(sig_eps_inv, j)));
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, cov, auxnm, 0.0, gain);
-    filename = ret_output_target(ret, ret->matrix_gain_file,
-				 "matrix_gain.tab", &dirname, &profile);
+    filename = shared_io_output_target(ret, ret->shared_io_matrix_gain_file,
+                                       "matrix_gain.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, gain,
 		 atm_i, obs_i, "x", "y", "c", profile);
 
@@ -4930,13 +4914,14 @@ void optimal_estimation(
     /* Compute averaging kernel matrix
        A = G * K ... */
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, gain, k_i, 0.0, a);
-    filename = ret_output_target(ret, ret->matrix_avk_file,
-				 "matrix_avk.tab", &dirname, &profile);
+    filename = shared_io_output_target(ret, ret->shared_io_matrix_avk_file,
+                                       "matrix_avk.tab", &dirname, &profile);
     write_matrix(dirname, filename, ctl, a,
 		 atm_i, obs_i, "x", "x", "r", profile);
 
     /* Analyze averaging kernel matrix... */
     analyze_avk(ret, ctl, atm_i, iqa, ipa, a);
+    shared_io_unlock(lockfd);
 
     /* Free... */
     gsl_matrix_free(auxnm);
@@ -6156,31 +6141,6 @@ void read_ret(
   const ctl_t *ctl,
   ret_t *ret) {
 
-  /* Shared retrieval I/O... */
-  ret->profile = 0;
-  scan_ctl(argc, argv, "PROFLIST", -1, "-", ret->proflist);
-  scan_ctl(argc, argv, "ATM_APR_FILE", -1, "-", ret->atm_apr_file);
-  scan_ctl(argc, argv, "OBS_MEAS_FILE", -1, "-", ret->obs_meas_file);
-  scan_ctl(argc, argv, "ATM_FINAL_FILE", -1, "-", ret->atm_final_file);
-  scan_ctl(argc, argv, "OBS_FINAL_FILE", -1, "-", ret->obs_final_file);
-  scan_ctl(argc, argv, "MATRIX_COV_APR_FILE", -1, "-",
-	   ret->matrix_cov_apr_file);
-  scan_ctl(argc, argv, "MATRIX_KERNEL_FILE", -1, "-",
-	   ret->matrix_kernel_file);
-  scan_ctl(argc, argv, "MATRIX_COV_RET_FILE", -1, "-",
-	   ret->matrix_cov_ret_file);
-  scan_ctl(argc, argv, "MATRIX_CORR_FILE", -1, "-", ret->matrix_corr_file);
-  scan_ctl(argc, argv, "MATRIX_GAIN_FILE", -1, "-", ret->matrix_gain_file);
-  scan_ctl(argc, argv, "MATRIX_AVK_FILE", -1, "-", ret->matrix_avk_file);
-  scan_ctl(argc, argv, "ATM_ERR_TOTAL_FILE", -1, "-",
-	   ret->atm_err_total_file);
-  scan_ctl(argc, argv, "ATM_ERR_NOISE_FILE", -1, "-",
-	   ret->atm_err_noise_file);
-  scan_ctl(argc, argv, "ATM_ERR_FORMOD_FILE", -1, "-",
-	   ret->atm_err_formod_file);
-  scan_ctl(argc, argv, "ATM_CONT_FILE", -1, "-", ret->atm_cont_file);
-  scan_ctl(argc, argv, "ATM_RES_FILE", -1, "-", ret->atm_res_file);
-
   /* Iteration control... */
   ret->kernel_recomp =
     (int) scan_ctl(argc, argv, "KERNEL_RECOMP", -1, "3", NULL);
@@ -6224,6 +6184,41 @@ void read_ret(
   ret->err_sft = scan_ctl(argc, argv, "ERR_SFT", -1, "0", NULL);
   for (int isf = 0; isf < ctl->nsf; isf++)
     ret->err_sfeps[isf] = scan_ctl(argc, argv, "ERR_SFEPS", isf, "0", NULL);
+
+  /* Shared retrieval I/O... */
+  ret->shared_io_profile = 0;
+  scan_ctl(argc, argv, "SHARED_IO_PROFLIST", -1, "-",
+           ret->shared_io_proflist);
+  scan_ctl(argc, argv, "SHARED_IO_ATM_APR_FILE", -1, "-",
+           ret->shared_io_atm_apr_file);
+  scan_ctl(argc, argv, "SHARED_IO_OBS_MEAS_FILE", -1, "-",
+           ret->shared_io_obs_meas_file);
+  scan_ctl(argc, argv, "SHARED_IO_ATM_FINAL_FILE", -1, "-",
+           ret->shared_io_atm_final_file);
+  scan_ctl(argc, argv, "SHARED_IO_OBS_FINAL_FILE", -1, "-",
+           ret->shared_io_obs_final_file);
+  scan_ctl(argc, argv, "SHARED_IO_MATRIX_COV_APR_FILE", -1, "-",
+	   ret->shared_io_matrix_cov_apr_file);
+  scan_ctl(argc, argv, "SHARED_IO_MATRIX_KERNEL_FILE", -1, "-",
+	   ret->shared_io_matrix_kernel_file);
+  scan_ctl(argc, argv, "SHARED_IO_MATRIX_COV_RET_FILE", -1, "-",
+	   ret->shared_io_matrix_cov_ret_file);
+  scan_ctl(argc, argv, "SHARED_IO_MATRIX_CORR_FILE", -1, "-",
+           ret->shared_io_matrix_corr_file);
+  scan_ctl(argc, argv, "SHARED_IO_MATRIX_GAIN_FILE", -1, "-",
+           ret->shared_io_matrix_gain_file);
+  scan_ctl(argc, argv, "SHARED_IO_MATRIX_AVK_FILE", -1, "-",
+           ret->shared_io_matrix_avk_file);
+  scan_ctl(argc, argv, "SHARED_IO_ATM_ERR_TOTAL_FILE", -1, "-",
+	   ret->shared_io_atm_err_total_file);
+  scan_ctl(argc, argv, "SHARED_IO_ATM_ERR_NOISE_FILE", -1, "-",
+	   ret->shared_io_atm_err_noise_file);
+  scan_ctl(argc, argv, "SHARED_IO_ATM_ERR_FORMOD_FILE", -1, "-",
+	   ret->shared_io_atm_err_formod_file);
+  scan_ctl(argc, argv, "SHARED_IO_ATM_CONT_FILE", -1, "-",
+           ret->shared_io_atm_cont_file);
+  scan_ctl(argc, argv, "SHARED_IO_ATM_RES_FILE", -1, "-",
+           ret->shared_io_atm_res_file);
 }
 
 /*****************************************************************************/
@@ -6833,6 +6828,105 @@ void set_cov_meas(
 
   /* Free... */
   free(obs_err);
+}
+
+/*****************************************************************************/
+
+const char *shared_io_output_target(
+  const ret_t *ret,
+  const char *shared_file,
+  const char *legacy_file,
+  const char **dirname,
+  int *profile) {
+
+  if (shared_file[0] != '-') {
+    *dirname = NULL;
+    *profile = ret->shared_io_profile;
+    return shared_file;
+  }
+
+  *dirname = ret->dir;
+  *profile = 0;
+  return legacy_file;
+}
+
+/*****************************************************************************/
+
+int shared_io_lock(
+  const ret_t *ret) {
+
+  const char *base = shared_io_output_file(ret);
+  if (base == NULL)
+    return -1;
+
+  char lockfile[LEN];
+  if (snprintf(lockfile, LEN, "%s.lock", base) >= LEN)
+    ERRMSG("Lock file name too long!");
+  int fd = open(lockfile, O_CREAT | O_RDWR, 0666);
+  if (fd < 0)
+    ERRMSG("Cannot open lock file!");
+
+  struct flock fl;
+  fl.l_type = F_WRLCK;
+  fl.l_whence = SEEK_SET;
+  fl.l_start = 0;
+  fl.l_len = 0;
+  if (fcntl(fd, F_SETLKW, &fl) < 0)
+    ERRMSG("Cannot lock shared output file!");
+
+  return fd;
+}
+
+/*****************************************************************************/
+
+void shared_io_unlock(
+  int fd) {
+
+  if (fd < 0)
+    return;
+
+  struct flock fl;
+  fl.l_type = F_UNLCK;
+  fl.l_whence = SEEK_SET;
+  fl.l_start = 0;
+  fl.l_len = 0;
+  if (fcntl(fd, F_SETLK, &fl) < 0)
+    ERRMSG("Cannot unlock shared output file!");
+  close(fd);
+}
+
+/*****************************************************************************/
+
+const char *shared_io_output_file(
+  const ret_t *ret) {
+
+  if (ret->shared_io_atm_final_file[0] != '-')
+    return ret->shared_io_atm_final_file;
+  if (ret->shared_io_obs_final_file[0] != '-')
+    return ret->shared_io_obs_final_file;
+  if (ret->shared_io_matrix_cov_apr_file[0] != '-')
+    return ret->shared_io_matrix_cov_apr_file;
+  if (ret->shared_io_matrix_kernel_file[0] != '-')
+    return ret->shared_io_matrix_kernel_file;
+  if (ret->shared_io_matrix_cov_ret_file[0] != '-')
+    return ret->shared_io_matrix_cov_ret_file;
+  if (ret->shared_io_matrix_corr_file[0] != '-')
+    return ret->shared_io_matrix_corr_file;
+  if (ret->shared_io_matrix_gain_file[0] != '-')
+    return ret->shared_io_matrix_gain_file;
+  if (ret->shared_io_matrix_avk_file[0] != '-')
+    return ret->shared_io_matrix_avk_file;
+  if (ret->shared_io_atm_err_total_file[0] != '-')
+    return ret->shared_io_atm_err_total_file;
+  if (ret->shared_io_atm_err_noise_file[0] != '-')
+    return ret->shared_io_atm_err_noise_file;
+  if (ret->shared_io_atm_err_formod_file[0] != '-')
+    return ret->shared_io_atm_err_formod_file;
+  if (ret->shared_io_atm_cont_file[0] != '-')
+    return ret->shared_io_atm_cont_file;
+  if (ret->shared_io_atm_res_file[0] != '-')
+    return ret->shared_io_atm_res_file;
+  return NULL;
 }
 
 /*****************************************************************************/
@@ -8551,14 +8645,14 @@ void write_stddev(
   copy_atm(ctl, atm_aux, atm, 1);
   x2atm(ctl, x_aux, atm_aux);
   if (strcmp(quantity, "total") == 0)
-    shared_file = ret->atm_err_total_file;
+    shared_file = ret->shared_io_atm_err_total_file;
   else if (strcmp(quantity, "noise") == 0)
-    shared_file = ret->atm_err_noise_file;
+    shared_file = ret->shared_io_atm_err_noise_file;
   else if (strcmp(quantity, "formod") == 0)
-    shared_file = ret->atm_err_formod_file;
+    shared_file = ret->shared_io_atm_err_formod_file;
   sprintf(filename, "atm_err_%s.tab", quantity);
   const char *target =
-    ret_output_target(ret, shared_file, filename, &dirname, &profile);
+    shared_io_output_target(ret, shared_file, filename, &dirname, &profile);
   write_atm(dirname, target, ctl, atm_aux, profile);
 
   /* Free... */

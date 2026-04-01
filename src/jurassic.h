@@ -105,6 +105,7 @@
    ------------------------------------------------------------ */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
@@ -119,6 +120,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 /* ------------------------------------------------------------
    Constants...
@@ -1597,57 +1599,6 @@ typedef struct {
   /*! Working directory. */
   char dir[LEN];
 
-  /*! Profile index used for shared netCDF retrieval inputs and outputs. */
-  int profile;
-
-  /*! Optional file containing retrieval profile indices. */
-  char proflist[LEN];
-
-  /*! Optional shared atmospheric a priori input file. */
-  char atm_apr_file[LEN];
-
-  /*! Optional shared measured-observation input file. */
-  char obs_meas_file[LEN];
-
-  /*! Optional shared retrieved-atmosphere output file. */
-  char atm_final_file[LEN];
-
-  /*! Optional shared retrieved-observation output file. */
-  char obs_final_file[LEN];
-
-  /*! Optional shared a priori covariance output file. */
-  char matrix_cov_apr_file[LEN];
-
-  /*! Optional shared kernel matrix output file. */
-  char matrix_kernel_file[LEN];
-
-  /*! Optional shared retrieval covariance output file. */
-  char matrix_cov_ret_file[LEN];
-
-  /*! Optional shared correlation matrix output file. */
-  char matrix_corr_file[LEN];
-
-  /*! Optional shared gain matrix output file. */
-  char matrix_gain_file[LEN];
-
-  /*! Optional shared averaging-kernel matrix output file. */
-  char matrix_avk_file[LEN];
-
-  /*! Optional shared total retrieval-error output file. */
-  char atm_err_total_file[LEN];
-
-  /*! Optional shared noise retrieval-error output file. */
-  char atm_err_noise_file[LEN];
-
-  /*! Optional shared forward-model retrieval-error output file. */
-  char atm_err_formod_file[LEN];
-
-  /*! Optional shared averaging-kernel contribution output file. */
-  char atm_cont_file[LEN];
-
-  /*! Optional shared averaging-kernel resolution output file. */
-  char atm_res_file[LEN];
-
   /*! Re-computation of kernel matrix (number of iterations). */
   int kernel_recomp;
 
@@ -1716,6 +1667,57 @@ typedef struct {
 
   /*! Surface emissivity error. */
   double err_sfeps[NSF];
+
+  /*! Profile index used for shared netCDF retrieval inputs and outputs. */
+  int shared_io_profile;
+
+  /*! Optional file containing retrieval profile indices. */
+  char shared_io_proflist[LEN];
+
+  /*! Optional shared atmospheric a priori input file. */
+  char shared_io_atm_apr_file[LEN];
+
+  /*! Optional shared measured-observation input file. */
+  char shared_io_obs_meas_file[LEN];
+
+  /*! Optional shared retrieved-atmosphere output file. */
+  char shared_io_atm_final_file[LEN];
+
+  /*! Optional shared retrieved-observation output file. */
+  char shared_io_obs_final_file[LEN];
+
+  /*! Optional shared a priori covariance output file. */
+  char shared_io_matrix_cov_apr_file[LEN];
+
+  /*! Optional shared kernel matrix output file. */
+  char shared_io_matrix_kernel_file[LEN];
+
+  /*! Optional shared retrieval covariance output file. */
+  char shared_io_matrix_cov_ret_file[LEN];
+
+  /*! Optional shared correlation matrix output file. */
+  char shared_io_matrix_corr_file[LEN];
+
+  /*! Optional shared gain matrix output file. */
+  char shared_io_matrix_gain_file[LEN];
+
+  /*! Optional shared averaging-kernel matrix output file. */
+  char shared_io_matrix_avk_file[LEN];
+
+  /*! Optional shared total retrieval-error output file. */
+  char shared_io_atm_err_total_file[LEN];
+
+  /*! Optional shared noise retrieval-error output file. */
+  char shared_io_atm_err_noise_file[LEN];
+
+  /*! Optional shared forward-model retrieval-error output file. */
+  char shared_io_atm_err_formod_file[LEN];
+
+  /*! Optional shared averaging-kernel contribution output file. */
+  char shared_io_atm_cont_file[LEN];
+
+  /*! Optional shared averaging-kernel resolution output file. */
+  char shared_io_atm_res_file[LEN];
 
 } ret_t;
 
@@ -3832,10 +3834,13 @@ double read_obs_rfm(
  *    - `CONV_DMIN` — minimum normalized step size for convergence.
  *
  * 2. **Optional shared-file retrieval I/O**
- *    - `PROFLIST` — optional file containing profile indices for batch mode.
- *    - `ATM_APR_FILE`, `OBS_MEAS_FILE` — optional shared input files.
- *    - `ATM_FINAL_FILE`, `OBS_FINAL_FILE` — optional shared output files.
- *    - `MATRIX_*_FILE`, `ATM_ERR_*_FILE`, `ATM_CONT_FILE`, `ATM_RES_FILE`
+ *    - `SHARED_IO_PROFLIST` — optional file containing profile indices for batch mode.
+ *    - `SHARED_IO_ATM_APR_FILE`, `SHARED_IO_OBS_MEAS_FILE`
+ *      — optional shared input files.
+ *    - `SHARED_IO_ATM_FINAL_FILE`, `SHARED_IO_OBS_FINAL_FILE`
+ *      — optional shared output files.
+ *    - `SHARED_IO_MATRIX_*_FILE`, `SHARED_IO_ATM_ERR_*_FILE`,
+ *      `SHARED_IO_ATM_CONT_FILE`, `SHARED_IO_ATM_RES_FILE`
  *      — optional shared diagnostic output files.
  *
  * 3. **Error analysis flag**
@@ -4319,6 +4324,102 @@ void set_cov_meas(
   gsl_vector * sig_noise,
   gsl_vector * sig_formod,
   gsl_vector * sig_eps_inv);
+
+/**
+ * @brief Resolve retrieval output target for legacy-directory and shared-file modes.
+ *
+ * Chooses whether a retrieval product should be written into the legacy
+ * per-directory file layout or into a shared netCDF file selected through
+ * the retrieval control structure.
+ *
+ * @param[in]  ret          Retrieval configuration structure (`ret_t`).
+ * @param[in]  shared_file  Shared output file name from `ret_t`; ignored when set to `"-"`.
+ * @param[in]  legacy_file  Legacy per-directory output file name.
+ * @param[out] dirname      Output directory pointer. Set to `ret->dir` for legacy output
+ *                          and to `NULL` for shared-file output.
+ * @param[out] profile      Record index used by the generic I/O wrappers.
+ *
+ * @return Pointer to the selected output file name.
+ *
+ * @details
+ * - In shared-file mode, the function returns `shared_file`, sets `*dirname = NULL`,
+ *   and uses `ret->shared_io_profile` as the profile or dataset index.
+ * - In legacy mode, the function returns `legacy_file`, sets `*dirname = ret->dir`,
+ *   and resets `*profile = 0`.
+ *
+ * @see shared_io_output_file, shared_io_lock, shared_io_unlock, write_atm, write_obs, write_matrix
+ *
+ * @author Lars Hoffmann
+ */
+const char *shared_io_output_target(
+  const ret_t * ret,
+  const char *shared_file,
+  const char *legacy_file,
+  const char **dirname,
+  int *profile);
+
+/**
+ * @brief Acquire an exclusive lock for shared retrieval output files.
+ *
+ * Creates or opens a lock file derived from the configured shared retrieval
+ * output target and blocks until an exclusive file lock can be obtained.
+ *
+ * @param[in] ret  Retrieval configuration structure (`ret_t`).
+ *
+ * @return File descriptor of the acquired lock, or `-1` if no shared output file is configured.
+ *
+ * @details
+ * The lock file name is formed as `"<shared-output>.lock"`, where
+ * `shared-output` is determined by `shared_io_output_file()`. The lock is used to
+ * serialize writes when multiple retrieval processes or MPI ranks write into
+ * the same shared netCDF files.
+ *
+ * @see shared_io_output_file, shared_io_unlock
+ *
+ * @author Lars Hoffmann
+ */
+int shared_io_lock(
+  const ret_t * ret);
+
+/**
+ * @brief Release a shared retrieval output lock.
+ *
+ * Unlocks and closes the file descriptor returned by `shared_io_lock()`.
+ *
+ * @param[in] fd  Lock file descriptor returned by `shared_io_lock()`.
+ *
+ * @details
+ * Passing a negative descriptor is allowed and results in no action.
+ *
+ * @see shared_io_lock
+ *
+ * @author Lars Hoffmann
+ */
+void shared_io_unlock(
+  int fd);
+
+/**
+ * @brief Return the primary shared retrieval output file configured for locking.
+ *
+ * Scans the shared retrieval output file fields in `ret_t` and returns the
+ * first configured file name. This file name is then used as the base for the
+ * shared lock file created by `shared_io_lock()`.
+ *
+ * @param[in] ret  Retrieval configuration structure (`ret_t`).
+ *
+ * @return Pointer to the first configured shared output file name, or `NULL`
+ *         if shared-output mode is not active.
+ *
+ * @note
+ * This helper does not return shared input files. It is only used to locate a
+ * representative shared output target for lock-file naming.
+ *
+ * @see shared_io_lock, shared_io_output_target
+ *
+ * @author Lars Hoffmann
+ */
+const char *shared_io_output_file(
+  const ret_t * ret);
 
 /**
  * @brief Compute the solar zenith angle for a given time and location.

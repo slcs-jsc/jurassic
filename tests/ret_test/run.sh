@@ -43,23 +43,23 @@ $jurassic/obsfmt ret.ctl data/case1/obs_meas.tab 1 data/shared/obs_meas.nc 3 \
     PROF_OUT 1
 
 # Retrieval in shared netCDF mode...
-$jurassic/retrieval ret.ctl - PROFLIST data/proflist.txt \
+$jurassic/retrieval ret.ctl - SHARED_IO_PROFLIST data/proflist.txt \
     ATMFMT 3 OBSFMT 3 MATRIXFMT 3 \
-    ATM_APR_FILE data/shared/atm_apr.nc \
-    OBS_MEAS_FILE data/shared/obs_meas.nc \
-    ATM_FINAL_FILE data/shared/atm_final.nc \
-    OBS_FINAL_FILE data/shared/obs_final.nc \
-    MATRIX_COV_APR_FILE data/shared/matrix_cov_apr.nc \
-    MATRIX_KERNEL_FILE data/shared/matrix_kernel.nc \
-    MATRIX_COV_RET_FILE data/shared/matrix_cov_ret.nc \
-    MATRIX_CORR_FILE data/shared/matrix_corr.nc \
-    MATRIX_GAIN_FILE data/shared/matrix_gain.nc \
-    MATRIX_AVK_FILE data/shared/matrix_avk.nc \
-    ATM_ERR_TOTAL_FILE data/shared/atm_err_total.nc \
-    ATM_ERR_NOISE_FILE data/shared/atm_err_noise.nc \
-    ATM_ERR_FORMOD_FILE data/shared/atm_err_formod.nc \
-    ATM_CONT_FILE data/shared/atm_cont.nc \
-    ATM_RES_FILE data/shared/atm_res.nc
+    SHARED_IO_ATM_APR_FILE data/shared/atm_apr.nc \
+    SHARED_IO_OBS_MEAS_FILE data/shared/obs_meas.nc \
+    SHARED_IO_ATM_FINAL_FILE data/shared/atm_final.nc \
+    SHARED_IO_OBS_FINAL_FILE data/shared/obs_final.nc \
+    SHARED_IO_MATRIX_COV_APR_FILE data/shared/matrix_cov_apr.nc \
+    SHARED_IO_MATRIX_KERNEL_FILE data/shared/matrix_kernel.nc \
+    SHARED_IO_MATRIX_COV_RET_FILE data/shared/matrix_cov_ret.nc \
+    SHARED_IO_MATRIX_CORR_FILE data/shared/matrix_corr.nc \
+    SHARED_IO_MATRIX_GAIN_FILE data/shared/matrix_gain.nc \
+    SHARED_IO_MATRIX_AVK_FILE data/shared/matrix_avk.nc \
+    SHARED_IO_ATM_ERR_TOTAL_FILE data/shared/atm_err_total.nc \
+    SHARED_IO_ATM_ERR_NOISE_FILE data/shared/atm_err_noise.nc \
+    SHARED_IO_ATM_ERR_FORMOD_FILE data/shared/atm_err_formod.nc \
+    SHARED_IO_ATM_CONT_FILE data/shared/atm_cont.nc \
+    SHARED_IO_ATM_RES_FILE data/shared/atm_res.nc
 
 # Extract shared outputs for comparison...
 $jurassic/atmfmt ret.ctl data/shared/atm_final.nc 3 data/shared/atm_final_p0.tab 1 \

@@ -41,7 +41,7 @@ static const char *ret_input_target(
 
   if (shared_file[0] != '-') {
     *dirname = NULL;
-    *profile = ret->profile;
+    *profile = ret->shared_io_profile;
     return shared_file;
   }
 
@@ -97,11 +97,11 @@ int main(
     if (!(dirlist = fopen(argv[2], "r")))
       ERRMSG("Cannot open directory list!");
   }
-  if (ret.proflist[0] != '-')
-    if (!(proflist = fopen(ret.proflist, "r")))
+  if (ret.shared_io_proflist[0] != '-')
+    if (!(proflist = fopen(ret.shared_io_proflist, "r")))
       ERRMSG("Cannot open profile list!");
   if (dirlist == NULL && proflist == NULL)
-    ERRMSG("Give a directory list or set PROFLIST!");
+    ERRMSG("Give a directory list or set SHARED_IO_PROFLIST!");
 
   /* Loop over retrieval cases... */
   while (1) {
@@ -116,15 +116,15 @@ int main(
     }
 
     if (proflist != NULL)
-      have_profile = fscanf(proflist, "%d", &ret.profile) == 1;
+      have_profile = fscanf(proflist, "%d", &ret.shared_io_profile) == 1;
     else {
-      ret.profile = 0;
+      ret.shared_io_profile = 0;
       have_profile = 1;
     }
 
     if ((dirlist != NULL && !have_dir) || (proflist != NULL && !have_profile)) {
       if ((dirlist != NULL && have_dir) || (proflist != NULL && have_profile))
-	ERRMSG("DIRLIST and PROFLIST have different lengths!");
+	ERRMSG("DIRLIST and SHARED_IO_PROFLIST have different lengths!");
       break;
     }
 
@@ -136,18 +136,18 @@ int main(
     if (size > 1 && proflist != NULL && dirlist != NULL) {
       LOG(1,
 	  "\nRetrieve profile %d in directory %s on rank %d of %d...\n",
-	  ret.profile, ret.dir, rank + 1, size);
+	  ret.shared_io_profile, ret.dir, rank + 1, size);
     } else if (size > 1 && proflist != NULL) {
       LOG(1, "\nRetrieve profile %d on rank %d of %d...\n",
-	  ret.profile, rank + 1, size);
+	  ret.shared_io_profile, rank + 1, size);
     } else if (size > 1) {
       LOG(1, "\nRetrieve in directory %s on rank %d of %d...\n",
 	  ret.dir, rank + 1, size);
     } else if (proflist != NULL && dirlist != NULL) {
       LOG(1, "\nRetrieve profile %d in directory %s...\n",
-	  ret.profile, ret.dir);
+	  ret.shared_io_profile, ret.dir);
     } else if (proflist != NULL) {
-      LOG(1, "\nRetrieve profile %d...\n", ret.profile);
+      LOG(1, "\nRetrieve profile %d...\n", ret.shared_io_profile);
     } else
       LOG(1, "\nRetrieve in directory %s...\n", ret.dir);
 
@@ -155,12 +155,12 @@ int main(
     const char *dirname;
     int profile;
     const char *filename =
-      ret_input_target(&ret, ret.atm_apr_file, "atm_apr.tab",
+      ret_input_target(&ret, ret.shared_io_atm_apr_file, "atm_apr.tab",
 		       &dirname, &profile);
     read_atm(dirname, filename, &ctl, &atm_apr, profile);
 
     /* Read observation data... */
-    filename = ret_input_target(&ret, ret.obs_meas_file, "obs_meas.tab",
+    filename = ret_input_target(&ret, ret.shared_io_obs_meas_file, "obs_meas.tab",
 				&dirname, &profile);
     read_obs(dirname, filename, &ctl, &obs_meas, profile);
 
