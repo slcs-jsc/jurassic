@@ -143,8 +143,10 @@ JURASSIC employs a Levenberg–Marquardt-type scheme to ensure numerical
 stability and convergence. The damping parameter balances between
 Gauss–Newton and gradient-descent behaviour.
 
-Iterations continue until convergence criteria based on state updates
-and cost-function changes are satisfied.
+Iterations continue until the normalized state-update criterion is met;
+the cost function is used within the Levenberg-Marquardt step acceptance
+logic and damping adjustment rather than as a separate final stopping
+criterion.
 
 ---
 

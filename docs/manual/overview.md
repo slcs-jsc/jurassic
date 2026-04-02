@@ -111,11 +111,11 @@ effects in many applications. More advanced treatments of infrared
 scattering have been developed in dedicated extensions and applied in
 specialized studies.
 
-Over time, JURASSIC has been extended to support additional
-capabilities, including tomographic retrieval methods and GPU-accelerated
-radiative transfer. Ongoing development aims to integrate these
-capabilities into a unified, modular code base to improve
-maintainability and long-term sustainability.
+Over time, the broader JURASSIC ecosystem has also included additional
+developments such as tomographic retrieval methods and GPU-accelerated
+radiative transfer. In this repository, GPU-related functionality is
+exposed only through optional integration hooks to external unified
+builds rather than as a self-contained default capability.
 
 ---
 
@@ -124,8 +124,8 @@ maintainability and long-term sustainability.
 JURASSIC is implemented in the C programming language with a modular
 architecture that separates ray tracing, radiative transfer,
 spectroscopy, and retrieval components. The model supports
-workflow-level parallelism, OpenMP acceleration across the tool suite,
-and MPI-based task distribution for retrieval workflows, and is
+workflow-level parallelism, MPI-based task distribution for retrieval
+workflows, and OpenMP-enabled code paths in selected kernels, and is
 designed for efficient execution on multicore CPUs and high-performance
 computing systems.
 

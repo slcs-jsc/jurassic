@@ -94,9 +94,10 @@ while broader rows indicate vertical smoothing.
 
 ### Output
 
-Averaging kernels are written by retrieval applications when matrix
-output is enabled. They are typically stored alongside Jacobians and
-error covariance matrices.
+Averaging kernels are written by retrieval applications during error
+analysis. In practice this means retrieval diagnostics require both the
+retrieval error-analysis switch and matrix output to be enabled. They
+are typically stored alongside Jacobians and error covariance matrices.
 
 ---
 
@@ -146,24 +147,26 @@ and can be used to assess retrieval stability and convergence behavior.
 
 ## Contribution functions
 
-Some applications compute **contribution functions**, which describe
-the fractional contribution of atmospheric layers to the measured
-radiance.
+Retrieval diagnostics also include AVK-derived **contribution** and
+**resolution** profile outputs (for example `atm_cont.*` and
+`atm_res.*`), which summarize how strongly the retrieval responds to the
+true state and how vertically resolved the retrieved quantities are.
 
-Contribution functions are closely related to Jacobians but emphasize
-radiative transfer rather than retrieval sensitivity.
+These products are derived from averaging-kernel analysis rather than
+from a separate forward-radiative contribution-function calculation.
 
 They are useful for:
 
-- qualitative interpretation of radiance formation,
-- validation of ray-path and absorption behavior.
+- qualitative interpretation of retrieval sensitivity,
+- diagnosing vertical smoothing and resolution,
+- comparing retrieval setups across test cases.
 
 ---
 
 ## Matrix output control
 
-Many diagnostic products are written only when matrix output is
-explicitly enabled via the control parameter:
+Many matrix-valued diagnostic products are written only when matrix
+output is explicitly enabled via the control parameter:
 
 - `WRITE_MATRIX`
 
@@ -173,6 +176,10 @@ When enabled:
   written in a structured, machine-readable format,
 - output files can be large and are intended for post-processing with
   external tools (e.g. Python, MATLAB).
+
+For retrieval workflows, matrix output alone is not sufficient:
+retrieval-side diagnostics are generated only when error analysis is
+enabled in the retrieval configuration.
 
 ---
 

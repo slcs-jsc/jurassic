@@ -56,8 +56,8 @@ post-processing.
 ```bash
 #!/bin/bash
 #SBATCH --job-name=jurassic_formod
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=8
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --time=02:00:00
 #SBATCH --output=logs/%x_%j.out
@@ -70,7 +70,8 @@ srun ./bin/formod ctl/run.ctl input/obs/obs.tab input/atm/atm.tab output/radianc
 
 Key points:
 
-- Use `ntasks-per-node × cpus-per-task` to match the node architecture.
+- For non-MPI executables such as `formod`, use a single task and scale with
+  `cpus-per-task` / `OMP_NUM_THREADS`.
 - Set `OMP_NUM_THREADS` explicitly.
 - Redirect output to per-job log files.
 
@@ -81,7 +82,8 @@ Key points:
 ### General guidelines
 
 - Use **workflow-level parallelism** or job arrays for independent forward-model runs.
-- Use **MPI** only for retrieval workloads that process directory lists.
+- Use **MPI** only for retrieval workloads that process independent directory
+  lists or shared-file profile lists.
 - Use **OpenMP** to accelerate per-observation computations.
 - Avoid oversubscription (total threads > physical cores).
 

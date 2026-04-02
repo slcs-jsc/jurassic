@@ -66,7 +66,7 @@ The default atmospheric reader expects the following units:
 | longitude, latitude | deg  |
 | pressure (`p`)      | hPa  |
 | temperature (`t`)   | K    |
-| volume mixing ratio | mol/mol |
+| volume mixing ratio | ppv |
 | extinction (`k`)    | km⁻¹ |
 
 These conventions are consistent with the internal JURASSIC data
@@ -132,11 +132,15 @@ applied along the ray path during radiative transfer calculations.
 
 Some workflows support simplified cloud-layer representations defined
 by a small set of parameters. If enabled via the control file, the
-**first atmospheric level only** may include additional columns such as:
+ASCII format used by JURASSIC appends additional columns such as:
 
 - cloud-layer altitude
 - cloud-layer thickness
 - cloud extinction coefficients
+
+These cloud-layer values are written on every row in the standard ASCII
+output, even though they represent profile-level parameters. When
+reading ASCII input, JURASSIC uses the values from the first row.
 
 If these options are not used, the corresponding parameters should be
 disabled in the control file and omitted from the atmospheric data.
@@ -148,7 +152,10 @@ disabled in the control file and omitted from the atmospheric data.
 Surface-related parameters (e.g. surface temperature or emissivity) may
 also be specified in the atmospheric data file for certain applications.
 
-When enabled, these parameters are expected in the **first row only**.
+As with the cloud-layer parameters, the standard ASCII writer appends
+these values on every row, but the ASCII reader consumes them from the
+first row only.
+
 If surface effects are not required, the default configuration should
 be used and these fields omitted.
 

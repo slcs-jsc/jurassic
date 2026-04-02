@@ -27,7 +27,6 @@ Key data structures (typedefs):
 - `los_t` — **line-of-sight representation** used internally during ray tracing / integration
 - `ret_t` — **retrieval control parameters** (optimal estimation settings, convergence, regularization)
 - `tbl_t` — **lookup-table container** (precomputed spectroscopy / emissivity/transmittance tables)
-- `tbl_gas_t`, `tbl_gas_index_t` — per-gas LUT storage and indexing helpers (binary on-disk and in-memory)
 
 The header is Doxygen-friendly and many functions/types have docstrings.
 If you are looking for “what is the intended contract of this function?”,
@@ -79,7 +78,7 @@ Typical project-style tools rely on table-based I/O helpers:
   - `read_obs(dirname, filename, ctl, obs, profile)`
   - `write_obs(dirname, filename, ctl, obs, profile)`
 - Retrieval configuration:
-  - `read_ret`, `write_ret` (where applicable)
+  - `read_ret`
 - Generic helpers:
   - `read_matrix(dirname, filename, ctl, matrix, dataset)`
   - `write_matrix(dirname, filename, ctl, matrix, atm, obs, rowspace, colspace, sort, dataset)`
@@ -92,7 +91,7 @@ For netCDF formats, they select the record along the unlimited dimension.
 
 ### Lookup tables (spectroscopy / transmittance)
 
-Lookup tables are handled via the `tbl_t` / `tbl_gas_t` family and helpers such as:
+Lookup tables are handled via `tbl_t` and helpers such as:
 
 - Read/write:
   - `read_tbl`, `read_tbl_asc`, `read_tbl_bin`, `read_tbl_nc_channel`
@@ -130,7 +129,6 @@ The retrieval layer implements an optimal estimation workflow:
 
 - `optimal_estimation(...)` — high-level retrieval driver
 - minimization + diagnostics helpers (commonly used internally):
-  - `levenberg_marquardt(...)`
   - `cost_function(...)`
   - `analyze_avk(...)`, `analyze_avk_quantity(...)` (averaging kernels / diagnostics)
 - shared-output helpers:
@@ -206,7 +204,7 @@ read_obs(NULL, "obs.tab", &ctl, &obs, 0);
 read_atm(NULL, "atm.tab", &ctl, &atm, 0);
 
 atm2x(&ctl, &atm, x);
-obs2y(&ctl, &obs, y);
+obs2y(&ctl, &obs, y, NULL, NULL);
 
 kernel(&ctl, tbl, &atm, &obs, K);
 
@@ -217,13 +215,17 @@ kernel(&ctl, tbl, &atm, &obs, K);
 
 ```c
 read_ctl(argc, argv, &ctl);
-read_ret(argc, argv, &ret);
-read_obs(NULL, "obs_meas.tab", &ctl, &obs, 0);
-read_atm(NULL, "atm_apr.tab", &ctl, &atm, 0);
+read_ret(argc, argv, &ctl, &ret);
+read_obs(NULL, "obs_meas.tab", &ctl, &obs_meas, 0);
+read_obs(NULL, "obs_apr.tab", &ctl, &obs_apr, 0);
+read_atm(NULL, "atm_apr.tab", &ctl, &atm_apr, 0);
+read_atm(NULL, "atm_ret.tab", &ctl, &atm_ret, 0);
 
-optimal_estimation(&ctl, tbl, &ret, &atm, &obs);
+optimal_estimation(&ret, &ctl, tbl,
+                   &obs_meas, &obs_apr,
+                   &atm_apr, &atm_ret, &chisq);
 
-/* results are written into obs/atm and/or retrieval output files */
+/* results are written into obs_apr/atm_ret and/or retrieval output files */
 ```
 
 The exact argument lists and memory ownership rules are documented in

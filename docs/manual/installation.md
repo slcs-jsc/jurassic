@@ -14,6 +14,8 @@ following requirements apply:
 
 - 64-bit Linux operating system
 - C compiler with OpenMP support
+- GNU Scientific Library (GSL)
+- netCDF-C library
 - MPI library (optional, retrieval only)
 - GNU Make or a compatible build system
 
@@ -31,6 +33,12 @@ The following software components are required to build JURASSIC:
 
 - **GNU Make**  
   Required to build the bundled libraries and the JURASSIC executables.
+
+- **GNU Scientific Library (GSL)**  
+  Required for numerical kernels and linear algebra support.
+
+- **netCDF-C library**  
+  Required for netCDF input/output support used throughout the toolchain.
 
 - **MPI library** (optional, retrieval only)  
   For example:
@@ -126,11 +134,13 @@ make MPI=1
 
 This will:
 
-- compile the retrieval code with MPI support,
+- compile the full tool suite with the MPI compiler wrapper,
 - automatically select `mpicc` (unless `CC` is set explicitly),
 - define the `MPI` preprocessor macro used by the retrieval source code.
 
-All other executables remain non-MPI and are unaffected by this option.
+MPI-specific runtime behavior is implemented only in the retrieval
+executable. The other binaries are still rebuilt under the selected MPI
+toolchain when `MPI=1` is used.
 
 ---
 

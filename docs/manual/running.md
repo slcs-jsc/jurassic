@@ -34,7 +34,7 @@ applications, parameters may optionally be overridden via `KEY VALUE` pairs.
 |------------|--------------|---------------------------------|
 | Forward model | `./formod <ctl> <obs_in> <atm_in> <rad_out>` | control file, observation geometry input, atmosphere input, radiance/observation output |
 | Kernels (Jacobians) | `./kernel <ctl> <obs_in> <atm_in> <kernel_out>` | control file, observation geometry input, atmosphere input, kernel matrix output |
-| Retrieval (optimal estimation) | `./retrieval <ctl> <dirlist>` | control file, text file listing working directories (one per line) |
+| Retrieval (optimal estimation) | `./retrieval <ctl> <dirlist-or->` | control file, either a text file listing working directories or `-` for shared-file/profile-list mode |
 
 > **Notes**
 > - For `formod` and `kernel`, the filenames are usually `*.tab` files, but the
@@ -130,6 +130,11 @@ Example:
 In that shared-file mode, atmospheric and observation data use the
 profile index from `SHARED_IO_PROFLIST`, while matrix products use the same index
 as the netCDF dataset selector.
+
+At least one of the following must be provided:
+
+- a directory list as the second positional argument, or
+- `SHARED_IO_PROFLIST` for shared-file profile processing.
 
 ### Inputs expected in each working directory
 

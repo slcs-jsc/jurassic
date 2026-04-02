@@ -55,8 +55,8 @@ Command-line values override values from the control file.
 Most JURASSIC applications follow the same high-level flow:
 
 1. Read control parameters (`read_ctl()` → `ctl_t`)
-2. Read observation geometry (from `OBS...` / `OBSFMT`)
-3. Read atmospheric profiles (from `ATM...` / `ATMFMT`)
+2. Read observation geometry (from application inputs interpreted using `OBSFMT`)
+3. Read atmospheric profiles (from application inputs interpreted using `ATMFMT`)
 4. Configure spectral definition (channels + spectral windows + lookup tables)
 5. Run the forward model (and optionally kernels / retrieval)
 6. Write output products

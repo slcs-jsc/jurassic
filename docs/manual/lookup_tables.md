@@ -74,13 +74,8 @@ Lookup tables are located using the control parameter:
 `TBLBASE` defines a base path or prefix from which the model derives the
 full table file names.
 
-A typical setup consists of:
-
-- one directory per spectral window,
-- one table per gas/emitter within each window.
-
-The exact naming convention is flexible but must match the expectations
-of the table-reading routines and the selected table format.
+The current table I/O implementation expects flat filename patterns
+derived directly from `TBLBASE`; the naming is not arbitrary.
 
 ---
 
@@ -110,6 +105,9 @@ For the current table I/O implementation, the naming conventions are:
 The example projects included with JURASSIC demonstrate working table
 layouts and formats and are the recommended starting point for new
 users.
+
+For ASCII tables, the corresponding filter-function files are also
+looked up via fixed names of the form `TBLBASE_<nu>.filt`.
 
 ---
 

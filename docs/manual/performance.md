@@ -47,8 +47,10 @@ where:
 Limb geometries typically require more ray segments than nadir
 geometries and are therefore more expensive.
 
-Forward-model executables use **serial execution with optional OpenMP
-threading**.
+Forward-model executables are built with OpenMP support, but the most
+visible OpenMP-parallel regions in the current code base are in lookup
+table initialization and kernel finite-difference evaluation rather than
+in the main `formod` ray loop itself.
 
 ---
 
@@ -130,8 +132,9 @@ rank becomes too small or if I/O dominates runtime.
 
 ### OpenMP scaling
 
-OpenMP is used within a single process to accelerate computationally
-intensive loops, such as radiative transfer and spectral calculations.
+OpenMP is used within a single process to accelerate selected
+computationally intensive loops, such as lookup-table initialization and
+kernel finite-difference calculations.
 
 OpenMP scaling is typically limited by:
 
@@ -209,7 +212,8 @@ and accuracy.
 
 - Start with example configurations and modify incrementally.
 - Disable diagnostics for production runs.
-- Use OpenMP to accelerate compute-heavy kernels.
+- Use OpenMP primarily to accelerate kernel-heavy workloads and other
+  OpenMP-enabled code paths.
 - Use MPI only for retrieval campaigns with many independent cases.
 - Split very large workloads into multiple jobs when appropriate.
 - Monitor runtime and scaling behavior during pilot runs.
