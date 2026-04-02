@@ -54,12 +54,15 @@ int main(
     ERRMSG("Give parameters: <ctl> <obs> <atm> <kernel>");
 
   /* Read control parameters... */
+  SELECT_TIMER("READ_CTL", "INPUT");
   read_ctl(argc, argv, &ctl);
 
   /* Initialize look-up tables... */
+  SELECT_TIMER("READ_TBL", "INPUT");
   tbl_t *tbl = read_tbl(&ctl);
 
   /* Get dirlist... */
+  SELECT_TIMER("READ_DIRLIST", "INPUT");
   scan_ctl(argc, argv, "DIRLIST", -1, "-", dirlist);
 
   /* Set flags... */
@@ -93,7 +96,9 @@ int main(
   }
 
   /* Free... */
+  SELECT_TIMER("FINALIZE", "OVERHEAD");
   tbl_free(&ctl, tbl);
+  PRINT_TIMERS;
 
   return EXIT_SUCCESS;
 }
@@ -112,9 +117,11 @@ void call_kernel(
   static obs_t obs;
 
   /* Read observation geometry... */
+  SELECT_TIMER("READ_OBS", "INPUT");
   read_obs(wrkdir, obsfile, ctl, &obs, 0);
 
   /* Read atmospheric data... */
+  SELECT_TIMER("READ_ATM", "INPUT");
   read_atm(wrkdir, atmfile, ctl, &atm, 0);
 
   /* Get sizes... */
@@ -131,9 +138,11 @@ void call_kernel(
   gsl_matrix *k = gsl_matrix_alloc(m, n);
 
   /* Compute kernel matrix... */
+  SELECT_TIMER("KERNEL", "FORWARD");
   kernel(ctl, tbl, &atm, &obs, k);
 
   /* Write matrix to file... */
+  SELECT_TIMER("WRITE_MATRIX", "OUTPUT");
   write_matrix(wrkdir, kernelfile, ctl, k, &atm, &obs, "y", "x", "r", 0);
 
   /* Free... */

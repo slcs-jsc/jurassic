@@ -67,6 +67,7 @@ int main(
     ERRMSG("Give parameters: <ctl> <obs> <atm> <rad>");
 
   /* Read control parameters... */
+  SELECT_TIMER("READ_CTL", "INPUT");
   read_ctl(argc, argv, &ctl);
 
 #ifdef UNIFIED
@@ -75,16 +76,20 @@ int main(
   static obs_t obs;
 
   /* Read observation geometry... */
+  SELECT_TIMER("READ_OBS", "INPUT");
   read_obs(NULL, argv[2], &ctl, &obs, 0);
 
   /* Read atmospheric data... */
+  SELECT_TIMER("READ_ATM", "INPUT");
   read_atm(NULL, argv[3], &ctl, &atm, 0);
 
   /* Call forward model... */
+  SELECT_TIMER("FORMOD_UNIFIED", "FORWARD");
   jur_unified_init(argc, argv);
   jur_unified_formod_multiple_packages(&atm, &obs, 1, NULL);
 
   /* Save radiance data... */
+  SELECT_TIMER("WRITE_OBS", "OUTPUT");
   write_obs(NULL, argv[4], &ctl, &obs, 0);
 
 #else
@@ -92,15 +97,19 @@ int main(
   char dirlist[LEN], obsref[LEN], task[LEN];
 
   /* Initialize look-up tables... */
+  SELECT_TIMER("READ_TBL", "INPUT");
   tbl_t *tbl = read_tbl(&ctl);
 
   /* Get task... */
+  SELECT_TIMER("READ_TASK", "INPUT");
   scan_ctl(argc, argv, "TASK", -1, "-", task);
 
   /* Get dirlist... */
+  SELECT_TIMER("READ_DIRLIST", "INPUT");
   scan_ctl(argc, argv, "DIRLIST", -1, "-", dirlist);
 
   /* Get reference data... */
+  SELECT_TIMER("READ_OBSREF", "INPUT");
   scan_ctl(argc, argv, "OBSREF", -1, "-", obsref);
 
   /* Single forward calculation... */
@@ -133,7 +142,9 @@ int main(
 #endif
 
   /* Free... */
+  SELECT_TIMER("FINALIZE", "OVERHEAD");
   tbl_free(&ctl, tbl);
+  PRINT_TIMERS;
 
   return EXIT_SUCCESS;
 }
@@ -154,13 +165,17 @@ void call_formod(
   static obs_t obs, obs2;
 
   /* Read atmospheric data... */
+  SELECT_TIMER("READ_ATM", "INPUT");
   read_atm(wrkdir, atmfile, ctl, &atm, 0);
 
   /* Read observation geometry... */
+  SELECT_TIMER("READ_OBS", "INPUT");
   read_obs(wrkdir, obsfile, ctl, &obs, 0);
 
   /* Compute multiple profiles... */
   if (task[0] == 'p' || task[0] == 'P') {
+
+    SELECT_TIMER("FORMOD_PROFILE_LOOP", "FORWARD");
 
     /* Loop over ray paths... */
     for (int ir = 0; ir < obs.nr; ir++) {
@@ -207,6 +222,7 @@ void call_formod(
     }
 
     /* Write radiance data... */
+    SELECT_TIMER("WRITE_OBS", "OUTPUT");
     write_obs(wrkdir, radfile, ctl, &obs, 0);
   }
 
@@ -214,13 +230,17 @@ void call_formod(
   else {
 
     /* Call forward model... */
+    SELECT_TIMER("FORMOD", "FORWARD");
     formod(ctl, tbl, &atm, &obs);
 
     /* Save radiance data... */
+    SELECT_TIMER("WRITE_OBS", "OUTPUT");
     write_obs(wrkdir, radfile, ctl, &obs, 0);
 
     /* Evaluate results... */
     if (obsref[0] != '-') {
+
+      SELECT_TIMER("EVAL", "OUTPUT");
 
       /* Read reference data... */
       read_obs(wrkdir, obsref, ctl, &obs2, 0);
@@ -238,6 +258,8 @@ void call_formod(
 
     /* Compute contributions of emitters... */
     if (task[0] == 'c' || task[0] == 'C') {
+
+      SELECT_TIMER("CONTRIBUTIONS", "FORWARD");
 
       char filename[LEN];
 
@@ -317,6 +339,7 @@ void call_formod(
 	}
 
 	/* Measure runtime... */
+	SELECT_TIMER("BENCHMARK_SAMPLE", "ANALYSIS");
 	double t0 = omp_get_wtime();
 	formod(ctl, tbl, &atm2, &obs);
 	double dt = omp_get_wtime() - t0;
@@ -332,7 +355,7 @@ void call_formod(
 
       } while (t_mean < 10.0);
 
-      /* Write results... */
+      /* Keep the legacy benchmark line and the new timer-style overlap metric. */
       t_mean /= (double) n;
       t_sd = sqrt(t_sd / (double) n - POW2(t_mean));
       printf("RUNTIME: mean= %g s | stddev= %g s | min= %g s | max= %g s\n",
@@ -344,6 +367,8 @@ void call_formod(
 
     /* Analyze impact of step size... */
     if (task[0] == 's' || task[0] == 'S') {
+
+      SELECT_TIMER("STEP_ANALYSIS", "ANALYSIS");
 
       /* Reference run... */
       ctl->rayds = 0.1;

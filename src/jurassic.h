@@ -1095,21 +1095,32 @@
 	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1]));			\
   } while (0)
 
+/*! Maximum number of aggregated timers. */
+#define NTIMER 100
+
 /**
- * @brief Start or stop a named timer.
+ * @brief Switch to a named aggregated timer.
  *
- * Calls the `timer()` function with contextual information (file name, function
- * name, and line number) to start or stop timing. Useful for performance profiling.
+ * Stops the previously selected aggregated timer, accumulates its runtime,
+ * and starts timing the new @p id within the given @p group.
  *
- * @param[in] name Name or label of the timer.
- * @param[in] mode Operation mode (e.g., start or stop).
+ * @param[in] id    Identifier of the timer to activate.
+ * @param[in] group Group label used for coarse runtime summaries.
  *
- * @note Relies on a user-defined `timer()` function.
- *
- * @author Lars Hoffmann
+ * @see timer_group, PRINT_TIMERS
  */
-#define TIMER(name, mode) \
-  {timer(name, __FILE__, __func__, __LINE__, mode);}
+#define SELECT_TIMER(id, group) \
+  {timer_group(id, group, 0);}
+
+/**
+ * @brief Print aggregated timer statistics.
+ *
+ * Writes accumulated per-timer and per-group runtimes to the log.
+ *
+ * @see timer_group, SELECT_TIMER
+ */
+#define PRINT_TIMERS \
+  {timer_group("END", "END", 1);}
 
 /**
  * @brief Tokenize a string and parse a variable.
@@ -4665,52 +4676,23 @@ void time2jsec(
   double *jsec);
 
 /**
- * @brief Simple wall-clock timer for runtime diagnostics.
+ * @brief Aggregate wall-clock timings for named code phases.
  *
- * Provides a lightweight timing utility based on `omp_get_wtime()`
- * to measure wall-clock durations between marked code regions.
- * The function supports up to ten concurrent nested timers.
+ * Tracks elapsed time for the currently active timer and accumulates it both
+ * per timer name and per timer group. Calling the function with @p output set
+ * to a non-zero value prints the current timing summary including total time,
+ * minimum, mean, standard deviation, maximum, and sample count for each timer.
  *
- * @param[in] name  Name or label of the timed code section.
- * @param[in] file  Source file name (usually `__FILE__` macro).
- * @param[in] func  Function name (usually `__func__` macro).
- * @param[in] line  Source line number (usually `__LINE__` macro).
- * @param[in] mode  Timer operation mode:
- *   - `1`: Start new timer.
- *   - `2`: Write elapsed time since last start (without stopping).
- *   - `3`: Write elapsed time and stop timer (pop one level).
+ * @param[in] name   Name of the next timer to activate.
+ * @param[in] group  Group name of the next timer to activate.
+ * @param[in] output If non-zero, print the accumulated timing summary.
  *
- * @details
- * - Each call with `mode == 1` starts a new timer instance and stores
- *   its start time and corresponding source line.
- * - When `mode == 2` or `mode == 3` is called, the elapsed wall-clock
- *   time (in seconds) is computed using:
- *   @f[
- *     \Delta t = t_{\text{now}} - t_{\text{start}}
- *   @f]
- *   and written to the log via the @ref LOG macro.
- * - Supports nested timers (up to 10 levels). Exceeding this limit
- *   triggers a runtime error via @ref ERRMSG.
- *
- * @see LOG, ERRMSG, omp_get_wtime
- *
- * @note
- * - The timing precision and resolution depend on the OpenMP runtime.
- * - Intended for coarse profiling and diagnostic output; not thread-safe.
- * - Lines reported in log messages indicate the start–stop interval.
- *
- * @warning
- * - Exceeding 10 nested timers results in an error.
- * - Calling `mode == 2` or `3` without a prior start causes an internal error.
- *
- * @author Lars Hoffmann
+ * @note Intended for coarse profiling; this interface is not thread-safe.
  */
-void timer(
+void timer_group(
   const char *name,
-  const char *file,
-  const char *func,
-  int line,
-  int mode);
+  const char *group,
+  int output);
 
 /**
  * @brief Write atmospheric data to a file.

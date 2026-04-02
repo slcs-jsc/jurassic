@@ -81,17 +81,18 @@ int main(
   if (argc < 3)
     ERRMSG("Give parameters: <ctl> <dirlist>");
 
-  /* Measure CPU-time... */
-  TIMER("total", 1);
-
   /* Read control parameters... */
+  SELECT_TIMER("READ_CTL", "INPUT");
   read_ctl(argc, argv, &ctl);
+  SELECT_TIMER("READ_RET", "INPUT");
   read_ret(argc, argv, &ctl, &ret);
 
   /* Initialize look-up tables... */
+  SELECT_TIMER("READ_TBL", "INPUT");
   tbl_t *tbl = read_tbl(&ctl);
 
   /* Open directory list... */
+  SELECT_TIMER("OPEN_CASELISTS", "INPUT");
   dirlist = NULL;
   if (argv[2][0] != '-') {
     if (!(dirlist = fopen(argv[2], "r")))
@@ -152,6 +153,7 @@ int main(
       LOG(1, "\nRetrieve in directory %s...\n", ret.dir);
 
     /* Read atmospheric data... */
+    SELECT_TIMER("READ_ATM", "INPUT");
     const char *dirname;
     int profile;
     const char *filename =
@@ -160,6 +162,7 @@ int main(
     read_atm(dirname, filename, &ctl, &atm_apr, profile);
 
     /* Read observation data... */
+    SELECT_TIMER("READ_OBS", "INPUT");
     filename =
       ret_input_target(&ret, ret.shared_io_obs_meas_file, "obs_meas.tab",
 		       &dirname, &profile);
@@ -169,16 +172,11 @@ int main(
     double chisq;
     optimal_estimation(&ret, &ctl, tbl, &obs_meas, &obs_i, &atm_apr, &atm_i,
 		       &chisq);
-
-    /* Measure CPU-time... */
-    TIMER("total", 2);
   }
 
   /* Write info... */
+  SELECT_TIMER("FINALIZE", "OVERHEAD");
   LOG(1, "\nRetrieval done...");
-
-  /* Measure CPU-time... */
-  TIMER("total", 3);
 
   /* Free... */
   if (dirlist != NULL)
@@ -190,6 +188,8 @@ int main(
 #ifdef MPI
   MPI_Finalize();
 #endif
+
+  PRINT_TIMERS;
 
   return EXIT_SUCCESS;
 }

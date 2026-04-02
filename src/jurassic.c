@@ -4702,6 +4702,9 @@ void optimal_estimation(
   gsl_vector *y_i = gsl_vector_alloc(m);
   gsl_vector *y_m = gsl_vector_alloc(m);
 
+  /* Set timer... */
+  SELECT_TIMER("RET_SETUP", "RETRIEVAL");
+
   /* Set initial state... */
   copy_atm(ctl, atm_i, atm_apr, 0);
   copy_obs(ctl, obs_i, obs_meas, 0);
@@ -4742,11 +4745,14 @@ void optimal_estimation(
   LOG(2, "it= %d / chi^2/m= %g", 0, *chisq);
 
   /* Compute initial kernel... */
+  SELECT_TIMER("RET_KERNEL_INIT", "RETRIEVAL");
   kernel(ctl, tbl, atm_i, obs_i, k_i);
 
   /* ------------------------------------------------------------
      Levenberg-Marquardt minimization...
      ------------------------------------------------------------ */
+
+  SELECT_TIMER("RET_ITERATE", "RETRIEVAL");
 
   /* Outer loop... */
   for (int it = 1; it <= ret->conv_itmax; it++) {
@@ -4845,6 +4851,8 @@ void optimal_estimation(
 
   /* Check if error analysis is requested... */
   if (ret->err_ana) {
+
+    SELECT_TIMER("RET_DIAGNOSTICS", "OUTPUT");
 
     /* Store results... */
     lockfd = shared_io_lock(ret);
@@ -7207,40 +7215,73 @@ void time2jsec(
 
 /*****************************************************************************/
 
-void timer(
+void timer_group(
   const char *name,
-  const char *file,
-  const char *func,
-  int line,
-  int mode) {
+  const char *group,
+  int output) {
 
-  static double w0[10];
+  static char names[NTIMER][100], groups[NTIMER][100];
+  static double rt_name[NTIMER], rt_group[NTIMER], rt_min[NTIMER],
+    rt_max[NTIMER], rt_sq[NTIMER], t0, t1;
+  static int ct_name[NTIMER], iname = -1, igroup = -1, nname, ngroup;
 
-  static int l0[10], nt;
+  /* Get time... */
+  t1 = omp_get_wtime();
+  const double dt = t1 - t0;
 
-  /* Start new timer... */
-  if (mode == 1) {
-    w0[nt] = omp_get_wtime();
-    l0[nt] = line;
-    if ((++nt) >= 10)
+  /* Accumulate runtime for current timer... */
+  if (iname >= 0) {
+    rt_name[iname] += dt;
+    rt_sq[iname] += POW2(dt);
+    rt_min[iname] = (ct_name[iname] <= 0 ? dt : MIN(rt_min[iname], dt));
+    rt_max[iname] = (ct_name[iname] <= 0 ? dt : MAX(rt_max[iname], dt));
+    ct_name[iname]++;
+  }
+  if (igroup >= 0)
+    rt_group[igroup] += dt;
+
+  /* Write summary... */
+  if (output) {
+    for (int i = 0; i < nname; i++) {
+      const double mean = rt_name[i] / ct_name[i];
+      const double variance = MAX(0.0, rt_sq[i] / ct_name[i] - POW2(mean));
+      LOG(1,
+	  "TIMER_%s = %.3f s    (min= %g s, mean= %g s, stddev= %g s, max= %g s, n= %d)",
+	  names[i], rt_name[i], rt_min[i], mean, sqrt(variance), rt_max[i],
+	  ct_name[i]);
+    }
+    for (int i = 0; i < ngroup; i++)
+      LOG(1, "TIMER_GROUP_%s = %.3f s", groups[i], rt_group[i]);
+    double total = 0.0;
+    for (int i = 0; i < nname; i++)
+      total += rt_name[i];
+    LOG(1, "TIMER_TOTAL = %.3f s", total);
+  }
+
+  /* Identify next timer name... */
+  for (iname = 0; iname < nname; iname++)
+    if (strcasecmp(name, names[iname]) == 0)
+      break;
+  for (igroup = 0; igroup < ngroup; igroup++)
+    if (strcasecmp(group, groups[igroup]) == 0)
+      break;
+
+  /* Add new timer name if needed... */
+  if (iname >= nname) {
+    sprintf(names[iname], "%s", name);
+    if ((++nname) >= NTIMER)
       ERRMSG("Too many timers!");
   }
 
-  /* Write elapsed time... */
-  else {
-
-    /* Check timer index... */
-    if (nt - 1 < 0)
-      ERRMSG("Coding error!");
-
-    /* Write elapsed time... */
-    LOG(1, "Timer '%s' (%s, %s, l%d-%d): %.3f sec",
-	name, file, func, l0[nt - 1], line, omp_get_wtime() - w0[nt - 1]);
+  /* Add new timer group if needed... */
+  if (igroup >= ngroup) {
+    sprintf(groups[igroup], "%s", group);
+    if ((++ngroup) >= NTIMER)
+      ERRMSG("Too many groups!");
   }
 
-  /* Stop timer... */
-  if (mode == 3)
-    nt--;
+  /* Save time stamp for next phase... */
+  t0 = t1;
 }
 
 /*****************************************************************************/
