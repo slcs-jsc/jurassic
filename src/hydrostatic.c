@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,6 +24,17 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
@@ -31,9 +42,17 @@ int main(
   static atm_t atm;
   static ctl_t ctl;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 4)
-    ERRMSG("Give parameters: <ctl> <atm_in> <atm_hyd>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: hydrostatic <ctl> <atm_in> <atm_hyd> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -52,4 +71,24 @@ int main(
   write_atm(NULL, argv[3], &ctl, &atm, 0);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC hydrostatic tool.\n\n");
+  printf("Recalculate pressure from hydrostatic equilibrium for an\n");
+  printf("existing atmospheric profile.\n\n");
+  printf("Usage:\n");
+  printf("  hydrostatic <ctl> <atm_in> <atm_hyd> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>      Control file.\n");
+  printf("  <atm_in>   Input atmospheric data file.\n");
+  printf("  <atm_hyd>  Output atmospheric data file with hydrostatic pressure.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Notes:\n");
+  printf("  HYDZ must be set to a non-negative reference height.\n");
+  printf("\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

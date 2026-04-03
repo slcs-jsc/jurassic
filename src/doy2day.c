@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,15 +24,34 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
 
   int day, mon;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 3)
-    ERRMSG("Give parameters: <year> <doy>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: doy2day <year> <doy>\n\n"
+	   "Use -h for full help.");
 
   /* Read arguments... */
   const int year = atoi(argv[1]);
@@ -43,4 +62,20 @@ int main(
   printf("%d %d %d\n", year, mon, day);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC calendar converter.\n\n");
+  printf("Convert year and day-of-year to a calendar date.\n\n");
+  printf("Usage:\n");
+  printf("  doy2day <year> <doy>\n\n");
+  printf("Arguments:\n");
+  printf("  <year>  Calendar year.\n");
+  printf("  <doy>   Day of year.\n\n");
+  printf("Output:\n");
+  printf("  Writes results to standard output.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

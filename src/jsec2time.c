@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,6 +24,17 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
@@ -32,9 +43,17 @@ int main(
 
   int day, hour, min, mon, sec, year;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 2)
-    ERRMSG("Give parameters: <jsec>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: jsec2time <jsec>\n\n"
+	   "Use -h for full help.");
 
   /* Read arguments... */
   const double jsec = atof(argv[1]);
@@ -44,4 +63,20 @@ int main(
   printf("%d %d %d %d %d %d %g\n", year, mon, day, hour, min, sec, remain);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC time converter.\n\n");
+  printf("Convert Julian seconds since 2000-01-01T00:00Z to calendar time.\n\n");
+  printf("Usage:\n");
+  printf("  jsec2time <jsec>\n\n");
+  printf("Arguments:\n");
+  printf("  <jsec>  Seconds since 2000-01-01T00:00Z.\n\n");
+  printf("Output:\n");
+  printf("  Writes results to standard output as:\n");
+  printf("  year month day hour minute second remainder\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

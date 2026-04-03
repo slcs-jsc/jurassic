@@ -36,6 +36,13 @@
 #define NMAX 1000
 
 /* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
 
@@ -63,9 +70,17 @@ int main(
 
   static int i, ig, n, nl, ndata[NMAX], nprof;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 6)
-    ERRMSG("Give parameters: <ctl> <prof> <inv> <atm> <kernel>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: invert <ctl> <prof> <inv> <atm> <kernel> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -354,4 +369,30 @@ int main(
   tbl_free(&ctl, tbl);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC inversion tool.\n\n");
+  printf("Run the MPTRAC inversion workflow using profile data, forward\n");
+  printf("model calculations, and kernel output.\n\n");
+  printf("Usage:\n");
+  printf("  invert <ctl> <prof> <inv> <atm> <kernel> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>     Control file.\n");
+  printf("  <prof>    Input profile data file.\n");
+  printf("  <inv>     Output inversion summary file.\n");
+  printf("  <atm>     Output atmospheric profile file.\n");
+  printf("  <kernel>  Output kernel file.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Common control overrides:\n");
+  printf("  INVERT_DT        Time bin size.\n");
+  printf("  INVERT_OBS_ERR   Observation error.\n");
+  printf("  INVERT_DATA      Data reduction mode.\n");
+  printf("  INVERT_FIT       Fit mode.\n");
+  printf("  INVERT_ITMAX     Maximum number of iterations.\n");
+  printf("  INVERT_TOL       Iteration tolerance.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

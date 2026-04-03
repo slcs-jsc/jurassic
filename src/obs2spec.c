@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,6 +24,13 @@
 
 #include <omp.h>
 #include "jurassic.h"
+
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
 
 /* ------------------------------------------------------------
    Main...
@@ -39,9 +46,17 @@ int main(
 
   FILE *out;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 4)
-    ERRMSG("Give parameters: <ctl> <obs> <spec.tab>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: obs2spec <ctl> <obs> <spec.tab> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Allocate... */
   ALLOC(obs, obs_t, 1);
@@ -93,4 +108,21 @@ int main(
   free(obs);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC spectrum writer.\n\n");
+  printf("Write radiances and transmittances from an observation file to\n");
+  printf("a per-channel spectrum table.\n\n");
+  printf("Usage:\n");
+  printf("  obs2spec <ctl> <obs> <spec.tab> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>       Control file.\n");
+  printf("  <obs>       Observation input file.\n");
+  printf("  <spec.tab>  Output spectrum table.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

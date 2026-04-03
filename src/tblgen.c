@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -35,6 +35,13 @@
 #define MAXNPTS 10000000
 
 /* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
 
@@ -53,9 +60,17 @@ int main(
 
   size_t line_buf_size = 0;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Read command line arguments... */
   if (argc != 5)
-    ERRMSG("Give parameters: <press> <temp> <spec> <filter>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: tblgen <press> <temp> <spec> <filter>\n\n"
+	   "Use -h for full help.");
   sscanf(argv[1], "%lg", &press);
   sscanf(argv[2], "%lg", &temp);
 
@@ -131,4 +146,23 @@ int main(
   }
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC lookup-table generator.\n\n");
+  printf("Prepare transmission look-up table entries from monochromatic\n");
+  printf("absorption spectra and a filter function.\n\n");
+  printf("Usage:\n");
+  printf("  tblgen <press> <temp> <spec> <filter>\n\n");
+  printf("Arguments:\n");
+  printf("  <press>   Pressure [hPa].\n");
+  printf("  <temp>    Temperature [K].\n");
+  printf("  <spec>    Monochromatic absorption spectrum file.\n");
+  printf("  <filter>  Filter-function file.\n\n");
+  printf("Output:\n");
+  printf("  Writes results to standard output.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

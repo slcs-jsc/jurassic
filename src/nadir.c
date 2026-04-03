@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,6 +24,17 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
@@ -31,9 +42,17 @@ int main(
   static ctl_t ctl;
   static obs_t obs;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 3)
-    ERRMSG("Give parameters: <ctl> <obs>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: nadir <ctl> <obs> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -59,4 +78,23 @@ int main(
   write_obs(NULL, argv[2], &ctl, &obs, 0);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC nadir-geometry tool.\n\n");
+  printf("Create observation geometry for a nadir sounding instrument.\n\n");
+  printf("Usage:\n");
+  printf("  nadir <ctl> <obs> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>  Control file.\n");
+  printf("  <obs>  Output observation geometry file.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Common control overrides:\n");
+  printf("  OBSZ           Observer altitude [km].\n");
+  printf("  T0, T1, DT     Time range and spacing.\n");
+  printf("  LAT0, LAT1, DLAT  Latitude range and spacing.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

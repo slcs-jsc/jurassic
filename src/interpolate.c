@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -23,6 +23,17 @@
 */
 
 #include "jurassic.h"
+
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
 
 int main(
   int argc,
@@ -33,11 +44,19 @@ int main(
 
   double k[NW], q[NG];
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Interpolate atmospheric data... */
 
   /* Check arguments... */
   if (argc < 5)
-    ERRMSG("Give parameters: <ctl> <atm_in> <atm_pts> <atm_out>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: interpolate <ctl> <atm_in> <atm_pts> <atm_out> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -60,4 +79,22 @@ int main(
   write_atm(NULL, argv[4], &ctl, &atm_pts, 0);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC interpolation tool.\n\n");
+  printf("Interpolate atmospheric state variables from one atmospheric\n");
+  printf("profile to the grid defined by another profile.\n\n");
+  printf("Usage:\n");
+  printf("  interpolate <ctl> <atm_in> <atm_pts> <atm_out> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>      Control file.\n");
+  printf("  <atm_in>   Input atmospheric data file.\n");
+  printf("  <atm_pts>  Atmospheric file defining interpolation points.\n");
+  printf("  <atm_out>  Output atmospheric data file.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

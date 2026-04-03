@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -23,6 +23,17 @@
 */
 
 #include "jurassic.h"
+
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
 
 int main(
   int argc,
@@ -39,9 +50,17 @@ int main(
 
   double u[NG];
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 5)
-    ERRMSG("Give parameters: <ctl> <obs> <atm> <raytrace.tab>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: raytrace <ctl> <obs> <atm> <raytrace.tab> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -150,4 +169,24 @@ int main(
   fclose(out);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC ray-tracing tool.\n\n");
+  printf("Determine atmospheric line-of-sight paths and write a summary\n");
+  printf("table plus one LOS profile file per ray.\n\n");
+  printf("Usage:\n");
+  printf("  raytrace <ctl> <obs> <atm> <raytrace.tab> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>           Control file.\n");
+  printf("  <obs>           Observation geometry input file.\n");
+  printf("  <atm>           Atmospheric state input file.\n");
+  printf("  <raytrace.tab>  Output summary table for traced rays.\n");
+  printf("  [KEY VALUE]     Optional control parameters.\n\n");
+  printf("Optional control overrides:\n");
+  printf("  LOSBASE <name>  Basename for per-ray LOS output files.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

@@ -24,6 +24,17 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
@@ -31,9 +42,17 @@ int main(
   static ctl_t ctl;
   static obs_t obs;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 3)
-    ERRMSG("Give parameters: <ctl> <obs>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: zenith <ctl> <obs> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -131,4 +150,25 @@ int main(
   write_obs(NULL, argv[2], &ctl, &obs, 0);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC zenith-geometry tool.\n\n");
+  printf("Create observation geometry for zenith observations in the\n");
+  printf("meridional 2-D setup used by JURASSIC.\n\n");
+  printf("Usage:\n");
+  printf("  zenith <ctl> <obs> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>  Control file.\n");
+  printf("  <obs>  Output observation geometry file.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Common control overrides:\n");
+  printf("  VPZ              View-point altitude [km].\n");
+  printf("  OBSZ             Observer altitude [km].\n");
+  printf("  T0, T1, DT       Time range and spacing.\n");
+  printf("  THETA0, THETA1, DTHETA  Zenith-angle range and spacing.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

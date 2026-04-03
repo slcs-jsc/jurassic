@@ -37,6 +37,9 @@ void call_kernel(
   const char *atmfile,
   const char *kernelfile);
 
+/*! Print command-line help. */
+void usage(void);
+
 /* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
@@ -49,9 +52,17 @@ int main(
 
   char dirlist[LEN];
 
+  if (argc == 2
+      && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 5)
-    ERRMSG("Give parameters: <ctl> <obs> <atm> <kernel>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: kernel <ctl> <obs> <atm> <kernel> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   SELECT_TIMER("READ_CTL", "INPUT");
@@ -101,6 +112,29 @@ int main(
   PRINT_TIMERS;
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+void usage(void) {
+
+  printf("\nJURASSIC kernel tool.\n\n");
+  printf("Compute Jacobian or kernel matrices for the configured channels\n");
+  printf("from observation geometry, atmospheric state, and control settings.\n\n");
+  printf("Usage:\n");
+  printf("  kernel <ctl> <obs> <atm> <kernel> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>     Control file.\n");
+  printf("  <obs>     Observation geometry input file.\n");
+  printf("  <atm>     Atmospheric state input file.\n");
+  printf("  <kernel>  Output file for the kernel matrix.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Optional control overrides:\n");
+  printf("  DIRLIST <file>   Read working directories from <file> and run one case\n");
+  printf("                   per directory using the same <obs>, <atm>, and\n");
+  printf("                   <kernel> filenames relative to each listed directory.\n");
+  printf("\nFurther information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }
 
 /*****************************************************************************/

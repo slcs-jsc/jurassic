@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2013-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2013-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,6 +24,17 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
@@ -32,10 +43,17 @@ int main(
 
   static atm_t atm;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 6)
-    ERRMSG("Give parameters: <ctl> <atm_in> <atmfmt_in>"
-	   " <atm_out> <atmfmt_out> [PROF_IN n] [PROF_OUT n]");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: atmfmt <ctl> <atm_in> <atmfmt_in> <atm_out> <atmfmt_out> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -53,4 +71,25 @@ int main(
   write_atm(NULL, argv[4], &ctl, &atm, prof_out);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC atmospheric-format converter.\n\n");
+  printf("Convert atmospheric input files between supported ATMFMT formats.\n\n");
+  printf("Usage:\n");
+  printf("  atmfmt <ctl> <atm_in> <atmfmt_in> <atm_out> <atmfmt_out> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>         Control file.\n");
+  printf("  <atm_in>      Input atmospheric data file.\n");
+  printf("  <atmfmt_in>   Input atmospheric file format identifier.\n");
+  printf("  <atm_out>     Output atmospheric data file.\n");
+  printf("  <atmfmt_out>  Output atmospheric file format identifier.\n");
+  printf("  [KEY VALUE]   Optional control parameters.\n\n");
+  printf("Optional control overrides:\n");
+  printf("  PROF_IN <n>   Read profile index <n> from the input file.\n");
+  printf("  PROF_OUT <n>  Write output as profile index <n>.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

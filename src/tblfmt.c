@@ -24,16 +24,34 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
 
   ctl_t ctl;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 6)
-    ERRMSG("Give parameters: <ctl> <tblbase_in> <tblfmt_in>"
-	   " <tblbase_out> <tblfmt_out>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: tblfmt <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -52,4 +70,22 @@ int main(
   tbl_free(&ctl, tbl);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC lookup-table format converter.\n\n");
+  printf("Convert look-up tables between supported TBLFMT formats.\n\n");
+  printf("Usage:\n");
+  printf("  tblfmt <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>         Control file.\n");
+  printf("  <tblbase_in>  Input table base name.\n");
+  printf("  <tblfmt_in>   Input table format identifier.\n");
+  printf("  <tblbase_out> Output table base name.\n");
+  printf("  <tblfmt_out>  Output table format identifier.\n");
+  printf("  [KEY VALUE]   Optional control parameters.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

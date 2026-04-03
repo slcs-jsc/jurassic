@@ -24,6 +24,17 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
@@ -33,9 +44,17 @@ int main(
 
   double clk[NCL], sfeps[NSF];
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 3)
-    ERRMSG("Give parameters: <ctl> <atm>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: climatology <ctl> <atm> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -108,4 +127,26 @@ int main(
   write_atm(NULL, argv[2], &ctl, &atm, 0);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC climatology tool.\n\n");
+  printf("Prepare an atmospheric profile from climatological data and\n");
+  printf("write it to an atmospheric output file.\n\n");
+  printf("Usage:\n");
+  printf("  climatology <ctl> <atm> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>  Control file.\n");
+  printf("  <atm>  Output atmospheric data file.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Common control overrides:\n");
+  printf("  T0, T1, DT      Time range and spacing.\n");
+  printf("  Z0, Z1, DZ      Altitude range and spacing.\n");
+  printf("  ZSURF           Refine the near-surface grid if set.\n");
+  printf("  CLZ, CLDZ, CLK  Cloud-layer settings.\n");
+  printf("  SFT, SFEPS      Surface temperature and emissivity.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,15 +24,34 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
 
   double jsec;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 8)
-    ERRMSG("Give parameters: <year> <mon> <day> <hour> <min> <sec> <remain>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: time2jsec <year> <mon> <day> <hour> <min> <sec> <remain>\n\n"
+	   "Use -h for full help.");
 
   /* Read arguments... */
   const int year = atoi(argv[1]);
@@ -48,4 +67,25 @@ int main(
   printf("%.2f\n", jsec);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC time converter.\n\n");
+  printf("Convert calendar time to Julian seconds since 2000-01-01T00:00Z.\n\n");
+  printf("Usage:\n");
+  printf("  time2jsec <year> <mon> <day> <hour> <min> <sec> <remain>\n\n");
+  printf("Arguments:\n");
+  printf("  <year>    Calendar year.\n");
+  printf("  <mon>     Calendar month.\n");
+  printf("  <day>     Day of month.\n");
+  printf("  <hour>    Hour.\n");
+  printf("  <min>     Minute.\n");
+  printf("  <sec>     Integer second.\n");
+  printf("  <remain>  Fractional remainder of the second.\n\n");
+  printf("Output:\n");
+  printf("  Writes results to standard output.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

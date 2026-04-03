@@ -24,6 +24,17 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
@@ -38,11 +49,17 @@ int main(
 
   size_t nr, nc;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 11)
-    ERRMSG("Give parameters: <ctl> <atm> <obs> <rowspace> <colspace> <sort>"
-	   " <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out>"
-	   " [PROF_IN n] [PROF_OUT n]");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: matfmt <ctl> <atm> <obs> <rowspace> <colspace> <sort> <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -95,4 +112,31 @@ int main(
   gsl_matrix_free(matrix);
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC matrix-format converter.\n\n");
+  printf("Convert matrix files between supported MATRIXFMT formats and\n");
+  printf("annotate them using atmospheric or observation metadata.\n\n");
+  printf("Usage:\n");
+  printf("  matfmt <ctl> <atm> <obs> <rowspace> <colspace> <sort> <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>           Control file.\n");
+  printf("  <atm>           Atmospheric data file.\n");
+  printf("  <obs>           Observation data file.\n");
+  printf("  <rowspace>      Row space: x or y.\n");
+  printf("  <colspace>      Column space: x or y.\n");
+  printf("  <sort>          Sort order: r or c.\n");
+  printf("  <matrix_in>     Input matrix file.\n");
+  printf("  <matrixfmt_in>  Input matrix format identifier.\n");
+  printf("  <matrix_out>    Output matrix file.\n");
+  printf("  <matrixfmt_out> Output matrix format identifier.\n");
+  printf("  [KEY VALUE]     Optional control parameters.\n\n");
+  printf("Optional control overrides:\n");
+  printf("  PROF_IN <n>     Read profile index <n> from the input file.\n");
+  printf("  PROF_OUT <n>    Write output as profile index <n>.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

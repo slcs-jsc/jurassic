@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -24,15 +24,34 @@
 
 #include "jurassic.h"
 
+/* ------------------------------------------------------------
+   Functions...
+   ------------------------------------------------------------ */
+
+/*! Print command-line help. */
+static void usage(void);
+
+/* ------------------------------------------------------------
+   Main...
+   ------------------------------------------------------------ */
+
 int main(
   int argc,
   char *argv[]) {
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc != 3 && argc != 7)
     ERRMSG
-      ("Give parameters: [ <rad> <nu> | "
-       " <rad0> <rad1> <drad> <nu0> <nu1> <dnu> ]");
+      ("Missing or invalid command-line arguments.\n\n"
+       "Usage: brightness <rad> <nu>\n"
+       "   or: brightness <rad0> <rad1> <drad> <nu0> <nu1> <dnu>\n\n"
+       "Use -h for full help.");
 
   /* Calculate single value... */
   if (argc == 3) {
@@ -71,4 +90,28 @@ int main(
   }
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC brightness-temperature converter.\n\n");
+  printf("Convert radiance to brightness temperature for a single value\n");
+  printf("or a tabulated radiance and wavenumber range.\n\n");
+  printf("Usage:\n");
+  printf("  brightness <rad> <nu>\n");
+  printf("  brightness <rad0> <rad1> <drad> <nu0> <nu1> <dnu>\n\n");
+  printf("Arguments:\n");
+  printf("  <rad>   Radiance [W/(m^2 sr cm^-1)].\n");
+  printf("  <nu>    Wavenumber [cm^-1].\n");
+  printf("  <rad0>  First radiance value for table output.\n");
+  printf("  <rad1>  Last radiance value for table output.\n");
+  printf("  <drad>  Radiance increment for table output.\n");
+  printf("  <nu0>   First wavenumber for table output.\n");
+  printf("  <nu1>   Last wavenumber for table output.\n");
+  printf("  <dnu>   Wavenumber increment for table output.\n\n");
+  printf("Output:\n");
+  printf("  Writes results to standard output.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

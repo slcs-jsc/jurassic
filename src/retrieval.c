@@ -54,6 +54,9 @@ static const char *ret_input_target(
    Main...
    ------------------------------------------------------------ */
 
+/*! Print command-line help. */
+void usage(void);
+
 int main(
   int argc,
   char *argv[]) {
@@ -77,9 +80,17 @@ int main(
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
 
+  if (argc == 2
+      && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 3)
-    ERRMSG("Give parameters: <ctl> <dirlist>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: retrieval <ctl> <dirlist> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   SELECT_TIMER("READ_CTL", "INPUT");
@@ -192,4 +203,28 @@ int main(
   PRINT_TIMERS;
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+void usage(void) {
+
+  printf("\nJURASSIC retrieval tool.\n\n");
+  printf("Run optimal-estimation retrievals from measured observations,\n");
+  printf("a priori atmospheric input, and control settings.\n\n");
+  printf("Usage:\n");
+  printf("  retrieval <ctl> <dirlist> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>      Control file.\n");
+  printf("  <dirlist>  File containing working directories to process.\n");
+  printf("             Use '-' together with shared I/O settings such as\n");
+  printf("             SHARED_IO_PROFLIST for shared-file workflows.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Optional control overrides:\n");
+  printf("  SHARED_IO_PROFLIST <file>\n");
+  printf("             Read profile indices from <file> for shared-file retrievals.\n");
+  printf("  SHARED_IO_* <file>\n");
+  printf("             Override shared input or output filenames on the command line.\n");
+  printf("\nFurther information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

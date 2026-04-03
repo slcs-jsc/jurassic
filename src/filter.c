@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with JURASSIC. If not, see <http://www.gnu.org/licenses/>.
   
-  Copyright (C) 2003-2025 Forschungszentrum Juelich GmbH
+  Copyright (C) 2003-2026 Forschungszentrum Juelich GmbH
 */
 
 /*! 
@@ -34,6 +34,9 @@ double ails(
   double opl,
   double dnu);
 
+/*! Print command-line help. */
+static void usage(void);
+
 /* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
@@ -50,9 +53,17 @@ int main(
 
   int fn = 0;
 
+  if (argc == 2
+      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Write info... */
   if (argc < 3)
-    ERRMSG("Give parameters: <ctl> <filter>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: filter <ctl> <filter> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   read_ctl(argc, argv, &ctl);
@@ -114,6 +125,29 @@ int main(
   write_shape(argv[2], fnu, ff, fn);
 
   return (EXIT_SUCCESS);
+}
+
+/*****************************************************************************/
+
+static void usage(void) {
+  printf("\nJURASSIC filter generator.\n\n");
+  printf("Create a radiometric filter function from the filter settings\n");
+  printf("in the control file and write it to disk.\n\n");
+  printf("Usage:\n");
+  printf("  filter <ctl> <filter> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>     Control file.\n");
+  printf("  <filter>  Output filter-function file.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Common control overrides:\n");
+  printf("  FILTER_TYPE    Filter shape identifier.\n");
+  printf("  FILTER_OPD     Optical path difference for sinc-based filters.\n");
+  printf("  FILTER_FWHM    Full width at half maximum.\n");
+  printf("  FILTER_CENTER  Center wavenumber.\n");
+  printf("  FILTER_WIDTH   Total spectral width.\n");
+  printf("  FILTER_SAMP    Spectral sampling interval.\n\n");
+  printf("Further information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }
 
 /*****************************************************************************/

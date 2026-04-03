@@ -52,6 +52,9 @@ void compute_rel_errors(
   double *minre,
   double *maxre);
 
+/*! Print command-line help. */
+void usage(void);
+
 /* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
@@ -62,9 +65,17 @@ int main(
 
   static ctl_t ctl;
 
+  if (argc == 2
+      && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
+    usage();
+    return EXIT_SUCCESS;
+  }
+
   /* Check arguments... */
   if (argc < 5)
-    ERRMSG("Give parameters: <ctl> <obs> <atm> <rad>");
+    ERRMSG("Missing or invalid command-line arguments.\n\n"
+	   "Usage: formod <ctl> <obs> <atm> <rad> [KEY VALUE ...]\n\n"
+	   "Use -h for full help.");
 
   /* Read control parameters... */
   SELECT_TIMER("READ_CTL", "INPUT");
@@ -147,6 +158,41 @@ int main(
   PRINT_TIMERS;
 
   return EXIT_SUCCESS;
+}
+
+/*****************************************************************************/
+
+void usage(void) {
+
+  printf("\nJURASSIC forward model.\n\n");
+  printf("Compute simulated radiances or transmittances for the configured\n");
+  printf("channels from observation geometry, atmospheric state, and control\n");
+  printf("settings.\n\n");
+  printf("Usage:\n");
+  printf("  formod <ctl> <obs> <atm> <rad> [KEY VALUE ...]\n\n");
+  printf("Arguments:\n");
+  printf("  <ctl>  Control file.\n");
+  printf("  <obs>  Observation geometry input file.\n");
+  printf("  <atm>  Atmospheric state input file.\n");
+  printf("  <rad>  Output file for simulated radiances or transmittances.\n");
+  printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Optional control overrides:\n");
+  printf("  TASK <name>      Select the operation mode.\n");
+  printf("                   - or omitted: regular forward-model simulation.\n");
+  printf("                   c: write separate outputs for individual emitter and\n");
+  printf("                      extinction contributions.\n");
+  printf("                   p: process observation profiles one ray at a time,\n");
+  printf("                      matching atmospheric profiles by time.\n");
+  printf("                   s: analyze sensitivity to ray-tracing step sizes.\n");
+  printf("                   t: run the built-in runtime benchmark using randomly\n");
+  printf("                      perturbed versions of the input atmosphere.\n");
+  printf("  DIRLIST <file>   Read working directories from <file> and run one case\n");
+  printf("                   per directory using the same <obs>, <atm>, and <rad>\n");
+  printf("                   filenames relative to each listed directory.\n");
+  printf("  OBSREF <file>    Read reference observations from <file> and print\n");
+  printf("                   relative-error diagnostics against the simulated output.\n");
+  printf("\nFurther information:\n");
+  printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }
 
 /*****************************************************************************/
