@@ -6839,6 +6839,26 @@ void set_cov_meas(
 
 /*****************************************************************************/
 
+const char *shared_io_input_target(
+  const ret_t *ret,
+  const char *shared_file,
+  const char *legacy_file,
+  const char **dirname,
+  int *profile) {
+
+  if (shared_file[0] != '-') {
+    *dirname = NULL;
+    *profile = ret->shared_io_profile;
+    return shared_file;
+  }
+
+  *dirname = ret->dir;
+  *profile = 0;
+  return legacy_file;
+}
+
+/*****************************************************************************/
+
 const char *shared_io_output_target(
   const ret_t *ret,
   const char *shared_file,

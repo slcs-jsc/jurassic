@@ -32,30 +32,12 @@
    Functions...
    ------------------------------------------------------------ */
 
-static const char *ret_input_target(
-  const ret_t *ret,
-  const char *shared_file,
-  const char *legacy_file,
-  const char **dirname,
-  int *profile) {
-
-  if (shared_file[0] != '-') {
-    *dirname = NULL;
-    *profile = ret->shared_io_profile;
-    return shared_file;
-  }
-
-  *dirname = ret->dir;
-  *profile = 0;
-  return legacy_file;
-}
+/*! Print command-line help. */
+void usage(void);
 
 /* ------------------------------------------------------------
    Main...
    ------------------------------------------------------------ */
-
-/*! Print command-line help. */
-void usage(void);
 
 int main(
   int argc,
@@ -168,15 +150,15 @@ int main(
     const char *dirname;
     int profile;
     const char *filename =
-      ret_input_target(&ret, ret.shared_io_atm_apr_file, "atm_apr.tab",
-		       &dirname, &profile);
+      shared_io_input_target(&ret, ret.shared_io_atm_apr_file, "atm_apr.tab",
+			     &dirname, &profile);
     read_atm(dirname, filename, &ctl, &atm_apr, profile);
 
     /* Read observation data... */
     SELECT_TIMER("READ_OBS", "INPUT");
     filename =
-      ret_input_target(&ret, ret.shared_io_obs_meas_file, "obs_meas.tab",
-		       &dirname, &profile);
+      shared_io_input_target(&ret, ret.shared_io_obs_meas_file, "obs_meas.tab",
+			     &dirname, &profile);
     read_obs(dirname, filename, &ctl, &obs_meas, profile);
 
     /* Run retrieval... */

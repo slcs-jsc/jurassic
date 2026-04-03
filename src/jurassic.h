@@ -4370,6 +4370,39 @@ void set_cov_meas(
   gsl_vector * sig_eps_inv);
 
 /**
+ * @brief Resolve retrieval input target for legacy-directory and shared-file modes.
+ *
+ * Chooses whether a retrieval input should be read from the legacy
+ * per-directory file layout or from a shared netCDF file selected through
+ * the retrieval control structure.
+ *
+ * @param[in]  ret          Retrieval configuration structure (`ret_t`).
+ * @param[in]  shared_file  Shared input file name from `ret_t`; ignored when set to `"-"`.
+ * @param[in]  legacy_file  Legacy per-directory input file name.
+ * @param[out] dirname      Output directory pointer. Set to `ret->dir` for legacy input
+ *                          and to `NULL` for shared-file input.
+ * @param[out] profile      Record index used by the generic I/O wrappers.
+ *
+ * @return Pointer to the selected input file name.
+ *
+ * @details
+ * - In shared-file mode, the function returns `shared_file`, sets `*dirname = NULL`,
+ *   and uses `ret->shared_io_profile` as the profile or dataset index.
+ * - In legacy mode, the function returns `legacy_file`, sets `*dirname = ret->dir`,
+ *   and resets `*profile = 0`.
+ *
+ * @see shared_io_output_target, read_atm, read_obs
+ *
+ * @author Lars Hoffmann
+ */
+const char *shared_io_input_target(
+  const ret_t * ret,
+  const char *shared_file,
+  const char *legacy_file,
+  const char **dirname,
+  int *profile);
+
+/**
  * @brief Resolve retrieval output target for legacy-directory and shared-file modes.
  *
  * Chooses whether a retrieval product should be written into the legacy
