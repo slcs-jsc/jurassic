@@ -1,4 +1,4 @@
-name: codecov
+name: coveralls
 
 on: [push, pull_request]
 
@@ -20,11 +20,8 @@ jobs:
           make coverage
 
       - name: upload
-        uses: codecov/codecov-action@v5
+        uses: coverallsapp/github-action@v2
         with:
-          files: ./src/coverage.info
-          disable_search: true
-          fail_ci_if_error: true
-          verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          file: ./src/coverage.info
+          format: lcov
+          fail-on-error: true
