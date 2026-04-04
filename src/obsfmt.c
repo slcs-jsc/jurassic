@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -43,11 +44,8 @@ int main(
 
   static obs_t obs;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 6)
@@ -75,11 +73,13 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC observation-format converter.\n\n");
   printf("Convert observation files between supported OBSFMT formats.\n\n");
   printf("Usage:\n");
-  printf("  obsfmt <ctl> <obs_in> <obsfmt_in> <obs_out> <obsfmt_out> [KEY VALUE ...]\n\n");
+  printf
+    ("  obsfmt <ctl> <obs_in> <obsfmt_in> <obs_out> <obsfmt_out> [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>         Control file.\n");
   printf("  <obs_in>      Input observation data file.\n");

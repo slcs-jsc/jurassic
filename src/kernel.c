@@ -38,7 +38,8 @@ void call_kernel(
   const char *kernelfile);
 
 /*! Print command-line help. */
-void usage(void);
+void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -52,11 +53,8 @@ int main(
 
   char dirlist[LEN];
 
-  if (argc == 2
-      && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 5)
@@ -116,11 +114,13 @@ int main(
 
 /*****************************************************************************/
 
-void usage(void) {
+void usage(
+  void) {
 
   printf("\nJURASSIC kernel tool.\n\n");
   printf("Compute Jacobian or kernel matrices for the configured channels\n");
-  printf("from observation geometry, atmospheric state, and control settings.\n\n");
+  printf
+    ("from observation geometry, atmospheric state, and control settings.\n\n");
   printf("Usage:\n");
   printf("  kernel <ctl> <obs> <atm> <kernel> [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
@@ -130,9 +130,12 @@ void usage(void) {
   printf("  <kernel>  Output file for the kernel matrix.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
   printf("Optional control overrides:\n");
-  printf("  DIRLIST <file>   Read working directories from <file> and run one case\n");
-  printf("                   per directory using the same <obs>, <atm>, and\n");
-  printf("                   <kernel> filenames relative to each listed directory.\n");
+  printf
+    ("  DIRLIST <file>   Read working directories from <file> and run one case\n");
+  printf
+    ("                   per directory using the same <obs>, <atm>, and\n");
+  printf
+    ("                   <kernel> filenames relative to each listed directory.\n");
   printf("\nFurther information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

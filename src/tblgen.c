@@ -39,7 +39,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -60,11 +61,8 @@ int main(
 
   size_t line_buf_size = 0;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Read command line arguments... */
   if (argc != 5)
@@ -150,7 +148,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC lookup-table generator.\n\n");
   printf("Prepare transmission look-up table entries from monochromatic\n");
   printf("absorption spectra and a filter function.\n\n");

@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -44,11 +45,8 @@ int main(
 
   double clk[NCL], sfeps[NSF];
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 3)
@@ -131,7 +129,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC climatology tool.\n\n");
   printf("Prepare an atmospheric profile from climatological data and\n");
   printf("write it to an atmospheric output file.\n\n");

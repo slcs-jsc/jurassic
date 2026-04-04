@@ -6,7 +6,7 @@
 EXC = atmfmt brightness climatology day2doy doy2day filter formod hydrostatic interpolate invert jsec2time kernel limb matfmt nadir obs2spec obsfmt planck raytrace retrieval tblfmt tblgen tblrdc time2jsec zenith
 
 # List of tests...
-TESTS = atm_test formod_test mat_test obs_test ret_test tbl_test tools_test
+TESTS = cli_test tools_test atm_test mat_test obs_test tbl_test formod_test ret_test
 
 # Installation directory...
 DESTDIR ?= ../bin
@@ -117,7 +117,7 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
-.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test strip uninstall $(TESTS)
+.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test print-exc strip uninstall $(TESTS)
 
 all: $(EXC)
 	rm -f *~
@@ -132,6 +132,9 @@ jurassic.o: jurassic.c jurassic.h Makefile
 	$(CC) $(CFLAGS) -c -o jurassic.o jurassic.c
 
 check: $(TESTS)
+
+print-exc:
+	@printf '%s\n' $(EXC)
 
 $(TESTS) mpi_test: all
 	@(echo "\n===== Running \"$@\" ... =====") ; \

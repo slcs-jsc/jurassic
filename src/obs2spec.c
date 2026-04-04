@@ -30,7 +30,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -46,11 +47,8 @@ int main(
 
   FILE *out;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 4)
@@ -112,7 +110,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC spectrum writer.\n\n");
   printf("Write radiances and transmittances from an observation file to\n");
   printf("a per-channel spectrum table.\n\n");

@@ -35,7 +35,8 @@ double ails(
   double dnu);
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -53,11 +54,8 @@ int main(
 
   int fn = 0;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Write info... */
   if (argc < 3)
@@ -129,7 +127,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC filter generator.\n\n");
   printf("Create a radiometric filter function from the filter settings\n");
   printf("in the control file and write it to disk.\n\n");
@@ -141,7 +140,8 @@ static void usage(void) {
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
   printf("Common control overrides:\n");
   printf("  FILTER_TYPE    Filter shape identifier.\n");
-  printf("  FILTER_OPD     Optical path difference for sinc-based filters.\n");
+  printf
+    ("  FILTER_OPD     Optical path difference for sinc-based filters.\n");
   printf("  FILTER_FWHM    Full width at half maximum.\n");
   printf("  FILTER_CENTER  Center wavenumber.\n");
   printf("  FILTER_WIDTH   Total spectral width.\n");

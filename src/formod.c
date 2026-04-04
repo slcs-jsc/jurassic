@@ -53,7 +53,8 @@ void compute_rel_errors(
   double *maxre);
 
 /*! Print command-line help. */
-void usage(void);
+void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -65,11 +66,8 @@ int main(
 
   static ctl_t ctl;
 
-  if (argc == 2
-      && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 5)
@@ -162,11 +160,14 @@ int main(
 
 /*****************************************************************************/
 
-void usage(void) {
+void usage(
+  void) {
 
   printf("\nJURASSIC forward model.\n\n");
-  printf("Compute simulated radiances or transmittances for the configured\n");
-  printf("channels from observation geometry, atmospheric state, and control\n");
+  printf
+    ("Compute simulated radiances or transmittances for the configured\n");
+  printf
+    ("channels from observation geometry, atmospheric state, and control\n");
   printf("settings.\n\n");
   printf("Usage:\n");
   printf("  formod <ctl> <obs> <atm> <rad> [KEY VALUE ...]\n\n");
@@ -178,19 +179,29 @@ void usage(void) {
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
   printf("Optional control overrides:\n");
   printf("  TASK <name>      Select the operation mode.\n");
-  printf("                   - or omitted: regular forward-model simulation.\n");
-  printf("                   c: write separate outputs for individual emitter and\n");
+  printf
+    ("                   - or omitted: regular forward-model simulation.\n");
+  printf
+    ("                   c: write separate outputs for individual emitter and\n");
   printf("                      extinction contributions.\n");
-  printf("                   p: process observation profiles one ray at a time,\n");
+  printf
+    ("                   p: process observation profiles one ray at a time,\n");
   printf("                      matching atmospheric profiles by time.\n");
-  printf("                   s: analyze sensitivity to ray-tracing step sizes.\n");
-  printf("                   t: run the built-in runtime benchmark using randomly\n");
-  printf("                      perturbed versions of the input atmosphere.\n");
-  printf("  DIRLIST <file>   Read working directories from <file> and run one case\n");
-  printf("                   per directory using the same <obs>, <atm>, and <rad>\n");
+  printf
+    ("                   s: analyze sensitivity to ray-tracing step sizes.\n");
+  printf
+    ("                   t: run the built-in runtime benchmark using randomly\n");
+  printf
+    ("                      perturbed versions of the input atmosphere.\n");
+  printf
+    ("  DIRLIST <file>   Read working directories from <file> and run one case\n");
+  printf
+    ("                   per directory using the same <obs>, <atm>, and <rad>\n");
   printf("                   filenames relative to each listed directory.\n");
-  printf("  OBSREF <file>    Read reference observations from <file> and print\n");
-  printf("                   relative-error diagnostics against the simulated output.\n");
+  printf
+    ("  OBSREF <file>    Read reference observations from <file> and print\n");
+  printf
+    ("                   relative-error diagnostics against the simulated output.\n");
   printf("\nFurther information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

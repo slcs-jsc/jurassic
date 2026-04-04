@@ -415,6 +415,26 @@
     ERRMSG("Out of memory!");
 
 /**
+ * @brief Print usage information on `-h` or `--help`.
+ *
+ * Calls the local `usage()` function and exits successfully when the current
+ * command is invoked with a single help flag.
+ *
+ * @note This macro expects local `argc` and `argv` variables and a local
+ *       `usage()` function.
+ *
+ * @author Lars Hoffmann
+ */
+#define USAGE								\
+  do {									\
+    if ((argc == 2)							\
+	&& (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {	\
+      usage();								\
+      return EXIT_SUCCESS;						\
+    }									\
+  } while (0)
+
+/**
  * @brief Compute brightness temperature from radiance.
  *
  * Computes the equivalent blackbody (brightness) temperature corresponding to

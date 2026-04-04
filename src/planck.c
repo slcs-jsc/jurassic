@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -39,11 +40,8 @@ int main(
   int argc,
   char *argv[]) {
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc != 3 && argc != 7)
@@ -92,7 +90,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC Planck-function converter.\n\n");
   printf("Convert brightness temperature to radiance for a single value\n");
   printf("or a tabulated temperature and wavenumber range.\n\n");

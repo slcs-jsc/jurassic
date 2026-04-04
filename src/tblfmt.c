@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -41,11 +42,8 @@ int main(
 
   ctl_t ctl;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 6)
@@ -74,11 +72,13 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC lookup-table format converter.\n\n");
   printf("Convert look-up tables between supported TBLFMT formats.\n\n");
   printf("Usage:\n");
-  printf("  tblfmt <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out> [KEY VALUE ...]\n\n");
+  printf
+    ("  tblfmt <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out> [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>         Control file.\n");
   printf("  <tblbase_in>  Input table base name.\n");

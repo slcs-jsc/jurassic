@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -43,17 +44,13 @@ int main(
 
   int day, hour, min, mon, sec, year;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 2)
     ERRMSG("Missing or invalid command-line arguments.\n\n"
-	   "Usage: jsec2time <jsec>\n\n"
-	   "Use -h for full help.");
+	   "Usage: jsec2time <jsec>\n\n" "Use -h for full help.");
 
   /* Read arguments... */
   const double jsec = atof(argv[1]);
@@ -67,9 +64,11 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC time converter.\n\n");
-  printf("Convert Julian seconds since 2000-01-01T00:00Z to calendar time.\n\n");
+  printf
+    ("Convert Julian seconds since 2000-01-01T00:00Z to calendar time.\n\n");
   printf("Usage:\n");
   printf("  jsec2time <jsec>\n\n");
   printf("Arguments:\n");

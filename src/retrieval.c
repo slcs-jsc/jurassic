@@ -33,7 +33,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-void usage(void);
+void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -62,11 +63,8 @@ int main(
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
 
-  if (argc == 2
-      && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 3)
@@ -157,8 +155,8 @@ int main(
     /* Read observation data... */
     SELECT_TIMER("READ_OBS", "INPUT");
     filename =
-      shared_io_input_target(&ret, ret.shared_io_obs_meas_file, "obs_meas.tab",
-			     &dirname, &profile);
+      shared_io_input_target(&ret, ret.shared_io_obs_meas_file,
+			     "obs_meas.tab", &dirname, &profile);
     read_obs(dirname, filename, &ctl, &obs_meas, profile);
 
     /* Run retrieval... */
@@ -189,7 +187,8 @@ int main(
 
 /*****************************************************************************/
 
-void usage(void) {
+void usage(
+  void) {
 
   printf("\nJURASSIC retrieval tool.\n\n");
   printf("Run optimal-estimation retrievals from measured observations,\n");
@@ -204,9 +203,11 @@ void usage(void) {
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
   printf("Optional control overrides:\n");
   printf("  SHARED_IO_PROFLIST <file>\n");
-  printf("             Read profile indices from <file> for shared-file retrievals.\n");
+  printf
+    ("             Read profile indices from <file> for shared-file retrievals.\n");
   printf("  SHARED_IO_* <file>\n");
-  printf("             Override shared input or output filenames on the command line.\n");
+  printf
+    ("             Override shared input or output filenames on the command line.\n");
   printf("\nFurther information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

@@ -52,7 +52,8 @@ static void reduction(
   double rtol);
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -63,11 +64,8 @@ int main(
   char *argv[]) {
   ctl_t ctl;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 6)
@@ -140,12 +138,14 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC lookup-table reduction tool.\n\n");
   printf("Reduce look-up table size by adaptive interpolation with\n");
   printf("absolute and relative error thresholds.\n\n");
   printf("Usage:\n");
-  printf("  tblrdc <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out> [KEY VALUE ...]\n\n");
+  printf
+    ("  tblrdc <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out> [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>         Control file.\n");
   printf("  <tblbase_in>  Input table base name.\n");

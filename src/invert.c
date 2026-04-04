@@ -40,7 +40,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -70,11 +71,8 @@ int main(
 
   static int i, ig, n, nl, ndata[NMAX], nprof;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 6)
@@ -373,7 +371,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC inversion tool.\n\n");
   printf("Run the MPTRAC inversion workflow using profile data, forward\n");
   printf("model calculations, and kernel output.\n\n");

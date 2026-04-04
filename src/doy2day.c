@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -41,17 +42,13 @@ int main(
 
   int day, mon;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 3)
     ERRMSG("Missing or invalid command-line arguments.\n\n"
-	   "Usage: doy2day <year> <doy>\n\n"
-	   "Use -h for full help.");
+	   "Usage: doy2day <year> <doy>\n\n" "Use -h for full help.");
 
   /* Read arguments... */
   const int year = atoi(argv[1]);
@@ -66,7 +63,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC calendar converter.\n\n");
   printf("Convert year and day-of-year to a calendar date.\n\n");
   printf("Usage:\n");

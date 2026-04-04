@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -43,11 +44,8 @@ int main(
 
   static atm_t atm;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 6)
@@ -75,11 +73,14 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC atmospheric-format converter.\n\n");
-  printf("Convert atmospheric input files between supported ATMFMT formats.\n\n");
+  printf
+    ("Convert atmospheric input files between supported ATMFMT formats.\n\n");
   printf("Usage:\n");
-  printf("  atmfmt <ctl> <atm_in> <atmfmt_in> <atm_out> <atmfmt_out> [KEY VALUE ...]\n\n");
+  printf
+    ("  atmfmt <ctl> <atm_in> <atmfmt_in> <atm_out> <atmfmt_out> [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>         Control file.\n");
   printf("  <atm_in>      Input atmospheric data file.\n");

@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -49,11 +50,8 @@ int main(
 
   size_t nr, nc;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 11)
@@ -116,12 +114,14 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC matrix-format converter.\n\n");
   printf("Convert matrix files between supported MATRIXFMT formats and\n");
   printf("annotate them using atmospheric or observation metadata.\n\n");
   printf("Usage:\n");
-  printf("  matfmt <ctl> <atm> <obs> <rowspace> <colspace> <sort> <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out> [KEY VALUE ...]\n\n");
+  printf
+    ("  matfmt <ctl> <atm> <obs> <rowspace> <colspace> <sort> <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out> [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>           Control file.\n");
   printf("  <atm>           Atmospheric data file.\n");

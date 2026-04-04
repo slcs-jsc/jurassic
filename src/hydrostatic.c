@@ -29,7 +29,8 @@
    ------------------------------------------------------------ */
 
 /*! Print command-line help. */
-static void usage(void);
+static void usage(
+  void);
 
 /* ------------------------------------------------------------
    Main...
@@ -42,11 +43,8 @@ int main(
   static atm_t atm;
   static ctl_t ctl;
 
-  if (argc == 2
-      && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
-    usage();
-    return EXIT_SUCCESS;
-  }
+  /* Print usage information... */
+  USAGE;
 
   /* Check arguments... */
   if (argc < 4)
@@ -75,7 +73,8 @@ int main(
 
 /*****************************************************************************/
 
-static void usage(void) {
+static void usage(
+  void) {
   printf("\nJURASSIC hydrostatic tool.\n\n");
   printf("Recalculate pressure from hydrostatic equilibrium for an\n");
   printf("existing atmospheric profile.\n\n");
@@ -84,7 +83,8 @@ static void usage(void) {
   printf("Arguments:\n");
   printf("  <ctl>      Control file.\n");
   printf("  <atm_in>   Input atmospheric data file.\n");
-  printf("  <atm_hyd>  Output atmospheric data file with hydrostatic pressure.\n");
+  printf
+    ("  <atm_hyd>  Output atmospheric data file with hydrostatic pressure.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
   printf("Notes:\n");
   printf("  HYDZ must be set to a non-negative reference height.\n");
