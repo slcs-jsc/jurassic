@@ -51,6 +51,6 @@ while IFS= read -r tool ; do
 
 # Read the executable list from the Makefile so this test follows the same
 # source of truth as the build and installation rules.
-done < <(make -s -C ../../src print-exc)
+done < <(make --no-print-directory -C ../../src print-exc)
 
 exit $error
