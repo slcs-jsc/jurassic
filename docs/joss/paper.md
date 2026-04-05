@@ -15,6 +15,11 @@ authors:
   - name: Sabine Griessbach
     affiliation: 1
     orcid: 0000-0003-3792-3573
+  - name: Yiran Zhang
+    affiliation: 1
+  - name: Amir Nikfal
+    affiliation: 1
+    orcid: 0000-0002-6699-9473
 
 affiliations:
   - name: Jülich Supercomputing Centre, Forschungszentrum Jülich, Jülich, Germany
