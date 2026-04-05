@@ -234,14 +234,14 @@
 #define T0 273.15
 #endif
 
-/*! Minimum temperature for source function [K]. */
-#ifndef TMIN
-#define TMIN 100.
-#endif
-
 /*! Maximum temperature for source function [K]. */
 #ifndef TMAX
 #define TMAX 400.
+#endif
+
+/*! Minimum temperature for source function [K]. */
+#ifndef TMIN
+#define TMIN 100.
 #endif
 
 /*! Effective temperature of the sun [K]. */
@@ -263,41 +263,6 @@
    Dimensions...
    ------------------------------------------------------------ */
 
-/*! Maximum number of cloud layer spectral grid points. */
-#ifndef NCL
-#define NCL 8
-#endif
-
-/*! Maximum number of radiance channels. */
-#ifndef ND
-#define ND 128
-#endif
-
-/*! Maximum number of emitters. */
-#ifndef NG
-#define NG 8
-#endif
-
-/*! Maximum number of atmospheric data points. */
-#ifndef NP
-#define NP 256
-#endif
-
-/*! Maximum number of ray paths. */
-#ifndef NR
-#define NR 256
-#endif
-
-/*! Maximum number of surface layer spectral grid points. */
-#ifndef NSF
-#define NSF 8
-#endif
-
-/*! Maximum number of spectral windows. */
-#ifndef NW
-#define NW 4
-#endif
-
 /*! Maximum length of ASCII data lines. */
 #ifndef LEN
 #define LEN 10000
@@ -313,19 +278,14 @@
 #define N ((2 + NG + NW) * NP + NCL + NSF + 3)
 #endif
 
-/*! Maximum number of quantities. */
-#ifndef NQ
-#define NQ (5 + NG + NW + NCL + NSF)
+/*! Maximum number of cloud layer spectral grid points. */
+#ifndef NCL
+#define NCL 8
 #endif
 
-/*! Maximum number of LOS points. */
-#ifndef NLOS
-#define NLOS 4096
-#endif
-
-/*! Maximum number of shape function grid points. */
-#ifndef NSHAPE
-#define NSHAPE 20000
+/*! Maximum number of radiance channels. */
+#ifndef ND
+#define ND 128
 #endif
 
 /*! Number of ray paths used for FOV calculations. */
@@ -333,9 +293,64 @@
 #define NFOV 5
 #endif
 
+/*! Maximum number of emitters. */
+#ifndef NG
+#define NG 8
+#endif
+
+/*! Maximum number of LOS points. */
+#ifndef NLOS
+#define NLOS 4096
+#endif
+
+/*! Maximum number of atmospheric data points. */
+#ifndef NP
+#define NP 256
+#endif
+
+/*! Maximum number of quantities. */
+#ifndef NQ
+#define NQ (5 + NG + NW + NCL + NSF)
+#endif
+
+/*! Maximum number of ray paths. */
+#ifndef NR
+#define NR 256
+#endif
+
+/*! Maximum number of surface layer spectral grid points. */
+#ifndef NSF
+#define NSF 8
+#endif
+
+/*! Maximum number of shape function grid points. */
+#ifndef NSHAPE
+#define NSHAPE 20000
+#endif
+
+/*! Maximum number of aggregated timers. */
+#ifndef NTIMER
+#define NTIMER 100
+#endif
+
+/*! Maximum number of spectral windows. */
+#ifndef NW
+#define NW 4
+#endif
+
+/*! Maximum number of RFM spectral grid points. */
+#ifndef RFMNPTS
+#define RFMNPTS 10000000
+#endif
+
 /*! Maximum number of pressure levels in emissivity tables. */
 #ifndef TBLNP
 #define TBLNP 41
+#endif
+
+/*! Maximum number of source function temperature levels. */
+#ifndef TBLNS
+#define TBLNS 1200
 #endif
 
 /*! Maximum number of temperatures in emissivity tables. */
@@ -346,16 +361,6 @@
 /*! Maximum number of column densities per emissivity curve. */
 #ifndef TBLNU
 #define TBLNU 512
-#endif
-
-/*! Maximum number of source function temperature levels. */
-#ifndef TBLNS
-#define TBLNS 1200
-#endif
-
-/*! Maximum number of RFM spectral grid points. */
-#ifndef RFMNPTS
-#define RFMNPTS 10000000
 #endif
 
 /* ------------------------------------------------------------
@@ -413,26 +418,6 @@
 #define ALLOC(ptr, type, n)				 \
   if((ptr=calloc((size_t)(n), sizeof(type)))==NULL)      \
     ERRMSG("Out of memory!");
-
-/**
- * @brief Print usage information on `-h` or `--help`.
- *
- * Calls the local `usage()` function and exits successfully when the current
- * command is invoked with a single help flag.
- *
- * @note This macro expects local `argc` and `argv` variables and a local
- *       `usage()` function.
- *
- * @author Lars Hoffmann
- */
-#define USAGE								\
-  do {									\
-    if ((argc == 2)							\
-	&& (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {	\
-      usage();								\
-      return EXIT_SUCCESS;						\
-    }									\
-  } while (0)
 
 /**
  * @brief Compute brightness temperature from radiance.
@@ -796,7 +781,6 @@
  * @param check Flag to check bounds. Set to 1 for bounds check.
  *
  * @author Lars Hoffmann
- * @author Jan Clemens
  */
 #define NC_INQ_DIM(dimname, ptr, min, max, check) {       \
     int dimid; size_t naux;				  \
@@ -1115,9 +1099,6 @@
 	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1]));			\
   } while (0)
 
-/*! Maximum number of aggregated timers. */
-#define NTIMER 100
-
 /**
  * @brief Switch to a named aggregated timer.
  *
@@ -1165,6 +1146,28 @@
       if(sscanf(tok, format, &(var))!=1) continue; \
     } else ERRMSG("Error while reading!"); \
   }
+
+/**
+ * @brief Print usage information on `-h` or `--help`.
+ *
+ * Calls the local `usage()` function and exits successfully when any command
+ * argument is `-h` or `--help`.
+ *
+ * @note This macro expects local `argc` and `argv` variables and a local
+ *       `usage()` function.
+ *
+ * @author Lars Hoffmann
+ */
+#define USAGE								\
+  do {									\
+    int iusage;								\
+    for (iusage = 1; iusage < argc; iusage++)				\
+      if (!strcmp(argv[iusage], "-h")					\
+	  || !strcmp(argv[iusage], "--help")) {				\
+	usage();							\
+	return EXIT_SUCCESS;						\
+      }									\
+  } while (0)
 
 /* ------------------------------------------------------------
    Log messages...

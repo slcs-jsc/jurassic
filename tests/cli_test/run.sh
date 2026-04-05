@@ -47,6 +47,19 @@ while IFS= read -r tool ; do
             echo "Missing usage text: $tool $flag"
             error=1
         fi
+
+        # Help should be discoverable even when users add extra arguments.
+        # This keeps help behavior forgiving for quick terminal exploration.
+        extra_out="data/${tool}_${flag#--}_extra.txt"
+        if ! "$jurassic/$tool" "$flag" extra-arg > "$extra_out" ; then
+            echo "Help command with extra arguments failed: $tool $flag"
+            error=1
+            continue
+        fi
+        if ! grep -q "Usage:" "$extra_out" ; then
+            echo "Missing usage text with extra arguments: $tool $flag"
+            error=1
+        fi
     done
 
 # Read the executable list from the Makefile so this test follows the same
