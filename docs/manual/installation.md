@@ -51,7 +51,7 @@ The following software components are required to build JURASSIC:
   independent retrieval tasks across processes. No other JURASSIC
   executables use MPI internally.
 
-- **GNU Plot** (optional)  
+- **Gnuplot** (optional)
   Used by example projects to generate diagnostic plots.
 
 - **Optional Fortran compiler**  
@@ -115,7 +115,7 @@ To build JURASSIC without MPI support:
 
 ```bash
 cd src
-make
+make -j
 ```
 
 This builds all executables in serial/OpenMP mode. MPI is not required
@@ -129,7 +129,7 @@ To enable MPI support for the retrieval executable, build with:
 
 ```bash
 cd src
-make MPI=1
+make -j MPI=1
 ```
 
 This will:
@@ -151,7 +151,7 @@ To perform a clean rebuild:
 ```bash
 cd src
 make clean
-make
+make -j
 ```
 
 ------------------------------------------------------------------------

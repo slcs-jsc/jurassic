@@ -24,8 +24,10 @@ JURASSIC includes a set of example projects that demonstrate typical use
 cases and serve as regression tests. These projects are located in the
 `projects` directory.
 
+From the repository root:
+
 ``` bash
-cd jurassic/projects
+cd projects
 ```
 
 Three example observation geometries are provided:
@@ -106,11 +108,11 @@ are discussed in more detail in the User Manual.
 
 ## Output and verification
 
-After the simulation completes, JURASSIC:
+After each simulation completes, JURASSIC:
 
 -   Computes radiances for two or three detector channels
 -   Compares the results against reference data to verify correctness
--   Generates diagnostic plots of radiances and Jacobians using gnuplot
+-   Generates diagnostic plots of radiances and Jacobians using Gnuplot
 
 If the run completes without errors and the verification checks pass,
 your JURASSIC installation is functioning correctly.
