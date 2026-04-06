@@ -4962,8 +4962,6 @@ void optimal_estimation(
   free(iqa);
 }
 
-/*****************************************************************************/
-
 void raytrace(
   const ctl_t *ctl,
   const atm_t *atm,
@@ -5112,7 +5110,7 @@ void raytrace(
 
     /* Determine refractivity... */
     if (ctl->refrac && z <= zrefrac)
-      n = 1 + REFRAC(p, t, ctl->ig_h2o >= 0 ? q[ctl->ig_h2o] : 0.0);
+      n = 1 + REFRAC_EDLEN(p, t);
     else
       n = 1;
 
@@ -5126,13 +5124,12 @@ void raytrace(
 	xh[i] = x[i] + 0.5 * ds * ex0[i];
       cart2geo(xh, &z, &lon, &lat);
       intpol_atm(ctl, atm, z, &p, &t, q, k);
-      n = REFRAC(p, t, ctl->ig_h2o >= 0 ? q[ctl->ig_h2o] : 0.0);
+      n = REFRAC_EDLEN(p, t);
       for (int i = 0; i < 3; i++) {
 	xh[i] += h;
 	cart2geo(xh, &z, &lon, &lat);
 	intpol_atm(ctl, atm, z, &p, &t, q, k);
-	ng[i] =
-	  (REFRAC(p, t, ctl->ig_h2o >= 0 ? q[ctl->ig_h2o] : 0.0) - n) / h;
+	ng[i] = (REFRAC_EDLEN(p, t) - n) / h;
 	xh[i] -= h;
       }
     } else

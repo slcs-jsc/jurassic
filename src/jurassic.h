@@ -1047,7 +1047,7 @@
 #define RAD2DEG(rad) ((rad) * (180.0 / M_PI))
 
 /**
- * @brief Compute moist-air refractivity (n - 1).
+ * @brief Compute moist-air refractivity (n - 1) with Smith-Weintraub.
  *
  * Approximates the refractivity of moist air using the Smith-Weintraub
  * relation for radio and microwave frequencies:
@@ -1058,8 +1058,8 @@
  * \f$ e = \mathrm{h2o} \cdot p \f$ is the water-vapor partial pressure (hPa)
  * derived from the H2O volume mixing ratio in [ppv].
  *
- * This provides a simple bulk-atmosphere refraction model, but it does not
- * represent wavelength-dependent infrared refractivity.
+ * In the current raytracer this relation is used as a fallback for
+ * refractivity models that are not explicitly wavelength-dependent.
  *
  * Reference:
  * Smith, E. K., and S. Weintraub: The constants in the equation for
@@ -1074,8 +1074,38 @@
  *
  * @author Lars Hoffmann
  */
-#define REFRAC(p, T, h2o) \
+#define REFRAC_SW53(p, T, h2o) \
   (1e-6 * (77.6 * (p) / (T) + 3.73e5 * (h2o) * (p) / ((T) * (T))))
+
+/**
+ * @brief Compute dry-air refractivity (n - 1) with an Edlen-type relation.
+ *
+ * Approximates dry-air refractivity using the wavelength-dependent relation
+ * documented for RFM:
+ * \f$ (n - 1) = 10^{-8}\left[8342.54 + \frac{2406147}{130-\sigma^2}
+ * + \frac{15998}{38.9-\sigma^2}\right]\frac{\rho}{\rho_\mathrm{ref}} \f$,
+ * where \f$ \sigma = 1 / \lambda \f$ is the wavenumber in inverse microns.
+ * The density ratio is approximated here as
+ * \f$ (\rho/\rho_\mathrm{ref}) \approx (p/1013.25)(288.15/T) \f$.
+ * In the current raytracer the reference wavelength is fixed at 10 um.
+ *
+ * Reference:
+ * Dudhia, A.: The Reference Forward Model (RFM),
+ * J. Quant. Spectrosc. Radiat. Transfer, 186, 243-253,
+ * https://doi.org/10.1016/j.jqsrt.2016.06.018, 2017.
+ *
+ * @param[in] p          Pressure [hPa].
+ * @param[in] T          Temperature [K].
+ *
+ * @return Refractivity (dimensionless, n - 1).
+ *
+ * @author Lars Hoffmann
+ */
+#define REFRAC_EDLEN(p, T)							\
+  ((1e-8								\
+    * (8342.54 + 2406147.0 / (130.0 - 1.0 / (10.0 * 10.0))		\
+       + 15998.0 / (38.9 - 1.0 / (10.0 * 10.0))))			\
+   * ((p) / 1013.25) * (288.15 / (T)))
 
 /**
  * @brief Log detailed statistics of an emissivity look-up table.
@@ -3291,8 +3321,10 @@ void optimal_estimation(
  *   altitude and user-specified controls (`rayds`, `raydz`).
  * - Interpolates atmospheric variables at each step using @ref intpol_atm.
  * - Detects surface intersection or top-of-atmosphere exit and terminates accordingly.
- * - Optionally accounts for **refraction** via a moist-air refractive
- *   index `n(p, T, h2o)` based on the Smith-Weintraub approximation.
+ * - Optionally accounts for **refraction** via a dry-air refractive
+ *   index `n(p, T)` based on an Edlen-type relation evaluated at a
+ *   fixed reference wavelength of 10 um, consistent with the published
+ *   RFM algorithm.
  * - Accumulates **column densities** and **Curtis–Godson means** for each gas.
  * - Supports **cloud extinction** and **surface emissivity** interpolation.
  *
