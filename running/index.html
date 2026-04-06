@@ -1,0 +1,1879 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://slcs-jsc.github.io/jurassic/running/">
+      
+      
+        <link rel="prev" href="../configuration/">
+      
+      
+        <link rel="next" href="../atmospheric_data/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Running JURASSIC - JURASSIC</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#running-jurassic" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="JURASSIC" class="md-header__button md-logo" aria-label="JURASSIC" data-md-component="logo">
+      
+  <img src="../img/JURASSIC_320px.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            JURASSIC
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Running JURASSIC
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/slcs-jsc/jurassic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="JURASSIC" class="md-nav__button md-logo" aria-label="JURASSIC" data-md-component="logo">
+      
+  <img src="../img/JURASSIC_320px.png" alt="logo">
+
+    </a>
+    JURASSIC
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/slcs-jsc/jurassic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Introduction
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../theory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Physical background
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../retrieval_theory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Retrieval theory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model assumptions & limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User manual
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User manual
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running JURASSIC
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running JURASSIC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#general-execution-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General execution model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="General execution model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#application-specific-command-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application-specific command lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-a-forward-simulation-formod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running a forward simulation (formod)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running a forward simulation (formod)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single run
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-directory-run-with-dirlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-directory run with DIRLIST
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-kernel-calculations-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running kernel calculations (kernel)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-retrievals-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running retrievals (retrieval)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running retrievals (retrieval)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inputs-expected-in-each-working-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs expected in each working directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outputs-written-in-each-working-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outputs written in each working directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parallel-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parallel execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mpi-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MPI execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openmp-threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenMP threading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combining-mpi-and-openmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining MPI and OpenMP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hpc-batch-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HPC batch systems
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling-and-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error handling and logging
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../atmospheric_data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atmospheric data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../radiance_data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Radiance data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lookup_tables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spectroscopic data & LUTs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../diagnostics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diagnostics & logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parallelization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parallelization (MPI/OpenMP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hpc_workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HPC workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer documentation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer documentation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building from source
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing & validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Further information
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Further information
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../links/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Links
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#general-execution-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General execution model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="General execution model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#application-specific-command-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application-specific command lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-a-forward-simulation-formod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running a forward simulation (formod)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running a forward simulation (formod)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single run
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-directory-run-with-dirlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-directory run with DIRLIST
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-kernel-calculations-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running kernel calculations (kernel)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-retrievals-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running retrievals (retrieval)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running retrievals (retrieval)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inputs-expected-in-each-working-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inputs expected in each working directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outputs-written-in-each-working-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outputs written in each working directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parallel-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parallel execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mpi-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MPI execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openmp-threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenMP threading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combining-mpi-and-openmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining MPI and OpenMP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hpc-batch-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HPC batch systems
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling-and-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error handling and logging
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="running-jurassic">Running JURASSIC</h1>
+<p>This page describes how to run JURASSIC applications from the command
+line, both for local executions and for parallel runs on HPC systems. It
+complements the <a href="../quickstart/">Quickstart</a> by providing a systematic
+overview of runtime usage.</p>
+<hr />
+<h2 id="general-execution-model">General execution model</h2>
+<p>JURASSIC is provided as a set of small command-line applications (e.g.
+<code>formod</code>, <code>kernel</code>, <code>retrieval</code>). Many of the scientific applications take a
+control file plus additional positional input/output files on the command
+line. Smaller utilities such as <code>day2doy</code>, <code>time2jsec</code>, <code>planck</code>, and
+<code>brightness</code> accept only direct numeric arguments. For control-file-driven
+applications, parameters may optionally be overridden via <code>KEY VALUE</code> pairs.</p>
+<h3 id="common-pattern">Common pattern</h3>
+<pre><code class="language-bash">./application &lt;positional-args...&gt; [KEY VALUE ...]
+</code></pre>
+<ul>
+<li><code>positional-args</code> are <strong>application-specific</strong> (see below).</li>
+<li><code>KEY VALUE</code> pairs apply only to applications that read a control file.</li>
+<li>Place overrides <strong>after</strong> the positional arguments.</li>
+</ul>
+<hr />
+<h2 id="application-specific-command-lines">Application-specific command lines</h2>
+<table>
+<thead>
+<tr>
+<th>Application</th>
+<th>Command line</th>
+<th>Meaning of positional arguments</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Forward model</td>
+<td><code>./formod &lt;ctl&gt; &lt;obs_in&gt; &lt;atm_in&gt; &lt;rad_out&gt;</code></td>
+<td>control file, observation geometry input, atmosphere input, radiance/observation output</td>
+</tr>
+<tr>
+<td>Kernels (Jacobians)</td>
+<td><code>./kernel &lt;ctl&gt; &lt;obs_in&gt; &lt;atm_in&gt; &lt;kernel_out&gt;</code></td>
+<td>control file, observation geometry input, atmosphere input, kernel matrix output</td>
+</tr>
+<tr>
+<td>Retrieval (optimal estimation)</td>
+<td><code>./retrieval &lt;ctl&gt; &lt;dirlist-or-&gt;</code></td>
+<td>control file, either a text file listing working directories or <code>-</code> for shared-file/profile-list mode</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Notes</strong>
+- For <code>formod</code> and <code>kernel</code>, the filenames are usually <code>*.tab</code> files, but the
+  actual names are user-defined.
+- For <code>formod</code> and <code>kernel</code>, the control parameter <code>DIRLIST</code> can switch between
+  a single-directory and a multi-directory workflow.</p>
+</blockquote>
+<hr />
+<h2 id="running-a-forward-simulation-formod">Running a forward simulation (<code>formod</code>)</h2>
+<h3 id="single-run">Single run</h3>
+<pre><code class="language-bash">./formod run.ctl obs.tab atm.tab rad.tab
+</code></pre>
+<p>This will:</p>
+<ul>
+<li>read control parameters from <code>run.ctl</code>,</li>
+<li>read observation geometry from <code>obs.tab</code>,</li>
+<li>read the atmospheric state from <code>atm.tab</code>,</li>
+<li>run the forward model,</li>
+<li>write simulated radiances to <code>rad.tab</code>.</li>
+</ul>
+<hr />
+<h3 id="multi-directory-run-with-dirlist">Multi-directory run with <code>DIRLIST</code></h3>
+<p>If the control file sets <code>DIRLIST</code> to a filename (instead of <code>-</code>),
+<code>formod</code> loops over the directories listed there (one directory per
+line). In each working directory it uses the same positional filenames,
+interpreted relative to that directory.</p>
+<p>Example:</p>
+<pre><code class="language-bash"># in run.ctl:  DIRLIST dirlist.txt
+./formod run.ctl obs.tab atm.tab rad.tab
+</code></pre>
+<hr />
+<h2 id="running-kernel-calculations-kernel">Running kernel calculations (<code>kernel</code>)</h2>
+<p>Kernel calculations compute Jacobians (sensitivities) of radiances with
+respect to atmospheric/state variables.</p>
+<pre><code class="language-bash">./kernel run.ctl obs.tab atm.tab kernel.tab
+</code></pre>
+<p>As with <code>formod</code>, <code>kernel</code> honors <code>DIRLIST</code> for multi-directory
+workflows.</p>
+<hr />
+<h2 id="running-retrievals-retrieval">Running retrievals (<code>retrieval</code>)</h2>
+<p>The retrieval application performs inverse modelling using optimal
+estimation.</p>
+<pre><code class="language-bash">./retrieval run.ctl dirlist.txt
+</code></pre>
+<p>Here, <code>dirlist.txt</code> is a plain text file containing one working directory
+per line. Each directory is processed independently.</p>
+<p>For shared netCDF workflows, retrieval can also read and write selected
+profile records from common files. In that mode, pass <code>-</code> instead of a
+directory list and provide:</p>
+<ul>
+<li><code>SHARED_IO_PROFLIST</code> — a text file with one profile index per line</li>
+<li>shared input files such as <code>SHARED_IO_ATM_APR_FILE</code> and
+  <code>SHARED_IO_OBS_MEAS_FILE</code></li>
+<li>optional shared output files such as <code>SHARED_IO_ATM_FINAL_FILE</code>,
+  <code>SHARED_IO_OBS_FINAL_FILE</code>, and <code>SHARED_IO_MATRIX_KERNEL_FILE</code></li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-bash">./retrieval run.ctl - \
+  SHARED_IO_PROFLIST proflist.txt \
+  ATMFMT 3 OBSFMT 3 MATRIXFMT 3 \
+  SHARED_IO_ATM_APR_FILE atm_apr.nc \
+  SHARED_IO_OBS_MEAS_FILE obs_meas.nc \
+  SHARED_IO_ATM_FINAL_FILE atm_final.nc \
+  SHARED_IO_OBS_FINAL_FILE obs_final.nc \
+  SHARED_IO_MATRIX_KERNEL_FILE matrix_kernel.nc
+</code></pre>
+<p>In that shared-file mode, atmospheric and observation data use the
+profile index from <code>SHARED_IO_PROFLIST</code>, while matrix products use the same index
+as the netCDF dataset selector.</p>
+<p>At least one of the following must be provided:</p>
+<ul>
+<li>a directory list as the second positional argument, or</li>
+<li><code>SHARED_IO_PROFLIST</code> for shared-file profile processing.</li>
+</ul>
+<h3 id="inputs-expected-in-each-working-directory">Inputs expected in each working directory</h3>
+<ul>
+<li><code>atm_apr.tab</code> — a priori atmospheric state</li>
+<li><code>obs_meas.tab</code> — measured (or synthetic) observations</li>
+</ul>
+<h3 id="outputs-written-in-each-working-directory">Outputs written in each working directory</h3>
+<ul>
+<li><code>atm_final.tab</code> — retrieved atmospheric state</li>
+<li><code>obs_final.tab</code> — modelled observations</li>
+<li><code>matrix_kernel.tab</code> — final Jacobian matrix</li>
+</ul>
+<p>Additional matrices (covariance, averaging kernels, etc.) are written if
+enabled via control parameters.</p>
+<hr />
+<h2 id="parallel-execution">Parallel execution</h2>
+<p>Parallel execution in JURASSIC is achieved through workflow-level
+parallelism, optional MPI in retrievals, and OpenMP threading.
+There is no general hybrid MPI–OpenMP execution model across the full
+tool suite. MPI is limited to retrieval workflows.</p>
+<hr />
+<h3 id="mpi-execution">MPI execution</h3>
+<p>MPI parallelization is implemented only in the retrieval code and is
+used to distribute independent retrieval cases across MPI ranks.</p>
+<pre><code class="language-bash">mpirun -np 8 ./retrieval run.ctl dirlist.txt
+</code></pre>
+<p>Each MPI rank processes a subset of directories from <code>dirlist.txt</code>. MPI
+ranks do not communicate during execution.</p>
+<p>Running non-retrieval executables (<code>formod</code>, <code>kernel</code>, tools) under
+<code>mpirun</code> provides no performance benefit.</p>
+<hr />
+<h3 id="openmp-threading">OpenMP threading</h3>
+<p>OpenMP is used within a single process to accelerate computationally
+intensive loops. It is available for both retrieval and non-retrieval
+executables.</p>
+<p>The number of OpenMP threads is controlled via:</p>
+<pre><code class="language-bash">export OMP_NUM_THREADS=4
+</code></pre>
+<hr />
+<h3 id="combining-mpi-and-openmp">Combining MPI and OpenMP</h3>
+<p>For retrievals, MPI and OpenMP can be combined:</p>
+<pre><code class="language-bash">export OMP_NUM_THREADS=4
+mpirun -np 8 ./retrieval run.ctl dirlist.txt
+</code></pre>
+<p>This uses up to 32 CPU cores in total.</p>
+<hr />
+<h2 id="hpc-batch-systems">HPC batch systems</h2>
+<p>On HPC systems, JURASSIC is typically run inside a batch job script.
+Example (Slurm):</p>
+<pre><code class="language-bash">#!/bin/bash
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=8
+#SBATCH --cpus-per-task=4
+#SBATCH --time=01:00:00
+
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+
+srun ./retrieval run.ctl dirlist.txt
+</code></pre>
+<p>Adjust resource requests according to problem size and architecture.</p>
+<hr />
+<h2 id="error-handling-and-logging">Error handling and logging</h2>
+<ul>
+<li>Runtime errors are reported to standard output.</li>
+<li>Fatal configuration errors typically cause immediate program exit.</li>
+<li>Numerical warnings may indicate configuration or lookup-table issues.</li>
+</ul>
+<p>Always inspect log output, especially when developing new workflows.</p>
+<hr />
+<h2 id="reproducibility">Reproducibility</h2>
+<p>To ensure reproducible runs:</p>
+<ul>
+<li>record the Git version string printed by the executables,</li>
+<li>archive control files and input data,</li>
+<li>document compiler and MPI/OpenMP settings.</li>
+</ul>
+<hr />
+<h2 id="related-pages">Related pages</h2>
+<ul>
+<li><a href="../quickstart/">Quickstart</a></li>
+<li><a href="../configuration/">Configuration</a></li>
+<li><a href="../parallelization/">Parallelization</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
