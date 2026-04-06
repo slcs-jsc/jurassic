@@ -109,6 +109,9 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
 
 - `REFRAC` *(default: `1`)*  
   Toggle atmospheric refraction in ray tracing (`1` = on, `0` = off).
+  When enabled, JURASSIC uses a moist-air Smith-Weintraub
+  refractivity approximation based on pressure, temperature, and H2O
+  volume mixing ratio.
 
 - `RAYDS` *(default: `10`)*  
   Maximum step length along the ray path (typically in km; see the theory/limitations pages for guidance).

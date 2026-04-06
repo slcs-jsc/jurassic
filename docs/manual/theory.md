@@ -36,9 +36,17 @@ for limb-sounding geometries.
 Ray paths are calculated numerically by solving the Eikonal equation,
 which describes the propagation of electromagnetic waves in a medium
 with spatially varying refractive index. In the mid-infrared spectral
-range, the refractive index depends primarily on pressure and
-temperature; wavelength dependence and water vapour contributions are
-small and neglected in the default formulation.
+range, JURASSIC uses a simple bulk-atmosphere refractivity model based
+on pressure, temperature, and water vapour. The default implementation
+uses the Smith-Weintraub relation for radio/microwave frequencies with
+total pressure and H2O partial pressure derived from the volume mixing
+ratio. This captures the first-order moist-air enhancement of
+refraction, which is most relevant in the lower troposphere.
+
+This remains an approximation for infrared applications: wavelength
+dependence of the refractive index is not represented explicitly, so
+the ray tracing is not based on a spectrally resolved infrared
+refractivity model.
 
 The ray tracing algorithm is generic and supports limb, nadir, zenith,
 and occultation geometries for instruments located inside or outside

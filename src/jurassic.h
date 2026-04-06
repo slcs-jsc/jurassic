@@ -1047,20 +1047,35 @@
 #define RAD2DEG(rad) ((rad) * (180.0 / M_PI))
 
 /**
- * @brief Compute air refractivity (n - 1).
+ * @brief Compute moist-air refractivity (n - 1).
  *
- * Approximates the refractivity of air under standard conditions using:
- * \f$ n - 1 = 7.753\times10^{-5} \frac{p}{T} \f$,
- * where p is pressure (hPa) and T is temperature (K).
+ * Approximates the refractivity of moist air using the Smith-Weintraub
+ * relation for radio and microwave frequencies:
+ * \f$ (n - 1) \times 10^6 = k_1 \frac{p}{T} + k_2 \frac{e}{T^2} \f$,
+ * with \f$ k_1 = 77.6 \,\mathrm{K/hPa} \f$ and
+ * \f$ k_2 = 3.73\times10^5 \,\mathrm{K^2/hPa} \f$.
+ * Here p is total pressure (hPa), T is temperature (K), and
+ * \f$ e = \mathrm{h2o} \cdot p \f$ is the water-vapor partial pressure (hPa)
+ * derived from the H2O volume mixing ratio in [ppv].
  *
- * @param[in] p Pressure [hPa].
- * @param[in] T Temperature [K].
+ * This provides a simple bulk-atmosphere refraction model, but it does not
+ * represent wavelength-dependent infrared refractivity.
+ *
+ * Reference:
+ * Smith, E. K., and S. Weintraub: The constants in the equation for
+ * atmospheric refractive index at radio frequencies, Proc. IRE, 41,
+ * 1035-1037, https://doi.org/10.1109/JRPROC.1953.274297, 1953.
+ *
+ * @param[in] p    Pressure [hPa].
+ * @param[in] T    Temperature [K].
+ * @param[in] h2o  Water-vapor volume mixing ratio [ppv].
  *
  * @return Refractivity (dimensionless, n - 1).
  *
  * @author Lars Hoffmann
  */
-#define REFRAC(p, T) (7.753e-05 * (p) / (T))
+#define REFRAC(p, T, h2o) \
+  (1e-6 * (77.6 * (p) / (T) + 3.73e5 * (h2o) * (p) / ((T) * (T))))
 
 /**
  * @brief Log detailed statistics of an emissivity look-up table.
@@ -3276,7 +3291,8 @@ void optimal_estimation(
  *   altitude and user-specified controls (`rayds`, `raydz`).
  * - Interpolates atmospheric variables at each step using @ref intpol_atm.
  * - Detects surface intersection or top-of-atmosphere exit and terminates accordingly.
- * - Optionally accounts for **refraction** via the refractive index `n(p, T)`.
+ * - Optionally accounts for **refraction** via a moist-air refractive
+ *   index `n(p, T, h2o)` based on the Smith-Weintraub approximation.
  * - Accumulates **column densities** and **Curtis–Godson means** for each gas.
  * - Supports **cloud extinction** and **surface emissivity** interpolation.
  *
