@@ -1,0 +1,6 @@
+<map id="read_ctl" name="read_ctl">
+<area shape="rect" id="node1" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="5,56,73,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="121,5,211,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="121,56,211,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="131,107,201,133"/>
+</map>

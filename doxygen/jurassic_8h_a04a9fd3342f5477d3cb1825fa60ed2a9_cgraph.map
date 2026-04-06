@@ -1,0 +1,10 @@
+<map id="analyze_avk" name="analyze_avk">
+<area shape="rect" id="node1" title="Analyze averaging kernel (AVK) matrix for retrieval diagnostics." alt="" coords="5,81,99,108"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#acbc0cac17f91169e812ecee2bc7fc990" title="Analyze averaging kernel submatrix for a specific retrieved quantity." alt="" coords="155,5,300,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1" title="Copy or initialize atmospheric profile data." alt="" coords="188,56,267,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ad2fd3ae3bed46f58a18a5bedc24ff959" title="Resolve retrieval output target for legacy&#45;directory and shared&#45;file modes." alt="" coords="147,107,308,133"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3" title="Write atmospheric data to a file." alt="" coords="188,157,267,184"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#aa30b84e6dd510a6419d07dcaaba6669f" title="Write atmospheric data to an ASCII file." alt="" coords="356,107,463,133"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#af40f268fa1f23a997abbebc49d4c88d2" title="Write atmospheric data to a binary file." alt="" coords="358,157,461,184"/>
+<area shape="rect" id="node8" href="$jurassic_8c.html#a55dc8eb554ec2a550b66ced8310c7d73" title="Write one atmospheric profile to a netCDF file." alt="" coords="359,208,459,235"/>
+</map>

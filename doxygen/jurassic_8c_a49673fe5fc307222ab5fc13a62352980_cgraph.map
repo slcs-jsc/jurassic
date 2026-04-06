@@ -1,0 +1,6 @@
+<map id="read_obs" name="read_obs">
+<area shape="rect" id="node1" title="Read observation data from an input file." alt="" coords="5,56,80,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#af6495fc53568fea1f4d90ecbe7ad48f4" title="Read ASCII&#45;formatted observation data from a file." alt="" coords="128,5,231,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a408b81d78cc2b56cd7722a6ab7f88115" title="Read binary&#45;formatted observation data from a file." alt="" coords="130,56,229,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ab603dde3a7fca7a74400efb71c9bb03d" title="Read one observation profile from a NetCDF file." alt="" coords="131,107,227,133"/>
+</map>

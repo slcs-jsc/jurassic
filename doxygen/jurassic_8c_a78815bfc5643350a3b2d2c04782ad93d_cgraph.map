@@ -1,0 +1,9 @@
+<map id="write_tbl" name="write_tbl">
+<area shape="rect" id="node1" title="Write emissivity lookup tables to disk." alt="" coords="5,81,76,108"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#abd649b0cdf3dc23af5ad95a0532c751b" title="Write tabulated shape function data to a text file." alt="" coords="127,5,219,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a2fcee466f0e231a61d06f1d441e03528" title="Write one emissivity lookup table in human&#45;readable ASCII format." alt="" coords="124,56,223,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a5c7354dd4c45b811f1b8ddf017f11cec" title="Write one emissivity lookup table in compact binary format." alt="" coords="126,107,221,133"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#a33a2bb4a4da7af5779d6b21120040bea" title="Write one packed lookup table to a NetCDF file." alt="" coords="127,157,219,184"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a1a654ed6f5c3a4de1e96ff66f652db49" title="Pack a lookup table into a contiguous binary buffer." alt="" coords="293,107,363,133"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#aeda53633ce35d9bc75ceb4c050a5b069" title="Compute required buffer size (in bytes) for tbl_pack()." alt="" coords="271,157,385,184"/>
+</map>

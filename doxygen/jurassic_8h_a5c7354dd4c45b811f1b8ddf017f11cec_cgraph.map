@@ -1,0 +1,5 @@
+<map id="write_tbl_bin" name="write_tbl_bin">
+<area shape="rect" id="node1" title="Write one emissivity lookup table in compact binary format." alt="" coords="5,31,100,57"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a1a654ed6f5c3a4de1e96ff66f652db49" title="Pack a lookup table into a contiguous binary buffer." alt="" coords="170,5,241,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#aeda53633ce35d9bc75ceb4c050a5b069" title="Compute required buffer size (in bytes) for tbl_pack()." alt="" coords="148,56,263,83"/>
+</map>

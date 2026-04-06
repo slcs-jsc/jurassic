@@ -1,0 +1,5 @@
+<map id="tangent_point" name="tangent_point">
+<area shape="rect" id="node1" title="Determine the tangent point along a line of sight (LOS)." alt="" coords="5,31,105,57"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#aaf98f7230de0893b8dc4833d3c83c7a4" title="Converts Cartesian coordinates to geographic coordinates." alt="" coords="153,5,225,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="153,56,225,83"/>
+</map>

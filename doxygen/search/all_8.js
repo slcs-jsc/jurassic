@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['idx2name_0',['idx2name',['../jurassic_8c.html#a342f4954ef3678480cae2efb366a7b3e',1,'idx2name(const ctl_t *ctl, const int idx, char *quantity):&#160;jurassic.c'],['../jurassic_8h.html#a342f4954ef3678480cae2efb366a7b3e',1,'idx2name(const ctl_t *ctl, const int idx, char *quantity):&#160;jurassic.c']]],
+  ['idxcldz_1',['IDXCLDZ',['../jurassic_8h.html#a3b420330ad2457758ef539d8c9e0bd99',1,'jurassic.h']]],
+  ['idxclk_2',['IDXCLK',['../jurassic_8h.html#a809f947437669a6b3930302f30375d41',1,'jurassic.h']]],
+  ['idxclz_3',['IDXCLZ',['../jurassic_8h.html#a04eaf14380553f171f54680560527fe5',1,'jurassic.h']]],
+  ['idxk_4',['IDXK',['../jurassic_8h.html#a511d4808c85a5b5e1e600cf413eabbd6',1,'jurassic.h']]],
+  ['idxp_5',['IDXP',['../jurassic_8h.html#a99c6798a64d9d5535a2b22b46ee31924',1,'jurassic.h']]],
+  ['idxq_6',['IDXQ',['../jurassic_8h.html#af2f80a7a5ff9b54495c0c41d8571cafc',1,'jurassic.h']]],
+  ['idxsfeps_7',['IDXSFEPS',['../jurassic_8h.html#a803581fe3fed7a56dacec94c5c860f35',1,'jurassic.h']]],
+  ['idxsft_8',['IDXSFT',['../jurassic_8h.html#a7abc6f3d1a1993a0337a736d79cf6ecc',1,'jurassic.h']]],
+  ['idxt_9',['IDXT',['../jurassic_8h.html#afb33f030ad4a44d5f638f3903d13fe70',1,'jurassic.h']]],
+  ['ig_5fco2_10',['ig_co2',['../structctl__t.html#a253c2c449b1d7e2f0eeda2ed62c8a4fe',1,'ctl_t']]],
+  ['ig_5fh2o_11',['ig_h2o',['../structctl__t.html#ae2af3d94af749a1d5ca2ca2d2b92067c',1,'ctl_t']]],
+  ['ig_5fn2_12',['ig_n2',['../structctl__t.html#aad56428f3ab41bd9c3b28a84c970d3b9',1,'ctl_t']]],
+  ['ig_5fo2_13',['ig_o2',['../structctl__t.html#a8b568f9d63b3d40886e073290532a28d',1,'ctl_t']]],
+  ['init_5fsrcfunc_14',['init_srcfunc',['../jurassic_8c.html#ab6852ec1675d0539a21df1fc4ecee1f0',1,'init_srcfunc(const ctl_t *ctl, tbl_t *tbl):&#160;jurassic.c'],['../jurassic_8h.html#ab6852ec1675d0539a21df1fc4ecee1f0',1,'init_srcfunc(const ctl_t *ctl, tbl_t *tbl):&#160;jurassic.c']]],
+  ['interpolate_2ec_15',['interpolate.c',['../interpolate_8c.html',1,'']]],
+  ['intpol_5fatm_16',['intpol_atm',['../jurassic_8c.html#a82151ea4448e70f46f7f3b770bb77612',1,'intpol_atm(const ctl_t *ctl, const atm_t *atm, const double z, double *p, double *t, double *q, double *k):&#160;jurassic.c'],['../jurassic_8h.html#a82151ea4448e70f46f7f3b770bb77612',1,'intpol_atm(const ctl_t *ctl, const atm_t *atm, const double z, double *p, double *t, double *q, double *k):&#160;jurassic.c']]],
+  ['intpol_5ftbl_5fcga_17',['intpol_tbl_cga',['../jurassic_8c.html#a5e22cd63c35ef6e2c9b9023e2c3945d8',1,'intpol_tbl_cga(const ctl_t *ctl, const tbl_t *tbl, const los_t *los, const int ip, double tau_path[ND][NG], double tau_seg[ND]):&#160;jurassic.c'],['../jurassic_8h.html#a5e22cd63c35ef6e2c9b9023e2c3945d8',1,'intpol_tbl_cga(const ctl_t *ctl, const tbl_t *tbl, const los_t *los, const int ip, double tau_path[ND][NG], double tau_seg[ND]):&#160;jurassic.c']]],
+  ['intpol_5ftbl_5fega_18',['intpol_tbl_ega',['../jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d',1,'intpol_tbl_ega(const ctl_t *ctl, const tbl_t *tbl, const los_t *los, const int ip, double tau_path[ND][NG], double tau_seg[ND]):&#160;jurassic.c'],['../jurassic_8h.html#a2b67aa3affea0dd3c6da502dab26d22d',1,'intpol_tbl_ega(const ctl_t *ctl, const tbl_t *tbl, const los_t *los, const int ip, double tau_path[ND][NG], double tau_seg[ND]):&#160;jurassic.c']]],
+  ['intpol_5ftbl_5feps_19',['intpol_tbl_eps',['../jurassic_8c.html#a00932c2897dc54236b7c15a3e1317b6f',1,'intpol_tbl_eps(const tbl_t *tbl, const int ig, const int id, const int ip, const int it, const double logu):&#160;jurassic.c'],['../jurassic_8h.html#a00932c2897dc54236b7c15a3e1317b6f',1,'intpol_tbl_eps(const tbl_t *tbl, const int ig, const int id, const int ip, const int it, const double logu):&#160;jurassic.c']]],
+  ['intpol_5ftbl_5fu_20',['intpol_tbl_u',['../jurassic_8h.html#a88d117d4fccee807254f98cb5dc360d2',1,'intpol_tbl_u(const tbl_t *tbl, const int ig, const int id, const int ip, const int it, const double logeps):&#160;jurassic.c'],['../jurassic_8c.html#a88d117d4fccee807254f98cb5dc360d2',1,'intpol_tbl_u(const tbl_t *tbl, const int ig, const int id, const int ip, const int it, const double logeps):&#160;jurassic.c']]],
+  ['invert_2ec_21',['invert.c',['../invert_8c.html',1,'']]]
+];

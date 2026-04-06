@@ -1,0 +1,6 @@
+<map id="read_atm" name="read_atm">
+<area shape="rect" id="node1" title="Read atmospheric input data from a file." alt="" coords="5,56,81,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#abf836e23902ae26464421f94fcb63fa1" title="Read atmospheric data in ASCII format." alt="" coords="129,5,233,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a20d5963b1fb1797a4c6ffaf3121481f9" title="Read atmospheric data in binary format." alt="" coords="131,56,231,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ad4969b3e373db7716fe47d9d15ae74e9" title="Read one atmospheric profile from a netCDF file." alt="" coords="133,107,230,133"/>
+</map>

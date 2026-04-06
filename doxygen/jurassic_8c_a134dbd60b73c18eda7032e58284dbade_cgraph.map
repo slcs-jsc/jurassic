@@ -1,0 +1,5 @@
+<map id="read_obs_rfm" name="read_obs_rfm">
+<area shape="rect" id="node1" title="Read and spectrally convolve an RFM output spectrum." alt="" coords="5,31,107,57"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="171,5,246,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a19d63e07e3eb8166cbf65ce079e4d156" title="Read a Reference Forward Model (RFM) ASCII spectrum." alt="" coords="155,56,263,83"/>
+</map>

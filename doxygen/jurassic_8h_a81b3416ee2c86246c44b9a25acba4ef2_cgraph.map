@@ -1,0 +1,6 @@
+<map id="read_matrix" name="read_matrix">
+<area shape="rect" id="node1" title="Read a numerical matrix from a file." alt="" coords="5,56,95,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#acc4cea4b08fbf737203335df5ac014f1" title="Read a numerical matrix from an ASCII file." alt="" coords="143,5,260,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ad0de3ace671297bd12003f2bfd8a059b" title="Read a numerical matrix from a binary file." alt="" coords="145,56,258,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a1c2c3d5de2ca723b41905405ed365441" title="Read a numerical matrix from a netCDF file." alt="" coords="146,107,257,133"/>
+</map>

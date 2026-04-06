@@ -1,0 +1,5 @@
+<map id="write_tbl_nc" name="write_tbl_nc">
+<area shape="rect" id="node1" title="Write one packed lookup table to a NetCDF file." alt="" coords="5,31,97,57"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a1a654ed6f5c3a4de1e96ff66f652db49" title="Pack a lookup table into a contiguous binary buffer." alt="" coords="167,5,238,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#aeda53633ce35d9bc75ceb4c050a5b069" title="Compute required buffer size (in bytes) for tbl_pack()." alt="" coords="145,56,260,83"/>
+</map>

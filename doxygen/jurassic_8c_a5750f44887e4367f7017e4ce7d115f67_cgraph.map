@@ -1,0 +1,10 @@
+<map id="write_matrix" name="write_matrix">
+<area shape="rect" id="node1" title="Write a fully annotated matrix (e.g., Jacobian or gain matrix) to file." alt="" coords="5,81,97,108"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a52df7c5b5de89b94dde4b8361ea1daac" title="Write a fully annotated matrix (e.g., Jacobian or gain matrix) to an ASCII file." alt="" coords="145,81,265,108"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#aa56680536419d84231bf230d86146969" title="Write a numerical matrix to a binary file." alt="" coords="147,132,263,159"/>
+<area shape="rect" id="node8" href="$jurassic_8c.html#a9f6ae358e6c34f8a941344dfca5c4500" title="Write a numerical matrix to a netCDF file." alt="" coords="149,31,262,57"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#adfbb04487aa1c1d4175afca6e521e20b" title="Convert atmospheric data to state vector elements." alt="" coords="323,5,381,32"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a342f4954ef3678480cae2efb366a7b3e" title="Convert a quantity index to a descriptive name string." alt="" coords="313,56,391,83"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#ad6380c9458cf356667952f9651932e27" title="Convert observation radiances into a measurement vector." alt="" coords="324,107,380,133"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a5ac332e50178e5439e72634fe03d191f" title="Append a single atmospheric value to the state vector." alt="" coords="439,5,527,32"/>
+</map>

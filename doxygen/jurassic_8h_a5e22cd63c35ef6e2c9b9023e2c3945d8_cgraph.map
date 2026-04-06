@@ -1,0 +1,7 @@
+<map id="intpol_tbl_cga" name="intpol_tbl_cga">
+<area shape="rect" id="node1" title="Interpolate emissivities and transmittances using the Curtis–Godson approximation (CGA)." alt="" coords="5,56,108,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a00932c2897dc54236b7c15a3e1317b6f" title="Interpolate gas emissivity as a function of column amount." alt="" coords="156,5,259,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="170,56,245,83"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="166,107,249,133"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#af353b2a27de539a038750c3224d31d8f" title="Locate index for interpolation within emissivity table grids." alt="" coords="307,5,385,32"/>
+</map>

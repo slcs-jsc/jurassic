@@ -1,0 +1,4 @@
+<map id="shared_io_lock" name="shared_io_lock">
+<area shape="rect" id="node1" title="Acquire an exclusive lock for shared retrieval output files." alt="" coords="5,5,115,32"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#aead8fe636538e2dc05b89dd26fe8ee8e" title="Return the primary shared retrieval output file configured for locking." alt="" coords="163,5,307,32"/>
+</map>

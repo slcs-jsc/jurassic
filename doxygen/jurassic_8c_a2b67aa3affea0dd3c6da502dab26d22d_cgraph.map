@@ -1,0 +1,8 @@
+<map id="intpol_tbl_ega" name="intpol_tbl_ega">
+<area shape="rect" id="node1" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="5,81,108,108"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a00932c2897dc54236b7c15a3e1317b6f" title="Interpolate gas emissivity as a function of column amount." alt="" coords="156,5,259,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a88d117d4fccee807254f98cb5dc360d2" title="Interpolate column amount as a function of emissivity." alt="" coords="163,56,251,83"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="170,107,245,133"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="166,157,249,184"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#af353b2a27de539a038750c3224d31d8f" title="Locate index for interpolation within emissivity table grids." alt="" coords="307,31,385,57"/>
+</map>

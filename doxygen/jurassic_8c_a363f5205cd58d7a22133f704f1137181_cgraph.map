@@ -1,0 +1,8 @@
+<map id="formod_continua" name="formod_continua">
+<area shape="rect" id="node1" title="Compute total extinction including gaseous continua." alt="" coords="5,81,124,108"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="172,5,237,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute water vapor continuum (optical depth)." alt="" coords="172,56,237,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision&#45;induced absorption coefficient." alt="" coords="175,107,234,133"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="175,157,234,184"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="285,132,368,159"/>
+</map>

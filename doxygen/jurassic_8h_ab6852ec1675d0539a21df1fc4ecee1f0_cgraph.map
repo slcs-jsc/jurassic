@@ -1,0 +1,4 @@
+<map id="init_srcfunc" name="init_srcfunc">
+<area shape="rect" id="node1" title="Initialize source function lookup tables from emissivity data." alt="" coords="5,5,95,32"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="143,5,217,32"/>
+</map>

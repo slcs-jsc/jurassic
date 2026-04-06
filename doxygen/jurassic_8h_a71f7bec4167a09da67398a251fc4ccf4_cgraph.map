@@ -1,0 +1,6 @@
+<map id="write_obs" name="write_obs">
+<area shape="rect" id="node1" title="Write observation data to an output file in ASCII or binary format." alt="" coords="5,56,84,83"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a244c640fe2feb4f867bc1f8f37c5eb69" title="Write observation data to an ASCII text file." alt="" coords="132,5,239,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#aaed03da1b762d7fbfabdb172df02b2e8" title="Write observation data in binary format to a file." alt="" coords="134,56,237,83"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a2d6437d6ffeb2d4d26fa9d620df5dc7f" title="Write one observation profile to a NetCDF file." alt="" coords="136,107,235,133"/>
+</map>

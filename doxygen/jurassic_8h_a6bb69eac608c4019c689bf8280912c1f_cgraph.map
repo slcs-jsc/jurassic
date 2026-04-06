@@ -1,0 +1,5 @@
+<map id="set_cov_meas" name="set_cov_meas">
+<area shape="rect" id="node1" title="Construct measurement error standard deviations and their inverse." alt="" coords="5,31,112,57"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#aa855e52716bd4b479bb0d2446b300a4e" title="Copy or initialize observation geometry and radiance data." alt="" coords="160,5,237,32"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#ad6380c9458cf356667952f9651932e27" title="Convert observation radiances into a measurement vector." alt="" coords="171,56,227,83"/>
+</map>
