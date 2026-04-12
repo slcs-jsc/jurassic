@@ -152,8 +152,8 @@ $(function() {
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  printf</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    (<span class="stringliteral">&quot;Convert atmospheric input files between supported ATMFMT formats.\n\n&quot;</span>);</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  printf(<span class="stringliteral">&quot;Usage:\n&quot;</span>);</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  printf</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    (<span class="stringliteral">&quot;  atmfmt &lt;ctl&gt; &lt;atm_in&gt; &lt;atmfmt_in&gt; &lt;atm_out&gt; &lt;atmfmt_out&gt; [KEY VALUE ...]\n\n&quot;</span>);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  printf(<span class="stringliteral">&quot;  atmfmt &lt;ctl&gt; &lt;atm_in&gt; &lt;atmfmt_in&gt; &lt;atm_out&gt; &lt;atmfmt_out&gt;\n&quot;</span>);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  printf(<span class="stringliteral">&quot;         [KEY VALUE ...]\n\n&quot;</span>);</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  printf(<span class="stringliteral">&quot;Arguments:\n&quot;</span>);</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  printf(<span class="stringliteral">&quot;  &lt;ctl&gt;         Control file.\n&quot;</span>);</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  printf(<span class="stringliteral">&quot;  &lt;atm_in&gt;      Input atmospheric data file.\n&quot;</span>);</div>
@@ -161,12 +161,17 @@ $(function() {
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  printf(<span class="stringliteral">&quot;  &lt;atm_out&gt;     Output atmospheric data file.\n&quot;</span>);</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  printf(<span class="stringliteral">&quot;  &lt;atmfmt_out&gt;  Output atmospheric file format identifier.\n&quot;</span>);</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  printf(<span class="stringliteral">&quot;  [KEY VALUE]   Optional control parameters.\n\n&quot;</span>);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  printf(<span class="stringliteral">&quot;Optional control overrides:\n&quot;</span>);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  printf(<span class="stringliteral">&quot;Tool-specific control parameters:\n&quot;</span>);</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  printf(<span class="stringliteral">&quot;  PROF_IN &lt;n&gt;   Read profile index &lt;n&gt; from the input file.\n&quot;</span>);</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  printf(<span class="stringliteral">&quot;  PROF_OUT &lt;n&gt;  Write output as profile index &lt;n&gt;.\n\n&quot;</span>);</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  printf(<span class="stringliteral">&quot;Further information:\n&quot;</span>);</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  printf(<span class="stringliteral">&quot;  Manual: https://slcs-jsc.github.io/jurassic/\n&quot;</span>);</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  printf(<span class="stringliteral">&quot;Common control parameters:\n&quot;</span>);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  printf(<span class="stringliteral">&quot;  NG, EMITTER[i]         Active emitters in atmospheric files.\n&quot;</span>);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  printf(<span class="stringliteral">&quot;  NW, WINDOW[i]          Extinction-window layout.\n&quot;</span>);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  printf(<span class="stringliteral">&quot;  NCL, CLNU[i]           Cloud spectral grid.\n&quot;</span>);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  printf(<span class="stringliteral">&quot;  NSF, SFNU[i]           Surface spectral grid.\n\n&quot;</span>);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  printf(<span class="stringliteral">&quot;Further information:\n&quot;</span>);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  printf(<span class="stringliteral">&quot;  Manual: https://slcs-jsc.github.io/jurassic/\n&quot;</span>);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>}</div>
 <div class="ttc" id="aatmfmt_8c_html_a0ddf1224851353fc92bfbff6f499fa97"><div class="ttname"><a href="atmfmt_8c.html#a0ddf1224851353fc92bfbff6f499fa97">main</a></div><div class="ttdeci">int main(int argc, char *argv[])</div><div class="ttdef"><b>Definition:</b> <a href="atmfmt_8c_source.html#l00039">atmfmt.c:39</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a19b236d7e6cd812c67f36673f0dbefc3"><div class="ttname"><a href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a></div><div class="ttdeci">void write_atm(const char *dirname, const char *filename, const ctl_t *ctl, const atm_t *atm, int profile)</div><div class="ttdoc">Write atmospheric data to a file.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l07307">jurassic.c:7307</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read model control parameters from command-line and configuration input.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05516">jurassic.c:5516</a></div></div>

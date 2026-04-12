@@ -169,253 +169,253 @@ Functions</h2></td></tr>
 
 <p>Perform forward model calculations in a single directory. </p>
 
-<p class="definition">Definition at line <a class="el" href="formod_8c_source.html#l00211">211</a> of file <a class="el" href="formod_8c_source.html">formod.c</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  219</span>                      {</div>
-<div class="line"><span class="lineno">  220</span> </div>
-<div class="line"><span class="lineno">  221</span>  <span class="keyword">static</span> <a class="code hl_struct" href="structatm__t.html">atm_t</a> atm, atm2;</div>
-<div class="line"><span class="lineno">  222</span>  <span class="keyword">static</span> <a class="code hl_struct" href="structobs__t.html">obs_t</a> obs, obs2;</div>
-<div class="line"><span class="lineno">  223</span> </div>
-<div class="line"><span class="lineno">  224</span>  <span class="comment">/* Read atmospheric data... */</span></div>
-<div class="line"><span class="lineno">  225</span>  <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;READ_ATM&quot;</span>, <span class="stringliteral">&quot;INPUT&quot;</span>);</div>
-<div class="line"><span class="lineno">  226</span>  <a class="code hl_function" href="jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c">read_atm</a>(wrkdir, atmfile, ctl, &amp;atm, 0);</div>
-<div class="line"><span class="lineno">  227</span> </div>
-<div class="line"><span class="lineno">  228</span>  <span class="comment">/* Read observation geometry... */</span></div>
-<div class="line"><span class="lineno">  229</span>  <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;READ_OBS&quot;</span>, <span class="stringliteral">&quot;INPUT&quot;</span>);</div>
-<div class="line"><span class="lineno">  230</span>  <a class="code hl_function" href="jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980">read_obs</a>(wrkdir, obsfile, ctl, &amp;obs, 0);</div>
-<div class="line"><span class="lineno">  231</span> </div>
-<div class="line"><span class="lineno">  232</span>  <span class="comment">/* Compute multiple profiles... */</span></div>
-<div class="line"><span class="lineno">  233</span>  <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;p&#39;</span> || task[0] == <span class="charliteral">&#39;P&#39;</span>) {</div>
-<div class="line"><span class="lineno">  234</span> </div>
-<div class="line"><span class="lineno">  235</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;FORMOD_PROFILE_LOOP&quot;</span>, <span class="stringliteral">&quot;FORWARD&quot;</span>);</div>
-<div class="line"><span class="lineno">  236</span> </div>
-<div class="line"><span class="lineno">  237</span>    <span class="comment">/* Loop over ray paths... */</span></div>
-<div class="line"><span class="lineno">  238</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ir = 0; ir &lt; obs.<a class="code hl_variable" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>; ir++) {</div>
-<div class="line"><span class="lineno">  239</span> </div>
-<div class="line"><span class="lineno">  240</span>      <span class="comment">/* Get atmospheric data... */</span></div>
-<div class="line"><span class="lineno">  241</span>      atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> = 0;</div>
-<div class="line"><span class="lineno">  242</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
-<div class="line"><span class="lineno">  243</span>        <span class="keywordflow">if</span> (atm.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[ip] == obs.<a class="code hl_variable" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[ir]) {</div>
-<div class="line"><span class="lineno">  244</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[ip];</div>
-<div class="line"><span class="lineno">  245</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip];</div>
-<div class="line"><span class="lineno">  246</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a2c8ffb598109120ed6d1f8e79aeb3ff8">lon</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a2c8ffb598109120ed6d1f8e79aeb3ff8">lon</a>[ip];</div>
-<div class="line"><span class="lineno">  247</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">lat</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">lat</a>[ip];</div>
-<div class="line"><span class="lineno">  248</span>          atm2.<a class="code hl_variable" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>[ip];</div>
-<div class="line"><span class="lineno">  249</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>[ip];</div>
-<div class="line"><span class="lineno">  250</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
-<div class="line"><span class="lineno">  251</span>            atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip];</div>
-<div class="line"><span class="lineno">  252</span>          for (<span class="keywordtype">int</span> iw = 0; iw &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a094e10d6d25abb248ee383a3da02181a">nw</a>; iw++)</div>
-<div class="line"><span class="lineno">  253</span>            atm2.<a class="code hl_variable" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw][atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw][ip];</div>
-<div class="line"><span class="lineno">  254</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>++;</div>
-<div class="line"><span class="lineno">  255</span>        }</div>
-<div class="line"><span class="lineno">  256</span> </div>
-<div class="line"><span class="lineno">  257</span>      <span class="comment">/* Get observation data... */</span></div>
-<div class="line"><span class="lineno">  258</span>      obs2.<a class="code hl_variable" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a> = 1;</div>
-<div class="line"><span class="lineno">  259</span>      obs2.<a class="code hl_variable" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[ir];</div>
-<div class="line"><span class="lineno">  260</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a5ad297ef892545d93168c57ed26f74b5">vpz</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a5ad297ef892545d93168c57ed26f74b5">vpz</a>[ir];</div>
-<div class="line"><span class="lineno">  261</span>      obs2.<a class="code hl_variable" href="structobs__t.html#aba164760718f1c258c150ebbc93a39a9">vplon</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#aba164760718f1c258c150ebbc93a39a9">vplon</a>[ir];</div>
-<div class="line"><span class="lineno">  262</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">vplat</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">vplat</a>[ir];</div>
-<div class="line"><span class="lineno">  263</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a992d21aae832400874f3f6bc3e7d1981">obsz</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a992d21aae832400874f3f6bc3e7d1981">obsz</a>[ir];</div>
-<div class="line"><span class="lineno">  264</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a6623d4c4c139db8c86195751653ea716">obslon</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a6623d4c4c139db8c86195751653ea716">obslon</a>[ir];</div>
-<div class="line"><span class="lineno">  265</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a8b9f2ae531c4d8693c7ce86f0387d290">obslat</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a8b9f2ae531c4d8693c7ce86f0387d290">obslat</a>[ir];</div>
-<div class="line"><span class="lineno">  266</span> </div>
-<div class="line"><span class="lineno">  267</span>      <span class="comment">/* Check number of data points... */</span></div>
-<div class="line"><span class="lineno">  268</span>      <span class="keywordflow">if</span> (atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> &gt; 0) {</div>
-<div class="line"><span class="lineno">  269</span> </div>
-<div class="line"><span class="lineno">  270</span>        <span class="comment">/* Call forward model... */</span></div>
-<div class="line"><span class="lineno">  271</span>        <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs2);</div>
-<div class="line"><span class="lineno">  272</span> </div>
-<div class="line"><span class="lineno">  273</span>        <span class="comment">/* Save radiance data... */</span></div>
-<div class="line"><span class="lineno">  274</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++) {</div>
-<div class="line"><span class="lineno">  275</span>          obs.<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][ir] = obs2.<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][0];</div>
-<div class="line"><span class="lineno">  276</span>          obs.<a class="code hl_variable" href="structobs__t.html#a0f8aac57859ceccb50b258d487e74670">tau</a>[id][ir] = obs2.<a class="code hl_variable" href="structobs__t.html#a0f8aac57859ceccb50b258d487e74670">tau</a>[id][0];</div>
-<div class="line"><span class="lineno">  277</span>        }</div>
-<div class="line"><span class="lineno">  278</span>      }</div>
-<div class="line"><span class="lineno">  279</span>    }</div>
-<div class="line"><span class="lineno">  280</span> </div>
-<div class="line"><span class="lineno">  281</span>    <span class="comment">/* Write radiance data... */</span></div>
-<div class="line"><span class="lineno">  282</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;WRITE_OBS&quot;</span>, <span class="stringliteral">&quot;OUTPUT&quot;</span>);</div>
-<div class="line"><span class="lineno">  283</span>    <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, radfile, ctl, &amp;obs, 0);</div>
-<div class="line"><span class="lineno">  284</span>  }</div>
-<div class="line"><span class="lineno">  285</span> </div>
-<div class="line"><span class="lineno">  286</span>  <span class="comment">/* Compute single profile... */</span></div>
-<div class="line"><span class="lineno">  287</span>  <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  288</span> </div>
-<div class="line"><span class="lineno">  289</span>    <span class="comment">/* Call forward model... */</span></div>
-<div class="line"><span class="lineno">  290</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;FORMOD&quot;</span>, <span class="stringliteral">&quot;FORWARD&quot;</span>);</div>
-<div class="line"><span class="lineno">  291</span>    <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm, &amp;obs);</div>
-<div class="line"><span class="lineno">  292</span> </div>
-<div class="line"><span class="lineno">  293</span>    <span class="comment">/* Save radiance data... */</span></div>
-<div class="line"><span class="lineno">  294</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;WRITE_OBS&quot;</span>, <span class="stringliteral">&quot;OUTPUT&quot;</span>);</div>
-<div class="line"><span class="lineno">  295</span>    <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, radfile, ctl, &amp;obs, 0);</div>
-<div class="line"><span class="lineno">  296</span> </div>
-<div class="line"><span class="lineno">  297</span>    <span class="comment">/* Evaluate results... */</span></div>
-<div class="line"><span class="lineno">  298</span>    <span class="keywordflow">if</span> (obsref[0] != <span class="charliteral">&#39;-&#39;</span>) {</div>
-<div class="line"><span class="lineno">  299</span> </div>
-<div class="line"><span class="lineno">  300</span>      <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;EVAL&quot;</span>, <span class="stringliteral">&quot;OUTPUT&quot;</span>);</div>
-<div class="line"><span class="lineno">  301</span> </div>
-<div class="line"><span class="lineno">  302</span>      <span class="comment">/* Read reference data... */</span></div>
-<div class="line"><span class="lineno">  303</span>      <a class="code hl_function" href="jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980">read_obs</a>(wrkdir, obsref, ctl, &amp;obs2, 0);</div>
-<div class="line"><span class="lineno">  304</span> </div>
-<div class="line"><span class="lineno">  305</span>      <span class="comment">/* Calculate relative errors... */</span></div>
-<div class="line"><span class="lineno">  306</span>      <span class="keywordtype">double</span> mre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], sdre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], minre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], maxre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>];</div>
-<div class="line"><span class="lineno">  307</span>      <a class="code hl_function" href="formod_8c.html#ae9e76775b1c23b104b9bdf5cf8dc11af">compute_rel_errors</a>(ctl, &amp;obs, &amp;obs2, mre, sdre, minre, maxre);</div>
-<div class="line"><span class="lineno">  308</span> </div>
-<div class="line"><span class="lineno">  309</span>      <span class="comment">/* Write results... */</span></div>
-<div class="line"><span class="lineno">  310</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++)</div>
-<div class="line"><span class="lineno">  311</span>        printf</div>
-<div class="line"><span class="lineno">  312</span>          (<span class="stringliteral">&quot;EVAL: nu= %.4f cm^-1 | MRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n&quot;</span>,</div>
-<div class="line"><span class="lineno">  313</span>           ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044">nu</a>[<span class="keywordtype">id</span>], mre[<span class="keywordtype">id</span>], sdre[<span class="keywordtype">id</span>], minre[<span class="keywordtype">id</span>], maxre[<span class="keywordtype">id</span>]);</div>
-<div class="line"><span class="lineno">  314</span>    }</div>
-<div class="line"><span class="lineno">  315</span> </div>
-<div class="line"><span class="lineno">  316</span>    <span class="comment">/* Compute contributions of emitters... */</span></div>
-<div class="line"><span class="lineno">  317</span>    <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;c&#39;</span> || task[0] == <span class="charliteral">&#39;C&#39;</span>) {</div>
-<div class="line"><span class="lineno">  318</span> </div>
-<div class="line"><span class="lineno">  319</span>      <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;CONTRIBUTIONS&quot;</span>, <span class="stringliteral">&quot;FORWARD&quot;</span>);</div>
-<div class="line"><span class="lineno">  320</span> </div>
-<div class="line"><span class="lineno">  321</span>      <span class="keywordtype">char</span> filename[<a class="code hl_define" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>];</div>
-<div class="line"><span class="lineno">  322</span> </div>
-<div class="line"><span class="lineno">  323</span>      <span class="comment">/* Switch off continua... */</span></div>
-<div class="line"><span class="lineno">  324</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a417bdd14462698d3ced23bc954fa48a0">ctm_co2</a> = 0;</div>
-<div class="line"><span class="lineno">  325</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a73f4f8e915d10ba9048b798580f7dddb">ctm_h2o</a> = 0;</div>
-<div class="line"><span class="lineno">  326</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a5b53512f37127a12ef73a85dc8ccee4c">ctm_n2</a> = 0;</div>
-<div class="line"><span class="lineno">  327</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#ad66545f9845ba89aa91fd173b50600ce">ctm_o2</a> = 0;</div>
-<div class="line"><span class="lineno">  328</span> </div>
-<div class="line"><span class="lineno">  329</span>      <span class="comment">/* Loop over emitters... */</span></div>
-<div class="line"><span class="lineno">  330</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++) {</div>
-<div class="line"><span class="lineno">  331</span> </div>
-<div class="line"><span class="lineno">  332</span>        <span class="comment">/* Copy atmospheric data... */</span></div>
-<div class="line"><span class="lineno">  333</span>        <a class="code hl_function" href="jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1">copy_atm</a>(ctl, &amp;atm2, &amp;atm, 0);</div>
-<div class="line"><span class="lineno">  334</span> </div>
-<div class="line"><span class="lineno">  335</span>        <span class="comment">/* Set extinction to zero... */</span></div>
-<div class="line"><span class="lineno">  336</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iw = 0; iw &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a094e10d6d25abb248ee383a3da02181a">nw</a>; iw++)</div>
-<div class="line"><span class="lineno">  337</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
-<div class="line"><span class="lineno">  338</span>            atm2.<a class="code hl_variable" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw][ip] = 0;</div>
-<div class="line"><span class="lineno">  339</span> </div>
-<div class="line"><span class="lineno">  340</span>        <span class="comment">/* Select emitter... */</span></div>
-<div class="line"><span class="lineno">  341</span>        for (<span class="keywordtype">int</span> ig2 = 0; ig2 &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig2++)</div>
-<div class="line"><span class="lineno">  342</span>          <span class="keywordflow">if</span> (ig2 != ig)</div>
-<div class="line"><span class="lineno">  343</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
-<div class="line"><span class="lineno">  344</span>              atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig2][ip] = 0;</div>
-<div class="line"><span class="lineno">  345</span> </div>
-<div class="line"><span class="lineno">  346</span>        <span class="comment">/* Call forward model... */</span></div>
-<div class="line"><span class="lineno">  347</span>        <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs);</div>
-<div class="line"><span class="lineno">  348</span> </div>
-<div class="line"><span class="lineno">  349</span>        <span class="comment">/* Save radiance data... */</span></div>
-<div class="line"><span class="lineno">  350</span>        sprintf(filename, <span class="stringliteral">&quot;%s.%s&quot;</span>, radfile, ctl-&gt;<a class="code hl_variable" href="structctl__t.html#ad91bbf51ada1919a24e2c7a5fd666e23">emitter</a>[ig]);</div>
-<div class="line"><span class="lineno">  351</span>        <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, filename, ctl, &amp;obs, 0);</div>
-<div class="line"><span class="lineno">  352</span>      }</div>
-<div class="line"><span class="lineno">  353</span> </div>
-<div class="line"><span class="lineno">  354</span>      <span class="comment">/* Copy atmospheric data... */</span></div>
-<div class="line"><span class="lineno">  355</span>      <a class="code hl_function" href="jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1">copy_atm</a>(ctl, &amp;atm2, &amp;atm, 0);</div>
-<div class="line"><span class="lineno">  356</span> </div>
-<div class="line"><span class="lineno">  357</span>      <span class="comment">/* Set volume mixing ratios to zero, keep extinction... */</span></div>
-<div class="line"><span class="lineno">  358</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
-<div class="line"><span class="lineno">  359</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
-<div class="line"><span class="lineno">  360</span>          atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip] = 0;</div>
-<div class="line"><span class="lineno">  361</span> </div>
-<div class="line"><span class="lineno">  362</span>      <span class="comment">/* Call forward model... */</span></div>
-<div class="line"><span class="lineno">  363</span>      <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs);</div>
-<div class="line"><span class="lineno">  364</span> </div>
-<div class="line"><span class="lineno">  365</span>      <span class="comment">/* Save radiance data... */</span></div>
-<div class="line"><span class="lineno">  366</span>      sprintf(filename, <span class="stringliteral">&quot;%s.EXTINCT&quot;</span>, radfile);</div>
-<div class="line"><span class="lineno">  367</span>      <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, filename, ctl, &amp;obs, 0);</div>
-<div class="line"><span class="lineno">  368</span>    }</div>
-<div class="line"><span class="lineno">  369</span> </div>
-<div class="line"><span class="lineno">  370</span>    <span class="comment">/* Measure CPU-time... */</span></div>
-<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;t&#39;</span> || task[0] == <span class="charliteral">&#39;T&#39;</span>) {</div>
-<div class="line"><span class="lineno">  372</span> </div>
-<div class="line"><span class="lineno">  373</span>      <span class="comment">/* Init... */</span></div>
-<div class="line"><span class="lineno">  374</span>      <span class="keywordtype">double</span> t_min = 0, t_max = 0, t_mean = 0, t_sd = 0;</div>
-<div class="line"><span class="lineno">  375</span>      <span class="keywordtype">int</span> n = 0;</div>
+<p class="definition">Definition at line <a class="el" href="formod_8c_source.html#l00226">226</a> of file <a class="el" href="formod_8c_source.html">formod.c</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  234</span>                      {</div>
+<div class="line"><span class="lineno">  235</span> </div>
+<div class="line"><span class="lineno">  236</span>  <span class="keyword">static</span> <a class="code hl_struct" href="structatm__t.html">atm_t</a> atm, atm2;</div>
+<div class="line"><span class="lineno">  237</span>  <span class="keyword">static</span> <a class="code hl_struct" href="structobs__t.html">obs_t</a> obs, obs2;</div>
+<div class="line"><span class="lineno">  238</span> </div>
+<div class="line"><span class="lineno">  239</span>  <span class="comment">/* Read atmospheric data... */</span></div>
+<div class="line"><span class="lineno">  240</span>  <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;READ_ATM&quot;</span>, <span class="stringliteral">&quot;INPUT&quot;</span>);</div>
+<div class="line"><span class="lineno">  241</span>  <a class="code hl_function" href="jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c">read_atm</a>(wrkdir, atmfile, ctl, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  242</span> </div>
+<div class="line"><span class="lineno">  243</span>  <span class="comment">/* Read observation geometry... */</span></div>
+<div class="line"><span class="lineno">  244</span>  <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;READ_OBS&quot;</span>, <span class="stringliteral">&quot;INPUT&quot;</span>);</div>
+<div class="line"><span class="lineno">  245</span>  <a class="code hl_function" href="jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980">read_obs</a>(wrkdir, obsfile, ctl, &amp;obs, 0);</div>
+<div class="line"><span class="lineno">  246</span> </div>
+<div class="line"><span class="lineno">  247</span>  <span class="comment">/* Compute multiple profiles... */</span></div>
+<div class="line"><span class="lineno">  248</span>  <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;p&#39;</span> || task[0] == <span class="charliteral">&#39;P&#39;</span>) {</div>
+<div class="line"><span class="lineno">  249</span> </div>
+<div class="line"><span class="lineno">  250</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;FORMOD_PROFILE_LOOP&quot;</span>, <span class="stringliteral">&quot;FORWARD&quot;</span>);</div>
+<div class="line"><span class="lineno">  251</span> </div>
+<div class="line"><span class="lineno">  252</span>    <span class="comment">/* Loop over ray paths... */</span></div>
+<div class="line"><span class="lineno">  253</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ir = 0; ir &lt; obs.<a class="code hl_variable" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>; ir++) {</div>
+<div class="line"><span class="lineno">  254</span> </div>
+<div class="line"><span class="lineno">  255</span>      <span class="comment">/* Get atmospheric data... */</span></div>
+<div class="line"><span class="lineno">  256</span>      atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> = 0;</div>
+<div class="line"><span class="lineno">  257</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
+<div class="line"><span class="lineno">  258</span>        <span class="keywordflow">if</span> (atm.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[ip] == obs.<a class="code hl_variable" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[ir]) {</div>
+<div class="line"><span class="lineno">  259</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[ip];</div>
+<div class="line"><span class="lineno">  260</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip];</div>
+<div class="line"><span class="lineno">  261</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a2c8ffb598109120ed6d1f8e79aeb3ff8">lon</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a2c8ffb598109120ed6d1f8e79aeb3ff8">lon</a>[ip];</div>
+<div class="line"><span class="lineno">  262</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">lat</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">lat</a>[ip];</div>
+<div class="line"><span class="lineno">  263</span>          atm2.<a class="code hl_variable" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>[ip];</div>
+<div class="line"><span class="lineno">  264</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>[atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>[ip];</div>
+<div class="line"><span class="lineno">  265</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
+<div class="line"><span class="lineno">  266</span>            atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip];</div>
+<div class="line"><span class="lineno">  267</span>          for (<span class="keywordtype">int</span> iw = 0; iw &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a094e10d6d25abb248ee383a3da02181a">nw</a>; iw++)</div>
+<div class="line"><span class="lineno">  268</span>            atm2.<a class="code hl_variable" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw][atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = atm.<a class="code hl_variable" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw][ip];</div>
+<div class="line"><span class="lineno">  269</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>++;</div>
+<div class="line"><span class="lineno">  270</span>        }</div>
+<div class="line"><span class="lineno">  271</span> </div>
+<div class="line"><span class="lineno">  272</span>      <span class="comment">/* Get observation data... */</span></div>
+<div class="line"><span class="lineno">  273</span>      obs2.<a class="code hl_variable" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a> = 1;</div>
+<div class="line"><span class="lineno">  274</span>      obs2.<a class="code hl_variable" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#ad86987afb2b3307399b50383f4dbdc40">time</a>[ir];</div>
+<div class="line"><span class="lineno">  275</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a5ad297ef892545d93168c57ed26f74b5">vpz</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a5ad297ef892545d93168c57ed26f74b5">vpz</a>[ir];</div>
+<div class="line"><span class="lineno">  276</span>      obs2.<a class="code hl_variable" href="structobs__t.html#aba164760718f1c258c150ebbc93a39a9">vplon</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#aba164760718f1c258c150ebbc93a39a9">vplon</a>[ir];</div>
+<div class="line"><span class="lineno">  277</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">vplat</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a62d326c0aa12f2f9208c6a5576e599da">vplat</a>[ir];</div>
+<div class="line"><span class="lineno">  278</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a992d21aae832400874f3f6bc3e7d1981">obsz</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a992d21aae832400874f3f6bc3e7d1981">obsz</a>[ir];</div>
+<div class="line"><span class="lineno">  279</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a6623d4c4c139db8c86195751653ea716">obslon</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a6623d4c4c139db8c86195751653ea716">obslon</a>[ir];</div>
+<div class="line"><span class="lineno">  280</span>      obs2.<a class="code hl_variable" href="structobs__t.html#a8b9f2ae531c4d8693c7ce86f0387d290">obslat</a>[0] = obs.<a class="code hl_variable" href="structobs__t.html#a8b9f2ae531c4d8693c7ce86f0387d290">obslat</a>[ir];</div>
+<div class="line"><span class="lineno">  281</span> </div>
+<div class="line"><span class="lineno">  282</span>      <span class="comment">/* Check number of data points... */</span></div>
+<div class="line"><span class="lineno">  283</span>      <span class="keywordflow">if</span> (atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> &gt; 0) {</div>
+<div class="line"><span class="lineno">  284</span> </div>
+<div class="line"><span class="lineno">  285</span>        <span class="comment">/* Call forward model... */</span></div>
+<div class="line"><span class="lineno">  286</span>        <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs2);</div>
+<div class="line"><span class="lineno">  287</span> </div>
+<div class="line"><span class="lineno">  288</span>        <span class="comment">/* Save radiance data... */</span></div>
+<div class="line"><span class="lineno">  289</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++) {</div>
+<div class="line"><span class="lineno">  290</span>          obs.<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][ir] = obs2.<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][0];</div>
+<div class="line"><span class="lineno">  291</span>          obs.<a class="code hl_variable" href="structobs__t.html#a0f8aac57859ceccb50b258d487e74670">tau</a>[id][ir] = obs2.<a class="code hl_variable" href="structobs__t.html#a0f8aac57859ceccb50b258d487e74670">tau</a>[id][0];</div>
+<div class="line"><span class="lineno">  292</span>        }</div>
+<div class="line"><span class="lineno">  293</span>      }</div>
+<div class="line"><span class="lineno">  294</span>    }</div>
+<div class="line"><span class="lineno">  295</span> </div>
+<div class="line"><span class="lineno">  296</span>    <span class="comment">/* Write radiance data... */</span></div>
+<div class="line"><span class="lineno">  297</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;WRITE_OBS&quot;</span>, <span class="stringliteral">&quot;OUTPUT&quot;</span>);</div>
+<div class="line"><span class="lineno">  298</span>    <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, radfile, ctl, &amp;obs, 0);</div>
+<div class="line"><span class="lineno">  299</span>  }</div>
+<div class="line"><span class="lineno">  300</span> </div>
+<div class="line"><span class="lineno">  301</span>  <span class="comment">/* Compute single profile... */</span></div>
+<div class="line"><span class="lineno">  302</span>  <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  303</span> </div>
+<div class="line"><span class="lineno">  304</span>    <span class="comment">/* Call forward model... */</span></div>
+<div class="line"><span class="lineno">  305</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;FORMOD&quot;</span>, <span class="stringliteral">&quot;FORWARD&quot;</span>);</div>
+<div class="line"><span class="lineno">  306</span>    <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm, &amp;obs);</div>
+<div class="line"><span class="lineno">  307</span> </div>
+<div class="line"><span class="lineno">  308</span>    <span class="comment">/* Save radiance data... */</span></div>
+<div class="line"><span class="lineno">  309</span>    <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;WRITE_OBS&quot;</span>, <span class="stringliteral">&quot;OUTPUT&quot;</span>);</div>
+<div class="line"><span class="lineno">  310</span>    <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, radfile, ctl, &amp;obs, 0);</div>
+<div class="line"><span class="lineno">  311</span> </div>
+<div class="line"><span class="lineno">  312</span>    <span class="comment">/* Evaluate results... */</span></div>
+<div class="line"><span class="lineno">  313</span>    <span class="keywordflow">if</span> (obsref[0] != <span class="charliteral">&#39;-&#39;</span>) {</div>
+<div class="line"><span class="lineno">  314</span> </div>
+<div class="line"><span class="lineno">  315</span>      <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;EVAL&quot;</span>, <span class="stringliteral">&quot;OUTPUT&quot;</span>);</div>
+<div class="line"><span class="lineno">  316</span> </div>
+<div class="line"><span class="lineno">  317</span>      <span class="comment">/* Read reference data... */</span></div>
+<div class="line"><span class="lineno">  318</span>      <a class="code hl_function" href="jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980">read_obs</a>(wrkdir, obsref, ctl, &amp;obs2, 0);</div>
+<div class="line"><span class="lineno">  319</span> </div>
+<div class="line"><span class="lineno">  320</span>      <span class="comment">/* Calculate relative errors... */</span></div>
+<div class="line"><span class="lineno">  321</span>      <span class="keywordtype">double</span> mre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], sdre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], minre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], maxre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>];</div>
+<div class="line"><span class="lineno">  322</span>      <a class="code hl_function" href="formod_8c.html#ae9e76775b1c23b104b9bdf5cf8dc11af">compute_rel_errors</a>(ctl, &amp;obs, &amp;obs2, mre, sdre, minre, maxre);</div>
+<div class="line"><span class="lineno">  323</span> </div>
+<div class="line"><span class="lineno">  324</span>      <span class="comment">/* Write results... */</span></div>
+<div class="line"><span class="lineno">  325</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++)</div>
+<div class="line"><span class="lineno">  326</span>        printf</div>
+<div class="line"><span class="lineno">  327</span>          (<span class="stringliteral">&quot;EVAL: nu= %.4f cm^-1 | MRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n&quot;</span>,</div>
+<div class="line"><span class="lineno">  328</span>           ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044">nu</a>[<span class="keywordtype">id</span>], mre[<span class="keywordtype">id</span>], sdre[<span class="keywordtype">id</span>], minre[<span class="keywordtype">id</span>], maxre[<span class="keywordtype">id</span>]);</div>
+<div class="line"><span class="lineno">  329</span>    }</div>
+<div class="line"><span class="lineno">  330</span> </div>
+<div class="line"><span class="lineno">  331</span>    <span class="comment">/* Compute contributions of emitters... */</span></div>
+<div class="line"><span class="lineno">  332</span>    <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;c&#39;</span> || task[0] == <span class="charliteral">&#39;C&#39;</span>) {</div>
+<div class="line"><span class="lineno">  333</span> </div>
+<div class="line"><span class="lineno">  334</span>      <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;CONTRIBUTIONS&quot;</span>, <span class="stringliteral">&quot;FORWARD&quot;</span>);</div>
+<div class="line"><span class="lineno">  335</span> </div>
+<div class="line"><span class="lineno">  336</span>      <span class="keywordtype">char</span> filename[<a class="code hl_define" href="jurassic_8h.html#a05b49c662c073f89e86804f7856622a0">LEN</a>];</div>
+<div class="line"><span class="lineno">  337</span> </div>
+<div class="line"><span class="lineno">  338</span>      <span class="comment">/* Switch off continua... */</span></div>
+<div class="line"><span class="lineno">  339</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a417bdd14462698d3ced23bc954fa48a0">ctm_co2</a> = 0;</div>
+<div class="line"><span class="lineno">  340</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a73f4f8e915d10ba9048b798580f7dddb">ctm_h2o</a> = 0;</div>
+<div class="line"><span class="lineno">  341</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a5b53512f37127a12ef73a85dc8ccee4c">ctm_n2</a> = 0;</div>
+<div class="line"><span class="lineno">  342</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#ad66545f9845ba89aa91fd173b50600ce">ctm_o2</a> = 0;</div>
+<div class="line"><span class="lineno">  343</span> </div>
+<div class="line"><span class="lineno">  344</span>      <span class="comment">/* Loop over emitters... */</span></div>
+<div class="line"><span class="lineno">  345</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++) {</div>
+<div class="line"><span class="lineno">  346</span> </div>
+<div class="line"><span class="lineno">  347</span>        <span class="comment">/* Copy atmospheric data... */</span></div>
+<div class="line"><span class="lineno">  348</span>        <a class="code hl_function" href="jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1">copy_atm</a>(ctl, &amp;atm2, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  349</span> </div>
+<div class="line"><span class="lineno">  350</span>        <span class="comment">/* Set extinction to zero... */</span></div>
+<div class="line"><span class="lineno">  351</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iw = 0; iw &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a094e10d6d25abb248ee383a3da02181a">nw</a>; iw++)</div>
+<div class="line"><span class="lineno">  352</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
+<div class="line"><span class="lineno">  353</span>            atm2.<a class="code hl_variable" href="structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3">k</a>[iw][ip] = 0;</div>
+<div class="line"><span class="lineno">  354</span> </div>
+<div class="line"><span class="lineno">  355</span>        <span class="comment">/* Select emitter... */</span></div>
+<div class="line"><span class="lineno">  356</span>        for (<span class="keywordtype">int</span> ig2 = 0; ig2 &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig2++)</div>
+<div class="line"><span class="lineno">  357</span>          <span class="keywordflow">if</span> (ig2 != ig)</div>
+<div class="line"><span class="lineno">  358</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
+<div class="line"><span class="lineno">  359</span>              atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig2][ip] = 0;</div>
+<div class="line"><span class="lineno">  360</span> </div>
+<div class="line"><span class="lineno">  361</span>        <span class="comment">/* Call forward model... */</span></div>
+<div class="line"><span class="lineno">  362</span>        <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs);</div>
+<div class="line"><span class="lineno">  363</span> </div>
+<div class="line"><span class="lineno">  364</span>        <span class="comment">/* Save radiance data... */</span></div>
+<div class="line"><span class="lineno">  365</span>        sprintf(filename, <span class="stringliteral">&quot;%s.%s&quot;</span>, radfile, ctl-&gt;<a class="code hl_variable" href="structctl__t.html#ad91bbf51ada1919a24e2c7a5fd666e23">emitter</a>[ig]);</div>
+<div class="line"><span class="lineno">  366</span>        <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, filename, ctl, &amp;obs, 0);</div>
+<div class="line"><span class="lineno">  367</span>      }</div>
+<div class="line"><span class="lineno">  368</span> </div>
+<div class="line"><span class="lineno">  369</span>      <span class="comment">/* Copy atmospheric data... */</span></div>
+<div class="line"><span class="lineno">  370</span>      <a class="code hl_function" href="jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1">copy_atm</a>(ctl, &amp;atm2, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  371</span> </div>
+<div class="line"><span class="lineno">  372</span>      <span class="comment">/* Set volume mixing ratios to zero, keep extinction... */</span></div>
+<div class="line"><span class="lineno">  373</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
+<div class="line"><span class="lineno">  374</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
+<div class="line"><span class="lineno">  375</span>          atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip] = 0;</div>
 <div class="line"><span class="lineno">  376</span> </div>
-<div class="line"><span class="lineno">  377</span>      <span class="comment">/* Initialize random number generator... */</span></div>
-<div class="line"><span class="lineno">  378</span>      gsl_rng_env_setup();</div>
-<div class="line"><span class="lineno">  379</span>      gsl_rng *rng = gsl_rng_alloc(gsl_rng_default);</div>
-<div class="line"><span class="lineno">  380</span> </div>
-<div class="line"><span class="lineno">  381</span>      <span class="comment">/* Loop over profiles... */</span></div>
-<div class="line"><span class="lineno">  382</span>      <span class="keywordflow">do</span> {</div>
-<div class="line"><span class="lineno">  383</span> </div>
-<div class="line"><span class="lineno">  384</span>        <span class="comment">/* Create random atmosphere... */</span></div>
-<div class="line"><span class="lineno">  385</span>        <a class="code hl_function" href="jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1">copy_atm</a>(ctl, &amp;atm2, &amp;atm, 0);</div>
-<div class="line"><span class="lineno">  386</span>        <span class="keywordtype">double</span> dtemp = 40. * (gsl_rng_uniform(rng) - 0.5);</div>
-<div class="line"><span class="lineno">  387</span>        <span class="keywordtype">double</span> dpress = 1. - 0.1 * gsl_rng_uniform(rng);</div>
-<div class="line"><span class="lineno">  388</span>        <span class="keywordtype">double</span> dq[<a class="code hl_define" href="jurassic_8h.html#ac29517e805c6a27f76e87e634eaf2929">NG</a>];</div>
-<div class="line"><span class="lineno">  389</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
-<div class="line"><span class="lineno">  390</span>          dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);</div>
-<div class="line"><span class="lineno">  391</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++) {</div>
-<div class="line"><span class="lineno">  392</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>[ip] += dtemp;</div>
-<div class="line"><span class="lineno">  393</span>          atm2.<a class="code hl_variable" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>[ip] *= dpress;</div>
-<div class="line"><span class="lineno">  394</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
-<div class="line"><span class="lineno">  395</span>            atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip] *= dq[ig];</div>
-<div class="line"><span class="lineno">  396</span>        }</div>
-<div class="line"><span class="lineno">  397</span> </div>
-<div class="line"><span class="lineno">  398</span>        <span class="comment">/* Measure runtime... */</span></div>
-<div class="line"><span class="lineno">  399</span>        <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;BENCHMARK_SAMPLE&quot;</span>, <span class="stringliteral">&quot;ANALYSIS&quot;</span>);</div>
-<div class="line"><span class="lineno">  400</span>        <span class="keywordtype">double</span> t0 = omp_get_wtime();</div>
-<div class="line"><span class="lineno">  401</span>        <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs);</div>
-<div class="line"><span class="lineno">  402</span>        <span class="keywordtype">double</span> dt = omp_get_wtime() - t0;</div>
-<div class="line"><span class="lineno">  403</span> </div>
-<div class="line"><span class="lineno">  404</span>        <span class="comment">/* Get runtime statistics... */</span></div>
-<div class="line"><span class="lineno">  405</span>        t_mean += dt;</div>
-<div class="line"><span class="lineno">  406</span>        t_sd += <a class="code hl_define" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(dt);</div>
-<div class="line"><span class="lineno">  407</span>        <span class="keywordflow">if</span> (n == 0 || dt &lt; t_min)</div>
-<div class="line"><span class="lineno">  408</span>          t_min = dt;</div>
-<div class="line"><span class="lineno">  409</span>        <span class="keywordflow">if</span> (n == 0 || dt &gt; t_max)</div>
-<div class="line"><span class="lineno">  410</span>          t_max = dt;</div>
-<div class="line"><span class="lineno">  411</span>        n++;</div>
+<div class="line"><span class="lineno">  377</span>      <span class="comment">/* Call forward model... */</span></div>
+<div class="line"><span class="lineno">  378</span>      <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs);</div>
+<div class="line"><span class="lineno">  379</span> </div>
+<div class="line"><span class="lineno">  380</span>      <span class="comment">/* Save radiance data... */</span></div>
+<div class="line"><span class="lineno">  381</span>      sprintf(filename, <span class="stringliteral">&quot;%s.EXTINCT&quot;</span>, radfile);</div>
+<div class="line"><span class="lineno">  382</span>      <a class="code hl_function" href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a>(wrkdir, filename, ctl, &amp;obs, 0);</div>
+<div class="line"><span class="lineno">  383</span>    }</div>
+<div class="line"><span class="lineno">  384</span> </div>
+<div class="line"><span class="lineno">  385</span>    <span class="comment">/* Measure CPU-time... */</span></div>
+<div class="line"><span class="lineno">  386</span>    <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;t&#39;</span> || task[0] == <span class="charliteral">&#39;T&#39;</span>) {</div>
+<div class="line"><span class="lineno">  387</span> </div>
+<div class="line"><span class="lineno">  388</span>      <span class="comment">/* Init... */</span></div>
+<div class="line"><span class="lineno">  389</span>      <span class="keywordtype">double</span> t_min = 0, t_max = 0, t_mean = 0, t_sd = 0;</div>
+<div class="line"><span class="lineno">  390</span>      <span class="keywordtype">int</span> n = 0;</div>
+<div class="line"><span class="lineno">  391</span> </div>
+<div class="line"><span class="lineno">  392</span>      <span class="comment">/* Initialize random number generator... */</span></div>
+<div class="line"><span class="lineno">  393</span>      gsl_rng_env_setup();</div>
+<div class="line"><span class="lineno">  394</span>      gsl_rng *rng = gsl_rng_alloc(gsl_rng_default);</div>
+<div class="line"><span class="lineno">  395</span> </div>
+<div class="line"><span class="lineno">  396</span>      <span class="comment">/* Loop over profiles... */</span></div>
+<div class="line"><span class="lineno">  397</span>      <span class="keywordflow">do</span> {</div>
+<div class="line"><span class="lineno">  398</span> </div>
+<div class="line"><span class="lineno">  399</span>        <span class="comment">/* Create random atmosphere... */</span></div>
+<div class="line"><span class="lineno">  400</span>        <a class="code hl_function" href="jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1">copy_atm</a>(ctl, &amp;atm2, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  401</span>        <span class="keywordtype">double</span> dtemp = 40. * (gsl_rng_uniform(rng) - 0.5);</div>
+<div class="line"><span class="lineno">  402</span>        <span class="keywordtype">double</span> dpress = 1. - 0.1 * gsl_rng_uniform(rng);</div>
+<div class="line"><span class="lineno">  403</span>        <span class="keywordtype">double</span> dq[<a class="code hl_define" href="jurassic_8h.html#ac29517e805c6a27f76e87e634eaf2929">NG</a>];</div>
+<div class="line"><span class="lineno">  404</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
+<div class="line"><span class="lineno">  405</span>          dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);</div>
+<div class="line"><span class="lineno">  406</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm2.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++) {</div>
+<div class="line"><span class="lineno">  407</span>          atm2.<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>[ip] += dtemp;</div>
+<div class="line"><span class="lineno">  408</span>          atm2.<a class="code hl_variable" href="structatm__t.html#ae769ef14e4824d35f47ad9dec75a4087">p</a>[ip] *= dpress;</div>
+<div class="line"><span class="lineno">  409</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
+<div class="line"><span class="lineno">  410</span>            atm2.<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip] *= dq[ig];</div>
+<div class="line"><span class="lineno">  411</span>        }</div>
 <div class="line"><span class="lineno">  412</span> </div>
-<div class="line"><span class="lineno">  413</span>      } <span class="keywordflow">while</span> (t_mean &lt; 10.0);</div>
-<div class="line"><span class="lineno">  414</span> </div>
-<div class="line"><span class="lineno">  415</span>      <span class="comment">/* Keep the legacy benchmark line and the new timer-style overlap metric. */</span></div>
-<div class="line"><span class="lineno">  416</span>      t_mean /= (double) n;</div>
-<div class="line"><span class="lineno">  417</span>      t_sd = sqrt(t_sd / (<span class="keywordtype">double</span>) n - <a class="code hl_define" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(t_mean));</div>
-<div class="line"><span class="lineno">  418</span>      printf(<span class="stringliteral">&quot;RUNTIME: mean= %g s | stddev= %g s | min= %g s | max= %g s\n&quot;</span>,</div>
-<div class="line"><span class="lineno">  419</span>             t_mean, t_sd, t_min, t_max);</div>
-<div class="line"><span class="lineno">  420</span> </div>
-<div class="line"><span class="lineno">  421</span>      <span class="comment">/* Free... */</span></div>
-<div class="line"><span class="lineno">  422</span>      gsl_rng_free(rng);</div>
-<div class="line"><span class="lineno">  423</span>    }</div>
-<div class="line"><span class="lineno">  424</span> </div>
-<div class="line"><span class="lineno">  425</span>    <span class="comment">/* Analyze impact of step size... */</span></div>
-<div class="line"><span class="lineno">  426</span>    <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;s&#39;</span> || task[0] == <span class="charliteral">&#39;S&#39;</span>) {</div>
+<div class="line"><span class="lineno">  413</span>        <span class="comment">/* Measure runtime... */</span></div>
+<div class="line"><span class="lineno">  414</span>        <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;BENCHMARK_SAMPLE&quot;</span>, <span class="stringliteral">&quot;ANALYSIS&quot;</span>);</div>
+<div class="line"><span class="lineno">  415</span>        <span class="keywordtype">double</span> t0 = omp_get_wtime();</div>
+<div class="line"><span class="lineno">  416</span>        <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm2, &amp;obs);</div>
+<div class="line"><span class="lineno">  417</span>        <span class="keywordtype">double</span> dt = omp_get_wtime() - t0;</div>
+<div class="line"><span class="lineno">  418</span> </div>
+<div class="line"><span class="lineno">  419</span>        <span class="comment">/* Get runtime statistics... */</span></div>
+<div class="line"><span class="lineno">  420</span>        t_mean += dt;</div>
+<div class="line"><span class="lineno">  421</span>        t_sd += <a class="code hl_define" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(dt);</div>
+<div class="line"><span class="lineno">  422</span>        <span class="keywordflow">if</span> (n == 0 || dt &lt; t_min)</div>
+<div class="line"><span class="lineno">  423</span>          t_min = dt;</div>
+<div class="line"><span class="lineno">  424</span>        <span class="keywordflow">if</span> (n == 0 || dt &gt; t_max)</div>
+<div class="line"><span class="lineno">  425</span>          t_max = dt;</div>
+<div class="line"><span class="lineno">  426</span>        n++;</div>
 <div class="line"><span class="lineno">  427</span> </div>
-<div class="line"><span class="lineno">  428</span>      <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;STEP_ANALYSIS&quot;</span>, <span class="stringliteral">&quot;ANALYSIS&quot;</span>);</div>
+<div class="line"><span class="lineno">  428</span>      } <span class="keywordflow">while</span> (t_mean &lt; 10.0);</div>
 <div class="line"><span class="lineno">  429</span> </div>
-<div class="line"><span class="lineno">  430</span>      <span class="comment">/* Reference run... */</span></div>
-<div class="line"><span class="lineno">  431</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#add30b1dee3914f1d1473df0fccabb364">rayds</a> = 0.1;</div>
-<div class="line"><span class="lineno">  432</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#aee8d7ddf07ec801c7d4a2037cb23a6e7">raydz</a> = 0.01;</div>
-<div class="line"><span class="lineno">  433</span>      <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm, &amp;obs);</div>
-<div class="line"><span class="lineno">  434</span>      <a class="code hl_function" href="jurassic_8c.html#aa855e52716bd4b479bb0d2446b300a4e">copy_obs</a>(ctl, &amp;obs2, &amp;obs, 0);</div>
+<div class="line"><span class="lineno">  430</span>      <span class="comment">/* Keep the legacy benchmark line and the new timer-style overlap metric. */</span></div>
+<div class="line"><span class="lineno">  431</span>      t_mean /= (double) n;</div>
+<div class="line"><span class="lineno">  432</span>      t_sd = sqrt(t_sd / (<span class="keywordtype">double</span>) n - <a class="code hl_define" href="jurassic_8h.html#a1ac0abc7c913167ecaf81778d57e7a17">POW2</a>(t_mean));</div>
+<div class="line"><span class="lineno">  433</span>      printf(<span class="stringliteral">&quot;RUNTIME: mean= %g s | stddev= %g s | min= %g s | max= %g s\n&quot;</span>,</div>
+<div class="line"><span class="lineno">  434</span>             t_mean, t_sd, t_min, t_max);</div>
 <div class="line"><span class="lineno">  435</span> </div>
-<div class="line"><span class="lineno">  436</span>      <span class="comment">/* Loop over step size... */</span></div>
-<div class="line"><span class="lineno">  437</span>      <span class="keywordflow">for</span> (<span class="keywordtype">double</span> dz = 0.01; dz &lt;= 2; dz *= 1.1)</div>
-<div class="line"><span class="lineno">  438</span>        <span class="keywordflow">for</span> (<span class="keywordtype">double</span> ds = 0.1; ds &lt;= 50; ds *= 1.1) {</div>
+<div class="line"><span class="lineno">  436</span>      <span class="comment">/* Free... */</span></div>
+<div class="line"><span class="lineno">  437</span>      gsl_rng_free(rng);</div>
+<div class="line"><span class="lineno">  438</span>    }</div>
 <div class="line"><span class="lineno">  439</span> </div>
-<div class="line"><span class="lineno">  440</span>          <span class="comment">/* Set step size... */</span></div>
-<div class="line"><span class="lineno">  441</span>          ctl-&gt;<a class="code hl_variable" href="structctl__t.html#add30b1dee3914f1d1473df0fccabb364">rayds</a> = ds;</div>
-<div class="line"><span class="lineno">  442</span>          ctl-&gt;<a class="code hl_variable" href="structctl__t.html#aee8d7ddf07ec801c7d4a2037cb23a6e7">raydz</a> = dz;</div>
-<div class="line"><span class="lineno">  443</span> </div>
-<div class="line"><span class="lineno">  444</span>          <span class="comment">/* Measure runtime... */</span></div>
-<div class="line"><span class="lineno">  445</span>          <span class="keywordtype">double</span> t0 = omp_get_wtime();</div>
-<div class="line"><span class="lineno">  446</span>          <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm, &amp;obs);</div>
-<div class="line"><span class="lineno">  447</span>          <span class="keywordtype">double</span> dt = omp_get_wtime() - t0;</div>
-<div class="line"><span class="lineno">  448</span> </div>
-<div class="line"><span class="lineno">  449</span>          <span class="comment">/* Calculate relative errors... */</span></div>
-<div class="line"><span class="lineno">  450</span>          <span class="keywordtype">double</span> mre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], sdre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], minre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], maxre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>];</div>
-<div class="line"><span class="lineno">  451</span>          <a class="code hl_function" href="formod_8c.html#ae9e76775b1c23b104b9bdf5cf8dc11af">compute_rel_errors</a>(ctl, &amp;obs, &amp;obs2, mre, sdre, minre, maxre);</div>
-<div class="line"><span class="lineno">  452</span> </div>
-<div class="line"><span class="lineno">  453</span>          <span class="comment">/* Write results... */</span></div>
-<div class="line"><span class="lineno">  454</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++)</div>
-<div class="line"><span class="lineno">  455</span>            printf</div>
-<div class="line"><span class="lineno">  456</span>              (<span class="stringliteral">&quot;STEPSIZE: ds= %.4f km | dz= %g km | t= %g s | nu= %.4f cm^-1&quot;</span></div>
-<div class="line"><span class="lineno">  457</span>               <span class="stringliteral">&quot; | MRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n&quot;</span>,</div>
-<div class="line"><span class="lineno">  458</span>               ds, dz, dt, ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044">nu</a>[<span class="keywordtype">id</span>], mre[<span class="keywordtype">id</span>], sdre[<span class="keywordtype">id</span>], minre[<span class="keywordtype">id</span>],</div>
-<div class="line"><span class="lineno">  459</span>               maxre[<span class="keywordtype">id</span>]);</div>
-<div class="line"><span class="lineno">  460</span>        }</div>
-<div class="line"><span class="lineno">  461</span>    }</div>
-<div class="line"><span class="lineno">  462</span>  }</div>
-<div class="line"><span class="lineno">  463</span>}</div>
-<div class="ttc" id="aformod_8c_html_ae9e76775b1c23b104b9bdf5cf8dc11af"><div class="ttname"><a href="formod_8c.html#ae9e76775b1c23b104b9bdf5cf8dc11af">compute_rel_errors</a></div><div class="ttdeci">void compute_rel_errors(const ctl_t *ctl, const obs_t *obs_test, const obs_t *obs_ref, double *mre, double *sdre, double *minre, double *maxre)</div><div class="ttdoc">Calculate relative errors.</div><div class="ttdef"><b>Definition:</b> <a href="formod_8c_source.html#l00467">formod.c:467</a></div></div>
+<div class="line"><span class="lineno">  440</span>    <span class="comment">/* Analyze impact of step size... */</span></div>
+<div class="line"><span class="lineno">  441</span>    <span class="keywordflow">if</span> (task[0] == <span class="charliteral">&#39;s&#39;</span> || task[0] == <span class="charliteral">&#39;S&#39;</span>) {</div>
+<div class="line"><span class="lineno">  442</span> </div>
+<div class="line"><span class="lineno">  443</span>      <a class="code hl_define" href="jurassic_8h.html#a2b61365bd73a3cf3c059940b7e008749">SELECT_TIMER</a>(<span class="stringliteral">&quot;STEP_ANALYSIS&quot;</span>, <span class="stringliteral">&quot;ANALYSIS&quot;</span>);</div>
+<div class="line"><span class="lineno">  444</span> </div>
+<div class="line"><span class="lineno">  445</span>      <span class="comment">/* Reference run... */</span></div>
+<div class="line"><span class="lineno">  446</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#add30b1dee3914f1d1473df0fccabb364">rayds</a> = 0.1;</div>
+<div class="line"><span class="lineno">  447</span>      ctl-&gt;<a class="code hl_variable" href="structctl__t.html#aee8d7ddf07ec801c7d4a2037cb23a6e7">raydz</a> = 0.01;</div>
+<div class="line"><span class="lineno">  448</span>      <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm, &amp;obs);</div>
+<div class="line"><span class="lineno">  449</span>      <a class="code hl_function" href="jurassic_8c.html#aa855e52716bd4b479bb0d2446b300a4e">copy_obs</a>(ctl, &amp;obs2, &amp;obs, 0);</div>
+<div class="line"><span class="lineno">  450</span> </div>
+<div class="line"><span class="lineno">  451</span>      <span class="comment">/* Loop over step size... */</span></div>
+<div class="line"><span class="lineno">  452</span>      <span class="keywordflow">for</span> (<span class="keywordtype">double</span> dz = 0.01; dz &lt;= 2; dz *= 1.1)</div>
+<div class="line"><span class="lineno">  453</span>        <span class="keywordflow">for</span> (<span class="keywordtype">double</span> ds = 0.1; ds &lt;= 50; ds *= 1.1) {</div>
+<div class="line"><span class="lineno">  454</span> </div>
+<div class="line"><span class="lineno">  455</span>          <span class="comment">/* Set step size... */</span></div>
+<div class="line"><span class="lineno">  456</span>          ctl-&gt;<a class="code hl_variable" href="structctl__t.html#add30b1dee3914f1d1473df0fccabb364">rayds</a> = ds;</div>
+<div class="line"><span class="lineno">  457</span>          ctl-&gt;<a class="code hl_variable" href="structctl__t.html#aee8d7ddf07ec801c7d4a2037cb23a6e7">raydz</a> = dz;</div>
+<div class="line"><span class="lineno">  458</span> </div>
+<div class="line"><span class="lineno">  459</span>          <span class="comment">/* Measure runtime... */</span></div>
+<div class="line"><span class="lineno">  460</span>          <span class="keywordtype">double</span> t0 = omp_get_wtime();</div>
+<div class="line"><span class="lineno">  461</span>          <a class="code hl_function" href="jurassic_8c.html#abe93da56294b380e322c18ca2838fd51">formod</a>(ctl, tbl, &amp;atm, &amp;obs);</div>
+<div class="line"><span class="lineno">  462</span>          <span class="keywordtype">double</span> dt = omp_get_wtime() - t0;</div>
+<div class="line"><span class="lineno">  463</span> </div>
+<div class="line"><span class="lineno">  464</span>          <span class="comment">/* Calculate relative errors... */</span></div>
+<div class="line"><span class="lineno">  465</span>          <span class="keywordtype">double</span> mre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], sdre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], minre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>], maxre[<a class="code hl_define" href="jurassic_8h.html#a68d169e5b90cf721678bc7ab0f964a99">ND</a>];</div>
+<div class="line"><span class="lineno">  466</span>          <a class="code hl_function" href="formod_8c.html#ae9e76775b1c23b104b9bdf5cf8dc11af">compute_rel_errors</a>(ctl, &amp;obs, &amp;obs2, mre, sdre, minre, maxre);</div>
+<div class="line"><span class="lineno">  467</span> </div>
+<div class="line"><span class="lineno">  468</span>          <span class="comment">/* Write results... */</span></div>
+<div class="line"><span class="lineno">  469</span>          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++)</div>
+<div class="line"><span class="lineno">  470</span>            printf</div>
+<div class="line"><span class="lineno">  471</span>              (<span class="stringliteral">&quot;STEPSIZE: ds= %.4f km | dz= %g km | t= %g s | nu= %.4f cm^-1&quot;</span></div>
+<div class="line"><span class="lineno">  472</span>               <span class="stringliteral">&quot; | MRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n&quot;</span>,</div>
+<div class="line"><span class="lineno">  473</span>               ds, dz, dt, ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044">nu</a>[<span class="keywordtype">id</span>], mre[<span class="keywordtype">id</span>], sdre[<span class="keywordtype">id</span>], minre[<span class="keywordtype">id</span>],</div>
+<div class="line"><span class="lineno">  474</span>               maxre[<span class="keywordtype">id</span>]);</div>
+<div class="line"><span class="lineno">  475</span>        }</div>
+<div class="line"><span class="lineno">  476</span>    }</div>
+<div class="line"><span class="lineno">  477</span>  }</div>
+<div class="line"><span class="lineno">  478</span>}</div>
+<div class="ttc" id="aformod_8c_html_ae9e76775b1c23b104b9bdf5cf8dc11af"><div class="ttname"><a href="formod_8c.html#ae9e76775b1c23b104b9bdf5cf8dc11af">compute_rel_errors</a></div><div class="ttdeci">void compute_rel_errors(const ctl_t *ctl, const obs_t *obs_test, const obs_t *obs_ref, double *mre, double *sdre, double *minre, double *maxre)</div><div class="ttdoc">Calculate relative errors.</div><div class="ttdef"><b>Definition:</b> <a href="formod_8c_source.html#l00482">formod.c:482</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a49673fe5fc307222ab5fc13a62352980"><div class="ttname"><a href="jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980">read_obs</a></div><div class="ttdeci">void read_obs(const char *dirname, const char *filename, const ctl_t *ctl, obs_t *obs, int profile)</div><div class="ttdoc">Read observation data from an input file.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05810">jurassic.c:5810</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a71f7bec4167a09da67398a251fc4ccf4"><div class="ttname"><a href="jurassic_8c.html#a71f7bec4167a09da67398a251fc4ccf4">write_obs</a></div><div class="ttdeci">void write_obs(const char *dirname, const char *filename, const ctl_t *ctl, const obs_t *obs, int profile)</div><div class="ttdoc">Write observation data to an output file in ASCII or binary format.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l08275">jurassic.c:8275</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a9b53106fcc10a9ec709a6be5ddab4a5c"><div class="ttname"><a href="jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c">read_atm</a></div><div class="ttdeci">void read_atm(const char *dirname, const char *filename, const ctl_t *ctl, atm_t *atm, int profile)</div><div class="ttdoc">Read atmospheric input data from a file.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05193">jurassic.c:5193</a></div></div>
@@ -570,43 +570,43 @@ Here is the call graph for this function:</div>
 
 <p>Calculate relative errors. </p>
 
-<p class="definition">Definition at line <a class="el" href="formod_8c_source.html#l00467">467</a> of file <a class="el" href="formod_8c_source.html">formod.c</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  474</span>                 {</div>
-<div class="line"><span class="lineno">  475</span> </div>
-<div class="line"><span class="lineno">  476</span>  <span class="comment">/* Loop over channels... */</span></div>
-<div class="line"><span class="lineno">  477</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++) {</div>
-<div class="line"><span class="lineno">  478</span> </div>
-<div class="line"><span class="lineno">  479</span>    <span class="keywordtype">double</span> sum = 0, sum2 = 0;</div>
-<div class="line"><span class="lineno">  480</span>    minre[id] = +1e9;</div>
-<div class="line"><span class="lineno">  481</span>    maxre[id] = -1e9;</div>
-<div class="line"><span class="lineno">  482</span>    <span class="keywordtype">int</span> n = 0;</div>
-<div class="line"><span class="lineno">  483</span> </div>
-<div class="line"><span class="lineno">  484</span>    <span class="comment">/* Loop over ray paths... */</span></div>
-<div class="line"><span class="lineno">  485</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ir = 0; ir &lt; obs_test-&gt;<a class="code hl_variable" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>; ir++) {</div>
-<div class="line"><span class="lineno">  486</span> </div>
-<div class="line"><span class="lineno">  487</span>      <span class="comment">/* Check for zero... */</span></div>
-<div class="line"><span class="lineno">  488</span>      <span class="keywordflow">if</span> (obs_ref-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[<span class="keywordtype">id</span>][ir] == 0)</div>
-<div class="line"><span class="lineno">  489</span>        <span class="keywordflow">continue</span>;</div>
+<p class="definition">Definition at line <a class="el" href="formod_8c_source.html#l00482">482</a> of file <a class="el" href="formod_8c_source.html">formod.c</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  489</span>                 {</div>
 <div class="line"><span class="lineno">  490</span> </div>
-<div class="line"><span class="lineno">  491</span>      <span class="comment">/* Calculate relative error... */</span></div>
-<div class="line"><span class="lineno">  492</span>      <span class="keywordtype">double</span> err = 100.0 * (obs_test-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][ir] - obs_ref-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][ir])</div>
-<div class="line"><span class="lineno">  493</span>        / obs_ref-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[<span class="keywordtype">id</span>][ir];</div>
-<div class="line"><span class="lineno">  494</span> </div>
-<div class="line"><span class="lineno">  495</span>      <span class="comment">/* Get statistics... */</span></div>
-<div class="line"><span class="lineno">  496</span>      sum += err;</div>
-<div class="line"><span class="lineno">  497</span>      sum2 += err * err;</div>
-<div class="line"><span class="lineno">  498</span>      if (err &gt; maxre[<span class="keywordtype">id</span>])</div>
-<div class="line"><span class="lineno">  499</span>        maxre[id] = err;</div>
-<div class="line"><span class="lineno">  500</span>      <span class="keywordflow">if</span> (err &lt; minre[<span class="keywordtype">id</span>])</div>
-<div class="line"><span class="lineno">  501</span>        minre[id] = err;</div>
-<div class="line"><span class="lineno">  502</span>      n++;</div>
-<div class="line"><span class="lineno">  503</span>    }</div>
-<div class="line"><span class="lineno">  504</span> </div>
-<div class="line"><span class="lineno">  505</span>    <span class="comment">/* Get mean and standard deviaton... */</span></div>
-<div class="line"><span class="lineno">  506</span>    mre[id] = sum / n;</div>
-<div class="line"><span class="lineno">  507</span>    sdre[id] = sqrt(sum2 / n - mre[<span class="keywordtype">id</span>] * mre[<span class="keywordtype">id</span>]);</div>
-<div class="line"><span class="lineno">  508</span>  }</div>
-<div class="line"><span class="lineno">  509</span>}</div>
+<div class="line"><span class="lineno">  491</span>  <span class="comment">/* Loop over channels... */</span></div>
+<div class="line"><span class="lineno">  492</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <span class="keywordtype">id</span> = 0; <span class="keywordtype">id</span> &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a8f5acb554ff044a1c3212c40fff9eec1">nd</a>; <span class="keywordtype">id</span>++) {</div>
+<div class="line"><span class="lineno">  493</span> </div>
+<div class="line"><span class="lineno">  494</span>    <span class="keywordtype">double</span> sum = 0, sum2 = 0;</div>
+<div class="line"><span class="lineno">  495</span>    minre[id] = +1e9;</div>
+<div class="line"><span class="lineno">  496</span>    maxre[id] = -1e9;</div>
+<div class="line"><span class="lineno">  497</span>    <span class="keywordtype">int</span> n = 0;</div>
+<div class="line"><span class="lineno">  498</span> </div>
+<div class="line"><span class="lineno">  499</span>    <span class="comment">/* Loop over ray paths... */</span></div>
+<div class="line"><span class="lineno">  500</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ir = 0; ir &lt; obs_test-&gt;<a class="code hl_variable" href="structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0">nr</a>; ir++) {</div>
+<div class="line"><span class="lineno">  501</span> </div>
+<div class="line"><span class="lineno">  502</span>      <span class="comment">/* Check for zero... */</span></div>
+<div class="line"><span class="lineno">  503</span>      <span class="keywordflow">if</span> (obs_ref-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[<span class="keywordtype">id</span>][ir] == 0)</div>
+<div class="line"><span class="lineno">  504</span>        <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  505</span> </div>
+<div class="line"><span class="lineno">  506</span>      <span class="comment">/* Calculate relative error... */</span></div>
+<div class="line"><span class="lineno">  507</span>      <span class="keywordtype">double</span> err = 100.0 * (obs_test-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][ir] - obs_ref-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[id][ir])</div>
+<div class="line"><span class="lineno">  508</span>        / obs_ref-&gt;<a class="code hl_variable" href="structobs__t.html#a3703f37920744c9d01cbc5c65b1dc7c3">rad</a>[<span class="keywordtype">id</span>][ir];</div>
+<div class="line"><span class="lineno">  509</span> </div>
+<div class="line"><span class="lineno">  510</span>      <span class="comment">/* Get statistics... */</span></div>
+<div class="line"><span class="lineno">  511</span>      sum += err;</div>
+<div class="line"><span class="lineno">  512</span>      sum2 += err * err;</div>
+<div class="line"><span class="lineno">  513</span>      if (err &gt; maxre[<span class="keywordtype">id</span>])</div>
+<div class="line"><span class="lineno">  514</span>        maxre[id] = err;</div>
+<div class="line"><span class="lineno">  515</span>      <span class="keywordflow">if</span> (err &lt; minre[<span class="keywordtype">id</span>])</div>
+<div class="line"><span class="lineno">  516</span>        minre[id] = err;</div>
+<div class="line"><span class="lineno">  517</span>      n++;</div>
+<div class="line"><span class="lineno">  518</span>    }</div>
+<div class="line"><span class="lineno">  519</span> </div>
+<div class="line"><span class="lineno">  520</span>    <span class="comment">/* Get mean and standard deviaton... */</span></div>
+<div class="line"><span class="lineno">  521</span>    mre[id] = sum / n;</div>
+<div class="line"><span class="lineno">  522</span>    sdre[id] = sqrt(sum2 / n - mre[<span class="keywordtype">id</span>] * mre[<span class="keywordtype">id</span>]);</div>
+<div class="line"><span class="lineno">  523</span>  }</div>
+<div class="line"><span class="lineno">  524</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -645,7 +645,7 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">  177</span>  printf(<span class="stringliteral">&quot;  &lt;atm&gt;  Atmospheric state input file.\n&quot;</span>);</div>
 <div class="line"><span class="lineno">  178</span>  printf(<span class="stringliteral">&quot;  &lt;rad&gt;  Output file for simulated radiances or transmittances.\n&quot;</span>);</div>
 <div class="line"><span class="lineno">  179</span>  printf(<span class="stringliteral">&quot;  [KEY VALUE]  Optional control parameters.\n\n&quot;</span>);</div>
-<div class="line"><span class="lineno">  180</span>  printf(<span class="stringliteral">&quot;Optional control overrides:\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  180</span>  printf(<span class="stringliteral">&quot;Tool-specific control parameters:\n&quot;</span>);</div>
 <div class="line"><span class="lineno">  181</span>  printf(<span class="stringliteral">&quot;  TASK &lt;name&gt;      Select the operation mode.\n&quot;</span>);</div>
 <div class="line"><span class="lineno">  182</span>  printf</div>
 <div class="line"><span class="lineno">  183</span>    (<span class="stringliteral">&quot;                   - or omitted: regular forward-model simulation.\n&quot;</span>);</div>
@@ -670,9 +670,24 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">  202</span>    (<span class="stringliteral">&quot;  OBSREF &lt;file&gt;    Read reference observations from &lt;file&gt; and print\n&quot;</span>);</div>
 <div class="line"><span class="lineno">  203</span>  printf</div>
 <div class="line"><span class="lineno">  204</span>    (<span class="stringliteral">&quot;                   relative-error diagnostics against the simulated output.\n&quot;</span>);</div>
-<div class="line"><span class="lineno">  205</span>  printf(<span class="stringliteral">&quot;\nFurther information:\n&quot;</span>);</div>
-<div class="line"><span class="lineno">  206</span>  printf(<span class="stringliteral">&quot;  Manual: https://slcs-jsc.github.io/jurassic/\n&quot;</span>);</div>
-<div class="line"><span class="lineno">  207</span>}</div>
+<div class="line"><span class="lineno">  205</span>  printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  206</span>  printf(<span class="stringliteral">&quot;Common control parameters:\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  207</span>  printf</div>
+<div class="line"><span class="lineno">  208</span>    (<span class="stringliteral">&quot;  TBLBASE, TBLFMT               Lookup-table base name and format.\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  209</span>  printf</div>
+<div class="line"><span class="lineno">  210</span>    (<span class="stringliteral">&quot;  ATMFMT, OBSFMT                Atmospheric and observation file formats.\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  211</span>  printf(<span class="stringliteral">&quot;  NG, EMITTER[i]                Active emitters.\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  212</span>  printf(<span class="stringliteral">&quot;  ND, NU[i], NW, WINDOW[i]      Spectral channels and windows.\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  213</span>  printf</div>
+<div class="line"><span class="lineno">  214</span>    (<span class="stringliteral">&quot;  NCL, CLNU[i], NSF, SFNU[i]    Cloud and surface spectral grids.\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  215</span>  printf</div>
+<div class="line"><span class="lineno">  216</span>    (<span class="stringliteral">&quot;  WRITE_BBT, FORMOD             Output units and forward-model selection.\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  217</span>  printf(<span class="stringliteral">&quot;  CTM_*, REFRAC                 Continua and refractivity.\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  218</span>  printf</div>
+<div class="line"><span class="lineno">  219</span>    (<span class="stringliteral">&quot;  RAYDS, RAYDZ, FOV             Ray tracing and field of view.\n\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  220</span>  printf(<span class="stringliteral">&quot;Further information:\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  221</span>  printf(<span class="stringliteral">&quot;  Manual: https://slcs-jsc.github.io/jurassic/\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  222</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -798,7 +813,7 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno">  157</span> </div>
 <div class="line"><span class="lineno">  158</span>  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
 <div class="line"><span class="lineno">  159</span>}</div>
-<div class="ttc" id="aformod_8c_html_a3a25f7ea65ab855217a098f3849c8800"><div class="ttname"><a href="formod_8c.html#a3a25f7ea65ab855217a098f3849c8800">call_formod</a></div><div class="ttdeci">void call_formod(ctl_t *ctl, const tbl_t *tbl, const char *wrkdir, const char *obsfile, const char *atmfile, const char *radfile, const char *task, const char *obsref)</div><div class="ttdoc">Perform forward model calculations in a single directory.</div><div class="ttdef"><b>Definition:</b> <a href="formod_8c_source.html#l00211">formod.c:211</a></div></div>
+<div class="ttc" id="aformod_8c_html_a3a25f7ea65ab855217a098f3849c8800"><div class="ttname"><a href="formod_8c.html#a3a25f7ea65ab855217a098f3849c8800">call_formod</a></div><div class="ttdeci">void call_formod(ctl_t *ctl, const tbl_t *tbl, const char *wrkdir, const char *obsfile, const char *atmfile, const char *radfile, const char *task, const char *obsref)</div><div class="ttdoc">Perform forward model calculations in a single directory.</div><div class="ttdef"><b>Definition:</b> <a href="formod_8c_source.html#l00226">formod.c:226</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a2f19c5549e06e2c15446e464007a7a0b"><div class="ttname"><a href="jurassic_8c.html#a2f19c5549e06e2c15446e464007a7a0b">tbl_free</a></div><div class="ttdeci">void tbl_free(const ctl_t *ctl, tbl_t *tbl)</div><div class="ttdoc">Free lookup table and all internally allocated memory.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l07002">jurassic.c:7002</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read model control parameters from command-line and configuration input.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05516">jurassic.c:5516</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_abb6ce9b0361afe11cb23b8ac1e0c7fa3"><div class="ttname"><a href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a></div><div class="ttdeci">double scan_ctl(int argc, char *argv[], const char *varname, const int arridx, const char *defvalue, char *value)</div><div class="ttdoc">Scan control file or command-line arguments for a configuration variable.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l06612">jurassic.c:6612</a></div></div>

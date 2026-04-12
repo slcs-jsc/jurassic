@@ -456,16 +456,30 @@ $(function() {
 <div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>  printf(<span class="stringliteral">&quot;  &lt;atm&gt;     Output atmospheric profile file.\n&quot;</span>);</div>
 <div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>  printf(<span class="stringliteral">&quot;  &lt;kernel&gt;  Output kernel file.\n&quot;</span>);</div>
 <div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>  printf(<span class="stringliteral">&quot;  [KEY VALUE]  Optional control parameters.\n\n&quot;</span>);</div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>  printf(<span class="stringliteral">&quot;Common control overrides:\n&quot;</span>);</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>  printf(<span class="stringliteral">&quot;Tool-specific control parameters:\n&quot;</span>);</div>
 <div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>  printf(<span class="stringliteral">&quot;  INVERT_DT        Time bin size.\n&quot;</span>);</div>
 <div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>  printf(<span class="stringliteral">&quot;  INVERT_OBS_ERR   Observation error.\n&quot;</span>);</div>
 <div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>  printf(<span class="stringliteral">&quot;  INVERT_DATA      Data reduction mode.\n&quot;</span>);</div>
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>  printf(<span class="stringliteral">&quot;  INVERT_FIT       Fit mode.\n&quot;</span>);</div>
 <div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>  printf(<span class="stringliteral">&quot;  INVERT_ITMAX     Maximum number of iterations.\n&quot;</span>);</div>
 <div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>  printf(<span class="stringliteral">&quot;  INVERT_TOL       Iteration tolerance.\n\n&quot;</span>);</div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>  printf(<span class="stringliteral">&quot;Further information:\n&quot;</span>);</div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>  printf(<span class="stringliteral">&quot;  Manual: https://slcs-jsc.github.io/jurassic/\n&quot;</span>);</div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>}</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>  printf(<span class="stringliteral">&quot;Common control parameters:\n&quot;</span>);</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>  printf</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    (<span class="stringliteral">&quot;  TBLBASE, TBLFMT               Lookup-table base name and format.\n&quot;</span>);</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>  printf(<span class="stringliteral">&quot;  ATMFMT, OBSFMT, MATRIXFMT     Input/output file formats.\n&quot;</span>);</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>  printf(<span class="stringliteral">&quot;  NG, EMITTER[i]                Active emitters.\n&quot;</span>);</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>  printf(<span class="stringliteral">&quot;  ND, NU[i], NW, WINDOW[i]      Spectral channels and windows.\n&quot;</span>);</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>  printf</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>    (<span class="stringliteral">&quot;  NCL, CLNU[i], NSF, SFNU[i]    Cloud and surface spectral grids.\n&quot;</span>);</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>  printf(<span class="stringliteral">&quot;  RET*_ZMIN, RET*_ZMAX          State-vector altitude limits.\n&quot;</span>);</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>  printf</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>    (<span class="stringliteral">&quot;  WRITE_BBT, FORMOD             Output units and forward-model selection.\n&quot;</span>);</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>  printf(<span class="stringliteral">&quot;  CTM_*, REFRAC                 Continua and refractivity.\n&quot;</span>);</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>  printf</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>    (<span class="stringliteral">&quot;  RAYDS, RAYDZ, FOV             Ray tracing and field of view.\n\n&quot;</span>);</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>  printf(<span class="stringliteral">&quot;Further information:\n&quot;</span>);</div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>  printf(<span class="stringliteral">&quot;  Manual: https://slcs-jsc.github.io/jurassic/\n&quot;</span>);</div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>}</div>
 <div class="ttc" id="aformod_8c_html_ad96d407a911fbb914fa8e4cfbf2faf0f"><div class="ttname"><a href="formod_8c.html#ad96d407a911fbb914fa8e4cfbf2faf0f">usage</a></div><div class="ttdeci">void usage(void)</div><div class="ttdoc">Print command-line help.</div><div class="ttdef"><b>Definition:</b> <a href="formod_8c_source.html#l00163">formod.c:163</a></div></div>
 <div class="ttc" id="ainvert_8c_html_a0ddf1224851353fc92bfbff6f499fa97"><div class="ttname"><a href="invert_8c.html#a0ddf1224851353fc92bfbff6f499fa97">main</a></div><div class="ttdeci">int main(int argc, char *argv[])</div><div class="ttdef"><b>Definition:</b> <a href="invert_8c_source.html#l00050">invert.c:50</a></div></div>
 <div class="ttc" id="ainvert_8c_html_a5de5d183f9a6a8d53316f743e1ca6dc2"><div class="ttname"><a href="invert_8c.html#a5de5d183f9a6a8d53316f743e1ca6dc2">NMAX</a></div><div class="ttdeci">#define NMAX</div><div class="ttdoc">Maximum number of data points...</div><div class="ttdef"><b>Definition:</b> <a href="invert_8c_source.html#l00036">invert.c:36</a></div></div>
