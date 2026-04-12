@@ -385,13 +385,27 @@ static void usage(
   printf("  <atm>     Output atmospheric profile file.\n");
   printf("  <kernel>  Output kernel file.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
-  printf("Common control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  INVERT_DT        Time bin size.\n");
   printf("  INVERT_OBS_ERR   Observation error.\n");
   printf("  INVERT_DATA      Data reduction mode.\n");
   printf("  INVERT_FIT       Fit mode.\n");
   printf("  INVERT_ITMAX     Maximum number of iterations.\n");
   printf("  INVERT_TOL       Iteration tolerance.\n\n");
+  printf("Common control parameters:\n");
+  printf
+    ("  TBLBASE, TBLFMT               Lookup-table base name and format.\n");
+  printf("  ATMFMT, OBSFMT, MATRIXFMT     Input/output file formats.\n");
+  printf("  NG, EMITTER[i]                Active emitters.\n");
+  printf("  ND, NU[i], NW, WINDOW[i]      Spectral channels and windows.\n");
+  printf
+    ("  NCL, CLNU[i], NSF, SFNU[i]    Cloud and surface spectral grids.\n");
+  printf("  RET*_ZMIN, RET*_ZMAX          State-vector altitude limits.\n");
+  printf
+    ("  WRITE_BBT, FORMOD             Output units and forward-model selection.\n");
+  printf("  CTM_*, REFRAC                 Continua and refractivity.\n");
+  printf
+    ("  RAYDS, RAYDZ, FOV             Ray tracing and field of view.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

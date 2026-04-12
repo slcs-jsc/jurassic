@@ -89,6 +89,12 @@ static void usage(
   printf("Notes:\n");
   printf("  HYDZ must be set to a non-negative reference height.\n");
   printf("\n");
+  printf("Common control parameters:\n");
+  printf("  ATMFMT                 Atmospheric file format.\n");
+  printf("  NG, EMITTER[i]         Active emitters.\n");
+  printf("  NW, WINDOW[i]          Extinction-window layout.\n");
+  printf("  NCL, CLNU[i]           Cloud spectral grid.\n");
+  printf("  NSF, SFNU[i]           Surface spectral grid.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

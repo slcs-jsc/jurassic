@@ -138,7 +138,7 @@ static void usage(
   printf("  <ctl>     Control file.\n");
   printf("  <filter>  Output filter-function file.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
-  printf("Common control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  FILTER_TYPE    Filter shape identifier.\n");
   printf
     ("  FILTER_OPD     Optical path difference for sinc-based filters.\n");

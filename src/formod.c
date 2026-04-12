@@ -177,7 +177,7 @@ void usage(
   printf("  <atm>  Atmospheric state input file.\n");
   printf("  <rad>  Output file for simulated radiances or transmittances.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
-  printf("Optional control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  TASK <name>      Select the operation mode.\n");
   printf
     ("                   - or omitted: regular forward-model simulation.\n");
@@ -202,7 +202,22 @@ void usage(
     ("  OBSREF <file>    Read reference observations from <file> and print\n");
   printf
     ("                   relative-error diagnostics against the simulated output.\n");
-  printf("\nFurther information:\n");
+  printf("\n");
+  printf("Common control parameters:\n");
+  printf
+    ("  TBLBASE, TBLFMT               Lookup-table base name and format.\n");
+  printf
+    ("  ATMFMT, OBSFMT                Atmospheric and observation file formats.\n");
+  printf("  NG, EMITTER[i]                Active emitters.\n");
+  printf("  ND, NU[i], NW, WINDOW[i]      Spectral channels and windows.\n");
+  printf
+    ("  NCL, CLNU[i], NSF, SFNU[i]    Cloud and surface spectral grids.\n");
+  printf
+    ("  WRITE_BBT, FORMOD             Output units and forward-model selection.\n");
+  printf("  CTM_*, REFRAC                 Continua and refractivity.\n");
+  printf
+    ("  RAYDS, RAYDZ, FOV             Ray tracing and field of view.\n\n");
+  printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }
 

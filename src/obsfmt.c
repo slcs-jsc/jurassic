@@ -78,8 +78,8 @@ static void usage(
   printf("\nJURASSIC observation-format converter.\n\n");
   printf("Convert observation files between supported OBSFMT formats.\n\n");
   printf("Usage:\n");
-  printf
-    ("  obsfmt <ctl> <obs_in> <obsfmt_in> <obs_out> <obsfmt_out> [KEY VALUE ...]\n\n");
+  printf("  obsfmt <ctl> <obs_in> <obsfmt_in> <obs_out> <obsfmt_out>\n");
+  printf("         [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>         Control file.\n");
   printf("  <obs_in>      Input observation data file.\n");
@@ -87,9 +87,13 @@ static void usage(
   printf("  <obs_out>     Output observation data file.\n");
   printf("  <obsfmt_out>  Output observation file format identifier.\n");
   printf("  [KEY VALUE]   Optional control parameters.\n\n");
-  printf("Optional control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  PROF_IN <n>   Read profile index <n> from the input file.\n");
   printf("  PROF_OUT <n>  Write output as profile index <n>.\n\n");
+  printf("Common control parameters:\n");
+  printf
+    ("  ND, NU[i]              Spectral channels in observation files.\n");
+  printf("  WRITE_BBT              Brightness-temperature output flag.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

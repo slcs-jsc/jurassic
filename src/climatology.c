@@ -140,12 +140,18 @@ static void usage(
   printf("  <ctl>  Control file.\n");
   printf("  <atm>  Output atmospheric data file.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
-  printf("Common control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  T0, T1, DT      Time range and spacing.\n");
   printf("  Z0, Z1, DZ      Altitude range and spacing.\n");
   printf("  ZSURF           Refine the near-surface grid if set.\n");
   printf("  CLZ, CLDZ, CLK  Cloud-layer settings.\n");
   printf("  SFT, SFEPS      Surface temperature and emissivity.\n\n");
+  printf("Common control parameters:\n");
+  printf("  ATMFMT                 Output atmospheric file format.\n");
+  printf("  NG, EMITTER[i]         Active emitters.\n");
+  printf("  NW, WINDOW[i]          Extinction-window layout.\n");
+  printf("  NCL, CLNU[i]           Cloud spectral grid.\n");
+  printf("  NSF, SFNU[i]           Surface spectral grid.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

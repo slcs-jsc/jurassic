@@ -79,8 +79,8 @@ static void usage(
   printf
     ("Convert atmospheric input files between supported ATMFMT formats.\n\n");
   printf("Usage:\n");
-  printf
-    ("  atmfmt <ctl> <atm_in> <atmfmt_in> <atm_out> <atmfmt_out> [KEY VALUE ...]\n\n");
+  printf("  atmfmt <ctl> <atm_in> <atmfmt_in> <atm_out> <atmfmt_out>\n");
+  printf("         [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>         Control file.\n");
   printf("  <atm_in>      Input atmospheric data file.\n");
@@ -88,9 +88,14 @@ static void usage(
   printf("  <atm_out>     Output atmospheric data file.\n");
   printf("  <atmfmt_out>  Output atmospheric file format identifier.\n");
   printf("  [KEY VALUE]   Optional control parameters.\n\n");
-  printf("Optional control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  PROF_IN <n>   Read profile index <n> from the input file.\n");
   printf("  PROF_OUT <n>  Write output as profile index <n>.\n\n");
+  printf("Common control parameters:\n");
+  printf("  NG, EMITTER[i]         Active emitters in atmospheric files.\n");
+  printf("  NW, WINDOW[i]          Extinction-window layout.\n");
+  printf("  NCL, CLNU[i]           Cloud spectral grid.\n");
+  printf("  NSF, SFNU[i]           Surface spectral grid.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

@@ -90,10 +90,15 @@ static void usage(
   printf("  <ctl>  Control file.\n");
   printf("  <obs>  Output observation geometry file.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
-  printf("Common control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  OBSZ           Observer altitude [km].\n");
   printf("  T0, T1, DT     Time range and spacing.\n");
-  printf("  LAT0, LAT1, DLAT  Latitude range and spacing.\n\n");
+  printf("  LAT0, LAT1     Latitude range.\n");
+  printf("  DLAT           Latitude spacing.\n\n");
+  printf("Common control parameters:\n");
+  printf("  OBSFMT                 Output observation file format.\n");
+  printf
+    ("  ND, NU[i]              Spectral channels in observation files.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

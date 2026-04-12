@@ -184,8 +184,15 @@ static void usage(
   printf("  <atm>           Atmospheric state input file.\n");
   printf("  <raytrace.tab>  Output summary table for traced rays.\n");
   printf("  [KEY VALUE]     Optional control parameters.\n\n");
-  printf("Optional control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  LOSBASE <name>  Basename for per-ray LOS output files.\n\n");
+  printf("Common control parameters:\n");
+  printf("  ATMFMT, OBSFMT         Input file formats.\n");
+  printf("  NG, EMITTER[i]         Active emitters.\n");
+  printf
+    ("  ND, NU[i]              Spectral channels in observation files.\n");
+  printf("  NW, WINDOW[i]          Extinction-window layout.\n");
+  printf("  REFRAC, RAYDS, RAYDZ   Ray-tracing settings.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

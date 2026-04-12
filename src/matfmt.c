@@ -120,8 +120,10 @@ static void usage(
   printf("Convert matrix files between supported MATRIXFMT formats and\n");
   printf("annotate them using atmospheric or observation metadata.\n\n");
   printf("Usage:\n");
+  printf("  matfmt <ctl> <atm> <obs> <rowspace> <colspace> <sort>\n");
   printf
-    ("  matfmt <ctl> <atm> <obs> <rowspace> <colspace> <sort> <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out> [KEY VALUE ...]\n\n");
+    ("         <matrix_in> <matrixfmt_in> <matrix_out> <matrixfmt_out>\n");
+  printf("         [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>           Control file.\n");
   printf("  <atm>           Atmospheric data file.\n");
@@ -134,9 +136,17 @@ static void usage(
   printf("  <matrix_out>    Output matrix file.\n");
   printf("  <matrixfmt_out> Output matrix format identifier.\n");
   printf("  [KEY VALUE]     Optional control parameters.\n\n");
-  printf("Optional control overrides:\n");
+  printf("Tool-specific control parameters:\n");
   printf("  PROF_IN <n>     Read profile index <n> from the input file.\n");
   printf("  PROF_OUT <n>    Write output as profile index <n>.\n\n");
+  printf("Common control parameters:\n");
+  printf
+    ("  ATMFMT, OBSFMT                Atmospheric and observation file formats.\n");
+  printf("  NG, EMITTER[i]                Active emitters.\n");
+  printf("  ND, NU[i], NW, WINDOW[i]      Spectral channels and windows.\n");
+  printf
+    ("  NCL, CLNU[i], NSF, SFNU[i]    Cloud and surface spectral grids.\n");
+  printf("  RET*_ZMIN, RET*_ZMAX          State-vector altitude limits.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

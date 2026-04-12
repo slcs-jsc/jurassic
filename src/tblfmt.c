@@ -78,7 +78,8 @@ static void usage(
   printf("Convert look-up tables between supported TBLFMT formats.\n\n");
   printf("Usage:\n");
   printf
-    ("  tblfmt <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out> [KEY VALUE ...]\n\n");
+    ("  tblfmt <ctl> <tblbase_in> <tblfmt_in> <tblbase_out> <tblfmt_out>\n");
+  printf("         [KEY VALUE ...]\n\n");
   printf("Arguments:\n");
   printf("  <ctl>         Control file.\n");
   printf("  <tblbase_in>  Input table base name.\n");
@@ -86,6 +87,9 @@ static void usage(
   printf("  <tblbase_out> Output table base name.\n");
   printf("  <tblfmt_out>  Output table format identifier.\n");
   printf("  [KEY VALUE]   Optional control parameters.\n\n");
+  printf("Common control parameters:\n");
+  printf("  NG, EMITTER[i]         Active emitters.\n");
+  printf("  ND, NU[i]              Spectral channels.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

@@ -201,13 +201,28 @@ void usage(
   printf("             Use '-' together with shared I/O settings such as\n");
   printf("             SHARED_IO_PROFLIST for shared-file workflows.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
-  printf("Optional control overrides:\n");
-  printf("  SHARED_IO_PROFLIST <file>\n");
+  printf("Tool-specific control parameters:\n");
+  printf("  KERNEL_RECOMP      Kernel recomputation mode.\n");
+  printf("  CONV_*             Convergence settings.\n");
+  printf("  ERR_*              Retrieval error and covariance settings.\n");
   printf
-    ("             Read profile indices from <file> for shared-file retrievals.\n");
-  printf("  SHARED_IO_* <file>\n");
+    ("  SHARED_IO_PROFLIST Profile-index file for shared-file retrievals.\n");
+  printf("  SHARED_IO_*        Shared input and output filenames.\n");
+  printf("\n");
+  printf("Common control parameters:\n");
   printf
-    ("             Override shared input or output filenames on the command line.\n");
-  printf("\nFurther information:\n");
+    ("  TBLBASE, TBLFMT               Lookup-table base name and format.\n");
+  printf("  ATMFMT, OBSFMT, MATRIXFMT     Input/output file formats.\n");
+  printf("  NG, EMITTER[i]                Active emitters.\n");
+  printf("  ND, NU[i], NW, WINDOW[i]      Spectral channels and windows.\n");
+  printf
+    ("  NCL, CLNU[i], NSF, SFNU[i]    Cloud and surface spectral grids.\n");
+  printf("  RET*_ZMIN, RET*_ZMAX          State-vector altitude limits.\n");
+  printf
+    ("  WRITE_BBT, FORMOD             Output units and forward-model selection.\n");
+  printf("  CTM_*, REFRAC                 Continua and refractivity.\n");
+  printf
+    ("  RAYDS, RAYDZ, FOV             Ray tracing and field of view.\n\n");
+  printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }

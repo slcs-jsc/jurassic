@@ -122,6 +122,12 @@ static void usage(
   printf("  <obs>       Observation input file.\n");
   printf("  <spec.tab>  Output spectrum table.\n");
   printf("  [KEY VALUE]  Optional control parameters.\n\n");
+  printf("Common control parameters:\n");
+  printf
+    ("  OBSFMT                 Observation file format from the control file.\n");
+  printf
+    ("  ND, NU[i]              Spectral channels in observation files.\n");
+  printf("  WRITE_BBT              Brightness-temperature output flag.\n\n");
   printf("Further information:\n");
   printf("  Manual: https://slcs-jsc.github.io/jurassic/\n");
 }
