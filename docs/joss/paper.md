@@ -26,7 +26,7 @@ authors:
     orcid: 0000-0002-6699-9473
   - name: Catrin Meyer
     affiliation: 1
-    orcid: tbd
+    orcid: 0000-0002-9271-6174
 
 affiliations:
   - name: Jülich Supercomputing Centre, Forschungszentrum Jülich, Jülich, Germany
