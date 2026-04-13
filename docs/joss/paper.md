@@ -15,13 +15,19 @@ authors:
   - name: Sabine Griessbach
     affiliation: 1
     orcid: 0000-0003-3792-3573
+  - name: Paul F. Baumeister
+    affiliation: 1
+    orcid: 0000-0002-2005-4474
+  - name: Stjepan Pozgaj
+    affiliation: 2
+    orcid: 0000-0002-2005-4474
   - name: Yiran Zhang
     affiliation: 1
     orcid: 0009-0009-9539-9598
   - name: Florian Rahlmann
-    affiliation: 2
+    affiliation: 3
     orcid: 0009-0006-4785-6406
-  - name: Amir Nikfal
+  - name: Amirhossein Nikfal
     affiliation: 1
     orcid: 0000-0002-6699-9473
   - name: Catrin Meyer
@@ -31,8 +37,10 @@ authors:
 affiliations:
   - name: Jülich Supercomputing Centre, Forschungszentrum Jülich, Jülich, Germany
     index: 1
-  - name: Technische Universität Hamburg, Hamburg, Germany
+  - name: tbd
     index: 2
+  - name: Technische Universität Hamburg, Hamburg, Germany
+    index: 3
 
 date: 2026-01-07
 
@@ -59,15 +67,13 @@ In addition to forward modelling, JURASSIC includes an optimal estimation retrie
 
 # Software design
 
-JURASSIC is implemented in modular components for ray tracing, spectroscopy, radiative transfer, and retrieval. This modular design supports code reuse across applications, simplifies maintenance, and makes it easier to adapt individual components to specific research needs.
+JURASSIC is implemented in modular components for ray tracing, spectroscopy, radiative transfer, and retrieval. This modular design supports code reuse across applications, simplifies maintenance, and makes it easier to adapt individual components to specific research needs. The software is written in C and supports OpenMP acceleration together with optional MPI-based task distribution for retrieval workflows, enabling efficient use of multicore systems and distributed execution of independent retrieval cases. JURASSIC supports NetCDF-based input and output for atmospheric data, observation data, and lookup tables, improving interoperability with common scientific data workflows.
 
-The core version of JURASSIC described here is designed around a central trade-off between spectroscopic fidelity and computational efficiency. Instead of performing line-by-line calculations at runtime, it uses precomputed emissivity lookup tables derived from detailed line-by-line radiative transfer calculations. During runtime, these tables are accessed through fast interpolation, allowing band-averaged emissivities to be evaluated efficiently.
+The radiative transfer formulation in the core version of JURASSIC described here assumes a vertically stratified atmosphere and curved ray paths that account for atmospheric refraction. The software supports limb, nadir, zenith, and occultation viewing geometries for sensors located inside or outside the atmosphere, corresponding to tangent-path, downward-looking, upward-looking, and transmission-style observation configurations, respectively.
 
-The radiative transfer formulation assumes a vertically stratified atmosphere and curved ray paths that account for atmospheric refraction. The software supports limb, nadir, zenith, and occultation viewing geometries for sensors located inside or outside the atmosphere. To approximate infrared absorption and emission efficiently, JURASSIC uses the Emissivity Growth Approximation and the Curtis--Godson Approximation [@Godson1953; @Gordley1981; @Marshall1994]. These methods provide a practical balance between accuracy and speed across a broad range of atmospheric conditions relevant to infrared remote sensing.
+To approximate infrared absorption and emission efficiently, JURASSIC uses the Emissivity Growth Approximation and the Curtis--Godson Approximation [@Godson1953; @Gordley1981; @Marshall1994]. In this framework, spectroscopic information is represented by precomputed emissivity lookup tables derived from detailed line-by-line radiative transfer calculations. During runtime, these tables are accessed through fast interpolation, allowing band-averaged emissivities to be evaluated efficiently. Together, these methods provide a practical balance between accuracy and speed across a broad range of atmospheric conditions relevant to infrared remote sensing.
 
 In addition to forward modelling, JURASSIC includes an optimal estimation framework for retrieving atmospheric quantities such as temperature and trace-gas volume mixing ratios directly from radiance measurements [@Rodgers2000]. Integrating retrieval capabilities with the forward model reduces duplication of model interfaces, supports reproducible inversion workflows, and facilitates sensitivity studies of forward-model assumptions within retrieval applications.
-
-The software is written in C and supports OpenMP acceleration together with optional MPI-based task distribution for retrieval workflows. This design enables efficient use of multicore systems and distributed execution of independent retrieval cases, which is important for large observational datasets, long time series, and computationally demanding retrieval applications.
 
 The version of JURASSIC described in this paper is intentionally focused on infrared remote sensing applications in which local thermodynamic equilibrium is an adequate assumption and clear-air radiative transfer is the dominant use case. Under these conditions, molecular populations are determined by local temperature and emission is governed by the Planck function. The core workflow also supports simplified treatments of cloud and aerosol effects, including grey-body and extinction-based parameterizations.
 
