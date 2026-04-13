@@ -17,6 +17,7 @@ authors:
     orcid: 0000-0003-3792-3573
   - name: Yiran Zhang
     affiliation: 1
+    orcid: 0009-0009-9539-9598
   - name: Florian Rahlmann
     affiliation: 2
     orcid: 0009-0006-4785-6406
