@@ -49,7 +49,8 @@ observation geometries, including:
 ![Sketch of limb, nadir, and zenith observation geometries](img/geometries.svg)
 
 *Basic limb, nadir, and zenith viewing geometries used in atmospheric
-remote sensing.*
+remote sensing. Arrows indicate the viewing direction; thermal radiance
+propagates in the opposite direction toward the instrument.*
 
 Radiative transfer calculations are based on fast spectral
 approximations, most notably the Emissivity Growth Approximation (EGA)
