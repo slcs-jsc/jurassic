@@ -6,8 +6,8 @@ the principles of **optimal estimation** and provides a consistent
 approach to deriving atmospheric state variables from infrared radiance
 measurements.
 
-The implementation closely follows the formalism described by Rodgers
-[(2000)](https://doi.org/10.1142/9789812813718) and is fully integrated
+The implementation closely follows the formalism described by
+[Rodgers (2000)](https://doi.org/10.1142/9789812813718) and is fully integrated
 with the JURASSIC forward radiative transfer model.
 
 ---
@@ -206,28 +206,6 @@ lead to biased or unstable retrievals.
 
 ---
 
-## Further reading
-
-The optimal-estimation formalism used here is described in detail by
-Rodgers [(2000)](https://doi.org/10.1142/9789812813718). Earlier and
-complementary treatments that are useful for retrieval interpretation
-include:
-
-- Rodgers
-  [(1976)](https://doi.org/10.1029/RG014i004p00609), which reviews the
-  retrieval of atmospheric temperature and composition from thermal
-  radiation measurements.
-- Rodgers
-  [(1990)](https://doi.org/10.1029/JD095iD05p05587), which discusses
-  profile characterization, smoothing, averaging kernels, and retrieval
-  error analysis.
-- Maahn et al.
-  [(2020)](https://doi.org/10.1175/BAMS-D-19-0027.1), which provides a
-  modern overview of optimal-estimation retrievals and uncertainty
-  interpretation for atmospheric applications.
-
----
-
 ## Summary
 
 JURASSIC implements a physically consistent and well-established
@@ -237,6 +215,25 @@ finite-difference Jacobians and shared numerical infrastructure ensures
 stable and efficient retrieval calculations.
 
 For a detailed theoretical treatment of optimal estimation, users are
-referred to Rodgers
-[(2000)](https://doi.org/10.1142/9789812813718). JURASSIC-specific
+referred to
+[Rodgers (2000)](https://doi.org/10.1142/9789812813718). JURASSIC-specific
 publications are listed in the [References](references.md) section.
+
+---
+
+## Further reading
+
+The optimal-estimation formalism used here is described in detail by
+[Rodgers (2000)](https://doi.org/10.1142/9789812813718). Earlier and
+complementary treatments that are useful for retrieval interpretation
+include:
+
+- [Rodgers (1976)](https://doi.org/10.1029/RG014i004p00609), which reviews the
+  retrieval of atmospheric temperature and composition from thermal
+  radiation measurements.
+- [Rodgers (1990)](https://doi.org/10.1029/JD095iD05p05587), which discusses
+  profile characterization, smoothing, averaging kernels, and retrieval
+  error analysis.
+- [Maahn et al. (2020)](https://doi.org/10.1175/BAMS-D-19-0027.1), which
+  provides a modern overview of optimal-estimation retrievals and uncertainty
+  interpretation for atmospheric applications.

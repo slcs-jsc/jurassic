@@ -118,6 +118,13 @@ faster calculations.
 The validity of the radiative transfer results depends on the coverage
 and resolution of the lookup tables.
 
+![Spectral mean emissivity curves used in lookup-table calculations](img/emissivity.png)
+
+*Spectral mean emissivity curves for carbon dioxide at 669 cm^-1,
+illustrating the lookup-table representation used by JURASSIC. Source:
+Baumeister and Hoffmann
+[(2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 2.*
+
 ---
 
 ## Emissivity Growth Approximation (EGA)
@@ -125,8 +132,8 @@ and resolution of the lookup tables.
 The **Emissivity Growth Approximation (EGA)** is a key component of
 JURASSIC and is used to compute the effective emissivity of an
 inhomogeneous atmospheric path. The method follows the EGA approach
-described by Gordley and Russell
-[(1981)](https://doi.org/10.1364/AO.20.000807).
+described by
+[Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807).
 
 Instead of treating each atmospheric segment independently, EGA
 accounts for the cumulative growth of emissivity along the ray path:
@@ -141,6 +148,13 @@ inhomogeneous atmosphere using lookup tables derived for homogeneous
 layers. The EGA method substantially reduces errors associated with
 simple band transmittance approaches and has been shown to provide good
 accuracy for a wide range of infrared remote sensing applications.
+
+![Illustration of the Emissivity Growth Approximation method](img/ega.png)
+
+*Illustration of the Emissivity Growth Approximation. The accumulated
+emissivity is mapped to a pseudo-column amount on the emissivity curve
+of the next path segment. Source: Baumeister and Hoffmann
+[(2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 3.*
 
 ---
 
@@ -158,6 +172,13 @@ ensures numerical stability and efficiency.
 The integration scheme is designed to be compatible with both forward
 modelling and the calculation of derivatives required for retrieval
 applications.
+
+![Integration of radiance along a ray path](img/raypath.png)
+
+*Radiance integration along a ray path. Emission contributions from
+individual path segments are partly absorbed by the overlying atmosphere
+before reaching the observer. Source: Baumeister and Hoffmann
+[(2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 1.*
 
 ---
 
