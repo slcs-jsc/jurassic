@@ -46,6 +46,11 @@ observation geometries, including:
 - zenith viewing
 - occultation geometry
 
+![Sketch of limb, nadir, and zenith observation geometries](img/geometries.svg)
+
+*Basic limb, nadir, and zenith viewing geometries used in atmospheric
+remote sensing.*
+
 Radiative transfer calculations are based on fast spectral
 approximations, most notably the Emissivity Growth Approximation (EGA)
 and the Curtis–Godson Approximation (CGA). These methods enable accurate

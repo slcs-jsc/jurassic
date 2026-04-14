@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" role="img" aria-labelledby="title desc">
+  <title id="title">Observation geometries supported by JURASSIC</title>
+  <desc id="desc">Simple sketches of limb, nadir, and zenith viewing geometries.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f77b4"/>
+    </marker>
+    <style>
+      text {
+        font-family: Arial, Helvetica, sans-serif;
+        fill: #1f2933;
+      }
+      .panel-title {
+        font-size: 24px;
+        font-weight: 700;
+      }
+      .label {
+        font-size: 16px;
+      }
+      .earth {
+        fill: #d8ecff;
+        stroke: #4f8fba;
+        stroke-width: 3;
+      }
+      .atm {
+        fill: none;
+        stroke: #91c8ef;
+        stroke-width: 2;
+        stroke-dasharray: 7 6;
+      }
+      .ray {
+        fill: none;
+        stroke: #1f77b4;
+        stroke-width: 4;
+        marker-end: url(#arrow);
+      }
+      .instrument {
+        fill: #2f3b46;
+      }
+    </style>
+  </defs>
+
+  <rect width="900" height="430" fill="#ffffff"/>
+
+  <g transform="translate(0,0)">
+    <text class="panel-title" x="150" y="30" text-anchor="middle">Limb</text>
+    <circle class="atm" cx="150" cy="250" r="134"/>
+    <circle class="earth" cx="150" cy="250" r="92"/>
+    <rect class="instrument" x="240" y="138" width="28" height="18" rx="3"/>
+    <path class="ray" d="M 258 147 L 42 147"/>
+    <text class="label" x="247" y="131">instrument</text>
+    <text class="label" x="150" y="418" text-anchor="middle">tangent path through the limb</text>
+  </g>
+
+  <g transform="translate(300,0)">
+    <text class="panel-title" x="150" y="30" text-anchor="middle">Nadir</text>
+    <circle class="atm" cx="150" cy="250" r="134"/>
+    <circle class="earth" cx="150" cy="250" r="92"/>
+    <rect class="instrument" x="136" y="68" width="28" height="18" rx="3"/>
+    <path class="ray" d="M 150 86 L 150 154"/>
+    <text class="label" x="150" y="61" text-anchor="middle">instrument</text>
+    <text class="label" x="150" y="418" text-anchor="middle">downward view toward Earth</text>
+  </g>
+
+  <g transform="translate(600,0)">
+    <text class="panel-title" x="150" y="30" text-anchor="middle">Zenith</text>
+    <circle class="atm" cx="150" cy="250" r="134"/>
+    <circle class="earth" cx="150" cy="250" r="92"/>
+    <rect class="instrument" x="136" y="158" width="28" height="18" rx="3"/>
+    <path class="ray" d="M 150 158 L 150 90"/>
+    <text class="label" x="150" y="199" text-anchor="middle">instrument</text>
+    <text class="label" x="150" y="418" text-anchor="middle">upward view from below</text>
+  </g>
+</svg>
