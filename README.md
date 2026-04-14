@@ -24,23 +24,9 @@ remote sensing measurements.
 
 The Jülich Rapid Spectral Simulation Code (JURASSIC) is a radiative
 transfer model for simulating infrared radiation in the Earth's
-atmosphere. It is designed to provide a balance between computational
-efficiency and physical accuracy, making it suitable for a wide range
-of applications in atmospheric and remote sensing research.
-
-JURASSIC applies established spectral approximations together with
-precomputed lookup tables derived from detailed line-by-line
-calculations to represent gaseous absorption, emission, and
-transmission. This approach enables reliable simulations across large
-datasets or ensembles without the runtime demands of full line-by-line
-models.
-
-Typical use cases include satellite radiance simulations, sensitivity
-studies, retrieval algorithm development, and the analysis of
-atmospheric composition. With its modular design and support for
-high-performance computing environments, JURASSIC offers a practical
-tool for studying radiative processes in the middle and upper
-atmosphere.
+atmosphere. It combines radiative transfer approximations,
+spectroscopic lookup tables, and retrieval tools for atmospheric remote
+sensing applications.
 
 ## Statement of need
 
