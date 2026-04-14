@@ -1680,14 +1680,19 @@ Each non-empty line is interpreted as:</p>
 <p>Many parameters are arrays (e.g. <code>NU[0]</code>, <code>EMITTER[1]</code>). The parser supports:</p>
 <ul>
 <li><code>KEY[i] = VALUE</code> for a specific index <code>i</code></li>
-<li><code>KEY[*] = VALUE</code> as a <strong>default for all indices</strong> (can be overridden by specific indices)</li>
+<li><code>KEY[*] = VALUE</code> as a <strong>default for all indices</strong></li>
 </ul>
+<p>When reading a control file, JURASSIC uses the first matching entry it
+finds. If you want to combine a wildcard default with index-specific
+values, put the index-specific entries before the wildcard entry.
+Command-line overrides are evaluated after the control file and can
+therefore override both exact and wildcard entries.</p>
 <p>Examples:</p>
-<pre><code class="language-text">NU[*] = 1000.0
-NU[0] = 925.0
+<pre><code class="language-text">NU[0] = 925.0
+NU[*] = 1000.0
 
-EMITTER[*] = CO2
 EMITTER[1] = H2O
+EMITTER[*] = CO2
 </code></pre>
 <h3 id="command-line-overrides">Command-line overrides</h3>
 <p>All control keywords can also be provided on the command line as pairs:</p>

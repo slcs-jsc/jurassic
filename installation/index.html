@@ -1557,26 +1557,25 @@ your local compiler and MPI setup.</p>
 MPI modules before configuring the build.</p>
 <hr />
 <h2 id="building-jurassic">Building JURASSIC</h2>
+<p>Run the source build commands in this section from
+<code>[jurassic_directory]/src</code> unless noted otherwise.</p>
 <h3 id="build-bundled-dependencies">Build bundled dependencies</h3>
 <p>For the default repository build, first compile the bundled third-party
-libraries:</p>
-<pre><code class="language-bash">cd libs
-bash build.sh
+libraries from <code>[jurassic_directory]/libs</code>:</p>
+<pre><code class="language-bash">bash build.sh
 </code></pre>
 <p>This populates <code>libs/build/</code>, which is the default include/library location
 used by <code>src/Makefile</code>.</p>
 <h3 id="default-build-no-mpi">Default build (no MPI)</h3>
 <p>To build JURASSIC without MPI support:</p>
-<pre><code class="language-bash">cd src
-make -j
+<pre><code class="language-bash">make -j
 </code></pre>
 <p>This builds all executables in serial/OpenMP mode. MPI is not required
 for this configuration.</p>
 <hr />
 <h3 id="building-with-mpi-enabled-retrieval">Building with MPI-enabled retrieval</h3>
 <p>To enable MPI support for the retrieval executable, build with:</p>
-<pre><code class="language-bash">cd src
-make -j MPI=1
+<pre><code class="language-bash">make -j MPI=1
 </code></pre>
 <p>This will:</p>
 <ul>
@@ -1590,16 +1589,14 @@ toolchain when <code>MPI=1</code> is used.</p>
 <hr />
 <h3 id="clean-rebuild">Clean rebuild</h3>
 <p>To perform a clean rebuild:</p>
-<pre><code class="language-bash">cd src
-make clean
+<pre><code class="language-bash">make clean
 make -j
 </code></pre>
 <hr />
 <h2 id="verifying-the-installation">Verifying the installation</h2>
 <p>After compilation, verify the installation by running the test suite or the
 example projects described in the <a href="../quickstart/">Quickstart</a>.</p>
-<pre><code class="language-bash">cd src
-make check
+<pre><code class="language-bash">make check
 </code></pre>
 <p>A successful test run or example simulation indicates that JURASSIC has been
 built correctly and that all required dependencies are working as expected.</p>

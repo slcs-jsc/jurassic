@@ -1697,8 +1697,12 @@ using a distinct <code>rad.tab</code> is usually clearer.</p>
 </ol>
 <h3 id="retrieval-inverse-modelling">Retrieval (inverse modelling)</h3>
 <ol>
-<li>Provide <code>rad.tab</code> where the radiance columns contain <strong>measured</strong>
-   radiances (and geometry is known).</li>
+<li>Provide observation/radiance data where the radiance columns contain
+   <strong>measured</strong> radiances and the geometry is known. In the default
+   directory-list retrieval workflow, this file is named <code>obs_meas.tab</code>.
+   The table layout is the same observation/radiance format described on
+   this page; some forward-model workflows call the corresponding output
+   <code>rad.tab</code>.</li>
 <li>The retrieval tool iteratively runs the forward model internally.</li>
 <li>Outputs may include:</li>
 <li>fitted radiances,</li>

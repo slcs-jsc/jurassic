@@ -539,6 +539,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1411,6 +1422,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1448,8 +1470,8 @@ the principles of <strong>optimal estimation</strong> and provides a consistent
 approach to deriving atmospheric state variables from infrared radiance
 measurements.</p>
 <p>The implementation closely follows the formalism described by Rodgers
-(2000) and is fully integrated with the JURASSIC forward radiative
-transfer model.</p>
+<a href="https://doi.org/10.1142/9789812813718">(2000)</a> and is fully integrated
+with the JURASSIC forward radiative transfer model.</p>
 <hr />
 <h2 id="forward-and-inverse-problems">Forward and inverse problems</h2>
 <p>In atmospheric remote sensing, the <strong>forward problem</strong> consists of
@@ -1483,8 +1505,10 @@ operators.</p>
 <p>The <strong>measurement vector</strong> <span class="arithmatex">\(\mathbf{y}\)</span> contains the observed
 radiances (or brightness temperatures) for the selected spectral
 channels and observation geometries.</p>
-<p>Measurement noise and forward-model uncertainties are represented by a
-measurement error covariance matrix.</p>
+<p>Measurement noise and forward-model uncertainties are represented by
+per-measurement error estimates. In the current implementation, the
+measurement error covariance is treated as diagonal, i.e. measurement
+errors are assumed to be independent.</p>
 <hr />
 <h2 id="forward-model-operator">Forward model operator</h2>
 <p>The forward model is represented by an operator <span class="arithmatex">\(\mathbf{F}\)</span> such
@@ -1512,8 +1536,9 @@ same forward-model components, numerical discretization, and spectral
 approximations as the radiance calculation itself. This consistency is
 essential for stable and physically meaningful retrievals.</p>
 <p>Jacobians can be computed for individual atmospheric quantities, such
-as temperature or trace gas concentrations, and are reused within the
-iterative retrieval algorithm.</p>
+as temperature or trace gas concentrations. During retrieval, they can
+be reused between iterations and recomputed according to the retrieval
+configuration.</p>
 <hr />
 <h2 id="optimal-estimation-framework">Optimal estimation framework</h2>
 <p>Optimal estimation formulates the retrieval as the minimization of a
@@ -1567,9 +1592,9 @@ sensitivity of the retrieved state to the true atmospheric state:</p>
 <li>sensitivity to true atmospheric variations,</li>
 <li>influence of the a priori information.</li>
 </ul>
-<p>JURASSIC computes averaging kernels and related diagnostic quantities
-that can be used to assess retrieval performance and information
-content.</p>
+<p>When retrieval error analysis and matrix output are enabled, JURASSIC
+computes averaging kernels and related diagnostic quantities that can be
+used to assess retrieval performance and information content.</p>
 <hr />
 <h2 id="error-characterization">Error characterization</h2>
 <p>The retrieval error covariance matrix <span class="arithmatex">\(\mathbf{S}_x\)</span> quantifies
@@ -1580,8 +1605,9 @@ the expected uncertainty of the retrieved state:</p>
 + \mathbf{S}_a^{-1})^{-1}
 \]</div>
 <p>This matrix accounts for both measurement noise and the imposed prior
-constraints. JURASSIC provides access to retrieval error estimates that
-can be used for scientific interpretation and validation.</p>
+constraints. When retrieval error analysis and matrix output are enabled,
+JURASSIC provides access to retrieval error estimates that can be used
+for scientific interpretation and validation.</p>
 <hr />
 <h2 id="practical-considerations">Practical considerations</h2>
 <p>When performing retrievals with JURASSIC, users should consider:</p>
@@ -1594,6 +1620,26 @@ can be used for scientific interpretation and validation.</p>
 <p>Poorly chosen prior information or inconsistent configurations can
 lead to biased or unstable retrievals.</p>
 <hr />
+<h2 id="further-reading">Further reading</h2>
+<p>The optimal-estimation formalism used here is described in detail by
+Rodgers <a href="https://doi.org/10.1142/9789812813718">(2000)</a>. Earlier and
+complementary treatments that are useful for retrieval interpretation
+include:</p>
+<ul>
+<li>Rodgers
+  <a href="https://doi.org/10.1029/RG014i004p00609">(1976)</a>, which reviews the
+  retrieval of atmospheric temperature and composition from thermal
+  radiation measurements.</li>
+<li>Rodgers
+  <a href="https://doi.org/10.1029/JD095iD05p05587">(1990)</a>, which discusses
+  profile characterization, smoothing, averaging kernels, and retrieval
+  error analysis.</li>
+<li>Maahn et al.
+  <a href="https://doi.org/10.1175/BAMS-D-19-0027.1">(2020)</a>, which provides a
+  modern overview of optimal-estimation retrievals and uncertainty
+  interpretation for atmospheric applications.</li>
+</ul>
+<hr />
 <h2 id="summary">Summary</h2>
 <p>JURASSIC implements a physically consistent and well-established
 optimal estimation retrieval framework that is tightly integrated with
@@ -1601,8 +1647,9 @@ its forward radiative transfer model. The use of forward-model-consistent
 finite-difference Jacobians and shared numerical infrastructure ensures
 stable and efficient retrieval calculations.</p>
 <p>For a detailed theoretical treatment of optimal estimation, users are
-referred to Rodgers (2000) and the references listed in the
-<a href="../references/">References</a> section.</p>
+referred to Rodgers
+<a href="https://doi.org/10.1142/9789812813718">(2000)</a>. JURASSIC-specific
+publications are listed in the <a href="../references/">References</a> section.</p>
 
 
 
