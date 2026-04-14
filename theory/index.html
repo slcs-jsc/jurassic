@@ -1481,13 +1481,18 @@ accuracy of line-by-line spectroscopy while enabling orders-of-magnitude
 faster calculations.</p>
 <p>The validity of the radiative transfer results depends on the coverage
 and resolution of the lookup tables.</p>
+<p><img alt="Spectral mean emissivity curves used in lookup-table calculations" src="../img/emissivity.png" /></p>
+<p><em>Spectral mean emissivity curves for carbon dioxide at 669 cm^-1,
+illustrating the lookup-table representation used by JURASSIC. Source:
+Baumeister and Hoffmann
+<a href="https://doi.org/10.5194/gmd-15-1855-2022">(2022)</a>, Fig. 2.</em></p>
 <hr />
 <h2 id="emissivity-growth-approximation-ega">Emissivity Growth Approximation (EGA)</h2>
 <p>The <strong>Emissivity Growth Approximation (EGA)</strong> is a key component of
 JURASSIC and is used to compute the effective emissivity of an
 inhomogeneous atmospheric path. The method follows the EGA approach
-described by Gordley and Russell
-<a href="https://doi.org/10.1364/AO.20.000807">(1981)</a>.</p>
+described by
+<a href="https://doi.org/10.1364/AO.20.000807">Gordley and Russell (1981)</a>.</p>
 <p>Instead of treating each atmospheric segment independently, EGA
 accounts for the cumulative growth of emissivity along the ray path:</p>
 <ol>
@@ -1501,6 +1506,11 @@ inhomogeneous atmosphere using lookup tables derived for homogeneous
 layers. The EGA method substantially reduces errors associated with
 simple band transmittance approaches and has been shown to provide good
 accuracy for a wide range of infrared remote sensing applications.</p>
+<p><img alt="Illustration of the Emissivity Growth Approximation method" src="../img/ega.png" /></p>
+<p><em>Illustration of the Emissivity Growth Approximation. The accumulated
+emissivity is mapped to a pseudo-column amount on the emissivity curve
+of the next path segment. Source: Baumeister and Hoffmann
+<a href="https://doi.org/10.5194/gmd-15-1855-2022">(2022)</a>, Fig. 3.</em></p>
 <hr />
 <h2 id="numerical-integration-along-the-line-of-sight">Numerical integration along the line of sight</h2>
 <p>Radiative transfer along the ray path is evaluated by dividing the path
@@ -1513,6 +1523,11 @@ ensures numerical stability and efficiency.</p>
 <p>The integration scheme is designed to be compatible with both forward
 modelling and the calculation of derivatives required for retrieval
 applications.</p>
+<p><img alt="Integration of radiance along a ray path" src="../img/raypath.png" /></p>
+<p><em>Radiance integration along a ray path. Emission contributions from
+individual path segments are partly absorbed by the overlying atmosphere
+before reaching the observer. Source: Baumeister and Hoffmann
+<a href="https://doi.org/10.5194/gmd-15-1855-2022">(2022)</a>, Fig. 1.</em></p>
 <hr />
 <h2 id="multiple-absorbers-and-continua">Multiple absorbers and continua</h2>
 <p>JURASSIC supports multiple molecular absorbers and includes continuum
