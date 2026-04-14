@@ -81,11 +81,9 @@ research, operational, and development workflows:
     atmospheric input fields, allowing users to integrate JURASSIC
     into diverse workflows and existing analysis pipelines.
 
-- **Validated against established reference models**: The model has
-    undergone extensive benchmarking and intercomparison studies with
-    leading radiative transfer codes such as KOPRA, RFM, and SARTA,
-    ensuring reliable performance and scientific credibility across a
-    wide range of atmospheric conditions.
+- **Comparison with reference models**: Published studies have
+    compared JURASSIC results with radiative transfer codes such as
+    KOPRA, RFM, and SARTA.
 
 - **Parallel execution for HPC environments**: JURASSIC supports
     workflow-level parallelism, OpenMP acceleration across the tool
@@ -146,26 +144,12 @@ the required dependencies manually. Distribution-specific package
 information, optional tools, and version details are collected in the
 [dependencies file](https://github.com/slcs-jsc/jurassic/blob/HEAD/DEPENDENCIES.md).
 
-**3. Compile JURASSIC**
-
-For the default bundled-library build, no changes to the `Makefile` are
-usually required:
-
-    cd [jurassic_directory]/src
-    make [-j]
-
-Run the regression test suite to verify the installation:
-
-    make check
-
-This uses the include and library paths prepared in `libs/build/`.
-
-**4. Optional: adjust the Makefile for non-default setups**
+**3. Optional: adjust the Makefile for non-default setups**
 
 Navigate to the source directory and adjust the `Makefile` as needed:
 
     cd [jurassic_directory]/src
-    emacs Makefile
+    edit Makefile
 
 Pay special attention to the following settings:
 
@@ -181,6 +165,20 @@ Pay special attention to the following settings:
   allows you to copy and use the binaries on other machines. However,
   in some cases, either static or dynamic linking may not be feasible
   or could cause specific issues.
+
+**4. Compile JURASSIC**
+
+For the default bundled-library build, no changes to the `Makefile` are
+usually required:
+
+    cd [jurassic_directory]/src
+    make [-j]
+
+Run the regression test suite to verify the installation:
+
+    make check
+
+This uses the include and library paths prepared in `libs/build/`.
 
 ### Run the examples
 
@@ -245,26 +243,29 @@ to generate plots of the simulated radiances and kernel functions.
 
 ### Lookup tables
 
-JURASSIC relies on precomputed spectroscopic lookup tables derived from
-high-resolution line-by-line calculations. These tables provide band
-transmittances used by the radiative transfer approximations implemented
-in the model.
-
-Precomputed lookup tables for common configurations are available from
-the [JURASSIC data repository](https://datapub.fz-juelich.de/slcs/jurassic/).
+JURASSIC relies on precomputed spectroscopic lookup tables derived
+from high-resolution line-by-line calculations. These tables provide
+band transmittances used by the radiative transfer approximations
+implemented in the model. Precomputed lookup tables for common
+configurations are available from the
+[JURASSIC data repository](https://datapub.fz-juelich.de/slcs/jurassic/).
 
 Users may either download these datasets or generate custom lookup
 tables tailored to specific spectral bands or instrument configurations.
 Creating custom lookup tables requires access to a line-by-line
 radiative transfer model capable of calculating high-resolution
-absorption spectra of a homogeneous gas cell. In practice, the
-[Reference Forward Model (RFM) from the University of Oxford](https://eodg.atm.ox.ac.uk/RFM/)
-is commonly used for this purpose.
+absorption spectra of a homogeneous gas cell. The lookup tables
+distributed with JURASSIC were generated using the
+[Reference Forward Model (RFM) from the University of Oxford](https://eodg.atm.ox.ac.uk/RFM/).
+Other line-by-line models may be used if they provide the required
+homogeneous-gas-cell absorption spectra.
 
 ## Further information
 
-More detailed information for new users and developers of JURASSIC is
-collected in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
+More detailed information for new users and developers is available in
+the [JURASSIC manual](https://slcs-jsc.github.io/jurassic/). The
+[GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki) collects links
+to manuals, repository files, and related resources.
 
 These are the main references for citing the JURASSIC model in
 scientific publications:
@@ -297,7 +298,11 @@ for further information.
 
 We are interested in sharing JURASSIC for operational or research
 applications. Please do not hesitate to contact us if you have any
-further questions or need support.
+further questions or need support. Please see the
+[contributing guidelines](https://github.com/slcs-jsc/jurassic/blob/HEAD/CONTRIBUTING.md)
+and the
+[code of conduct](https://github.com/slcs-jsc/jurassic/blob/HEAD/CODE_OF_CONDUCT.md)
+before contributing.
 
 ## License
 
