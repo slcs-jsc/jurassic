@@ -16,6 +16,7 @@ following requirements apply:
 - C compiler with OpenMP support
 - GNU Scientific Library (GSL)
 - netCDF-C library
+- HDF5 library
 - MPI library (optional, retrieval only)
 - GNU Make or a compatible build system
 
@@ -39,6 +40,9 @@ The following software components are required to build JURASSIC:
 
 - **netCDF-C library**  
   Required for netCDF input/output support used throughout the toolchain.
+
+- **HDF5 library**  
+  Required for netCDF-4/HDF5 input/output workflows.
 
 - **MPI library** (optional, retrieval only)  
   For example:

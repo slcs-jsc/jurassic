@@ -13,14 +13,12 @@ which is the reference platform used for development and testing.
 | GCC | 13.3.0 | C compiler |
 | GNU Scientific Library | 2.7.1 | Numerical routines |
 | netCDF-C | 4.9.2 | File I/O (netCDF) |
+| HDF5 | 1.14.4 | netCDF-4 file support |
 
 ## Optional Dependencies
 
 | Dependency | Version | Description |
 |------------|---------|-------------|
-| HDF5 | 1.14.4 | Required for netCDF-4 support |
-| zlib | 1.3.1 | Required for netCDF-4 compression |
-| Zstandard (zstd) | 1.5.5 | Optional netCDF/HDF5 filter-based compression |
 | gnuplot | 6.0 | Used by example scripts |
 | Cppcheck | 2.13 | Static code analysis  |
 | gprofng | 2.42 | Performance profiling tool |
@@ -31,13 +29,13 @@ which is the reference platform used for development and testing.
 
 ## Notes
 
-- **Using bundled libraries:** JURASSIC includes a `libs/` directory that can build GSL and netCDF if system libraries are not available or if a self-contained build is preferred.
+- **Using bundled libraries:** JURASSIC includes a `libs/` directory that can build GSL, HDF5, and netCDF if system libraries are not available or if a self-contained build is preferred.
 
 - **Bundled build toolchain:** `libs/build.sh` builds HDF5 with the C++ interface disabled (`--disable-cxx`). A GNU C compiler is required, but a C++ compiler is not required for the bundled-library build.
 
-- **netCDF version:** netCDF classic only requires `libnetcdf-dev`. netCDF-4 additionally requires HDF5 and zlib. Using filter-based compression (e.g. zstd) requires the HDF5 plugin package and possibly setting `HDF5_PLUGIN_PATH`.
+- **netCDF version:** JURASSIC uses netCDF-4/HDF5 files in several workflows, so both netCDF-C and HDF5 are required. Compression backends such as zlib are normally provided by the installed netCDF/HDF5 stack. Using external filter-based compression (e.g. zstd) requires a matching HDF5 plugin package and possibly setting `HDF5_PLUGIN_PATH`.
 
-- **Static linking**: Fully static builds require static versions of all libraries and usually do not support HDF5 filter plugins. Dynamic linking is recommended for most users.
+- **Static linking**: Fully static builds require static versions of all libraries used by the installed netCDF/HDF5 stack and usually do not support HDF5 filter plugins. Dynamic linking is recommended for most users.
 
 ## Installing dependencies
 
@@ -50,14 +48,7 @@ sudo apt update
 sudo apt install \
   git make gcc \
   libgsl-dev \
-  libnetcdf-dev
-```
-
-Optional netCDF-4 and compression support:
-
-```bash
-sudo apt install \
-  libhdf5-dev zlib1g-dev libzstd-dev
+  libnetcdf-dev libhdf5-dev
 ```
 
 Optional tools:
@@ -77,14 +68,7 @@ Use the following commands to install the dependencies on Fedora.
 sudo dnf install \
   git make gcc \
   gsl-devel \
-  netcdf-devel
-```
-
-Optional netCDF-4 and compression support:
-
-```bash
-sudo dnf install \
-  hdf5-devel zlib-devel libzstd-devel
+  netcdf-devel hdf5-devel
 ```
 
 Optional tools:
