@@ -153,6 +153,9 @@ usually required:
 
     cd [jurassic_directory]/src
     make [-j]
+
+Run the regression test suite to verify the installation:
+
     make check
 
 This uses the include and library paths prepared in `libs/build/`.
