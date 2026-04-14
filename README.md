@@ -42,6 +42,27 @@ high-performance computing environments, JURASSIC offers a practical
 tool for studying radiative processes in the middle and upper
 atmosphere.
 
+## Statement of need
+
+Infrared limb, nadir, and zenith observations are widely used to study
+temperature, composition, and dynamical variability in the atmosphere.
+Interpreting these measurements requires radiative transfer calculations,
+but full line-by-line models can be too computationally expensive for
+large satellite datasets, sensitivity studies, or iterative retrieval
+workflows.
+
+JURASSIC addresses this use case by combining radiative transfer
+approximations with precomputed spectroscopic lookup tables. It is
+intended for users who need many infrared radiance or transmittance
+calculations with configurable atmospheric states, instrument settings,
+and observation geometries.
+
+The model has been used in studies of satellite remote sensing and
+middle-atmosphere dynamics, including temperature retrievals, trace-gas
+retrievals, and gravity-wave analyses. It complements line-by-line
+radiative transfer models by providing a faster modelling option for
+workflows where lookup-table approximations are appropriate.
+
 ## Features
 
 JURASSIC provides a comprehensive and efficient framework for infrared
@@ -54,7 +75,7 @@ research, operational, and development workflows:
     methods enable rapid yet accurate simulations of atmospheric
     radiances and transmittances across a broad spectral range.
 
-- **High-fidelity spectroscopy via lookup tables**: Band
+- **Lookup-table spectroscopy**: Band
     transmittances are derived from pre-calculated lookup tables based
     on detailed line-by-line spectroscopy. This approach maintains
     spectroscopic accuracy while largely reducing computational cost,
