@@ -33,8 +33,12 @@ compared, merged, or processed with the same downstream tools.
 
 ### Retrieval (inverse modelling)
 
-1. Provide `rad.tab` where the radiance columns contain **measured**
-   radiances (and geometry is known).
+1. Provide observation/radiance data where the radiance columns contain
+   **measured** radiances and the geometry is known. In the default
+   directory-list retrieval workflow, this file is named `obs_meas.tab`.
+   The table layout is the same observation/radiance format described on
+   this page; some forward-model workflows call the corresponding output
+   `rad.tab`.
 2. The retrieval tool iteratively runs the forward model internally.
 3. Outputs may include:
    - fitted radiances,

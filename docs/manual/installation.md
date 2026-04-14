@@ -100,13 +100,15 @@ MPI modules before configuring the build.
 
 ## Building JURASSIC
 
+Run the source build commands in this section from
+`[jurassic_directory]/src` unless noted otherwise.
+
 ### Build bundled dependencies
 
 For the default repository build, first compile the bundled third-party
-libraries:
+libraries from `[jurassic_directory]/libs`:
 
 ```bash
-cd libs
 bash build.sh
 ```
 
@@ -118,7 +120,6 @@ used by `src/Makefile`.
 To build JURASSIC without MPI support:
 
 ```bash
-cd src
 make -j
 ```
 
@@ -132,7 +133,6 @@ for this configuration.
 To enable MPI support for the retrieval executable, build with:
 
 ```bash
-cd src
 make -j MPI=1
 ```
 
@@ -153,7 +153,6 @@ toolchain when `MPI=1` is used.
 To perform a clean rebuild:
 
 ```bash
-cd src
 make clean
 make -j
 ```
@@ -166,7 +165,6 @@ After compilation, verify the installation by running the test suite or the
 example projects described in the [Quickstart](quickstart.md).
 
 ```bash
-cd src
 make check
 ```
 

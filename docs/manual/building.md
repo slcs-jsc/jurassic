@@ -21,7 +21,7 @@ Typical tools include drivers for:
 - forward modelling (e.g. `formod`)
 - kernels / Jacobians (e.g. `kernel`)
 - retrieval (e.g. `retrieval`)
-- format conversion utilities (`*_fmt` tools)
+- format conversion utilities (e.g. `atmfmt`, `obsfmt`, `matfmt`)
 - table utilities (`tblgen`, `tblfmt`, ...)
 
 The exact list can be inspected in the Makefile via the `EXC = ...` line.

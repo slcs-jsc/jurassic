@@ -5,7 +5,7 @@ methods implemented in JURASSIC. The description focuses on the
 radiative transfer formulation, spectral approximations, and numerical
 integration schemes that enable fast and accurate infrared simulations.
 A detailed and formal description of the algorithms can be found in
-Baumeister and Hoffmann (2022).
+[Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022).
 
 ---
 
@@ -124,7 +124,9 @@ and resolution of the lookup tables.
 
 The **Emissivity Growth Approximation (EGA)** is a key component of
 JURASSIC and is used to compute the effective emissivity of an
-inhomogeneous atmospheric path.
+inhomogeneous atmospheric path. The method follows the EGA approach
+described by Gordley and Russell
+[(1981)](https://doi.org/10.1364/AO.20.000807).
 
 Instead of treating each atmospheric segment independently, EGA
 accounts for the cumulative growth of emissivity along the ray path:
@@ -196,5 +198,6 @@ infrared simulations suitable for large-scale atmospheric remote
 sensing and retrieval applications.
 
 For a comprehensive and formal derivation of the algorithms, users are
-referred to Baumeister and Hoffmann (2022) and the references listed in
-the [References](references.md) section.
+referred to [Baumeister and Hoffmann
+(2022)](https://doi.org/10.5194/gmd-15-1855-2022) and the references
+listed in the [References](references.md) section.

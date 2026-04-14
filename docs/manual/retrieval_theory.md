@@ -7,8 +7,8 @@ approach to deriving atmospheric state variables from infrared radiance
 measurements.
 
 The implementation closely follows the formalism described by Rodgers
-(2000) and is fully integrated with the JURASSIC forward radiative
-transfer model.
+[(2000)](https://doi.org/10.1142/9789812813718) and is fully integrated
+with the JURASSIC forward radiative transfer model.
 
 ---
 
@@ -53,8 +53,10 @@ The **measurement vector** \(\mathbf{y}\) contains the observed
 radiances (or brightness temperatures) for the selected spectral
 channels and observation geometries.
 
-Measurement noise and forward-model uncertainties are represented by a
-measurement error covariance matrix.
+Measurement noise and forward-model uncertainties are represented by
+per-measurement error estimates. In the current implementation, the
+measurement error covariance is treated as diagonal, i.e. measurement
+errors are assumed to be independent.
 
 ---
 
@@ -94,8 +96,9 @@ approximations as the radiance calculation itself. This consistency is
 essential for stable and physically meaningful retrievals.
 
 Jacobians can be computed for individual atmospheric quantities, such
-as temperature or trace gas concentrations, and are reused within the
-iterative retrieval algorithm.
+as temperature or trace gas concentrations. During retrieval, they can
+be reused between iterations and recomputed according to the retrieval
+configuration.
 
 ---
 
@@ -165,9 +168,9 @@ Averaging kernels provide insight into:
 - sensitivity to true atmospheric variations,
 - influence of the a priori information.
 
-JURASSIC computes averaging kernels and related diagnostic quantities
-that can be used to assess retrieval performance and information
-content.
+When retrieval error analysis and matrix output are enabled, JURASSIC
+computes averaging kernels and related diagnostic quantities that can be
+used to assess retrieval performance and information content.
 
 ---
 
@@ -183,8 +186,9 @@ the expected uncertainty of the retrieved state:
 \]
 
 This matrix accounts for both measurement noise and the imposed prior
-constraints. JURASSIC provides access to retrieval error estimates that
-can be used for scientific interpretation and validation.
+constraints. When retrieval error analysis and matrix output are enabled,
+JURASSIC provides access to retrieval error estimates that can be used
+for scientific interpretation and validation.
 
 ---
 
@@ -202,6 +206,28 @@ lead to biased or unstable retrievals.
 
 ---
 
+## Further reading
+
+The optimal-estimation formalism used here is described in detail by
+Rodgers [(2000)](https://doi.org/10.1142/9789812813718). Earlier and
+complementary treatments that are useful for retrieval interpretation
+include:
+
+- Rodgers
+  [(1976)](https://doi.org/10.1029/RG014i004p00609), which reviews the
+  retrieval of atmospheric temperature and composition from thermal
+  radiation measurements.
+- Rodgers
+  [(1990)](https://doi.org/10.1029/JD095iD05p05587), which discusses
+  profile characterization, smoothing, averaging kernels, and retrieval
+  error analysis.
+- Maahn et al.
+  [(2020)](https://doi.org/10.1175/BAMS-D-19-0027.1), which provides a
+  modern overview of optimal-estimation retrievals and uncertainty
+  interpretation for atmospheric applications.
+
+---
+
 ## Summary
 
 JURASSIC implements a physically consistent and well-established
@@ -211,5 +237,6 @@ finite-difference Jacobians and shared numerical infrastructure ensures
 stable and efficient retrieval calculations.
 
 For a detailed theoretical treatment of optimal estimation, users are
-referred to Rodgers (2000) and the references listed in the
-[References](references.md) section.
+referred to Rodgers
+[(2000)](https://doi.org/10.1142/9789812813718). JURASSIC-specific
+publications are listed in the [References](references.md) section.

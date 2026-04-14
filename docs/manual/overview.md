@@ -137,3 +137,12 @@ documented in intercomparison studies.
 JURASSIC is distributed as open-source software under the GNU General
 Public License (GPL) and is openly available to support transparent,
 reproducible, and extensible atmospheric remote sensing research.
+
+---
+
+## Related pages
+
+- [Physical background](theory.md)
+- [Retrieval theory](retrieval_theory.md)
+- [Model assumptions & limitations](limitations.md)
+- [Quickstart](quickstart.md)

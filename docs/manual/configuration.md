@@ -26,16 +26,22 @@ Internally, this is parsed by reading three tokens (`KEY`, a dummy token such as
 Many parameters are arrays (e.g. `NU[0]`, `EMITTER[1]`). The parser supports:
 
 - `KEY[i] = VALUE` for a specific index `i`
-- `KEY[*] = VALUE` as a **default for all indices** (can be overridden by specific indices)
+- `KEY[*] = VALUE` as a **default for all indices**
+
+When reading a control file, JURASSIC uses the first matching entry it
+finds. If you want to combine a wildcard default with index-specific
+values, put the index-specific entries before the wildcard entry.
+Command-line overrides are evaluated after the control file and can
+therefore override both exact and wildcard entries.
 
 Examples:
 
 ```text
-NU[*] = 1000.0
 NU[0] = 925.0
+NU[*] = 1000.0
 
-EMITTER[*] = CO2
 EMITTER[1] = H2O
+EMITTER[*] = CO2
 ```
 
 ### Command-line overrides
