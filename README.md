@@ -186,10 +186,6 @@ that demonstrate different observation geometries and typical model
 workflows. This directory can also be used to store your own
 experiments.
 
-Navigate to the projects directory:
-
-    cd [jurassic_directory]/projects
-
 Running the examples provided in the `projects` directory is a convenient
 way to verify that the installation was successful. Example simulations
 are provided for three observation geometries. The example scripts set
@@ -197,16 +193,17 @@ the runtime library path for the bundled-library build automatically and
 use `gnuplot` to generate diagnostic plots:
 
     # Limb
-    cd limb && ./run.sh
+    cd [jurassic_directory]/projects/limb && ./run.sh
     
     # Nadir
-    cd ../nadir && ./run.sh
+    cd [jurassic_directory]/projects/nadir && ./run.sh
 
     # Zenith
-    cd ../zenith && ./run.sh
+    cd [jurassic_directory]/projects/zenith && ./run.sh
 
-Each example performs a complete radiative transfer simulation. The
-scripts generate an observation geometry file,
+Each example performs a complete radiative transfer simulation. Inside
+the corresponding example directory, the scripts generate an observation
+geometry file,
 
     cat obs.tab
 
