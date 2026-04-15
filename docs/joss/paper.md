@@ -20,7 +20,7 @@ authors:
     orcid: 0000-0002-2005-4474
   - name: Stjepan Pozgaj
     affiliation: 2
-    orcid: 0000-0002-2005-4474
+    orcid: 0009-0002-4799-3911
   - name: Yiran Zhang
     affiliation: 1
     orcid: 0009-0009-9539-9598
@@ -37,7 +37,7 @@ authors:
 affiliations:
   - name: Jülich Supercomputing Centre, Forschungszentrum Jülich, Jülich, Germany
     index: 1
-  - name: tbd
+  - name: University of Zagreb, Faculty of Electrical Engineering and Computing, Zagreb, Croatia
     index: 2
   - name: Technische Universität Hamburg, Hamburg, Germany
     index: 3
@@ -63,7 +63,7 @@ JURASSIC is designed for researchers working in atmospheric infrared remote sens
 
 Atmospheric infrared radiative transfer is supported by a mature ecosystem of software, including highly accurate line-by-line reference models [@Clough2005; @Dudhia2017; @Buehler2018] and faster approximate forward models [@Moncet2008; @Hocking2021]. Line-by-line tools are essential for spectroscopic reference calculations and benchmarking, but their runtime cost can become prohibitive when thousands to millions of forward calculations are required. JURASSIC occupies a distinct position within this landscape as a fast, research-oriented model for multiple atmospheric remote sensing geometries rather than a single observation mode or instrument family.
 
-In addition to forward modelling, JURASSIC includes an optimal estimation retrieval framework, allowing radiative transfer and inversion to be performed within the same software environment. The core version of JURASSIC described here has been used for limb and nadir radiative transfer applications, including retrievals of atmospheric temperature and trace gase abundances. Related extensions, not covered in this paper, have also supported cloud- and aerosol-affected cases as well as tomographic and GPU-accelerated applications. Together, these developments reflect a broader research scope than that of instrument-specific forward models tightly coupled to a single observing system or operational product chain.
+In addition to forward modelling, JURASSIC includes an optimal estimation retrieval framework, allowing radiative transfer and inversion to be performed within the same software environment. The core version of JURASSIC described here has been used for limb and nadir radiative transfer applications, including retrievals of atmospheric temperature and trace gas abundances. Related extensions, not covered in this paper, have also supported cloud- and aerosol-affected cases as well as tomographic and GPU-accelerated applications. Together, these developments reflect a broader research scope than that of instrument-specific forward models tightly coupled to a single observing system or operational product chain.
 
 # Software design
 
@@ -73,11 +73,11 @@ The radiative transfer formulation in the core version of JURASSIC described her
 
 To approximate infrared absorption and emission efficiently, JURASSIC uses the Emissivity Growth Approximation and the Curtis--Godson Approximation [@Godson1953; @Gordley1981; @Marshall1994]. In this framework, spectroscopic information is represented by precomputed emissivity lookup tables derived from detailed line-by-line radiative transfer calculations. During runtime, these tables are accessed through fast interpolation, allowing band-averaged emissivities to be evaluated efficiently. Together, these methods provide a practical balance between accuracy and speed across a broad range of atmospheric conditions relevant to infrared remote sensing.
 
-In addition to forward modelling, JURASSIC includes an optimal estimation framework for retrieving atmospheric quantities such as temperature and trace-gas volume mixing ratios directly from radiance measurements [@Rodgers2000]. Integrating retrieval capabilities with the forward model reduces duplication of model interfaces, supports reproducible inversion workflows, and facilitates sensitivity studies of forward-model assumptions within retrieval applications.
+The retrieval component implements optimal estimation methods for deriving atmospheric quantities such as temperature and trace-gas volume mixing ratios directly from radiance measurements [@Rodgers2000]. Integrating retrieval capabilities with the forward model reduces duplication of model interfaces, supports reproducible inversion workflows, and facilitates sensitivity studies of forward-model assumptions within retrieval applications.
 
 The version of JURASSIC described in this paper is intentionally focused on infrared remote sensing applications in which local thermodynamic equilibrium is an adequate assumption and clear-air radiative transfer is the dominant use case. Under these conditions, molecular populations are determined by local temperature and emission is governed by the Planck function. The core workflow also supports simplified treatments of cloud and aerosol effects, including grey-body and extinction-based parameterizations.
 
-Related developments outside the scope of this paper include more advanced scattering extensions for cloud- and aerosol-affected cases [@Griessbach2014; @Griessbach2016], a GPU-accelerated implementation for heterogeneous architectures [@Baumeister2022], and recent integration efforts aimed at connecting core, scattering-enabled, and accelerator-oriented variants within a more maintainable library-based framework referred to as JURASSIC-UNIFIED [@Pozgaj2025].
+Related developments outside the scope of this paper include more advanced scattering extensions for cloud- and aerosol-affected cases [@Griessbach2014; @Griessbach2016], a GPU-accelerated implementation for heterogeneous architectures [@Baumeister2022], and recent integration efforts aimed at connecting core, scattering-enabled, and accelerator-oriented variants within a more maintainable library-based framework referred to as JURASSIC-UNIFIED [@Pozgaj2022].
 
 # Research impact statement
 
