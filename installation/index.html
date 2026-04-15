@@ -649,6 +649,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#install-binaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install binaries
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1394,6 +1405,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#install-binaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install binaries
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1470,77 +1492,47 @@ designed for batch-style execution and is typically compiled from
 source.</p>
 <hr />
 <h2 id="system-requirements">System requirements</h2>
-<p>JURASSIC is primarily developed and tested on Linux systems. The
-following requirements apply:</p>
-<ul>
-<li>64-bit Linux operating system</li>
-<li>C compiler with OpenMP support</li>
-<li>GNU Scientific Library (GSL)</li>
-<li>netCDF-C library</li>
-<li>HDF5 library</li>
-<li>MPI library (optional, retrieval only)</li>
-<li>GNU Make or a compatible build system</li>
-</ul>
-<p>MPI is required only if MPI-enabled retrieval executables are built.
-All other components can be built and run without MPI.</p>
+<p>JURASSIC is primarily developed and tested on 64-bit Linux systems,
+including high-performance computing environments. It is built from
+source using a Makefile-based workflow.</p>
 <hr />
 <h2 id="required-software">Required software</h2>
 <p>The following software components are required to build JURASSIC:</p>
 <ul>
-<li>
-<p><strong>C compiler</strong><br />
-  Required for auxiliary components and libraries (e.g. <code>gcc</code>, <code>icc</code>).</p>
-</li>
-<li>
-<p><strong>GNU Make</strong><br />
-  Required to build the bundled libraries and the JURASSIC executables.</p>
-</li>
-<li>
-<p><strong>GNU Scientific Library (GSL)</strong><br />
-  Required for numerical kernels and linear algebra support.</p>
-</li>
-<li>
-<p><strong>netCDF-C library</strong><br />
-  Required for netCDF input/output support used throughout the toolchain.</p>
-</li>
-<li>
-<p><strong>HDF5 library</strong><br />
-  Required for netCDF-4/HDF5 input/output workflows.</p>
-</li>
-<li>
-<p><strong>MPI library</strong> (optional, retrieval only)<br />
-  For example:</p>
-</li>
-<li>
-<p>OpenMPI</p>
-</li>
-<li>MPICH</li>
-<li>Intel MPI</li>
-</ul>
-<p>MPI is used exclusively by the retrieval code to distribute
-  independent retrieval tasks across processes. No other JURASSIC
-  executables use MPI internally.</p>
-<ul>
-<li>
-<p><strong>Gnuplot</strong> (optional)
-  Used by example projects to generate diagnostic plots.</p>
-</li>
-<li>
-<p><strong>Optional Fortran compiler</strong><br />
-  A Fortran compiler is not required for the default repository build. It may
-  be useful on HPC systems or when integrating external tooling that depends on
-  Fortran-enabled libraries.</p>
-</li>
+<li><strong>C compiler:</strong> required for auxiliary components and libraries, for
+  example <code>gcc</code>.</li>
+<li><strong>GNU Make:</strong> required to build the bundled libraries and the JURASSIC
+  executables.</li>
+<li><strong>GNU Scientific Library (GSL):</strong> required for numerical kernels and
+  linear algebra support.</li>
+<li><strong>netCDF-C library:</strong> required for netCDF input/output support used
+  throughout the toolchain.</li>
+<li><strong>HDF5 library:</strong> required for netCDF-4/HDF5 input/output workflows.</li>
+<li><strong>MPI library (optional, retrieval only):</strong> required only for
+  MPI-enabled retrieval builds. Supported MPI implementations include
+  OpenMPI and MPICH-derived implementations such as ParaStation MPI. MPI
+  is used exclusively by the retrieval code to distribute independent
+  retrieval tasks across processes.</li>
+<li><strong>Gnuplot (optional):</strong> used by example projects to generate
+  diagnostic plots.</li>
 </ul>
 <hr />
 <h2 id="obtaining-the-source-code">Obtaining the source code</h2>
-<p>The JURASSIC source code is hosted on GitHub. Clone the repository
-using:</p>
+<p>The JURASSIC source code is hosted in the
+<a href="https://github.com/slcs-jsc/jurassic">GitHub repository</a>. To obtain the
+most recent development version from the default branch, clone the
+repository using:</p>
 <pre><code class="language-bash">git clone https://github.com/slcs-jsc/jurassic.git
 cd jurassic
 </code></pre>
-<p>Alternatively, you may download a source archive from the GitHub
-repository.</p>
+<p>Alternatively, download a release archive from the
+<a href="https://github.com/slcs-jsc/jurassic/releases">GitHub releases page</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Recommended version</p>
+<p>We generally recommend using the current development version from the
+default branch. Bug fixes are usually applied there and are not
+routinely backported to older releases.</p>
+</div>
 <hr />
 <h2 id="configuring-the-build">Configuring the build</h2>
 <p>JURASSIC uses a Makefile-based build system in <code>src/Makefile</code>. Prior to
@@ -1557,15 +1549,22 @@ your local compiler and MPI setup.</p>
 MPI modules before configuring the build.</p>
 <hr />
 <h2 id="building-jurassic">Building JURASSIC</h2>
-<p>Run the source build commands in this section from
-<code>[jurassic_directory]/src</code> unless noted otherwise.</p>
+<p>The dependency build command is run from the <code>libs/</code> directory. The
+JURASSIC build, install, and test commands are run from the <code>src/</code>
+directory.</p>
 <h3 id="build-bundled-dependencies">Build bundled dependencies</h3>
-<p>For the default repository build, first compile the bundled third-party
-libraries from <code>[jurassic_directory]/libs</code>:</p>
-<pre><code class="language-bash">bash build.sh
+<p>From <code>libs/</code>, compile the bundled third-party libraries:</p>
+<pre><code class="language-bash">./build.sh
 </code></pre>
 <p>This populates <code>libs/build/</code>, which is the default include/library location
 used by <code>src/Makefile</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Using system libraries</p>
+<p>If you prefer to use system-provided GSL, HDF5, and netCDF libraries,
+this bundled-library step can be skipped, but the include and library
+paths in <code>src/Makefile</code> must point to the corresponding system
+locations.</p>
+</div>
 <h3 id="default-build-no-mpi">Default build (no MPI)</h3>
 <p>To build JURASSIC without MPI support:</p>
 <pre><code class="language-bash">make -j
@@ -1593,6 +1592,18 @@ toolchain when <code>MPI=1</code> is used.</p>
 make -j
 </code></pre>
 <hr />
+<h3 id="install-binaries">Install binaries</h3>
+<p>The <code>src/Makefile</code> provides a simple copy-install target. By default,
+executables are installed to <code>../bin</code> relative to the <code>src</code> directory:</p>
+<pre><code class="language-bash">make install
+</code></pre>
+<p>To install into a custom binary directory:</p>
+<pre><code class="language-bash">make install DESTDIR=/path/to/bin
+</code></pre>
+<p>To remove binaries from the same destination:</p>
+<pre><code class="language-bash">make uninstall DESTDIR=/path/to/bin
+</code></pre>
+<hr />
 <h2 id="verifying-the-installation">Verifying the installation</h2>
 <p>After compilation, verify the installation by running the test suite or the
 example projects described in the <a href="../quickstart/">Quickstart</a>.</p>
@@ -1613,7 +1624,8 @@ workspace rather than system-wide. Recommended practices include:</p>
   large-scale production runs</li>
 </ul>
 <p>Further details on MPI execution and performance considerations are
-provided in the HPC workflows documentation.</p>
+provided in <a href="../running/">Running JURASSIC</a> and
+<a href="../hpc_workflows/">HPC workflows</a>.</p>
 <hr />
 <h2 id="troubleshooting">Troubleshooting</h2>
 <p>Common issues during installation include:</p>
@@ -1622,10 +1634,21 @@ provided in the HPC workflows documentation.</p>
 <li>Using an MPI-enabled build without <code>mpicc</code> or an MPI runtime</li>
 <li>Mismatches between compile-time and runtime MPI environments</li>
 <li>Incorrect OpenMP settings</li>
+<li>Runtime linker errors caused by missing shared-library paths</li>
 </ul>
 <p>If you encounter problems, consult the build output carefully and verify
-that your compiler and MPI environment are correctly configured.
+that your compiler, library paths, and MPI environment are correctly
+configured.
 Additional help may be available through the project maintainers.</p>
+<div class="admonition warning">
+<p class="admonition-title">Bundled shared libraries</p>
+<p>When using the bundled dynamic libraries, executables may need the
+library directory in <code>LD_LIBRARY_PATH</code> at runtime:</p>
+<p><code>bash
+export LD_LIBRARY_PATH=/path/to/jurassic/libs/build/lib:$LD_LIBRARY_PATH</code></p>
+<p>The example scripts in <code>projects/</code> set this path automatically for
+the default bundled-library layout.</p>
+</div>
 <hr />
 <h2 id="next-steps">Next steps</h2>
 <p>Once JURASSIC is installed, proceed to the <a href="../quickstart/">Quickstart</a>
