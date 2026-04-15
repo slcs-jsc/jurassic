@@ -1658,13 +1658,13 @@ applications, parameters may optionally be overridden via <code>KEY VALUE</code>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p><strong>Notes</strong>
-- For <code>formod</code> and <code>kernel</code>, the filenames are usually <code>*.tab</code> files, but the
-  actual names are user-defined.
-- For <code>formod</code> and <code>kernel</code>, the control parameter <code>DIRLIST</code> can switch between
-  a single-directory and a multi-directory workflow.</p>
-</blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For <code>formod</code> and <code>kernel</code>, the filenames are usually <code>*.tab</code> files,
+but the actual names are user-defined.</p>
+<p>For <code>formod</code> and <code>kernel</code>, the control parameter <code>DIRLIST</code> can
+switch between a single-directory and a multi-directory workflow.</p>
+</div>
 <hr />
 <h2 id="running-a-forward-simulation-formod">Running a forward simulation (<code>formod</code>)</h2>
 <h3 id="single-run">Single run</h3>
@@ -1676,7 +1676,7 @@ applications, parameters may optionally be overridden via <code>KEY VALUE</code>
 <li>read observation geometry from <code>obs.tab</code>,</li>
 <li>read the atmospheric state from <code>atm.tab</code>,</li>
 <li>run the forward model,</li>
-<li>write simulated radiances to <code>rad.tab</code>.</li>
+<li>write simulated radiances or brightness temperatures to <code>rad.tab</code>.</li>
 </ul>
 <hr />
 <h3 id="multi-directory-run-with-dirlist">Multi-directory run with <code>DIRLIST</code></h3>
@@ -1688,10 +1688,37 @@ interpreted relative to that directory.</p>
 <pre><code class="language-bash"># in run.ctl:  DIRLIST dirlist.txt
 ./formod run.ctl obs.tab atm.tab rad.tab
 </code></pre>
+<p>A minimal directory layout for this workflow is:</p>
+<pre><code class="language-text">run.ctl
+dirlist.txt
+case_001/
+  obs.tab
+  atm.tab
+case_002/
+  obs.tab
+  atm.tab
+</code></pre>
+<p>with <code>dirlist.txt</code> containing:</p>
+<pre><code class="language-text">case_001
+case_002
+</code></pre>
+<p>For this example, JURASSIC reads <code>case_001/obs.tab</code> and
+<code>case_001/atm.tab</code>, writes <code>case_001/rad.tab</code>, and then repeats the same
+file-name pattern for <code>case_002</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Lookup tables are loaded once before the directory loop starts and
+then reused for all cases in the <code>DIRLIST</code> run. This avoids the
+expensive table-loading step for every individual case and is one of
+the main performance advantages of this workflow.</p>
+<p><code>TBLBASE</code> is therefore resolved relative to the directory where
+<code>formod</code> is launched, or as an absolute path, not relative to each
+case directory.</p>
+</div>
 <hr />
 <h2 id="running-kernel-calculations-kernel">Running kernel calculations (<code>kernel</code>)</h2>
-<p>Kernel calculations compute Jacobians (sensitivities) of radiances with
-respect to atmospheric/state variables.</p>
+<p>Kernel calculations compute Jacobians (sensitivities) of the simulated
+output with respect to atmospheric/state variables.</p>
 <pre><code class="language-bash">./kernel run.ctl obs.tab atm.tab kernel.tab
 </code></pre>
 <p>As with <code>formod</code>, <code>kernel</code> honors <code>DIRLIST</code> for multi-directory
@@ -1724,9 +1751,9 @@ directory list and provide:</p>
   SHARED_IO_OBS_FINAL_FILE obs_final.nc \
   SHARED_IO_MATRIX_KERNEL_FILE matrix_kernel.nc
 </code></pre>
-<p>In that shared-file mode, atmospheric and observation data use the
-profile index from <code>SHARED_IO_PROFLIST</code>, while matrix products use the same index
-as the netCDF dataset selector.</p>
+<p>In shared-file mode, the profile indices listed in <code>SHARED_IO_PROFLIST</code>
+select the records read from shared atmospheric and observation files and
+the records written to shared output files.</p>
 <p>At least one of the following must be provided:</p>
 <ul>
 <li>a directory list as the second positional argument, or</li>
@@ -1759,8 +1786,11 @@ used to distribute independent retrieval cases across MPI ranks.</p>
 </code></pre>
 <p>Each MPI rank processes a subset of directories from <code>dirlist.txt</code>. MPI
 ranks do not communicate during execution.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>Running non-retrieval executables (<code>formod</code>, <code>kernel</code>, tools) under
 <code>mpirun</code> provides no performance benefit.</p>
+</div>
 <hr />
 <h3 id="openmp-threading">OpenMP threading</h3>
 <p>OpenMP is used within a single process to accelerate computationally

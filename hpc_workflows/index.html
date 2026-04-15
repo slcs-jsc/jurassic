@@ -911,6 +911,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#example-mpi-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: MPI retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1406,6 +1417,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#example-mpi-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: MPI retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1540,7 +1562,7 @@ retrievals</strong> efficiently, reproducibly, and robustly.</p>
 benefit strongly from parallel execution.</p>
 <hr />
 <h2 id="directory-and-workflow-structure">Directory and workflow structure</h2>
-<p>A recommended directory layout for HPC workflows is:</p>
+<p>A recommended directory layout for directory-based HPC workflows is:</p>
 <pre><code class="language-text">project/
 ├── bin/            # JURASSIC executables
 ├── ctl/            # control files
@@ -1556,6 +1578,13 @@ benefit strongly from parallel execution.</p>
 </code></pre>
 <p>Separating input, output, and scripts simplifies automation and
 post-processing.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Large retrieval campaigns may instead use shared netCDF atmospheric,
+observation, and matrix files together with <code>SHARED_IO_PROFLIST</code>.
+This reduces the number of directories and small ASCII files that
+need to be managed by the file system.</p>
+</div>
 <hr />
 <h2 id="batch-job-submission">Batch job submission</h2>
 <h3 id="example-slurm-batch-script">Example: Slurm batch script</h3>
@@ -1586,7 +1615,8 @@ srun ./bin/formod ctl/run.ctl input/obs/obs.tab input/atm/atm.tab output/radianc
 <li>Use <strong>workflow-level parallelism</strong> or job arrays for independent forward-model runs.</li>
 <li>Use <strong>MPI</strong> only for retrieval workloads that process independent directory
   lists or shared-file profile lists.</li>
-<li>Use <strong>OpenMP</strong> to accelerate per-observation computations.</li>
+<li>Use <strong>OpenMP</strong> to accelerate selected computational loops, especially
+  source-function table initialization and kernel/Jacobian calculations.</li>
 <li>Avoid oversubscription (total threads &gt; physical cores).</li>
 </ul>
 <h3 id="example-configurations">Example configurations</h3>
@@ -1621,6 +1651,18 @@ srun ./bin/formod ctl/run.ctl input/obs/obs.tab input/atm/atm.tab output/radianc
 </tbody>
 </table>
 <p>Always benchmark representative workloads to find the optimal balance.</p>
+<h3 id="example-mpi-retrieval">Example: MPI retrieval</h3>
+<p>For retrieval workloads, MPI distributes independent retrieval cases
+across ranks:</p>
+<pre><code class="language-bash">export OMP_NUM_THREADS=4
+mpirun -np 8 ./bin/retrieval ctl/retrieval.ctl dirlist.txt
+</code></pre>
+<p>For shared-file retrieval workflows, pass <code>-</code> instead of a directory
+list and provide a profile-index list:</p>
+<pre><code class="language-bash">export OMP_NUM_THREADS=4
+mpirun -np 8 ./bin/retrieval ctl/retrieval.ctl - \
+  SHARED_IO_PROFLIST input/proflist.txt
+</code></pre>
 <hr />
 <h2 id="splitting-large-workloads">Splitting large workloads</h2>
 <p>Very large datasets are often split into <strong>independent chunks</strong> that
@@ -1640,6 +1682,8 @@ handled carefully.</p>
 <p>Recommendations:</p>
 <ul>
 <li>store LUTs on a <strong>fast parallel file system</strong>,</li>
+<li>prefer netCDF lookup tables for new workflows, because they use fast
+  packed I/O and group multiple channels into one file per gas,</li>
 <li>avoid duplicating large LUTs across directories,</li>
 <li>reuse LUTs across many jobs,</li>
 <li>verify LUT availability before job submission.</li>
@@ -1651,8 +1695,10 @@ performance.</p>
 <ul>
 <li>Write output to dedicated directories to avoid file-name collisions.</li>
 <li>Minimize diagnostic output for large production runs.</li>
-<li>Use compressed or binary formats for large matrix outputs when
-  possible.</li>
+<li>Use binary or netCDF matrix formats (<code>MATRIXFMT = 2</code> or <code>3</code>) for large
+  matrix outputs.</li>
+<li>Prefer shared netCDF workflows for large retrieval campaigns when
+  practical, to avoid thousands of small ASCII files and directories.</li>
 <li>Clean up temporary files in long-running workflows.</li>
 </ul>
 <hr />

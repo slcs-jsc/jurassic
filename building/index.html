@@ -1055,6 +1055,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mpi-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MPI support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#static-linking" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1434,6 +1445,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mpi-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MPI support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#static-linking" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1568,15 +1590,20 @@
 source using the provided <code>Makefile</code>. It is intended for developers and
 advanced users who want to compile JURASSIC themselves, change compiler
 flags, or enable optional build modes.</p>
-<blockquote>
-<p>If you are only looking for a "first run", see the <a href="../quickstart/">Quickstart</a>.
-For general setup and prerequisites, see <a href="../installation/">Installation</a>.</p>
-</blockquote>
+<p>Unless stated otherwise, the <code>make</code> commands on this page are run from
+the <code>src/</code> directory of the JURASSIC source tree.</p>
+<div class="admonition tip">
+<p class="admonition-title">First run</p>
+<p>If you are only looking for a first run, see the
+<a href="../quickstart/">Quickstart</a>. For general setup and prerequisites, see
+<a href="../installation/">Installation</a>.</p>
+</div>
 <hr />
 <h2 id="what-the-makefile-builds">What the Makefile builds</h2>
-<p>The top-level build produces a set of small executables (command-line
-tools) that are linked against the JURASSIC libraries in <code>../libs/build/</code>.
-The Makefile defines the executable list in the <code>EXC</code> variable.</p>
+<p>The build in <code>src/</code> produces a set of small executables (command-line
+tools) that are linked with the JURASSIC object code and the dependency
+libraries in <code>../libs/build/</code>. The Makefile defines the executable list
+in the <code>EXC</code> variable.</p>
 <p>Typical tools include drivers for:</p>
 <ul>
 <li>forward modelling (e.g. <code>formod</code>)</li>
@@ -1630,12 +1657,15 @@ script (the Makefile prints a pass/fail banner for each test).</p>
 </code></pre>
 <hr />
 <h2 id="important-build-variables">Important build variables</h2>
-<p>You can override Makefile variables on the command line. The most relevant
-ones are:</p>
+<p>You can override Makefile variables on the command line. For most local
+builds, prefer the high-level variables below over replacing <code>CFLAGS</code>
+directly.</p>
 <h3 id="compiler-and-flags">Compiler and flags</h3>
 <ul>
 <li><code>CC</code> - C compiler (default: <code>gcc</code>)</li>
-<li><code>CFLAGS</code> - compile flags</li>
+<li><code>CFLAGS</code> - compile flags; overriding this variable replaces the
+  Makefile defaults, including include paths, preprocessor definitions,
+  warning flags, and OpenMP flags</li>
 <li><code>LDFLAGS</code> - link flags</li>
 </ul>
 <p>Examples:</p>
@@ -1655,13 +1685,25 @@ make INFO=1
 make PROF=1
 make COV=1
 </code></pre>
+<h3 id="mpi-support">MPI support</h3>
+<ul>
+<li><code>MPI</code> (default: <code>0</code>) - if set to <code>1</code>, builds with MPI support enabled
+  and defines the <code>MPI</code> preprocessor macro</li>
+</ul>
+<pre><code class="language-bash">make MPI=1
+</code></pre>
+<p>When <code>MPI=1</code>, the Makefile uses <code>mpicc</code> unless <code>CC</code> is set explicitly.
+MPI-specific runtime behavior is implemented only in the retrieval
+executable, but the full tool suite is rebuilt with the selected MPI
+compiler wrapper.</p>
 <h3 id="static-linking">Static linking</h3>
 <ul>
 <li><code>STATIC</code> (default: <code>0</code>) - if set to <code>1</code>, attempts to add <code>-static</code></li>
 </ul>
 <pre><code class="language-bash">make STATIC=1
 </code></pre>
-<p>Note: the Makefile explicitly prevents static builds when <code>UNIFIED=1</code>.</p>
+<p>Note: the Makefile explicitly prevents static builds when <code>MPI=1</code> or
+<code>UNIFIED=1</code>.</p>
 <h3 id="library-paths">Library paths</h3>
 <p>The build expects headers and libraries under:</p>
 <ul>
@@ -1696,7 +1738,9 @@ make UNIFIED=1
 <p>The Makefile provides several targets that are helpful for development:</p>
 <ul>
 <li><code>make clean</code> - remove build products (executables, objects, coverage files)</li>
-<li><code>make doxygen</code> - build Doxygen documentation</li>
+<li><code>make doxygen</code> - build local Doxygen documentation; the hosted
+  <a href="https://slcs-jsc.github.io/jurassic/doxygen/">Doxygen manual</a> is also
+  available online</li>
 <li><code>make mkdocs</code> - build MkDocs documentation (runs <code>mkdocs build</code> in <code>../docs</code>)</li>
 <li><code>make cppcheck</code> - run static analysis (requires <code>cppcheck</code>)</li>
 <li><code>make indent</code> - apply code formatting rules (requires <code>indent</code>)</li>

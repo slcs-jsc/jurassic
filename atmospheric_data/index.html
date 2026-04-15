@@ -656,10 +656,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#general-format-rules" class="md-nav__link">
+  <a href="#ascii-format-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        General format rules
+        ASCII format rules
       
     </span>
   </a>
@@ -726,6 +726,17 @@
     <span class="md-ellipsis">
       
         Optional: surface parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#netcdf-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        netCDF format
       
     </span>
   </a>
@@ -1311,10 +1322,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#general-format-rules" class="md-nav__link">
+  <a href="#ascii-format-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        General format rules
+        ASCII format rules
       
     </span>
   </a>
@@ -1388,6 +1399,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#netcdf-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        netCDF format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#example-schematic" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1452,10 +1474,12 @@
 
 
 <h1 id="atmospheric-data">Atmospheric data</h1>
-<p>This page describes the atmospheric input data used by JURASSIC,
-typically provided in a file named <code>atm.tab</code>. The atmospheric data file
-defines the thermodynamic and compositional state of the atmosphere used
-for radiative transfer and retrieval calculations.</p>
+<p>This page describes the atmospheric input data used by JURASSIC. In the
+example projects this is typically an ASCII file named <code>atm.tab</code>, but
+JURASSIC can also read and write atmospheric profiles in netCDF format.
+The atmospheric data file defines the thermodynamic and compositional
+state of the atmosphere used for radiative transfer and retrieval
+calculations.</p>
 <p>In JURASSIC, the atmospheric data represent the <strong>model state</strong>, while
 observation geometry and radiances are handled separately (see
 <a href="../radiance_data/">Observation and radiance files</a>).</p>
@@ -1478,14 +1502,29 @@ parameter:</p>
 <ul>
 <li><code>ATMFMT</code></li>
 </ul>
-<p>The description below refers to the <strong>default ASCII format</strong>, typically
-used with:</p>
+<p>The <strong>default ASCII format</strong> is selected with:</p>
 <pre><code class="language-text">ATMFMT = 1
 </code></pre>
 <p>This is the format used in the example projects distributed with
-JURASSIC.</p>
+JURASSIC and is described first below.</p>
+<p>JURASSIC also supports:</p>
+<ul>
+<li><code>ATMFMT = 2</code> for the compact binary format used by JURASSIC,</li>
+<li><code>ATMFMT = 3</code> for netCDF files.</li>
+</ul>
+<p>The netCDF format is useful for workflows that manage many atmospheric
+profiles in one file, for example shared-input or retrieval workflows
+that select profiles by index.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>ATMFMT = 2</code> selects the JURASSIC C binary format. It was implemented
+for workflows where file-I/O performance is critical, because reading
+and writing ASCII tables can be much slower than binary I/O. For new
+workflows, users are generally encouraged to use the netCDF format
+instead.</p>
+</div>
 <hr />
-<h2 id="general-format-rules">General format rules</h2>
+<h2 id="ascii-format-rules">ASCII format rules</h2>
 <ul>
 <li>The file is a plain-text ASCII table.</li>
 <li>Columns are separated by spaces or tabs.</li>
@@ -1495,7 +1534,7 @@ JURASSIC.</p>
 </ul>
 <hr />
 <h2 id="units-and-conventions">Units and conventions</h2>
-<p>The default atmospheric reader expects the following units:</p>
+<p>The atmospheric readers expect the following units:</p>
 <table>
 <thead>
 <tr>
@@ -1600,6 +1639,177 @@ first row only.</p>
 <p>If surface effects are not required, the default configuration should
 be used and these fields omitted.</p>
 <hr />
+<h2 id="netcdf-format">netCDF format</h2>
+<p>For <code>ATMFMT = 3</code>, JURASSIC expects a netCDF file with a profile
+dimension and a level dimension. A single file may contain several
+profiles; applications select the desired zero-based profile index when
+reading the file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A major advantage of the netCDF format is that many atmospheric
+profiles can be stored in a single file. This avoids many of the
+file-system problems that can occur when large runs are organized as
+thousands of directories containing small ASCII files.</p>
+</div>
+<p>The standard JURASSIC writer creates the dimensions:</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>profile</code></td>
+<td>atmospheric profile index</td>
+</tr>
+<tr>
+<td><code>level</code></td>
+<td>vertical grid level</td>
+</tr>
+</tbody>
+</table>
+<p>The variable <code>nlev</code> gives the number of valid vertical levels for each
+profile. Variables that depend on height use the dimensions
+<code>profile, level</code>; profile-level cloud and surface parameters use only
+the <code>profile</code> dimension.</p>
+<p>The required core variables are:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Unit</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nlev</code></td>
+<td>1</td>
+<td>number of vertical levels</td>
+</tr>
+<tr>
+<td><code>time</code></td>
+<td>s</td>
+<td>time in seconds since 2000-01-01, 00:00 UTC</td>
+</tr>
+<tr>
+<td><code>z</code></td>
+<td>km</td>
+<td>altitude</td>
+</tr>
+<tr>
+<td><code>lon</code></td>
+<td>degrees_east</td>
+<td>longitude</td>
+</tr>
+<tr>
+<td><code>lat</code></td>
+<td>degrees_north</td>
+<td>latitude</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td>hPa</td>
+<td>pressure</td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>K</td>
+<td>temperature</td>
+</tr>
+</tbody>
+</table>
+<p>Trace-gas variables are named exactly as the emitters in the control
+file. For example:</p>
+<pre><code class="language-text">NG = 2
+EMITTER[0] = CO2
+EMITTER[1] = H2O
+</code></pre>
+<p>requires netCDF variables named <code>CO2</code> and <code>H2O</code>, both in units of
+volume mixing ratio (<code>ppv</code>). The order is still defined by the control
+file, but the netCDF reader finds the data by variable name.</p>
+<p>Extinction variables are named by spectral window:</p>
+<pre><code class="language-text">ext_win_0
+ext_win_1
+...
+ext_win_&lt;NW-1&gt;
+</code></pre>
+<p>The number of variables must match <code>NW</code>.</p>
+<p>If cloud-layer parameters are enabled with <code>NCL &gt; 0</code>, the netCDF file
+must also contain:</p>
+<ul>
+<li><code>cld_z</code> for cloud-layer height in km,</li>
+<li><code>cld_dz</code> for cloud-layer depth in km,</li>
+<li><code>cld_k_&lt;wavenumber&gt;</code> for cloud-layer extinction at each <code>CLNU[i]</code>.</li>
+</ul>
+<p>For example, <code>CLNU[0] = 800.0000</code> corresponds to a variable named
+<code>cld_k_800.0000</code>.</p>
+<p>If surface parameters are enabled with <code>NSF &gt; 0</code>, the netCDF file must
+also contain:</p>
+<ul>
+<li><code>srf_t</code> for surface temperature in K,</li>
+<li><code>srf_eps_&lt;wavenumber&gt;</code> for surface emissivity at each <code>SFNU[i]</code>.</li>
+</ul>
+<p>For example, <code>SFNU[0] = 925.0000</code> corresponds to a variable named
+<code>srf_eps_925.0000</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The control file and the netCDF file must describe the same
+quantities. In particular, <code>NG</code>, <code>EMITTER[i]</code>, <code>NW</code>, <code>NCL</code>, <code>CLNU[i]</code>,
+<code>NSF</code>, and <code>SFNU[i]</code> determine which netCDF variables JURASSIC will
+look for.</p>
+</div>
+<p>A compact <code>ncdump -h</code>-style skeleton for <code>NG = 2</code>, <code>NW = 1</code>, <code>NCL = 1</code>,
+and <code>NSF = 1</code> could look like:</p>
+<pre><code class="language-text">netcdf atm {
+dimensions:
+  profile = UNLIMITED ;
+  level = 121 ;
+
+variables:
+  int nlev(profile) ;
+    nlev:long_name = &quot;number of vertical levels&quot; ;
+    nlev:units = &quot;1&quot; ;
+
+  double time(profile, level) ;
+    time:units = &quot;s&quot; ;
+  double z(profile, level) ;
+    z:units = &quot;km&quot; ;
+  double lon(profile, level) ;
+    lon:units = &quot;degrees_east&quot; ;
+  double lat(profile, level) ;
+    lat:units = &quot;degrees_north&quot; ;
+  double p(profile, level) ;
+    p:units = &quot;hPa&quot; ;
+  double t(profile, level) ;
+    t:units = &quot;K&quot; ;
+
+  double CO2(profile, level) ;
+    CO2:units = &quot;ppv&quot; ;
+  double H2O(profile, level) ;
+    H2O:units = &quot;ppv&quot; ;
+
+  double ext_win_0(profile, level) ;
+    ext_win_0:units = &quot;km**-1&quot; ;
+
+  double cld_z(profile) ;
+    cld_z:units = &quot;km&quot; ;
+  double cld_dz(profile) ;
+    cld_dz:units = &quot;km&quot; ;
+  double cld_k_800.0000(profile) ;
+    cld_k_800.0000:units = &quot;km**-1&quot; ;
+
+  double srf_t(profile) ;
+    srf_t:units = &quot;K&quot; ;
+  double srf_eps_925.0000(profile) ;
+    srf_eps_925.0000:units = &quot;1&quot; ;
+}
+</code></pre>
+<p>Cloud and surface variables are only required when the corresponding
+options are enabled in the control file.</p>
+<hr />
 <h2 id="example-schematic">Example (schematic)</h2>
 <p>For <code>NG = 2</code> emitters and <code>NW = 1</code> spectral window, a single profile row
 might look like:</p>
@@ -1619,11 +1829,12 @@ might look like:</p>
 unexpected results.</p>
 <hr />
 <h2 id="summary">Summary</h2>
-<p>The atmospheric data file (<code>atm.tab</code>) defines the thermodynamic and
-compositional state of the atmosphere used by JURASSIC. It is independent
-of the observation geometry and radiance data and should be prepared
-carefully to ensure physically meaningful and numerically stable
-results.</p>
+<p>The atmospheric data file defines the thermodynamic and compositional
+state of the atmosphere used by JURASSIC. It is independent of the
+observation geometry and radiance data and should be prepared carefully
+to ensure physically meaningful and numerically stable results. The
+ASCII format is convenient for small examples and inspection, while the
+netCDF format is better suited to multi-profile workflows.</p>
 <hr />
 <h2 id="related-pages">Related pages</h2>
 <ul>

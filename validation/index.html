@@ -1421,6 +1421,9 @@ models, including:</p>
 <p>Results demonstrate that JURASSIC reproduces reference-model radiances,
 Jacobians, and retrieval-relevant quantities within the accuracy
 expected from its spectral approximations.</p>
+<p>Published validation and application studies are listed on the
+<a href="../references/">References</a> page, including comparisons with KOPRA and
+retrieval studies using satellite observations.</p>
 <hr />
 <h2 id="validation-of-spectral-approximations">Validation of spectral approximations</h2>
 <p>Particular attention has been given to validating the:</p>
@@ -1466,7 +1469,7 @@ tests.</p>
 </ul>
 <p>Running these examples after installation is the recommended way to
 verify that JURASSIC is functioning correctly on a given system.</p>
-<p>Example projects are typically executed via:</p>
+<p>From the repository root, example projects are typically executed via:</p>
 <pre><code class="language-bash">cd projects/limb
 ./run.sh
 </code></pre>
@@ -1474,12 +1477,37 @@ verify that JURASSIC is functioning correctly on a given system.</p>
 <hr />
 <h2 id="automated-test-suite">Automated test suite</h2>
 <p>In addition to example projects, the build system provides a test
-target:</p>
+target. From the <code>src/</code> directory, run:</p>
 <pre><code class="language-bash">make check
 </code></pre>
 <p>This target runs a predefined set of tests and reports pass/fail
 status. These tests are intended to catch regressions caused by code
 changes or build-system issues.</p>
+<p>The default <code>make check</code> target currently runs the following suites from
+<code>tests/</code>:</p>
+<ul>
+<li><code>cli_test</code> - command-line behavior and help output for all executables</li>
+<li><code>tools_test</code> - small utility programs such as time conversion and
+  Planck/brightness-temperature tools</li>
+<li><code>atm_test</code> - atmospheric-profile generation, interpolation, hydrostatic
+  adjustment, and format conversion</li>
+<li><code>mat_test</code> - matrix input/output and format conversion</li>
+<li><code>obs_test</code> - observation geometry, ray tracing, and observation format
+  conversion</li>
+<li><code>tbl_test</code> - filter functions, lookup tables, and table format
+  conversion</li>
+<li><code>formod_test</code> - limb, nadir, and zenith forward-model calculations and
+  kernels</li>
+<li><code>ret_test</code> - retrieval workflow checks, including shared netCDF input
+  and output</li>
+</ul>
+<p>Most regression tests generate fresh output files and compare them with
+checked-in reference files under the corresponding <code>data.ref/</code>
+directory. This makes the test suite useful for detecting unintended
+changes in numerical output, file-format behavior, and command-line
+interfaces.</p>
+<p>An additional <code>mpi_test</code> suite is available for MPI-enabled retrieval
+checks, but it is not part of the default <code>make check</code> target.</p>
 <hr />
 <h2 id="numerical-reproducibility">Numerical reproducibility</h2>
 <p>Due to floating-point arithmetic and parallel execution, JURASSIC does
@@ -1489,9 +1517,11 @@ not guarantee bitwise-identical results across:</p>
 <li>different MPI/OpenMP configurations,</li>
 <li>different hardware architectures.</li>
 </ul>
-<p>However, numerical differences are typically small and do not affect
-scientific conclusions. Validation should therefore focus on physical
-and statistical consistency rather than exact numerical identity.</p>
+<p>The regression tests use exact file comparisons for controlled test
+setups and supported reference outputs. For broader user workflows,
+small numerical differences may occur across compilers, hardware, and
+parallel configurations. Validation should therefore focus on physical
+and statistical consistency rather than bitwise identity alone.</p>
 <hr />
 <h2 id="user-level-validation-recommendations">User-level validation recommendations</h2>
 <p>Users are encouraged to perform application-specific validation by:</p>
@@ -1517,7 +1547,7 @@ application-specific validation as needed.</p>
 <h2 id="related-pages">Related pages</h2>
 <ul>
 <li><a href="../performance/">Performance considerations</a></li>
-<li><a href="../quickstart/">Testing and examples</a></li>
+<li><a href="../quickstart/">Quickstart examples</a></li>
 <li><a href="../limitations/">Model assumptions &amp; limitations</a></li>
 </ul>
 

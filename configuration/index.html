@@ -761,10 +761,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#line-by-line-rfm-integration-hooks" class="md-nav__link">
+  <a href="#line-by-line-reference-forward-model-rfm-integration-hooks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Line-by-line / RFM integration hooks
+        Line-by-line / Reference Forward Model (RFM) integration hooks
       
     </span>
   </a>
@@ -1578,10 +1578,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#line-by-line-rfm-integration-hooks" class="md-nav__link">
+  <a href="#line-by-line-reference-forward-model-rfm-integration-hooks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Line-by-line / RFM integration hooks
+        Line-by-line / Reference Forward Model (RFM) integration hooks
       
     </span>
   </a>
@@ -1664,20 +1664,24 @@
 
 
 <h1 id="configuration">Configuration</h1>
-<p>JURASSIC is configured through a <strong>control file</strong> (often called <code>*.ctl</code>) and optional <strong>command-line overrides</strong>.
-Most applications in the repository (e.g. forward model, kernel, retrieval tools) share the same control-parameter
-infrastructure and populate a <code>ctl_t</code> structure internally.</p>
+<p>JURASSIC is configured through a <strong>control file</strong> (often called <code>*.ctl</code>)
+and optional <strong>command-line overrides</strong>. Most applications in the
+repository, such as the forward model, kernel, and retrieval tools, use
+the same control-file syntax and keyword names.</p>
 <p>This page documents the configuration <strong>syntax</strong> and the most important <strong>control keywords</strong>.</p>
 <hr />
 <h2 id="control-file-syntax">Control file syntax</h2>
 <h3 id="basic-format">Basic format</h3>
 <p>JURASSIC reads a control file from the <strong>first command-line argument</strong> if it does <strong>not</strong> start with <code>-</code>.
-Each non-empty line is interpreted as:</p>
+Lines starting with <code>#</code> are treated as comments and ignored. Each other
+non-empty line is interpreted as:</p>
 <pre><code class="language-text">KEY = VALUE
 </code></pre>
-<p>Internally, this is parsed by reading three tokens (<code>KEY</code>, a dummy token such as <code>=</code>, and <code>VALUE</code>).</p>
+<p>The separator is required but otherwise only serves to separate the key
+from the value.</p>
 <h3 id="arrays-and-wildcards">Arrays and wildcards</h3>
-<p>Many parameters are arrays (e.g. <code>NU[0]</code>, <code>EMITTER[1]</code>). The parser supports:</p>
+<p>Many parameters are arrays (e.g. <code>NU[0]</code>, <code>EMITTER[1]</code>). Array indices
+are zero-based, so the first entry is index <code>0</code>. You can use:</p>
 <ul>
 <li><code>KEY[i] = VALUE</code> for a specific index <code>i</code></li>
 <li><code>KEY[*] = VALUE</code> as a <strong>default for all indices</strong></li>
@@ -1688,11 +1692,12 @@ values, put the index-specific entries before the wildcard entry.
 Command-line overrides are evaluated after the control file and can
 therefore override both exact and wildcard entries.</p>
 <p>Examples:</p>
-<pre><code class="language-text">NU[0] = 925.0
-NU[*] = 1000.0
+<pre><code class="language-text">WINDOW[3] = 1
+WINDOW[*] = 0
 
-EMITTER[1] = H2O
-EMITTER[*] = CO2
+RETQ_ZMAX[1] = 60
+RETQ_ZMIN[*] = 0
+RETQ_ZMAX[*] = 80
 </code></pre>
 <h3 id="command-line-overrides">Command-line overrides</h3>
 <p>All control keywords can also be provided on the command line as pairs:</p>
@@ -1703,7 +1708,7 @@ EMITTER[*] = CO2
 <h2 id="key-concepts">Key concepts</h2>
 <p>Most JURASSIC applications follow the same high-level flow:</p>
 <ol>
-<li>Read control parameters (<code>read_ctl()</code> → <code>ctl_t</code>)</li>
+<li>Read control parameters</li>
 <li>Read observation geometry (from application inputs interpreted using <code>OBSFMT</code>)</li>
 <li>Read atmospheric profiles (from application inputs interpreted using <code>ATMFMT</code>)</li>
 <li>Configure spectral definition (channels + spectral windows + lookup tables)</li>
@@ -1712,7 +1717,8 @@ EMITTER[*] = CO2
 </ol>
 <hr />
 <h2 id="control-keywords">Control keywords</h2>
-<p>Below is a practical overview of the control keywords evaluated by <code>read_ctl()</code> and their default values.
+<p>Below is a practical overview of commonly used control keywords and
+their default values.
 “Array” means that the keyword is indexed, e.g. <code>NU[0]</code>.</p>
 <h3 id="emitters-and-gases">Emitters and gases</h3>
 <p>These control which gases/emitters are considered in radiative transfer.</p>
@@ -1726,9 +1732,11 @@ EMITTER[*] = CO2
   Name of emitter <em>i</em> (e.g. <code>CO2</code>, <code>H2O</code>, ...).</p>
 </li>
 </ul>
-<blockquote>
-<p>Tip: You typically choose emitters that have lookup tables available under your <code>TBLBASE</code>.</p>
-</blockquote>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You typically choose emitters that have lookup tables available under
+your <code>TBLBASE</code>.</p>
+</div>
 <h3 id="spectral-channels-and-windows">Spectral channels and windows</h3>
 <p>Channels are detector wavenumbers (or band centers) and each channel belongs to a spectral window.</p>
 <ul>
@@ -1795,14 +1803,18 @@ EMITTER[*] = CO2
   Observation geometry file format selector.</p>
 </li>
 </ul>
-<blockquote>
-<p>Notes:
-- In the example projects, the formats and table layout are chosen to match the provided <code>atm.tab</code>, <code>obs.tab</code>,
-  <code>rad.tab</code>, and associated lookup tables.
-- For <code>TBLFMT = 3</code>, JURASSIC stores one netCDF file per emitter and one packed
-  lookup-table variable per channel inside that file.
-- If you introduce new formats, keep the “format selectors” consistent across applications.</p>
-</blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The format selectors must match the files you provide. For example,
+<code>ATMFMT</code> must match the atmosphere file, <code>OBSFMT</code> must match the
+observation file, and <code>TBLFMT</code> must match the lookup-table files
+under <code>TBLBASE</code>.</p>
+<p>With <code>TBLFMT = 3</code>, lookup tables are read from netCDF files. In this
+layout, JURASSIC expects one netCDF file per emitter and one packed
+lookup-table variable per channel inside that file.</p>
+<p>When the same files are used by several tools, use the same format
+selectors in each control file or command-line override.</p>
+</div>
 <h3 id="hydrostasy">Hydrostasy</h3>
 <ul>
 <li><code>HYDZ</code> <em>(default: <code>-999</code>)</em><br />
@@ -1880,7 +1892,7 @@ retrieval application and state-vector definition.)</p>
 <ul>
 <li>
 <p><code>WRITE_BBT</code> <em>(default: <code>0</code>)</em><br />
-  Write brightness temperature output (if applicable).</p>
+  Write brightness temperatures instead of radiances, where applicable.</p>
 </li>
 <li>
 <p><code>WRITE_MATRIX</code> <em>(default: <code>0</code>)</em><br />
@@ -1893,8 +1905,10 @@ retrieval application and state-vector definition.)</p>
   Select the forward model implementation / backend (application-specific).
   Keep the default unless you explicitly built and intend to use an alternative backend.</li>
 </ul>
-<h3 id="line-by-line-rfm-integration-hooks">Line-by-line / RFM integration hooks</h3>
-<p>Some workflows use external line-by-line assets or tools (e.g. for table generation). These parameters provide paths.</p>
+<h3 id="line-by-line-reference-forward-model-rfm-integration-hooks">Line-by-line / Reference Forward Model (RFM) integration hooks</h3>
+<p>Some workflows use external line-by-line assets or tools, for example
+the <a href="https://eodg.atm.ox.ac.uk/RFM/">Reference Forward Model (RFM)</a> for
+table generation. These parameters provide paths.</p>
 <ul>
 <li>
 <p><code>RFMBIN</code> <em>(default: <code>-</code>)</em><br />
@@ -1913,35 +1927,28 @@ retrieval application and state-vector definition.)</p>
 <h2 id="minimal-examples">Minimal examples</h2>
 <h3 id="forward-simulation-single-window">Forward simulation (single window)</h3>
 <pre><code class="language-text"># minimal_forward.ctl
-NG = 2
+
+# Lookup-table prefix.
+TBLBASE = ../tests/data/airs
+
+# Active emitters.
+NG = 1
 EMITTER[0] = CO2
-EMITTER[1] = H2O
 
+# Spectral channels.
 ND = 3
-NU[0] = 930.0
-NU[1] = 950.0
-NU[2] = 970.0
-WINDOW[*] = 0
-NW = 1
+NU[0] = 667.7820
+NU[1] = 668.5410
+NU[2] = 669.8110
 
-TBLBASE = tables/midlat_example
-TBLFMT  = 1
-
-ATMFMT = 1
-OBSFMT = 1
-
-REFRAC = 1
-RAYDS  = 10
-RAYDZ  = 0.1
-
-CTM_CO2 = 1
-CTM_H2O = 1
-CTM_N2  = 1
-CTM_O2  = 1
+# Write brightness temperatures instead of radiances.
+WRITE_BBT = 1
 </code></pre>
-<p>Run (example):</p>
+<p>Run from <code>src/</code> with compatible <code>obs.tab</code> and <code>atm.tab</code> files:</p>
 <pre><code class="language-bash">./formod minimal_forward.ctl obs.tab atm.tab rad.tab
 </code></pre>
+<p>For a complete runnable setup, start from the example projects described
+in the <a href="../quickstart/">Quickstart</a>.</p>
 <h3 id="overriding-parameters-on-the-command-line">Overriding parameters on the command line</h3>
 <pre><code class="language-bash">./formod minimal_forward.ctl obs.tab atm.tab rad.tab RAYDS 5 REFRAC 0
 </code></pre>

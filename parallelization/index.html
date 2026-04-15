@@ -1593,19 +1593,23 @@ tuning.</p>
 </li>
 </ul>
 <p>There is no general hybrid MPI–OpenMP execution model across the full
-tool suite. MPI is currently implemented only in the retrieval code.</p>
+tool suite. MPI-specific runtime behavior is currently implemented only
+in the retrieval executable.</p>
 <hr />
 <h2 id="mpi-parallelization">MPI parallelization</h2>
 <h3 id="scope-of-mpi-support">Scope of MPI support</h3>
-<p>MPI parallelization is implemented exclusively in the retrieval
-executable. No forward models, tools, or utilities use MPI internally.</p>
+<p>MPI-specific runtime behavior is implemented exclusively in the
+retrieval executable. Other executables may be built with the MPI
+compiler wrapper when <code>MPI=1</code> is used, but they do not distribute work
+with MPI at runtime.</p>
 <p>MPI support is optional and enabled at compile time.</p>
 <hr />
 <h3 id="what-is-parallelized">What is parallelized?</h3>
 <p>At the MPI level, retrieval runs are parallelized over:</p>
 <ul>
-<li>independent retrieval cases,</li>
-<li>observation directories or datasets.</li>
+<li>independent retrieval cases listed in <code>DIRLIST</code>,</li>
+<li>profile indices listed in <code>SHARED_IO_PROFLIST</code> for shared-file
+  workflows.</li>
 </ul>
 <p>Each MPI rank processes a disjoint subset of retrieval tasks.</p>
 <hr />
@@ -1614,7 +1618,10 @@ executable. No forward models, tools, or utilities use MPI internally.</p>
 <li>MPI is used only for task distribution.</li>
 <li>There is no communication between MPI ranks during the retrieval.</li>
 <li>No domain decomposition or collective algorithms are employed.</li>
-<li>Each rank performs its own I/O.</li>
+<li>In directory-list mode, each rank reads and writes its assigned working
+  directories.</li>
+<li>In shared-file mode, ranks read and write selected profile records from
+  common files; output writes are serialized with file locking.</li>
 </ul>
 <p>This design is robust and scales well for large numbers of independent
 retrievals.</p>
@@ -1622,17 +1629,21 @@ retrievals.</p>
 <h3 id="typical-usage-retrieval-only">Typical usage (retrieval only)</h3>
 <pre><code class="language-bash">mpirun -np 16 ./retrieval ctl/retrieval.ctl dirlist.txt
 </code></pre>
+<p>Shared-file/profile-list retrievals can also be run under MPI. In that
+mode, pass <code>-</code> instead of a directory list and configure
+<code>SHARED_IO_PROFLIST</code> and the corresponding shared input/output files:</p>
+<pre><code class="language-bash">mpirun -np 16 ./retrieval run.ctl - SHARED_IO_PROFLIST proflist.txt
+</code></pre>
 <p>Running non-retrieval executables under <code>mpirun</code> provides no performance
 benefit.</p>
 <hr />
 <h2 id="openmp-parallelization">OpenMP parallelization</h2>
 <h3 id="what-is-parallelized_1">What is parallelized?</h3>
-<p>OpenMP is used to accelerate computationally intensive loops within a
-single process, such as:</p>
+<p>OpenMP is used to accelerate selected computationally intensive loops
+within a single process, especially:</p>
 <ul>
-<li>radiative transfer calculations,</li>
-<li>spectral loops,</li>
-<li>internal numerical kernels.</li>
+<li>source-function table initialization,</li>
+<li>kernel/Jacobian finite-difference calculations.</li>
 </ul>
 <p>OpenMP is available in both retrieval and non-retrieval executables.</p>
 <hr />
@@ -1655,8 +1666,8 @@ mpirun -np 8 ./retrieval ctl/retrieval.ctl dirlist.txt
 <p>This configuration uses up to 32 CPU cores in total.</p>
 <hr />
 <h2 id="load-balancing-considerations">Load balancing considerations</h2>
-<p>Since MPI distributes tasks statically, load balance depends on the
-uniformity of retrieval cases.</p>
+<p>MPI distributes retrieval tasks statically in a round-robin pattern.
+Load balance therefore depends on the uniformity of retrieval cases.</p>
 <p>Potential imbalance sources include:</p>
 <ul>
 <li>varying convergence behavior,</li>
@@ -1676,6 +1687,8 @@ uniformity of retrieval cases.</p>
 <ul>
 <li>store lookup tables on fast parallel file systems,</li>
 <li>ensure unique output paths for each MPI rank,</li>
+<li>use shared netCDF files for large campaigns when practical, to avoid
+  thousands of small ASCII files and directories,</li>
 <li>minimize diagnostic output in large runs,</li>
 <li>reuse lookup tables across many retrievals.</li>
 </ul>
