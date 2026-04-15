@@ -1,5 +1,6 @@
 bin/
 docs/docs/
+docs/manual/javascripts/
 docs/site/
 libs/build/
 projects/*
