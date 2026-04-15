@@ -1,8 +1,9 @@
 # Configuration
 
-JURASSIC is configured through a **control file** (often called `*.ctl`) and optional **command-line overrides**.
-Most applications in the repository (e.g. forward model, kernel, retrieval tools) share the same control-parameter
-infrastructure and populate a `ctl_t` structure internally.
+JURASSIC is configured through a **control file** (often called `*.ctl`)
+and optional **command-line overrides**. Most applications in the
+repository, such as the forward model, kernel, and retrieval tools, use
+the same control-file syntax and keyword names.
 
 This page documents the configuration **syntax** and the most important **control keywords**.
 
@@ -13,17 +14,20 @@ This page documents the configuration **syntax** and the most important **contro
 ### Basic format
 
 JURASSIC reads a control file from the **first command-line argument** if it does **not** start with `-`.
-Each non-empty line is interpreted as:
+Lines starting with `#` are treated as comments and ignored. Each other
+non-empty line is interpreted as:
 
 ```text
 KEY = VALUE
 ```
 
-Internally, this is parsed by reading three tokens (`KEY`, a dummy token such as `=`, and `VALUE`).
+The separator is required but otherwise only serves to separate the key
+from the value.
 
 ### Arrays and wildcards
 
-Many parameters are arrays (e.g. `NU[0]`, `EMITTER[1]`). The parser supports:
+Many parameters are arrays (e.g. `NU[0]`, `EMITTER[1]`). Array indices
+are zero-based, so the first entry is index `0`. You can use:
 
 - `KEY[i] = VALUE` for a specific index `i`
 - `KEY[*] = VALUE` as a **default for all indices**
@@ -37,11 +41,12 @@ therefore override both exact and wildcard entries.
 Examples:
 
 ```text
-NU[0] = 925.0
-NU[*] = 1000.0
+WINDOW[3] = 1
+WINDOW[*] = 0
 
-EMITTER[1] = H2O
-EMITTER[*] = CO2
+RETQ_ZMAX[1] = 60
+RETQ_ZMIN[*] = 0
+RETQ_ZMAX[*] = 80
 ```
 
 ### Command-line overrides
@@ -60,7 +65,7 @@ Command-line values override values from the control file.
 
 Most JURASSIC applications follow the same high-level flow:
 
-1. Read control parameters (`read_ctl()` → `ctl_t`)
+1. Read control parameters
 2. Read observation geometry (from application inputs interpreted using `OBSFMT`)
 3. Read atmospheric profiles (from application inputs interpreted using `ATMFMT`)
 4. Configure spectral definition (channels + spectral windows + lookup tables)
@@ -71,7 +76,8 @@ Most JURASSIC applications follow the same high-level flow:
 
 ## Control keywords
 
-Below is a practical overview of the control keywords evaluated by `read_ctl()` and their default values.
+Below is a practical overview of commonly used control keywords and
+their default values.
 “Array” means that the keyword is indexed, e.g. `NU[0]`.
 
 ### Emitters and gases
@@ -84,7 +90,9 @@ These control which gases/emitters are considered in radiative transfer.
 - `EMITTER[i]` *(array, default: required if `NG>0`)*  
   Name of emitter *i* (e.g. `CO2`, `H2O`, ...).
 
-> Tip: You typically choose emitters that have lookup tables available under your `TBLBASE`.
+!!! tip
+    You typically choose emitters that have lookup tables available under
+    your `TBLBASE`.
 
 ### Spectral channels and windows
 
@@ -140,12 +148,18 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
 - `OBSFMT` *(default: `1`)*  
   Observation geometry file format selector.
 
-> Notes:
-> - In the example projects, the formats and table layout are chosen to match the provided `atm.tab`, `obs.tab`,
->   `rad.tab`, and associated lookup tables.
-> - For `TBLFMT = 3`, JURASSIC stores one netCDF file per emitter and one packed
->   lookup-table variable per channel inside that file.
-> - If you introduce new formats, keep the “format selectors” consistent across applications.
+!!! note
+    The format selectors must match the files you provide. For example,
+    `ATMFMT` must match the atmosphere file, `OBSFMT` must match the
+    observation file, and `TBLFMT` must match the lookup-table files
+    under `TBLBASE`.
+
+    With `TBLFMT = 3`, lookup tables are read from netCDF files. In this
+    layout, JURASSIC expects one netCDF file per emitter and one packed
+    lookup-table variable per channel inside that file.
+
+    When the same files are used by several tools, use the same format
+    selectors in each control file or command-line override.
 
 ### Hydrostasy
 
@@ -215,7 +229,7 @@ retrieval application and state-vector definition.)
 ### Output control
 
 - `WRITE_BBT` *(default: `0`)*  
-  Write brightness temperature output (if applicable).
+  Write brightness temperatures instead of radiances, where applicable.
 
 - `WRITE_MATRIX` *(default: `0`)*  
   Write retrieval matrices (e.g. Jacobian/averaging kernel/error covariance), where supported.
@@ -226,9 +240,11 @@ retrieval application and state-vector definition.)
   Select the forward model implementation / backend (application-specific).
   Keep the default unless you explicitly built and intend to use an alternative backend.
 
-### Line-by-line / RFM integration hooks
+### Line-by-line / Reference Forward Model (RFM) integration hooks
 
-Some workflows use external line-by-line assets or tools (e.g. for table generation). These parameters provide paths.
+Some workflows use external line-by-line assets or tools, for example
+the [Reference Forward Model (RFM)](https://eodg.atm.ox.ac.uk/RFM/) for
+table generation. These parameters provide paths.
 
 - `RFMBIN` *(default: `-`)*  
   Path to the RFM binary (if used).
@@ -247,38 +263,32 @@ Some workflows use external line-by-line assets or tools (e.g. for table generat
 
 ```text
 # minimal_forward.ctl
-NG = 2
+
+# Lookup-table prefix.
+TBLBASE = ../tests/data/airs
+
+# Active emitters.
+NG = 1
 EMITTER[0] = CO2
-EMITTER[1] = H2O
 
+# Spectral channels.
 ND = 3
-NU[0] = 930.0
-NU[1] = 950.0
-NU[2] = 970.0
-WINDOW[*] = 0
-NW = 1
+NU[0] = 667.7820
+NU[1] = 668.5410
+NU[2] = 669.8110
 
-TBLBASE = tables/midlat_example
-TBLFMT  = 1
-
-ATMFMT = 1
-OBSFMT = 1
-
-REFRAC = 1
-RAYDS  = 10
-RAYDZ  = 0.1
-
-CTM_CO2 = 1
-CTM_H2O = 1
-CTM_N2  = 1
-CTM_O2  = 1
+# Write brightness temperatures instead of radiances.
+WRITE_BBT = 1
 ```
 
-Run (example):
+Run from `src/` with compatible `obs.tab` and `atm.tab` files:
 
 ```bash
 ./formod minimal_forward.ctl obs.tab atm.tab rad.tab
 ```
+
+For a complete runnable setup, start from the example projects described
+in the [Quickstart](quickstart.md).
 
 ### Overriding parameters on the command line
 

@@ -1,20 +1,22 @@
 # Radiance and observation data
 
-This page documents the tabular data files used by JURASSIC to describe
+This page documents the file formats used by JURASSIC to describe
 **observation geometry** and to store **radiances** (measured or
-simulated). In typical workflows you will encounter two closely related
-files:
+simulated). In typical ASCII workflows you will encounter two closely
+related files:
 
 - `obs.tab` — **observation definition** (geometry input for radiative transfer)
 - `rad.tab` — **radiance data** (geometry + computed tangent point + radiances)
 
-Both files share the same leading geometry columns so they can be
-compared, merged, or processed with the same downstream tools.
+In the ASCII format, both files share the same leading geometry columns
+so they can be compared, merged, or processed with the same downstream
+tools.
 
-> Recommended convention: treat `obs.tab` as *input* (requested geometry)
-> and `rad.tab` as *output* (evaluated geometry + radiances).  
-> Some tools/workflows may overwrite radiance columns in `obs.tab`, but
-> using a distinct `rad.tab` is usually clearer.
+!!! tip "Recommended convention"
+    Treat `obs.tab` as *input* (requested geometry) and `rad.tab` as
+    *output* (evaluated geometry + radiances). Some tools/workflows may
+    overwrite radiance columns in `obs.tab`, but using a distinct
+    `rad.tab` is usually clearer.
 
 ---
 
@@ -54,19 +56,34 @@ parameter:
 
 - `OBSFMT`
 
-The description below refers to the **default ASCII format**, typically
-used with:
+The **default ASCII format** is selected with:
 
 ```text
 OBSFMT = 1
 ```
 
 This is the format used by the example projects distributed with
-JURASSIC.
+JURASSIC and is described first below.
+
+JURASSIC also supports:
+
+- `OBSFMT = 2` for the compact binary format used by JURASSIC,
+- `OBSFMT = 3` for netCDF files.
+
+The netCDF format is useful for workflows that manage many observation
+profiles in one file, for example shared-input or retrieval workflows
+that select profiles by index.
+
+!!! note
+    `OBSFMT = 2` selects the JURASSIC C binary format. It was implemented
+    for workflows where file-I/O performance is critical, because reading
+    and writing ASCII tables can be much slower than binary I/O. For new
+    workflows, users are generally encouraged to use the netCDF format
+    instead.
 
 ---
 
-## General format rules
+## ASCII format rules
 
 - Plain-text ASCII table.
 - Columns separated by spaces or tabs.
@@ -104,10 +121,11 @@ observation geometry:
   In `rad.tab` it is typically replaced/filled with the **computed**
   tangent point derived from the actual refracted ray path.
 
-> Note: The exact interpretation of `vp*` and the use of tangent point
-> fields depends on geometry (limb, nadir, zenith, occultation). The key point
-> is that `rad.tab` should contain the *evaluated* geometry consistent
-> with the ray tracing used by the forward model.
+!!! note
+    The exact interpretation of `vp*` and the use of tangent point fields
+    depends on geometry (limb, nadir, zenith, occultation). The key point
+    is that `rad.tab` should contain the *evaluated* geometry consistent
+    with the ray tracing used by the forward model.
 
 ---
 
@@ -184,6 +202,128 @@ Typical radiance conventions include:
 - brightness-temperature-equivalent radiance (after conversion).
 
 Geometry units are as listed above (km, deg, seconds).
+
+---
+
+## netCDF format
+
+For `OBSFMT = 3`, JURASSIC expects a netCDF file with a profile
+dimension and a ray dimension. A single file may contain several
+observation profiles; applications select the desired zero-based profile
+index when reading the file.
+
+!!! note
+    A major advantage of the netCDF format is that many observation
+    profiles can be stored in a single file. This avoids many of the
+    file-system problems that can occur when large runs are organized as
+    thousands of directories containing small ASCII files.
+
+The standard JURASSIC writer creates the dimensions:
+
+| Dimension | Meaning |
+|-----------|---------|
+| `profile` | observation profile index |
+| `ray` | ray path or line-of-sight index |
+
+The variable `nray` gives the number of valid ray paths for each
+profile. Geometry, radiance or brightness temperature, and transmittance
+variables use the dimensions `profile, ray`.
+
+The required geometry variables are:
+
+| Variable | Unit | Meaning |
+|----------|------|---------|
+| `nray` | 1 | number of ray paths |
+| `time` | s | time in seconds since 2000-01-01, 00:00 UTC |
+| `obs_z` | km | observer altitude |
+| `obs_lon` | degrees_east | observer longitude |
+| `obs_lat` | degrees_north | observer latitude |
+| `vp_z` | km | view point altitude |
+| `vp_lon` | degrees_east | view point longitude |
+| `vp_lat` | degrees_north | view point latitude |
+| `tp_z` | km | tangent point altitude |
+| `tp_lon` | degrees_east | tangent point longitude |
+| `tp_lat` | degrees_north | tangent point latitude |
+
+Spectral variables are named by channel wavenumber. With radiance
+output, JURASSIC expects:
+
+```text
+rad_<wavenumber>
+tau_<wavenumber>
+```
+
+For example, `NU[0] = 925.0000` corresponds to variables named
+`rad_925.0000` and `tau_925.0000`.
+
+If `WRITE_BBT = 1` is enabled, JURASSIC writes brightness temperatures
+instead of radiances. In that case the spectral output variable uses the
+prefix `bt`:
+
+```text
+bt_<wavenumber>
+tau_<wavenumber>
+```
+
+For example, `NU[0] = 925.0000` corresponds to variables named
+`bt_925.0000` and `tau_925.0000`.
+
+!!! note
+    The control file and the netCDF file must describe the same
+    channels. In particular, `ND`, `NU[i]`, and `WRITE_BBT` determine
+    which spectral variables JURASSIC will look for.
+
+A compact `ncdump -h`-style skeleton for `ND = 2` radiance channels
+could look like:
+
+```text
+netcdf obs {
+dimensions:
+  profile = UNLIMITED ;
+  ray = 100 ;
+
+variables:
+  int nray(profile) ;
+    nray:long_name = "number of ray paths" ;
+    nray:units = "1" ;
+
+  double time(profile, ray) ;
+    time:units = "s" ;
+  double obs_z(profile, ray) ;
+    obs_z:units = "km" ;
+  double obs_lon(profile, ray) ;
+    obs_lon:units = "degrees_east" ;
+  double obs_lat(profile, ray) ;
+    obs_lat:units = "degrees_north" ;
+
+  double vp_z(profile, ray) ;
+    vp_z:units = "km" ;
+  double vp_lon(profile, ray) ;
+    vp_lon:units = "degrees_east" ;
+  double vp_lat(profile, ray) ;
+    vp_lat:units = "degrees_north" ;
+
+  double tp_z(profile, ray) ;
+    tp_z:units = "km" ;
+  double tp_lon(profile, ray) ;
+    tp_lon:units = "degrees_east" ;
+  double tp_lat(profile, ray) ;
+    tp_lat:units = "degrees_north" ;
+
+  double rad_925.0000(profile, ray) ;
+    rad_925.0000:units = "W/(m^2 sr cm^-1)" ;
+  double tau_925.0000(profile, ray) ;
+    tau_925.0000:units = "1" ;
+
+  double rad_1000.0000(profile, ray) ;
+    rad_1000.0000:units = "W/(m^2 sr cm^-1)" ;
+  double tau_1000.0000(profile, ray) ;
+    tau_1000.0000:units = "1" ;
+}
+```
+
+For brightness-temperature output, replace `rad_<wavenumber>` with
+`bt_<wavenumber>` and use units of K.
 
 ---
 

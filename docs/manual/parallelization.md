@@ -29,7 +29,8 @@ JURASSIC employs three complementary levels of parallelism:
   computational kernels.
 
 There is no general hybrid MPI–OpenMP execution model across the full
-tool suite. MPI is currently implemented only in the retrieval code.
+tool suite. MPI-specific runtime behavior is currently implemented only
+in the retrieval executable.
 
 ---
 
@@ -37,8 +38,10 @@ tool suite. MPI is currently implemented only in the retrieval code.
 
 ### Scope of MPI support
 
-MPI parallelization is implemented exclusively in the retrieval
-executable. No forward models, tools, or utilities use MPI internally.
+MPI-specific runtime behavior is implemented exclusively in the
+retrieval executable. Other executables may be built with the MPI
+compiler wrapper when `MPI=1` is used, but they do not distribute work
+with MPI at runtime.
 
 MPI support is optional and enabled at compile time.
 
@@ -48,8 +51,9 @@ MPI support is optional and enabled at compile time.
 
 At the MPI level, retrieval runs are parallelized over:
 
-- independent retrieval cases,
-- observation directories or datasets.
+- independent retrieval cases listed in `DIRLIST`,
+- profile indices listed in `SHARED_IO_PROFLIST` for shared-file
+  workflows.
 
 Each MPI rank processes a disjoint subset of retrieval tasks.
 
@@ -60,7 +64,10 @@ Each MPI rank processes a disjoint subset of retrieval tasks.
 - MPI is used only for task distribution.
 - There is no communication between MPI ranks during the retrieval.
 - No domain decomposition or collective algorithms are employed.
-- Each rank performs its own I/O.
+- In directory-list mode, each rank reads and writes its assigned working
+  directories.
+- In shared-file mode, ranks read and write selected profile records from
+  common files; output writes are serialized with file locking.
 
 This design is robust and scales well for large numbers of independent
 retrievals.
@@ -73,6 +80,14 @@ retrievals.
 mpirun -np 16 ./retrieval ctl/retrieval.ctl dirlist.txt
 ```
 
+Shared-file/profile-list retrievals can also be run under MPI. In that
+mode, pass `-` instead of a directory list and configure
+`SHARED_IO_PROFLIST` and the corresponding shared input/output files:
+
+```bash
+mpirun -np 16 ./retrieval run.ctl - SHARED_IO_PROFLIST proflist.txt
+```
+
 Running non-retrieval executables under `mpirun` provides no performance
 benefit.
 
@@ -82,12 +97,11 @@ benefit.
 
 ### What is parallelized?
 
-OpenMP is used to accelerate computationally intensive loops within a
-single process, such as:
+OpenMP is used to accelerate selected computationally intensive loops
+within a single process, especially:
 
-- radiative transfer calculations,
-- spectral loops,
-- internal numerical kernels.
+- source-function table initialization,
+- kernel/Jacobian finite-difference calculations.
 
 OpenMP is available in both retrieval and non-retrieval executables.
 
@@ -125,8 +139,8 @@ This configuration uses up to 32 CPU cores in total.
 
 ## Load balancing considerations
 
-Since MPI distributes tasks statically, load balance depends on the
-uniformity of retrieval cases.
+MPI distributes retrieval tasks statically in a round-robin pattern.
+Load balance therefore depends on the uniformity of retrieval cases.
 
 Potential imbalance sources include:
 
@@ -150,6 +164,8 @@ Recommendations:
 
 - store lookup tables on fast parallel file systems,
 - ensure unique output paths for each MPI rank,
+- use shared netCDF files for large campaigns when practical, to avoid
+  thousands of small ASCII files and directories,
 - minimize diagnostic output in large runs,
 - reuse lookup tables across many retrievals.
 

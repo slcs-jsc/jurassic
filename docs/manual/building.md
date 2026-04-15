@@ -5,16 +5,22 @@ source using the provided `Makefile`. It is intended for developers and
 advanced users who want to compile JURASSIC themselves, change compiler
 flags, or enable optional build modes.
 
-> If you are only looking for a "first run", see the [Quickstart](quickstart.md).
-> For general setup and prerequisites, see [Installation](installation.md).
+Unless stated otherwise, the `make` commands on this page are run from
+the `src/` directory of the JURASSIC source tree.
+
+!!! tip "First run"
+    If you are only looking for a first run, see the
+    [Quickstart](quickstart.md). For general setup and prerequisites, see
+    [Installation](installation.md).
 
 ---
 
 ## What the Makefile builds
 
-The top-level build produces a set of small executables (command-line
-tools) that are linked against the JURASSIC libraries in `../libs/build/`.
-The Makefile defines the executable list in the `EXC` variable.
+The build in `src/` produces a set of small executables (command-line
+tools) that are linked with the JURASSIC object code and the dependency
+libraries in `../libs/build/`. The Makefile defines the executable list
+in the `EXC` variable.
 
 Typical tools include drivers for:
 
@@ -102,13 +108,16 @@ make uninstall DESTDIR=/path/to/bin
 
 ## Important build variables
 
-You can override Makefile variables on the command line. The most relevant
-ones are:
+You can override Makefile variables on the command line. For most local
+builds, prefer the high-level variables below over replacing `CFLAGS`
+directly.
 
 ### Compiler and flags
 
 - `CC` - C compiler (default: `gcc`)
-- `CFLAGS` - compile flags
+- `CFLAGS` - compile flags; overriding this variable replaces the
+  Makefile defaults, including include paths, preprocessor definitions,
+  warning flags, and OpenMP flags
 - `LDFLAGS` - link flags
 
 Examples:
@@ -134,6 +143,20 @@ make PROF=1
 make COV=1
 ```
 
+### MPI support
+
+- `MPI` (default: `0`) - if set to `1`, builds with MPI support enabled
+  and defines the `MPI` preprocessor macro
+
+```bash
+make MPI=1
+```
+
+When `MPI=1`, the Makefile uses `mpicc` unless `CC` is set explicitly.
+MPI-specific runtime behavior is implemented only in the retrieval
+executable, but the full tool suite is rebuilt with the selected MPI
+compiler wrapper.
+
 ### Static linking
 
 - `STATIC` (default: `0`) - if set to `1`, attempts to add `-static`
@@ -142,7 +165,8 @@ make COV=1
 make STATIC=1
 ```
 
-Note: the Makefile explicitly prevents static builds when `UNIFIED=1`.
+Note: the Makefile explicitly prevents static builds when `MPI=1` or
+`UNIFIED=1`.
 
 ### Library paths
 
@@ -190,7 +214,9 @@ make UNIFIED=1
 The Makefile provides several targets that are helpful for development:
 
 - `make clean` - remove build products (executables, objects, coverage files)
-- `make doxygen` - build Doxygen documentation
+- `make doxygen` - build local Doxygen documentation; the hosted
+  [Doxygen manual](https://slcs-jsc.github.io/jurassic/doxygen/) is also
+  available online
 - `make mkdocs` - build MkDocs documentation (runs `mkdocs build` in `../docs`)
 - `make cppcheck` - run static analysis (requires `cppcheck`)
 - `make indent` - apply code formatting rules (requires `indent`)
