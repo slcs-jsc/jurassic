@@ -36,15 +36,14 @@ for limb-sounding geometries.
 Ray paths are calculated numerically by solving the Eikonal equation,
 which describes the propagation of electromagnetic waves in a medium
 with spatially varying refractive index. In the mid-infrared spectral
-range, JURASSIC uses a dry-air Edlen-type refractivity model consistent
-with the published RFM algorithm. The implementation scales
-refractivity with pressure and temperature and evaluates the Edlen
-formula at a fixed reference wavelength of 10 um. This provides a
-simple and stable approximation for thermal-infrared ray tracing while
-keeping the line-of-sight geometry independent of the active channel
-set.
+range, JURASSIC uses a dry-air Edlen-type refractivity model.  The
+implementation scales refractivity with pressure and temperature and
+evaluates the Edlen formula at a fixed reference wavelength of 10
+micrometer. This provides a simple and stable approximation for
+thermal-infrared ray tracing while keeping the line-of-sight geometry
+independent of the active channel set.
 
-This remains an approximation for infrared applications: the ray
+However, this remains an approximation for infrared applications: the ray
 tracing does not use a fully spectrally resolved infrared refractivity
 model, and water-vapour effects on refractivity are neglected.
 
@@ -104,7 +103,8 @@ precomputed lookup tables of band-averaged emissivities. These tables
 are generated offline using detailed line-by-line radiative transfer
 models and spectroscopic databases.
 
-Each lookup table provides emissivity as a function of:
+Each lookup table provides spectral mean emissivity for the corresponding
+spectral channel and instrument response function as a function of:
 
 - pressure  
 - temperature  
@@ -115,6 +115,13 @@ interpolation within the tables. This approach preserves much of the
 accuracy of line-by-line spectroscopy while enabling orders-of-magnitude
 faster calculations.
 
+To keep lookup-table files within practical size limits, JURASSIC also
+provides adaptive, error-controlled table reduction. The reduction
+algorithm recursively removes absorber-column grid points that can be
+reconstructed by interpolation within configurable absolute and relative
+error thresholds, retaining higher grid density only where the
+emissivity curves require it.
+
 The validity of the radiative transfer results depends on the coverage
 and resolution of the lookup tables.
 
@@ -122,8 +129,7 @@ and resolution of the lookup tables.
 
 *Spectral mean emissivity curves for carbon dioxide at 669 cm^-1,
 illustrating the lookup-table representation used by JURASSIC. Source:
-Baumeister and Hoffmann
-[(2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 2.*
+[Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 2.*
 
 ---
 
@@ -153,8 +159,8 @@ accuracy for a wide range of infrared remote sensing applications.
 
 *Illustration of the Emissivity Growth Approximation. The accumulated
 emissivity is mapped to a pseudo-column amount on the emissivity curve
-of the next path segment. Source: Baumeister and Hoffmann
-[(2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 3.*
+of the next path segment. Source:
+[Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 3.*
 
 ---
 
@@ -166,8 +172,9 @@ segment, atmospheric properties are assumed to be homogeneous.
 
 The radiance at the instrument is obtained by iteratively accumulating
 the emission from each segment while accounting for absorption by the
-overlying atmosphere. This procedure follows the Beer–Lambert law and
-ensures numerical stability and efficiency.
+atmospheric path between that segment and the instrument. This procedure
+follows the Beer–Lambert law and ensures numerical stability and
+efficiency.
 
 The integration scheme is designed to be compatible with both forward
 modelling and the calculation of derivatives required for retrieval
@@ -176,9 +183,9 @@ applications.
 ![Integration of radiance along a ray path](img/raypath.png)
 
 *Radiance integration along a ray path. Emission contributions from
-individual path segments are partly absorbed by the overlying atmosphere
-before reaching the observer. Source: Baumeister and Hoffmann
-[(2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 1.*
+individual path segments are partly absorbed along the atmospheric path
+between the segment and the observer. Source:
+[Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 1.*
 
 ---
 
@@ -199,13 +206,14 @@ channels or strongly overlapping absorption features.
 ## Relation to retrieval calculations
 
 The radiative transfer formulation described above forms the basis for
-both forward simulations and inverse modelling in JURASSIC. The same
-numerical framework is used to compute radiances and their sensitivities
-with respect to atmospheric state variables.
+both forward simulations and inverse modelling in JURASSIC. Retrievals
+use the same forward model to compute simulated radiances, while
+sensitivities with respect to atmospheric state variables are evaluated
+by finite differencing rather than by analytic Jacobians.
 
-This consistency between forward model and Jacobian calculations is a
-key requirement for optimal estimation retrievals and ensures numerical
-stability and physical coherence of the retrieval results.
+Using the same forward-model implementation for the unperturbed and
+perturbed calculations keeps the Jacobians consistent with the radiance
+calculation used in optimal estimation retrievals.
 
 ---
 
@@ -219,6 +227,5 @@ infrared simulations suitable for large-scale atmospheric remote
 sensing and retrieval applications.
 
 For a comprehensive and formal derivation of the algorithms, users are
-referred to [Baumeister and Hoffmann
-(2022)](https://doi.org/10.5194/gmd-15-1855-2022) and the references
-listed in the [References](references.md) section.
+referred to [Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022)
+and the references listed in the [References](references.md) section.

@@ -42,6 +42,10 @@ Results demonstrate that JURASSIC reproduces reference-model radiances,
 Jacobians, and retrieval-relevant quantities within the accuracy
 expected from its spectral approximations.
 
+Published validation and application studies are listed on the
+[References](references.md) page, including comparisons with KOPRA and
+retrieval studies using satellite observations.
+
 ---
 
 ## Validation of spectral approximations
@@ -98,7 +102,7 @@ These examples:
 Running these examples after installation is the recommended way to
 verify that JURASSIC is functioning correctly on a given system.
 
-Example projects are typically executed via:
+From the repository root, example projects are typically executed via:
 
 ```bash
 cd projects/limb
@@ -112,7 +116,7 @@ and similarly for other configurations.
 ## Automated test suite
 
 In addition to example projects, the build system provides a test
-target:
+target. From the `src/` directory, run:
 
 ```bash
 make check
@@ -121,6 +125,33 @@ make check
 This target runs a predefined set of tests and reports pass/fail
 status. These tests are intended to catch regressions caused by code
 changes or build-system issues.
+
+The default `make check` target currently runs the following suites from
+`tests/`:
+
+- `cli_test` - command-line behavior and help output for all executables
+- `tools_test` - small utility programs such as time conversion and
+  Planck/brightness-temperature tools
+- `atm_test` - atmospheric-profile generation, interpolation, hydrostatic
+  adjustment, and format conversion
+- `mat_test` - matrix input/output and format conversion
+- `obs_test` - observation geometry, ray tracing, and observation format
+  conversion
+- `tbl_test` - filter functions, lookup tables, and table format
+  conversion
+- `formod_test` - limb, nadir, and zenith forward-model calculations and
+  kernels
+- `ret_test` - retrieval workflow checks, including shared netCDF input
+  and output
+
+Most regression tests generate fresh output files and compare them with
+checked-in reference files under the corresponding `data.ref/`
+directory. This makes the test suite useful for detecting unintended
+changes in numerical output, file-format behavior, and command-line
+interfaces.
+
+An additional `mpi_test` suite is available for MPI-enabled retrieval
+checks, but it is not part of the default `make check` target.
 
 ---
 
@@ -133,9 +164,11 @@ not guarantee bitwise-identical results across:
 - different MPI/OpenMP configurations,
 - different hardware architectures.
 
-However, numerical differences are typically small and do not affect
-scientific conclusions. Validation should therefore focus on physical
-and statistical consistency rather than exact numerical identity.
+The regression tests use exact file comparisons for controlled test
+setups and supported reference outputs. For broader user workflows,
+small numerical differences may occur across compilers, hardware, and
+parallel configurations. Validation should therefore focus on physical
+and statistical consistency rather than bitwise identity alone.
 
 ---
 
@@ -170,5 +203,5 @@ application-specific validation as needed.
 ## Related pages
 
 - [Performance considerations](performance.md)
-- [Testing and examples](quickstart.md)
+- [Quickstart examples](quickstart.md)
 - [Model assumptions & limitations](limitations.md)

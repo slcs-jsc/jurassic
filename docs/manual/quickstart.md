@@ -1,145 +1,188 @@
 # Quickstart
 
-This Quickstart guides you through running the provided example
-simulations that come with JURASSIC. The goal is to verify that the
-model is correctly installed and to familiarize yourself with the basic
-workflow of a JURASSIC radiative transfer simulation.
+This page walks through a first JURASSIC run using the example projects
+included with the repository. The examples generate an atmosphere,
+create an observation geometry, run the forward model, compute finite
+difference Jacobians, and compare the simulated radiances with reference
+output.
+
+For build instructions, see [Installation](installation.md). For a
+systematic description of command-line usage, see
+[Running JURASSIC](running.md).
+
+---
 
 ## Prerequisites
 
-This guide assumes that:
+Start from a compiled source tree. From the repository root, the main
+executables should be available in `src/`, for example:
 
--   JURASSIC has been successfully compiled
--   All required runtime dependencies are available
--   You are working in a shell environment on a Linux or HPC system
-
-Detailed installation instructions are provided in the
-[Installation](installation.md) section of the user manual.
-
-------------------------------------------------------------------------
-
-## Running the example simulations
-
-JURASSIC includes a set of example projects that demonstrate typical use
-cases and serve as regression tests. These projects are located in the
-`projects` directory.
-
-From the repository root:
-
-``` bash
-cd projects
+```bash
+ls src/formod src/kernel
 ```
 
-Three example observation geometries are provided:
+The example scripts set the local library path for the bundled
+dependencies. If you installed libraries elsewhere, make sure your
+runtime environment can find GSL, netCDF, HDF5, and any other libraries
+used by your build.
 
--   **Nadir sounding**, representative of satellite instruments viewing
-    the atmosphere from above
--   **Limb sounding**, representative of instruments observing along the
-    atmospheric limb
--   **Zenith sounding**, representative of upward-looking observations
-    from the ground
+`gnuplot` is optional for the model calculation itself, but the example
+scripts use it to generate diagnostic PNG plots.
 
-### Nadir sounder example
+---
 
-To run the nadir sounder example:
+## Run an Example
 
-``` bash
-cd nadir
+The quickest end-to-end test is one of the example projects under
+`projects/`. Start from the repository root, then enter the project
+directory before running its script so the relative paths inside the
+script resolve correctly.
+
+```bash
+cd projects/nadir
 ./run.sh
 ```
 
-### Limb sounder example
+A successful run ends with a comparison of the newly generated
+`rad.tab` file against the checked-in reference `rad.org`. If the files
+match, the script exits with status zero.
 
-To run the limb sounder example:
+To run the other geometries, use the same pattern:
 
-``` bash
+```bash
 cd ../limb
 ./run.sh
-```
 
-### Zenith sounder example
-
-To run the zenith sounder example:
-
-``` bash
 cd ../zenith
 ./run.sh
 ```
 
-Each example is executed via a simple wrapper script that prepares the
-input data, runs the radiative transfer calculations, and performs basic
-verification steps.
+---
 
-------------------------------------------------------------------------
+## What the Script Does
 
-## Input files
+Each example script performs the same basic workflow:
 
-In these examples, the following files are generated or used:
+1. Generate an atmospheric state with `climatology`.
+2. Generate an observation geometry with `limb`, `nadir`, or `zenith`.
+3. Run the forward model with `formod`.
+4. Compute Jacobians with `kernel`.
+5. Compare `rad.tab` against the reference file `rad.org`.
+6. Generate diagnostic plots if `gnuplot` is available.
 
--   **Observation geometry**\
-    The file `obs.tab` defines the viewing geometry of the instrument,
-    including sensor position and line-of-sight information.
+For the nadir example, the core commands are:
 
-    ``` bash
-    cat obs.tab
-    ```
+```bash
+../../src/climatology nadir.ctl atm.tab
+../../src/nadir nadir.ctl obs.tab
+../../src/formod nadir.ctl obs.tab atm.tab rad.tab TASK time
+../../src/kernel nadir.ctl obs.tab atm.tab kernel.tab
+```
 
--   **Atmospheric state**\
-    The file `atm.tab` contains a standard mid-latitude atmospheric
-    profile, including pressure, temperature, and trace gas
-    concentrations.
+The limb and zenith examples use the same structure with `limb.ctl` or
+`zenith.ctl` and the corresponding geometry generator.
 
-    ``` bash
-    cat atm.tab
-    ```
+---
 
--   **Radiative transfer output**\
-    The file `rad.tab` contains the simulated radiances written by the
-    forward model for the configured detector channels.
+## Example Output
 
-    ``` bash
-    cat rad.tab
-    ```
+The example projects generate radiance and transmittance plots for each
+viewing geometry:
 
-These files illustrate the basic structure of JURASSIC input data and
-are discussed in more detail in the User Manual.
+<p align="center">
+  <img src="../img/example_limb_rad.png" alt="Limb radiance example" width="30%"/>
+  &emsp;
+  <img src="../img/example_nadir_rad.png" alt="Nadir radiance example" width="30%"/>
+  &emsp;
+  <img src="../img/example_zenith_rad.png" alt="Zenith radiance example" width="30%"/>
+</p>
 
-------------------------------------------------------------------------
+They also generate finite difference Jacobian plots, such as these
+temperature kernels:
 
-## Output and verification
+<p align="center">
+  <img src="../img/example_limb_kernel_temperature.png" alt="Limb temperature kernel example" width="30%"/>
+  &emsp;
+  <img src="../img/example_nadir_kernel_temperature.png" alt="Nadir temperature kernel example" width="30%"/>
+  &emsp;
+  <img src="../img/example_zenith_kernel_temperature.png" alt="Zenith temperature kernel example" width="30%"/>
+</p>
 
-After each simulation completes, JURASSIC:
+---
 
--   Computes radiances for two or three detector channels
--   Compares the results against reference data to verify correctness
--   Generates diagnostic plots of radiances and Jacobians using Gnuplot
+## Important Files
 
-If the run completes without errors and the verification checks pass,
-your JURASSIC installation is functioning correctly.
+After an example has run, the project directory contains:
 
-------------------------------------------------------------------------
+| File | Purpose |
+|------|---------|
+| `*.ctl` | Control file defining channels, lookup tables, emitters, geometry settings, and output options |
+| `atm.tab` | Atmospheric state used by the forward model |
+| `obs.tab` | Observation geometry and line-of-sight information |
+| `rad.tab` | Simulated radiances and transmittances |
+| `rad.org` | Reference radiance output used for comparison |
+| `kernel.tab` | Finite difference Jacobians computed by `kernel` |
+| `plot_*.png` | Diagnostic plots generated by `gnuplot` |
 
-## Next steps
+Inspect the text files directly to see the column headers:
 
-After completing the Quickstart, you may want to explore:
+```bash
+head -40 atm.tab
+head -40 obs.tab
+head -40 rad.tab
+head -40 kernel.tab
+```
 
--   Customizing atmospheric profiles and observation geometries
--   Defining your own spectral bands and instrument configurations
--   Running JURASSIC on parallel HPC systems
+The file formats are described in [Atmospheric data](atmospheric_data.md),
+[Radiance data](radiance_data.md), and [Diagnostics & logs](diagnostics.md).
 
-These topics are covered in detail in the subsequent sections of the
-User Manual.
+---
 
-------------------------------------------------------------------------
+## Verify the Full Test Suite
 
-## Further information
+The example projects are useful as a first run. For a broader
+regression check, use the test suite from `src/`:
 
-More detailed documentation for users and developers is available in the
-main [JURASSIC documentation](https://slcs-jsc.github.io/jurassic) and
-in the [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki).
+```bash
+cd src
+make check
+```
 
-A detailed description of the JURASSIC model and its applications can be
-found in the publications listed in the [References](references.md).
+This runs the tests under `tests/`, including tool, table, forward-model,
+and retrieval checks.
 
-If you are interested in using JURASSIC for operational or research
-applications, please do not hesitate to contact us for support.
+---
+
+## Troubleshooting
+
+!!! warning "Missing shared libraries"
+    If an executable fails to start because a shared library cannot be
+    found, check `LD_LIBRARY_PATH`. The example scripts expect bundled
+    libraries under `libs/build/lib`.
+
+!!! warning "Missing lookup tables"
+    Errors about lookup-table files usually mean that `TBLBASE`,
+    `TBLFMT`, `ND`, `NU[i]`, or `EMITTER[i]` in the control file do not
+    match the available table files. Start from one of the example
+    control files and modify it incrementally.
+
+!!! note "Plotting"
+    If `gnuplot` is not installed, the radiative-transfer commands can
+    still be run manually, but the example scripts will not create the
+    diagnostic PNG files.
+
+---
+
+## Next Steps
+
+After the first examples, continue with:
+
+- [Configuration files](configuration.md) to understand control
+  parameters such as `TBLBASE`, `NU[i]`, `EMITTER[i]`, `FORMOD`, and
+  `RAYDS`
+- [Running JURASSIC](running.md) for forward-model, kernel, retrieval,
+  MPI, and OpenMP command lines
+- [Spectroscopic data & LUTs](lookup_tables.md) for lookup-table
+  structure and table preparation
+- [Performance tuning](performance.md) and [HPC workflows](hpc_workflows.md)
+  for larger production runs

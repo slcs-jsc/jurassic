@@ -36,11 +36,12 @@ applications, parameters may optionally be overridden via `KEY VALUE` pairs.
 | Kernels (Jacobians) | `./kernel <ctl> <obs_in> <atm_in> <kernel_out>` | control file, observation geometry input, atmosphere input, kernel matrix output |
 | Retrieval (optimal estimation) | `./retrieval <ctl> <dirlist-or->` | control file, either a text file listing working directories or `-` for shared-file/profile-list mode |
 
-> **Notes**
-> - For `formod` and `kernel`, the filenames are usually `*.tab` files, but the
->   actual names are user-defined.
-> - For `formod` and `kernel`, the control parameter `DIRLIST` can switch between
->   a single-directory and a multi-directory workflow.
+!!! note
+    For `formod` and `kernel`, the filenames are usually `*.tab` files,
+    but the actual names are user-defined.
+
+    For `formod` and `kernel`, the control parameter `DIRLIST` can
+    switch between a single-directory and a multi-directory workflow.
 
 ---
 
@@ -58,7 +59,7 @@ This will:
 - read observation geometry from `obs.tab`,
 - read the atmospheric state from `atm.tab`,
 - run the forward model,
-- write simulated radiances to `rad.tab`.
+- write simulated radiances or brightness temperatures to `rad.tab`.
 
 ---
 
@@ -76,12 +77,46 @@ Example:
 ./formod run.ctl obs.tab atm.tab rad.tab
 ```
 
+A minimal directory layout for this workflow is:
+
+```text
+run.ctl
+dirlist.txt
+case_001/
+  obs.tab
+  atm.tab
+case_002/
+  obs.tab
+  atm.tab
+```
+
+with `dirlist.txt` containing:
+
+```text
+case_001
+case_002
+```
+
+For this example, JURASSIC reads `case_001/obs.tab` and
+`case_001/atm.tab`, writes `case_001/rad.tab`, and then repeats the same
+file-name pattern for `case_002`.
+
+!!! note
+    Lookup tables are loaded once before the directory loop starts and
+    then reused for all cases in the `DIRLIST` run. This avoids the
+    expensive table-loading step for every individual case and is one of
+    the main performance advantages of this workflow.
+
+    `TBLBASE` is therefore resolved relative to the directory where
+    `formod` is launched, or as an absolute path, not relative to each
+    case directory.
+
 ---
 
 ## Running kernel calculations (`kernel`)
 
-Kernel calculations compute Jacobians (sensitivities) of radiances with
-respect to atmospheric/state variables.
+Kernel calculations compute Jacobians (sensitivities) of the simulated
+output with respect to atmospheric/state variables.
 
 ```bash
 ./kernel run.ctl obs.tab atm.tab kernel.tab
@@ -127,9 +162,9 @@ Example:
   SHARED_IO_MATRIX_KERNEL_FILE matrix_kernel.nc
 ```
 
-In that shared-file mode, atmospheric and observation data use the
-profile index from `SHARED_IO_PROFLIST`, while matrix products use the same index
-as the netCDF dataset selector.
+In shared-file mode, the profile indices listed in `SHARED_IO_PROFLIST`
+select the records read from shared atmospheric and observation files and
+the records written to shared output files.
 
 At least one of the following must be provided:
 
@@ -173,8 +208,9 @@ mpirun -np 8 ./retrieval run.ctl dirlist.txt
 Each MPI rank processes a subset of directories from `dirlist.txt`. MPI
 ranks do not communicate during execution.
 
-Running non-retrieval executables (`formod`, `kernel`, tools) under
-`mpirun` provides no performance benefit.
+!!! note
+    Running non-retrieval executables (`formod`, `kernel`, tools) under
+    `mpirun` provides no performance benefit.
 
 ---
 

@@ -91,9 +91,13 @@ become a bottleneck if not handled efficiently.
 
 Recommendations:
 
-- prefer **binary table formats** over ASCII,
+- prefer **netCDF lookup tables** for new workflows, because they use
+  packed binary I/O and reduce the number of table files,
+- use binary lookup tables rather than ASCII when raw I/O speed is the
+  main concern,
 - place LUTs on fast local or parallel file systems,
-- avoid unnecessary table reloads between runs.
+- batch cases through `DIRLIST` or retrieval task lists so lookup tables
+  are loaded once and reused across many calculations.
 
 For large campaigns, LUT I/O costs are typically amortized over many
 simulations.
@@ -116,11 +120,12 @@ as sufficient resources are available.
 
 ### MPI scaling
 
-MPI parallelization is implemented only in the retrieval executables
-and is used exclusively to distribute independent retrieval tasks
-across MPI ranks.
+MPI-specific runtime behavior is implemented only in the retrieval
+executable and is used to distribute independent retrieval tasks across
+MPI ranks.
 
-- Each MPI rank processes a subset of retrieval cases.
+- Each MPI rank processes a static round-robin subset of `DIRLIST`
+  entries or `SHARED_IO_PROFLIST` profile indices.
 - There is no communication between ranks during execution.
 - Scaling is close to linear as long as enough retrieval cases are
   available.
@@ -155,7 +160,8 @@ tool suite.
 General guidance:
 
 - Use MPI only for retrieval workloads with many independent cases.
-- Use OpenMP to accelerate single-case computations.
+- Use OpenMP to accelerate selected computational loops, especially
+  source-function table initialization and kernel/Jacobian calculations.
 - Avoid oversubscription (MPI ranks × OpenMP threads > physical cores).
 - Running non-retrieval executables under `mpirun` provides no benefit.
 
@@ -174,8 +180,19 @@ Several control parameters have a direct impact on performance:
 - `ND`, `NW`, `NG`  
   Increasing spectral or chemical complexity increases cost.
 
-- `WRITE_MATRIX`, `WRITE_BBT`  
-  Diagnostic output can significantly increase runtime and I/O.
+- `ATMFMT`, `OBSFMT`, `MATRIXFMT`, `TBLFMT`  
+  Binary and netCDF formats reduce I/O overhead compared with ASCII.
+  For large multi-profile workflows, netCDF formats also reduce the
+  number of files that need to be managed.
+
+- `WRITE_MATRIX`  
+  Matrix diagnostics can significantly increase runtime, memory use, and
+  I/O volume.
+
+- `WRITE_BBT`  
+  Brightness-temperature output is written instead of radiance output.
+  This is not an additional diagnostic product, but it may add conversion
+  work when enabled.
 
 Users should balance accuracy requirements against computational cost.
 
@@ -215,6 +232,9 @@ and accuracy.
 - Use OpenMP primarily to accelerate kernel-heavy workloads and other
   OpenMP-enabled code paths.
 - Use MPI only for retrieval campaigns with many independent cases.
+- Use netCDF atmospheric, observation, and matrix files for large
+  multi-profile workflows.
+- Use netCDF lookup tables for new LUT sets.
 - Split very large workloads into multiple jobs when appropriate.
 - Monitor runtime and scaling behavior during pilot runs.
 

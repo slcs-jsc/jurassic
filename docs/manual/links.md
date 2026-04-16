@@ -2,34 +2,52 @@
 
 These links provide further information for users and developers of JURASSIC:
 
-* [README file](https://github.com/slcs-jsc/jurassic/blob/HEAD/README.md)
+## Documentation
 
-* [User manual](https://slcs-jsc.github.io/jurassic)
+- [README file](https://github.com/slcs-jsc/jurassic/blob/HEAD/README.md)
 
-* [Doxygen manual](https://slcs-jsc.github.io/jurassic/doxygen)
+- [User manual](https://slcs-jsc.github.io/jurassic)
 
-* [AI documentation](https://www.deepwiki.com/slcs-jsc/jurassic)
+- [Doxygen manual](https://slcs-jsc.github.io/jurassic/doxygen)
 
-* [Reference paper](https://doi.org/10.5194/gmd-15-1855-2022)
+- [AI documentation](https://www.deepwiki.com/slcs-jsc/jurassic)
 
-* [Other references](https://slcs-jsc.github.io/jurassic/references)
+- [GitHub wiki](https://github.com/slcs-jsc/jurassic/wiki)
 
-* [Citation file](https://github.com/slcs-jsc/jurassic/blob/HEAD/CITATION.cff)
+- [GitHub repository](https://github.com/slcs-jsc/jurassic)
 
-* [Code of conduct](https://github.com/slcs-jsc/jurassic/blob/HEAD/CODE_OF_CONDUCT.md)
+## Citation and releases
 
-* [Contributing guidelines](https://github.com/slcs-jsc/jurassic/blob/HEAD/CONTRIBUTING.md)
+- [Reference paper](https://doi.org/10.5194/gmd-15-1855-2022)
 
-* [Software dependencies](https://github.com/slcs-jsc/jurassic/blob/HEAD/DEPENDENCIES.md)
+- [Other references](https://slcs-jsc.github.io/jurassic/references)
 
-* [License](https://github.com/slcs-jsc/jurassic/blob/HEAD/COPYING)
+- [Citation file](https://github.com/slcs-jsc/jurassic/blob/HEAD/CITATION.cff)
 
-Links to external resources:
+- [Source-code DOI](https://doi.org/10.5281/zenodo.4572889)
 
-* [Helmholtz Research Software Directory](https://helmholtz.software/software/jurassic)
+- [Software Heritage archive](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/slcs-jsc/jurassic/)
 
-* [Rocket.Chat channel](https://chat.fz-juelich.de/channel/jurassic) (internal)
+- [GitHub releases](https://github.com/slcs-jsc/jurassic/releases)
 
-* [Data repository](https://datapub.fz-juelich.de/slcs/jurassic)
+## Project files
 
-* [Nightly builds](https://datapub.fz-juelich.de/slcs/jurassic/nightly_builds)
+- [Code of conduct](https://github.com/slcs-jsc/jurassic/blob/HEAD/CODE_OF_CONDUCT.md)
+
+- [Contributing guidelines](https://github.com/slcs-jsc/jurassic/blob/HEAD/CONTRIBUTING.md)
+
+- [Software dependencies](https://github.com/slcs-jsc/jurassic/blob/HEAD/DEPENDENCIES.md)
+
+- [License](https://github.com/slcs-jsc/jurassic/blob/HEAD/COPYING)
+
+## External resources
+
+- [Helmholtz Research Software Directory](https://helmholtz.software/software/jurassic)
+
+- [JURASSIC Data Repository](https://datapub.fz-juelich.de/slcs/jurassic)
+
+- [JURASSIC Nightly Builds](https://datapub.fz-juelich.de/slcs/jurassic/nightly_builds)
+
+- [Rocket.Chat channel](https://chat.fz-juelich.de/channel/jurassic) (internal)
+
+- [ESM Buildbot](https://esm-buildbot.fz-juelich.de) (internal)

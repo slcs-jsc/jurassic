@@ -10,6 +10,12 @@ The intent is to help new contributors understand:
 - how the forward model, Jacobians, and retrieval are wired together, and
 - how to add new small tools that reuse the JURASSIC library.
 
+!!! tip "API reference"
+    The generated [Doxygen manual](https://slcs-jsc.github.io/jurassic/doxygen/)
+    is the primary reference for function signatures, data structures, and
+    detailed source-level contracts. This page provides a high-level map for
+    navigating that API.
+
 ---
 
 ## Core library files
@@ -26,11 +32,12 @@ Key data structures (typedefs):
 - `obs_t` — **observation geometry + radiance container** (viewing geometry and per-channel radiance/Jacobian outputs)
 - `los_t` — **line-of-sight representation** used internally during ray tracing / integration
 - `ret_t` — **retrieval control parameters** (optimal estimation settings, convergence, regularization)
-- `tbl_t` — **lookup-table container** (precomputed spectroscopy / emissivity/transmittance tables)
+- `tbl_t` — **lookup-table container** (precomputed spectroscopy / emissivity tables)
 
 The header is Doxygen-friendly and many functions/types have docstrings.
 If you are looking for “what is the intended contract of this function?”,
-start with the corresponding Doxygen block in `jurassic.h`.
+start with the corresponding Doxygen block in `jurassic.h` or the
+[Doxygen manual](https://slcs-jsc.github.io/jurassic/doxygen/).
 
 ### `jurassic.c` — implementation
 
@@ -86,10 +93,11 @@ Typical project-style tools rely on table-based I/O helpers:
 For ASCII and binary formats, the `profile` / `dataset` arguments are ignored.
 For netCDF formats, they select the record along the unlimited dimension.
 
-> Tip: the small example tools (`formod.c`, `kernel.c`, `retrieval.c`)
-> are good minimal references for correct I/O sequences.
+!!! tip
+    The small example tools (`formod.c`, `kernel.c`, `retrieval.c`) are
+    good minimal references for correct I/O sequences.
 
-### Lookup tables (spectroscopy / transmittance)
+### Lookup tables (spectroscopy / emissivity)
 
 Lookup tables are handled via `tbl_t` and helpers such as:
 
@@ -255,10 +263,11 @@ Recommended starting point:
 If you are trying to understand a specific capability:
 
 - **Forward modelling**: start at `formod(...)` in `jurassic.c`, then follow
-  the called helpers for ray tracing / transmittance evaluation.
+  the called helpers for ray tracing and lookup-table interpolation.
 - **Lookup tables**: search for `read_tbl_*` and `intpol_tbl_*`.
 - **Retrieval**: start at `optimal_estimation(...)` and follow the minimizer
   logic (Levenberg–Marquardt and diagnostics).
 
-For API-level documentation, prefer the Doxygen comments in `jurassic.h`
-as the primary reference.
+For API-level documentation, use the generated
+[Doxygen manual](https://slcs-jsc.github.io/jurassic/doxygen/) or the
+Doxygen comments in `jurassic.h` as the primary reference.

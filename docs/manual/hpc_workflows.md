@@ -27,7 +27,7 @@ benefit strongly from parallel execution.
 
 ## Directory and workflow structure
 
-A recommended directory layout for HPC workflows is:
+A recommended directory layout for directory-based HPC workflows is:
 
 ```text
 project/
@@ -46,6 +46,12 @@ project/
 
 Separating input, output, and scripts simplifies automation and
 post-processing.
+
+!!! note
+    Large retrieval campaigns may instead use shared netCDF atmospheric,
+    observation, and matrix files together with `SHARED_IO_PROFLIST`.
+    This reduces the number of directories and small ASCII files that
+    need to be managed by the file system.
 
 ---
 
@@ -84,7 +90,8 @@ Key points:
 - Use **workflow-level parallelism** or job arrays for independent forward-model runs.
 - Use **MPI** only for retrieval workloads that process independent directory
   lists or shared-file profile lists.
-- Use **OpenMP** to accelerate per-observation computations.
+- Use **OpenMP** to accelerate selected computational loops, especially
+  source-function table initialization and kernel/Jacobian calculations.
 - Avoid oversubscription (total threads > physical cores).
 
 ### Example configurations
@@ -96,6 +103,25 @@ Key points:
 | 4     | 32        | 4              | 128         |
 
 Always benchmark representative workloads to find the optimal balance.
+
+### Example: MPI retrieval
+
+For retrieval workloads, MPI distributes independent retrieval cases
+across ranks:
+
+```bash
+export OMP_NUM_THREADS=4
+mpirun -np 8 ./bin/retrieval ctl/retrieval.ctl dirlist.txt
+```
+
+For shared-file retrieval workflows, pass `-` instead of a directory
+list and provide a profile-index list:
+
+```bash
+export OMP_NUM_THREADS=4
+mpirun -np 8 ./bin/retrieval ctl/retrieval.ctl - \
+  SHARED_IO_PROFLIST input/proflist.txt
+```
 
 ---
 
@@ -123,6 +149,8 @@ handled carefully.
 Recommendations:
 
 - store LUTs on a **fast parallel file system**,
+- prefer netCDF lookup tables for new workflows, because they use fast
+  packed I/O and group multiple channels into one file per gas,
 - avoid duplicating large LUTs across directories,
 - reuse LUTs across many jobs,
 - verify LUT availability before job submission.
@@ -136,8 +164,10 @@ performance.
 
 - Write output to dedicated directories to avoid file-name collisions.
 - Minimize diagnostic output for large production runs.
-- Use compressed or binary formats for large matrix outputs when
-  possible.
+- Use binary or netCDF matrix formats (`MATRIXFMT = 2` or `3`) for large
+  matrix outputs.
+- Prefer shared netCDF workflows for large retrieval campaigns when
+  practical, to avoid thousands of small ASCII files and directories.
 - Clean up temporary files in long-running workflows.
 
 ---

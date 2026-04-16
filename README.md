@@ -135,7 +135,7 @@ third-party libraries that can be compiled and installed using a build
 script:
 
     cd [jurassic_directory]/libs
-    bash build.sh
+    ./build.sh
 
 This builds the bundled third-party libraries into `libs/build/`.
 

@@ -20,7 +20,7 @@ large-scale applications.
 JURASSIC avoids this cost by using lookup tables that:
 
 - are generated **offline** using detailed line-by-line models,
-- store **band-averaged emissivities or transmittances**,
+- store **band-averaged emissivities**,
 - are interpolated efficiently during runtime.
 
 This approach preserves high spectroscopic fidelity while enabling
@@ -89,7 +89,7 @@ via the control keyword:
 Common formats include:
 
 - **ASCII tables** (human-readable, larger, slower to read),
-- **binary tables** (compact, fast I/O, preferred for production use).
+- **binary tables** (compact, fast I/O),
 - **netCDF tables** (portable container format; tables for one emitter are
   grouped into a single file with one packed variable per channel).
 
@@ -102,12 +102,29 @@ For the current table I/O implementation, the naming conventions are:
 - netCDF: one file per emitter, for example `TBLBASE_CO2.nc`, containing
   one packed variable per channel such as `tbl_792.0000` and `tbl_832.0000`
 
+!!! note
+    The netCDF format is preferred for new lookup-table workflows.
+    Compared with ASCII tables, the packed binary data stored in netCDF
+    can be read and written much faster. In addition, netCDF groups the
+    lookup tables for multiple channels into a single file per gas,
+    significantly reducing the number of files required to store a full
+    lookup-table set.
+
+!!! note
+    Binary and netCDF lookup tables use the packed internal JURASSIC
+    table representation. The netCDF files are therefore portable
+    containers for packed lookup-table variables, not a transparent
+    multidimensional layout with separate pressure, temperature,
+    absorber-amount, and emissivity variables.
+
 The example projects included with JURASSIC demonstrate working table
 layouts and formats and are the recommended starting point for new
 users.
 
 For ASCII tables, the corresponding filter-function files are also
-looked up via fixed names of the form `TBLBASE_<nu>.filt`.
+looked up via fixed names of the form `TBLBASE_<nu>.filt`. For binary
+and netCDF tables, the filter-function data are included in the packed
+table representation.
 
 ---
 
@@ -118,7 +135,8 @@ tables to obtain emissivities for the local atmospheric state.
 
 Interpolation is typically:
 
-- linear in pressure, temperature, and absorber amount,
+- performed over pressure, temperature, and absorber amount using the
+  internal lookup-table coordinates,
 - performed independently for each gas and spectral window.
 
 The interpolation routines are optimized for performance and are called
@@ -136,9 +154,9 @@ ranges, interpolation may result in:
 - reduced accuracy,
 - or, in extreme cases, invalid results.
 
-**Best practice:**  
-Ensure that lookup tables cover the full range of pressure, temperature,
-and gas concentrations expected in your application.
+!!! tip "Best practice"
+    Ensure that lookup tables cover the full range of pressure,
+    temperature, and gas concentrations expected in your application.
 
 ---
 
@@ -148,6 +166,19 @@ The underlying spectroscopic content for lookup tables is typically
 prepared **outside** the core JURASSIC runtime, for example with a
 line-by-line radiative transfer model and a chosen spectroscopic
 database.
+
+Most users should start from the lookup tables provided with the example
+projects or from tables prepared for their specific instrument setup,
+rather than generating new spectroscopic tables from scratch.
+
+!!! note
+    Selected sets of pre-calculated lookup tables are available from the
+    [JURASSIC Data Repository](https://datapub.fz-juelich.de/slcs/jurassic/).
+    These data sets can help users get started, because creating new
+    lookup tables is a complex process. It requires separate
+    line-by-line model calculations and the corresponding spectroscopic
+    databases, such as HITRAN, in addition to instrument-specific table
+    preparation.
 
 While JURASSIC is agnostic to the specific external spectroscopy tool,
 the repository does include utilities that support table workflows:
@@ -170,8 +201,8 @@ RFM-based workflows where applicable.
 ## Performance considerations
 
 - Binary lookup tables significantly reduce I/O overhead.
-- netCDF lookup tables can be convenient when multiple channels for one
-  emitter should be bundled into a single file.
+- netCDF lookup tables are recommended for portable larger workflows and
+  for bundling multiple channels for one emitter into a single file.
 - Keeping tables on fast local or parallel file systems improves
   performance for large runs.
 - Table reuse across many simulations amortizes the offline generation
