@@ -4147,6 +4147,9 @@ void intpol_tbl_cga(
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
+
+	  /* Check emissivity range... */
+	  eps = CLAMP(eps, 0, 1);
 	}
       }
 
@@ -4246,6 +4249,9 @@ void intpol_tbl_ega(
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
+
+	  /* Check emissivity range... */
+	  eps = CLAMP(eps, 0, 1);
 	}
       }
 
