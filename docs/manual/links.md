@@ -48,6 +48,6 @@ These links provide further information for users and developers of JURASSIC:
 
 - [JURASSIC Nightly Builds](https://datapub.fz-juelich.de/slcs/jurassic/nightly_builds)
 
-- [Rocket.Chat channel](https://chat.fz-juelich.de/channel/jurassic) (internal)
+- [Matrix room](https://matrix.to/#/#jurassic:fz-juelich.de)
 
 - [ESM Buildbot](https://esm-buildbot.fz-juelich.de) (internal)
