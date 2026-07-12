@@ -466,11 +466,7 @@ static inline size_t array_min_index(
  * @author Lars Hoffmann
  */
 #ifdef _OPENACC
-#define ALLOC(ptr, type, n)				\
-  if(acc_get_num_devices(acc_device_nvidia) <= 0)	\
-    ERRMSG("Not running on a GPU device!");		\
-  if((ptr=calloc((size_t)(n), sizeof(type)))==NULL)	\
-    ERRMSG("Out of memory!");
+#define ALLOC(ptr, type, n)                                           {                                                                     const acc_device_t acc_device = acc_get_device_type();              if (acc_device == acc_device_nvidia                                    && acc_get_num_devices(acc_device_nvidia) <= 0)                  ERRMSG("Not running on a GPU device!");                          if ((ptr = calloc((size_t) (n), sizeof(type))) == NULL)              ERRMSG("Out of memory!");                                      }
 #else
 #define ALLOC(ptr, type, n)				 \
   if((ptr=calloc((size_t)(n), sizeof(type)))==NULL)      \

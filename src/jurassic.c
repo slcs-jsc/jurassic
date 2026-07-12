@@ -3587,7 +3587,8 @@ int formod_fov(
   obs_t *obs,
   obs_t *obs2) {
 
-  double rad[ND][NR], tau[ND][NR], z[NR];
+  int rays[2 * NFOV + 1];
+  double z[2 * NFOV + 1];
 
   /* Do not take into account FOV... */
   if (ctl->fov[0] == '-')
@@ -3599,16 +3600,13 @@ int formod_fov(
   /* Loop over ray paths... */
   for (int ir = 0; ir < obs->nr; ir++) {
 
-    /* Get radiance and transmittance profiles... */
+    /* Collect neighbouring ray paths for the same time step... */
     int nz = 0;
     for (int ir2 = MAX(ir - NFOV, 0);
          ir2 < MIN(ir + 1 + NFOV, obs->nr); ir2++)
       if (obs->time[ir2] == obs->time[ir]) {
+        rays[nz] = ir2;
         z[nz] = obs2->vpz[ir2];
-        for (int id = 0; id < ctl->nd; id++) {
-          rad[id][nz] = obs2->rad[id][ir2];
-          tau[id][nz] = obs2->tau[id][ir2];
-        }
         nz++;
       }
     if (nz < 2)
@@ -3623,11 +3621,15 @@ int formod_fov(
     for (int i = 0; i < ctl->fov_n; i++) {
       const double zfov = obs->vpz[ir] + ctl->fov_dz[i];
       const int idx = locate_irr(z, nz, zfov);
+      const int ir0 = rays[idx];
+      const int ir1 = rays[idx + 1];
       for (int id = 0; id < ctl->nd; id++) {
         obs->rad[id][ir] += ctl->fov_w[i]
-          * LIN(z[idx], rad[id][idx], z[idx + 1], rad[id][idx + 1], zfov);
+          * LIN(z[idx], obs2->rad[id][ir0], z[idx + 1], obs2->rad[id][ir1],
+                zfov);
         obs->tau[id][ir] += ctl->fov_w[i]
-          * LIN(z[idx], tau[id][idx], z[idx + 1], tau[id][idx + 1], zfov);
+          * LIN(z[idx], obs2->tau[id][ir0], z[idx + 1], obs2->tau[id][ir1],
+                zfov);
       }
       wsum += ctl->fov_w[i];
     }
@@ -4484,7 +4486,7 @@ void kernel(
   /* Get sizes... */
   const size_t m = k->size1;
   const size_t n = k->size2;
-  const size_t batch_size = MIN(n, (size_t) MAX(1, 4 * omp_get_max_threads()));
+  const size_t batch_size = MIN(n, (size_t) MAX(1, omp_get_max_threads()));
 
   /* Allocate... */
   gsl_vector *x0 = gsl_vector_alloc(n);

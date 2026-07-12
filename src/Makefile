@@ -32,6 +32,9 @@ MPICC ?= mpicc
 # Compile for GPUs...
 GPU ?= 0
 
+# OpenACC target for GPU builds (gpu, multicore, or host)...
+GPU_TARGET ?= gpu
+
 # GPU memory pinning (for GH200)...
 GPU_PIN ?= 0
 
@@ -84,11 +87,19 @@ endif
 # Compile for GPUs...
 ifeq ($(GPU),1)
   ifeq ($(COMPILER),gcc)
+    ifneq ($(GPU_TARGET),gpu)
+      $(error GPU_TARGET=$(GPU_TARGET) is not supported by the gcc compiler)
+    endif
     CFLAGS += -fopenacc -foffload=-lm
   else ifeq ($(COMPILER),nvc)
-    CFLAGS += -acc -gpu=cc80,cc90
-    ifeq ($(GPU_PIN),1)
-      CFLAGS += -gpu=mem:separate:pinnedalloc
+    CFLAGS += -acc=$(GPU_TARGET)
+    ifeq ($(GPU_TARGET),gpu)
+      CFLAGS += -gpu=cc80,cc90
+      ifeq ($(GPU_PIN),1)
+        CFLAGS += -gpu=mem:separate:pinnedalloc
+      endif
+    else ifeq ($(GPU_PIN),1)
+      $(warning GPU_PIN is ignored for GPU_TARGET=$(GPU_TARGET))
     endif
   else ifeq ($(COMPILER),clang)
     $(error OpenACC is not supported by the clang compiler)
@@ -101,7 +112,11 @@ ifeq ($(STATIC),1)
   LDFLAGS += -lhdf5_hl -lhdf5 -lm -lz -lsz
 endif
 ifeq ($(GPU),1)
-  LDFLAGS += -L $(CUDA_PATH)/lib64 -lcudart
+  ifeq ($(COMPILER),nvc)
+    ifeq ($(GPU_TARGET),gpu)
+      LDFLAGS += -L $(CUDA_PATH)/lib64 -lcudart
+    endif
+  endif
 endif
 
 # Compile with MPI...
