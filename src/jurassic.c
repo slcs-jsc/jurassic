@@ -1221,12 +1221,6 @@ double cost_function(
 
 /*****************************************************************************/
 
-double ctmco2(
-  const double nu,
-  const double p,
-  const double t,
-  const double u) {
-
   static const double co2296[2001] =
     { 9.3388e-5, 9.7711e-5, 1.0224e-4, 1.0697e-4,
     1.1193e-4, 1.1712e-4, 1.2255e-4, 1.2824e-4, 1.3419e-4, 1.4043e-4,
@@ -2061,6 +2055,16 @@ double ctmco2(
     .12584
   };
 
+#if defined(_OPENACC)
+#pragma acc declare copyin(co2296, co2260, co2230)
+#endif
+
+double ctmco2(
+  const double nu,
+  const double p,
+  const double t,
+  const double u) {
+
   /* Get CO2 continuum absorption... */
   const double xw = nu / 2 + 1;
   if (xw >= 1 && xw < 2001) {
@@ -2083,13 +2087,6 @@ double ctmco2(
 }
 
 /*****************************************************************************/
-
-double ctmh2o(
-  const double nu,
-  const double p,
-  const double t,
-  const double q,
-  const double u) {
 
   static const double h2o296[2001] =
     { .17, .1695, .172, .168, .1687, .1624, .1606,
@@ -3101,6 +3098,17 @@ double ctmh2o(
     1.039, 1.04, 1.046, 1.036, 1.027, 1.01, 1.002, 1.
   };
 
+#if defined(_OPENACC)
+#pragma acc declare copyin(h2o296, h2o260, h2ofrn, xfcrev)
+#endif
+
+double ctmh2o(
+  const double nu,
+  const double p,
+  const double t,
+  const double q,
+  const double u) {
+
   double sfac;
 
   /* Get H2O continuum absorption... */
@@ -3136,67 +3144,112 @@ double ctmh2o(
 
 /*****************************************************************************/
 
+static const double ctmn2_ba[98] =
+  { 0., 4.45e-8, 5.22e-8, 6.46e-8, 7.75e-8, 9.03e-8,
+  1.06e-7, 1.21e-7, 1.37e-7, 1.57e-7, 1.75e-7, 2.01e-7, 2.3e-7,
+  2.59e-7, 2.95e-7, 3.26e-7, 3.66e-7, 4.05e-7, 4.47e-7, 4.92e-7,
+  5.34e-7, 5.84e-7, 6.24e-7, 6.67e-7, 7.14e-7, 7.26e-7, 7.54e-7,
+  7.84e-7, 8.09e-7, 8.42e-7, 8.62e-7, 8.87e-7, 9.11e-7, 9.36e-7,
+  9.76e-7, 1.03e-6, 1.11e-6, 1.23e-6, 1.39e-6, 1.61e-6, 1.76e-6,
+  1.94e-6, 1.97e-6, 1.87e-6, 1.75e-6, 1.56e-6, 1.42e-6, 1.35e-6,
+  1.32e-6, 1.29e-6, 1.29e-6, 1.29e-6, 1.3e-6, 1.32e-6, 1.33e-6,
+  1.34e-6, 1.35e-6, 1.33e-6, 1.31e-6, 1.29e-6, 1.24e-6, 1.2e-6,
+  1.16e-6, 1.1e-6, 1.04e-6, 9.96e-7, 9.38e-7, 8.63e-7, 7.98e-7,
+  7.26e-7, 6.55e-7, 5.94e-7, 5.35e-7, 4.74e-7, 4.24e-7, 3.77e-7,
+  3.33e-7, 2.96e-7, 2.63e-7, 2.34e-7, 2.08e-7, 1.85e-7, 1.67e-7,
+  1.47e-7, 1.32e-7, 1.2e-7, 1.09e-7, 9.85e-8, 9.08e-8, 8.18e-8,
+  7.56e-8, 6.85e-8, 6.14e-8, 5.83e-8, 5.77e-8, 5e-8, 4.32e-8, 0.
+};
+
+static const double ctmn2_betaa[98] =
+  { 802., 802., 761., 722., 679., 646., 609., 562.,
+  511., 472., 436., 406., 377., 355., 338., 319., 299., 278., 255.,
+  233., 208., 184., 149., 107., 66., 25., -13., -49., -82., -104.,
+  -119., -130., -139., -144., -146., -146., -147., -148., -150.,
+  -153., -160., -169., -181., -189., -195., -200., -205., -209.,
+  -211., -210., -210., -209., -205., -199., -190., -180., -168.,
+  -157., -143., -126., -108., -89., -63., -32., 1., 35., 65., 95.,
+  121., 141., 152., 161., 164., 164., 161., 155., 148., 143., 137.,
+  133., 131., 133., 139., 150., 165., 187., 213., 248., 284., 321.,
+  372., 449., 514., 569., 609., 642., 673., 673.
+};
+
+static const double ctmn2_nua[98] =
+  { 2120., 2125., 2130., 2135., 2140., 2145., 2150.,
+  2155., 2160., 2165., 2170., 2175., 2180., 2185., 2190., 2195.,
+  2200., 2205., 2210., 2215., 2220., 2225., 2230., 2235., 2240.,
+  2245., 2250., 2255., 2260., 2265., 2270., 2275., 2280., 2285.,
+  2290., 2295., 2300., 2305., 2310., 2315., 2320., 2325., 2330.,
+  2335., 2340., 2345., 2350., 2355., 2360., 2365., 2370., 2375.,
+  2380., 2385., 2390., 2395., 2400., 2405., 2410., 2415., 2420.,
+  2425., 2430., 2435., 2440., 2445., 2450., 2455., 2460., 2465.,
+  2470., 2475., 2480., 2485., 2490., 2495., 2500., 2505., 2510.,
+  2515., 2520., 2525., 2530., 2535., 2540., 2545., 2550., 2555.,
+  2560., 2565., 2570., 2575., 2580., 2585., 2590., 2595., 2600., 2605.
+};
+
+static const double ctmo2_ba[90] =
+  { 0., .061, .074, .084, .096, .12, .162, .208, .246,
+  .285, .314, .38, .444, .5, .571, .673, .768, .853, .966, 1.097,
+  1.214, 1.333, 1.466, 1.591, 1.693, 1.796, 1.922, 2.037, 2.154,
+  2.264, 2.375, 2.508, 2.671, 2.847, 3.066, 3.417, 3.828, 4.204,
+  4.453, 4.599, 4.528, 4.284, 3.955, 3.678, 3.477, 3.346, 3.29,
+  3.251, 3.231, 3.226, 3.212, 3.192, 3.108, 3.033, 2.911, 2.798,
+  2.646, 2.508, 2.322, 2.13, 1.928, 1.757, 1.588, 1.417, 1.253,
+  1.109, .99, .888, .791, .678, .587, .524, .464, .403, .357, .32,
+  .29, .267, .242, .215, .182, .16, .146, .128, .103, .087, .081,
+  .071, .064, 0.
+};
+
+static const double ctmo2_betaa[90] =
+  { 467., 467., 400., 315., 379., 368., 475., 521.,
+  531., 512., 442., 444., 430., 381., 335., 324., 296., 248., 215.,
+  193., 158., 127., 101., 71., 31., -6., -26., -47., -63., -79.,
+  -88., -88., -87., -90., -98., -99., -109., -134., -160., -167.,
+  -164., -158., -153., -151., -156., -166., -168., -173., -170.,
+  -161., -145., -126., -108., -84., -59., -29., 4., 41., 73., 97.,
+  123., 159., 198., 220., 242., 256., 281., 311., 334., 319., 313.,
+  321., 323., 310., 315., 320., 335., 361., 378., 373., 338., 319.,
+  346., 322., 291., 290., 350., 371., 504., 504.
+};
+
+static const double ctmo2_nua[90] =
+  { 1360., 1365., 1370., 1375., 1380., 1385., 1390.,
+  1395., 1400., 1405., 1410., 1415., 1420., 1425., 1430., 1435.,
+  1440., 1445., 1450., 1455., 1460., 1465., 1470., 1475., 1480.,
+  1485., 1490., 1495., 1500., 1505., 1510., 1515., 1520., 1525.,
+  1530., 1535., 1540., 1545., 1550., 1555., 1560., 1565., 1570.,
+  1575., 1580., 1585., 1590., 1595., 1600., 1605., 1610., 1615.,
+  1620., 1625., 1630., 1635., 1640., 1645., 1650., 1655., 1660.,
+  1665., 1670., 1675., 1680., 1685., 1690., 1695., 1700., 1705.,
+  1710., 1715., 1720., 1725., 1730., 1735., 1740., 1745., 1750.,
+  1755., 1760., 1765., 1770., 1775., 1780., 1785., 1790., 1795.,
+  1800., 1805.
+};
+
+#if defined(_OPENACC)
+#pragma acc declare copyin(ctmn2_ba, ctmn2_betaa, ctmn2_nua, ctmo2_ba, ctmo2_betaa, ctmo2_nua)
+#endif
+
+/*****************************************************************************/
+
 double ctmn2(
   const double nu,
   const double p,
   const double t) {
 
-  static const double ba[98] =
-    { 0., 4.45e-8, 5.22e-8, 6.46e-8, 7.75e-8, 9.03e-8,
-    1.06e-7, 1.21e-7, 1.37e-7, 1.57e-7, 1.75e-7, 2.01e-7, 2.3e-7,
-    2.59e-7, 2.95e-7, 3.26e-7, 3.66e-7, 4.05e-7, 4.47e-7, 4.92e-7,
-    5.34e-7, 5.84e-7, 6.24e-7, 6.67e-7, 7.14e-7, 7.26e-7, 7.54e-7,
-    7.84e-7, 8.09e-7, 8.42e-7, 8.62e-7, 8.87e-7, 9.11e-7, 9.36e-7,
-    9.76e-7, 1.03e-6, 1.11e-6, 1.23e-6, 1.39e-6, 1.61e-6, 1.76e-6,
-    1.94e-6, 1.97e-6, 1.87e-6, 1.75e-6, 1.56e-6, 1.42e-6, 1.35e-6,
-    1.32e-6, 1.29e-6, 1.29e-6, 1.29e-6, 1.3e-6, 1.32e-6, 1.33e-6,
-    1.34e-6, 1.35e-6, 1.33e-6, 1.31e-6, 1.29e-6, 1.24e-6, 1.2e-6,
-    1.16e-6, 1.1e-6, 1.04e-6, 9.96e-7, 9.38e-7, 8.63e-7, 7.98e-7,
-    7.26e-7, 6.55e-7, 5.94e-7, 5.35e-7, 4.74e-7, 4.24e-7, 3.77e-7,
-    3.33e-7, 2.96e-7, 2.63e-7, 2.34e-7, 2.08e-7, 1.85e-7, 1.67e-7,
-    1.47e-7, 1.32e-7, 1.2e-7, 1.09e-7, 9.85e-8, 9.08e-8, 8.18e-8,
-    7.56e-8, 6.85e-8, 6.14e-8, 5.83e-8, 5.77e-8, 5e-8, 4.32e-8, 0.
-  };
-
-  static const double betaa[98] =
-    { 802., 802., 761., 722., 679., 646., 609., 562.,
-    511., 472., 436., 406., 377., 355., 338., 319., 299., 278., 255.,
-    233., 208., 184., 149., 107., 66., 25., -13., -49., -82., -104.,
-    -119., -130., -139., -144., -146., -146., -147., -148., -150.,
-    -153., -160., -169., -181., -189., -195., -200., -205., -209.,
-    -211., -210., -210., -209., -205., -199., -190., -180., -168.,
-    -157., -143., -126., -108., -89., -63., -32., 1., 35., 65., 95.,
-    121., 141., 152., 161., 164., 164., 161., 155., 148., 143., 137.,
-    133., 131., 133., 139., 150., 165., 187., 213., 248., 284., 321.,
-    372., 449., 514., 569., 609., 642., 673., 673.
-  };
-
-  static const double nua[98] =
-    { 2120., 2125., 2130., 2135., 2140., 2145., 2150.,
-    2155., 2160., 2165., 2170., 2175., 2180., 2185., 2190., 2195.,
-    2200., 2205., 2210., 2215., 2220., 2225., 2230., 2235., 2240.,
-    2245., 2250., 2255., 2260., 2265., 2270., 2275., 2280., 2285.,
-    2290., 2295., 2300., 2305., 2310., 2315., 2320., 2325., 2330.,
-    2335., 2340., 2345., 2350., 2355., 2360., 2365., 2370., 2375.,
-    2380., 2385., 2390., 2395., 2400., 2405., 2410., 2415., 2420.,
-    2425., 2430., 2435., 2440., 2445., 2450., 2455., 2460., 2465.,
-    2470., 2475., 2480., 2485., 2490., 2495., 2500., 2505., 2510.,
-    2515., 2520., 2525., 2530., 2535., 2540., 2545., 2550., 2555.,
-    2560., 2565., 2570., 2575., 2580., 2585., 2590., 2595., 2600., 2605.
-  };
-
   const double t0 = 273.0, tr = 296.0;
 
   /* Check wavenumber range... */
-  if (nu < nua[0] || nu > nua[97])
+  if (nu < ctmn2_nua[0] || nu > ctmn2_nua[97])
     return 0;
 
   /* Interpolate B and beta... */
-  const int idx = locate_reg(nua, 98, nu);
+  const int idx = locate_reg(ctmn2_nua, 98, nu);
   const double b =
-    1e6 * LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
+    1e6 * LIN(ctmn2_nua[idx], ctmn2_ba[idx], ctmn2_nua[idx + 1], ctmn2_ba[idx + 1], nu);
   const double beta =
-    LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+    LIN(ctmn2_nua[idx], ctmn2_betaa[idx], ctmn2_nua[idx + 1], ctmn2_betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t))
@@ -3210,56 +3263,17 @@ double ctmo2(
   const double p,
   const double t) {
 
-  static const double ba[90] =
-    { 0., .061, .074, .084, .096, .12, .162, .208, .246,
-    .285, .314, .38, .444, .5, .571, .673, .768, .853, .966, 1.097,
-    1.214, 1.333, 1.466, 1.591, 1.693, 1.796, 1.922, 2.037, 2.154,
-    2.264, 2.375, 2.508, 2.671, 2.847, 3.066, 3.417, 3.828, 4.204,
-    4.453, 4.599, 4.528, 4.284, 3.955, 3.678, 3.477, 3.346, 3.29,
-    3.251, 3.231, 3.226, 3.212, 3.192, 3.108, 3.033, 2.911, 2.798,
-    2.646, 2.508, 2.322, 2.13, 1.928, 1.757, 1.588, 1.417, 1.253,
-    1.109, .99, .888, .791, .678, .587, .524, .464, .403, .357, .32,
-    .29, .267, .242, .215, .182, .16, .146, .128, .103, .087, .081,
-    .071, .064, 0.
-  };
-
-  static const double betaa[90] =
-    { 467., 467., 400., 315., 379., 368., 475., 521.,
-    531., 512., 442., 444., 430., 381., 335., 324., 296., 248., 215.,
-    193., 158., 127., 101., 71., 31., -6., -26., -47., -63., -79.,
-    -88., -88., -87., -90., -98., -99., -109., -134., -160., -167.,
-    -164., -158., -153., -151., -156., -166., -168., -173., -170.,
-    -161., -145., -126., -108., -84., -59., -29., 4., 41., 73., 97.,
-    123., 159., 198., 220., 242., 256., 281., 311., 334., 319., 313.,
-    321., 323., 310., 315., 320., 335., 361., 378., 373., 338., 319.,
-    346., 322., 291., 290., 350., 371., 504., 504.
-  };
-
-  static const double nua[90] =
-    { 1360., 1365., 1370., 1375., 1380., 1385., 1390.,
-    1395., 1400., 1405., 1410., 1415., 1420., 1425., 1430., 1435.,
-    1440., 1445., 1450., 1455., 1460., 1465., 1470., 1475., 1480.,
-    1485., 1490., 1495., 1500., 1505., 1510., 1515., 1520., 1525.,
-    1530., 1535., 1540., 1545., 1550., 1555., 1560., 1565., 1570.,
-    1575., 1580., 1585., 1590., 1595., 1600., 1605., 1610., 1615.,
-    1620., 1625., 1630., 1635., 1640., 1645., 1650., 1655., 1660.,
-    1665., 1670., 1675., 1680., 1685., 1690., 1695., 1700., 1705.,
-    1710., 1715., 1720., 1725., 1730., 1735., 1740., 1745., 1750.,
-    1755., 1760., 1765., 1770., 1775., 1780., 1785., 1790., 1795.,
-    1800., 1805.
-  };
-
   const double t0 = 273, tr = 296;
 
   /* Check wavenumber range... */
-  if (nu < nua[0] || nu > nua[89])
+  if (nu < ctmo2_nua[0] || nu > ctmo2_nua[89])
     return 0;
 
   /* Interpolate B and beta... */
-  const int idx = locate_reg(nua, 90, nu);
-  const double b = LIN(nua[idx], ba[idx], nua[idx + 1], ba[idx + 1], nu);
+  const int idx = locate_reg(ctmo2_nua, 90, nu);
+  const double b = LIN(ctmo2_nua[idx], ctmo2_ba[idx], ctmo2_nua[idx + 1], ctmo2_ba[idx + 1], nu);
   const double beta =
-    LIN(nua[idx], betaa[idx], nua[idx + 1], betaa[idx + 1], nu);
+    LIN(ctmo2_nua[idx], ctmo2_betaa[idx], ctmo2_nua[idx + 1], ctmo2_betaa[idx + 1], nu);
 
   /* Compute absorption coefficient... */
   return 0.1 * POW2(p / P0 * t0 / t) * exp(beta * (1 / tr - 1 / t)) * O2 * b;
@@ -3342,6 +3356,8 @@ void copy_obs(
     memcpy(obs_dest->rad[id], obs_src->rad[id], s);
   for (int id = 0; id < ctl->nd; id++)
     memcpy(obs_dest->tau[id], obs_src->tau[id], s);
+  for (int id = 0; id < ctl->nd; id++)
+    memcpy(obs_dest->mask[id], obs_src->mask[id], (size_t) obs_src->nr * sizeof(int));
 
   /* Initialize... */
   if (init)
@@ -3418,21 +3434,23 @@ int find_emitter(
 
 /*****************************************************************************/
 
-void formod(
+int formod(
   const ctl_t *ctl,
   const tbl_t *tbl,
   atm_t *atm,
-  obs_t *obs) {
+  obs_t *obs,
+  los_t *los,
+  obs_t *obs2) {
 
-  /* Allocate... */
-  int *mask;
-  ALLOC(mask, int,
-	ND * NR);
+#if defined(_OPENACC)
+  if (ctl->formod == 2)
+    return FORMOD_STATUS_RFM_UNSUPPORTED;
+#endif
 
   /* Save observation mask... */
   for (int id = 0; id < ctl->nd; id++)
     for (int ir = 0; ir < obs->nr; ir++)
-      mask[id * NR + ir] = !isfinite(obs->rad[id][ir]);
+      obs->mask[id][ir] = !isfinite(obs->rad[id][ir]);
 
   /* Hydrostatic equilibrium... */
   hydrostatic(ctl, atm);
@@ -3440,14 +3458,24 @@ void formod(
   /* CGA or EGA forward model... */
   if (ctl->formod == 0 || ctl->formod == 1)
     for (int ir = 0; ir < obs->nr; ir++)
-      formod_pencil(ctl, tbl, atm, obs, ir);
+      {
+	const int status = formod_pencil(ctl, tbl, atm, obs, ir, los);
+	if (status != FORMOD_STATUS_OK)
+	  return status;
+      }
 
+#if !defined(_OPENACC)
   /* Call RFM... */
   else if (ctl->formod == 2)
     formod_rfm(ctl, tbl, atm, obs);
+#endif
 
   /* Apply field-of-view convolution... */
-  formod_fov(ctl, obs);
+  {
+    const int status = formod_fov(ctl, obs, obs2);
+    if (status != FORMOD_STATUS_OK)
+      return status;
+  }
 
   /* Convert radiance to brightness temperature... */
   if (ctl->write_bbt)
@@ -3458,11 +3486,62 @@ void formod(
   /* Apply observation mask... */
   for (int id = 0; id < ctl->nd; id++)
     for (int ir = 0; ir < obs->nr; ir++)
-      if (mask[id * NR + ir])
+      if (obs->mask[id][ir])
 	obs->rad[id][ir] = NAN;
 
-  /* Free... */
-  free(mask);
+  return FORMOD_STATUS_OK;
+}
+
+/*****************************************************************************/
+
+
+/*****************************************************************************/
+
+void formod_batch(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  atm_t *atm,
+  obs_t *obs,
+  const int nbatch,
+  int *status,
+  los_t *los,
+  obs_t *obs2) {
+
+  if (nbatch <= 0)
+    return;
+
+  if (los == NULL || obs2 == NULL)
+    ERRMSG("formod_batch requires scratch arrays for los and obs2!");
+
+  /* The RFM interface uses fixed temporary filenames and is therefore
+     not thread-safe in the current implementation. */
+  if (ctl->formod == 2) {
+    for (int ib = 0; ib < nbatch; ib++) {
+      const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs2[ib]);
+      if (status)
+        status[ib] = ib_status;
+      else if (ib_status != FORMOD_STATUS_OK)
+        ERRMSG("Forward model failed with status code %d!", ib_status);
+    }
+    return;
+  }
+
+#if defined(_OPENACC)
+  if (status == NULL)
+    ERRMSG("GPU batch execution requires a status array!");
+#pragma acc parallel loop present(ctl,tbl,atm[0:nbatch],obs[0:nbatch],status[0:nbatch],los[0:nbatch],obs2[0:nbatch])
+  for (int ib = 0; ib < nbatch; ib++)
+    status[ib] = formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs2[ib]);
+#else
+#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs2)
+  for (int ib = 0; ib < nbatch; ib++) {
+    const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs2[ib]);
+    if (status)
+      status[ib] = ib_status;
+    else if (ib_status != FORMOD_STATUS_OK)
+      ERRMSG("Forward model failed with status code %d!", ib_status);
+  }
+#endif
 }
 
 /*****************************************************************************/
@@ -3503,19 +3582,16 @@ void formod_continua(
 
 /*****************************************************************************/
 
-void formod_fov(
+int formod_fov(
   const ctl_t *ctl,
-  obs_t *obs) {
+  obs_t *obs,
+  obs_t *obs2) {
 
   double rad[ND][NR], tau[ND][NR], z[NR];
 
   /* Do not take into account FOV... */
   if (ctl->fov[0] == '-')
-    return;
-
-  /* Allocate... */
-  obs_t *obs2;
-  ALLOC(obs2, obs_t, 1);
+    return FORMOD_STATUS_OK;
 
   /* Copy observation data... */
   copy_obs(ctl, obs2, obs, 0);
@@ -3526,17 +3602,17 @@ void formod_fov(
     /* Get radiance and transmittance profiles... */
     int nz = 0;
     for (int ir2 = MAX(ir - NFOV, 0);
-	 ir2 < MIN(ir + 1 + NFOV, obs->nr); ir2++)
+         ir2 < MIN(ir + 1 + NFOV, obs->nr); ir2++)
       if (obs->time[ir2] == obs->time[ir]) {
-	z[nz] = obs2->vpz[ir2];
-	for (int id = 0; id < ctl->nd; id++) {
-	  rad[id][nz] = obs2->rad[id][ir2];
-	  tau[id][nz] = obs2->tau[id][ir2];
-	}
-	nz++;
+        z[nz] = obs2->vpz[ir2];
+        for (int id = 0; id < ctl->nd; id++) {
+          rad[id][nz] = obs2->rad[id][ir2];
+          tau[id][nz] = obs2->tau[id][ir2];
+        }
+        nz++;
       }
     if (nz < 2)
-      ERRMSG("Cannot apply FOV convolution!");
+      return FORMOD_STATUS_FOV_DATA_MISSING;
 
     /* Convolute profiles with FOV... */
     double wsum = 0;
@@ -3548,10 +3624,10 @@ void formod_fov(
       const double zfov = obs->vpz[ir] + ctl->fov_dz[i];
       const int idx = locate_irr(z, nz, zfov);
       for (int id = 0; id < ctl->nd; id++) {
-	obs->rad[id][ir] += ctl->fov_w[i]
-	  * LIN(z[idx], rad[id][idx], z[idx + 1], rad[id][idx + 1], zfov);
-	obs->tau[id][ir] += ctl->fov_w[i]
-	  * LIN(z[idx], tau[id][idx], z[idx + 1], tau[id][idx + 1], zfov);
+        obs->rad[id][ir] += ctl->fov_w[i]
+          * LIN(z[idx], rad[id][idx], z[idx + 1], rad[id][idx + 1], zfov);
+        obs->tau[id][ir] += ctl->fov_w[i]
+          * LIN(z[idx], tau[id][idx], z[idx + 1], tau[id][idx + 1], zfov);
       }
       wsum += ctl->fov_w[i];
     }
@@ -3561,24 +3637,26 @@ void formod_fov(
     }
   }
 
-  /* Free... */
-  free(obs2);
+  return FORMOD_STATUS_OK;
 }
 
 /*****************************************************************************/
 
-void formod_pencil(
+
+/*****************************************************************************/
+
+int formod_pencil(
   const ctl_t *ctl,
   const tbl_t *tbl,
   const atm_t *atm,
   obs_t *obs,
-  const int ir) {
+  const int ir,
+  los_t *los) {
 
   double rad[ND], tau[ND], tau_path[ND][NG];
 
-  /* Allocate... */
-  los_t *los;
-  ALLOC(los, los_t, 1);
+  /* Preserve the previous calloc-based semantics for scratch LOS data. */
+  memset(los, 0, sizeof(*los));
 
   /* Initialize... */
   for (int id = 0; id < ctl->nd; id++) {
@@ -3589,7 +3667,11 @@ void formod_pencil(
   }
 
   /* Raytracing... */
-  raytrace(ctl, atm, obs, los, ir);
+  {
+    const int status = raytrace(ctl, atm, obs, los, ir);
+    if (status != FORMOD_STATUS_OK)
+      return status;
+  }
 
   /* Loop over LOS points... */
   for (int ip = 0; ip < los->np; ip++) {
@@ -3698,9 +3780,11 @@ void formod_pencil(
     obs->tau[id][ir] = tau[id];
   }
 
-  /* Free... */
-  free(los);
+  return FORMOD_STATUS_OK;
 }
+
+/*****************************************************************************/
+
 
 /*****************************************************************************/
 
@@ -3736,7 +3820,7 @@ void formod_rfm(
 	ERRMSG("RFM interface cannot handle extinction data!");
 
   /* Get altitude range of atmospheric data... */
-  gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
+  array_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
 
   /* Observer within atmosphere? */
   if (obs->obsz[0] >= zmin && obs->obsz[0] <= zmax) {
@@ -3787,7 +3871,7 @@ void formod_rfm(
     strcat(rfmflg, " ZEN");
 
   /* Get surface temperature... */
-  tsurf = atm->t[gsl_stats_min_index(atm->z, 1, (size_t) atm->np)];
+  tsurf = atm->t[array_min_index(atm->z, 1, (size_t) atm->np)];
 
   /* Refraction? */
   if (!nadir && !zenith && !ctl->refrac)
@@ -4407,9 +4491,13 @@ void kernel(
   int *iqa;
   ALLOC(iqa, int,
 	N);
+  los_t *los0;
+  obs_t *obs0;
+  ALLOC(los0, los_t, 1);
+  ALLOC(obs0, obs_t, 1);
 
   /* Compute radiance for undisturbed atmospheric data... */
-  formod(ctl, tbl, atm, obs);
+  formod(ctl, tbl, atm, obs, los0, obs0);
 
   /* Compose vectors... */
   atm2x(ctl, atm, x0, iqa, NULL);
@@ -4459,7 +4547,11 @@ void kernel(
     x2atm(ctl, x1, atm1);
 
     /* Compute radiance for disturbed atmospheric data... */
-    formod(ctl, tbl, atm1, obs1);
+    los_t *los1;
+    obs_t *obs1_scratch;
+    ALLOC(los1, los_t, 1);
+    ALLOC(obs1_scratch, obs_t, 1);
+    formod(ctl, tbl, atm1, obs1, los1, obs1_scratch);
 
     /* Compose measurement vector for disturbed radiance data... */
     obs2y(ctl, obs1, yy1, NULL, NULL);
@@ -4472,6 +4564,8 @@ void kernel(
     /* Free... */
     gsl_vector_free(x1);
     gsl_vector_free(yy1);
+    free(obs1_scratch);
+    free(los1);
     free(atm1);
     free(obs1);
   }
@@ -4479,6 +4573,8 @@ void kernel(
   /* Free... */
   gsl_vector_free(x0);
   gsl_vector_free(yy0);
+  free(obs0);
+  free(los0);
   free(iqa);
 }
 
@@ -4708,13 +4804,18 @@ void optimal_estimation(
   gsl_vector *y_i = gsl_vector_alloc(m);
   gsl_vector *y_m = gsl_vector_alloc(m);
 
+  los_t *los_scratch;
+  obs_t *obs_scratch;
+  ALLOC(los_scratch, los_t, 1);
+  ALLOC(obs_scratch, obs_t, 1);
+
   /* Set timer... */
   SELECT_TIMER("RET_SETUP", "RETRIEVAL");
 
   /* Set initial state... */
   copy_atm(ctl, atm_i, atm_apr, 0);
   copy_obs(ctl, obs_i, obs_meas, 0);
-  formod(ctl, tbl, atm_i, obs_i);
+  formod(ctl, tbl, atm_i, obs_i, los_scratch, obs_scratch);
 
   /* Set state vectors and observation vectors... */
   atm2x(ctl, atm_apr, x_a, NULL, NULL);
@@ -4817,7 +4918,7 @@ void optimal_estimation(
 	atm_i->sfeps[isf] = CLAMP(atm_i->sfeps[isf], 0, 1);
 
       /* Forward calculation... */
-      formod(ctl, tbl, atm_i, obs_i);
+      formod(ctl, tbl, atm_i, obs_i, los_scratch, obs_scratch);
       obs2y(ctl, obs_i, y_i, NULL, NULL);
 
       /* Determine dx = x_i - x_a and dy = y - F(x_i) ... */
@@ -4964,11 +5065,13 @@ void optimal_estimation(
   gsl_vector_free(y_i);
   gsl_vector_free(y_m);
 
+  free(obs_scratch);
+  free(los_scratch);
   free(ipa);
   free(iqa);
 }
 
-void raytrace(
+int raytrace(
   const ctl_t *ctl,
   const atm_t *atm,
   obs_t *obs,
@@ -4990,11 +5093,11 @@ void raytrace(
   obs->tplat[ir] = obs->vplat[ir];
 
   /* Get altitude range of atmospheric data... */
-  gsl_stats_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
+  array_minmax(&zmin, &zmax, atm->z, 1, (size_t) atm->np);
 
   /* Check observer altitude... */
   if (obs->obsz[ir] < zmin)
-    ERRMSG("Observer below surface!");
+    return FORMOD_STATUS_OBSERVER_BELOW_SURFACE;
 
   /* Determine Cartesian coordinates for observer and view point... */
   geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xobs);
@@ -5089,7 +5192,7 @@ void raytrace(
 
     /* Increment and check number of LOS points... */
     if ((++los->np) > NLOS)
-      ERRMSG("Too many LOS points!");
+      return FORMOD_STATUS_TOO_MANY_LOS_POINTS;
 
     /* Check stop flag... */
     if (stop) {
@@ -5192,7 +5295,12 @@ void raytrace(
 	los->cgp[ip][ig] /= los->cgu[ip][ig];
 	los->cgt[ip][ig] /= los->cgu[ip][ig];
       }
+
+  return FORMOD_STATUS_OK;
 }
+
+/*****************************************************************************/
+
 
 /*****************************************************************************/
 
@@ -5235,24 +5343,24 @@ void read_atm(
   /* Write info... */
   double mini, maxi;
   LOG(2, "Number of data points: %d", atm->np);
-  gsl_stats_minmax(&mini, &maxi, atm->time, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->time, 1, (size_t) atm->np);
   LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->z, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->z, 1, (size_t) atm->np);
   LOG(2, "Altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->lon, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->lon, 1, (size_t) atm->np);
   LOG(2, "Longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->lat, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->lat, 1, (size_t) atm->np);
   LOG(2, "Latitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->p, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->p, 1, (size_t) atm->np);
   LOG(2, "Pressure range: %g ... %g hPa", maxi, mini);
-  gsl_stats_minmax(&mini, &maxi, atm->t, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->t, 1, (size_t) atm->np);
   LOG(2, "Temperature range: %g ... %g K", mini, maxi);
   for (int ig = 0; ig < ctl->ng; ig++) {
-    gsl_stats_minmax(&mini, &maxi, atm->q[ig], 1, (size_t) atm->np);
+    array_minmax(&mini, &maxi, atm->q[ig], 1, (size_t) atm->np);
     LOG(2, "Emitter %s range: %g ... %g ppv", ctl->emitter[ig], mini, maxi);
   }
   for (int iw = 0; iw < ctl->nw; iw++) {
-    gsl_stats_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
+    array_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
     LOG(2, "Extinction range (window %d): %g ... %g km^-1", iw, mini, maxi);
   }
   if (ctl->ncl > 0) {
@@ -5849,28 +5957,28 @@ void read_obs(
   /* Write info... */
   double mini, maxi;
   LOG(2, "Number of ray paths: %d", obs->nr);
-  gsl_stats_minmax(&mini, &maxi, obs->time, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->time, 1, (size_t) obs->nr);
   LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->obsz, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->obsz, 1, (size_t) obs->nr);
   LOG(2, "Observer altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->obslon, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->obslon, 1, (size_t) obs->nr);
   LOG(2, "Observer longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->obslat, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->obslat, 1, (size_t) obs->nr);
   LOG(2, "Observer latitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->vpz, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->vpz, 1, (size_t) obs->nr);
   LOG(2, "View point altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->vplon, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->vplon, 1, (size_t) obs->nr);
   LOG(2, "View point longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->vplat, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->vplat, 1, (size_t) obs->nr);
   LOG(2, "View point latitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->tpz, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->tpz, 1, (size_t) obs->nr);
   LOG(2, "Tangent point altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->tplon, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->tplon, 1, (size_t) obs->nr);
   LOG(2, "Tangent point longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->tplat, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->tplat, 1, (size_t) obs->nr);
   LOG(2, "Tangent point latitude range: %g ... %g deg", mini, maxi);
   for (int id = 0; id < ctl->nd; id++) {
-    gsl_stats_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
+    array_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
     if (ctl->write_bbt) {
       LOG(2, "Brightness temperature (%.4f cm^-1) range: %g ... %g K",
 	  ctl->nu[id], mini, maxi);
@@ -5880,7 +5988,7 @@ void read_obs(
     }
   }
   for (int id = 0; id < ctl->nd; id++) {
-    gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
+    array_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
     LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
 	ctl->nu[id], mini, maxi);
   }
@@ -6327,9 +6435,9 @@ void read_shape(
   /* Write info... */
   double mini, maxi;
   LOG(2, "Number of data points: %d", *n);
-  gsl_stats_minmax(&mini, &maxi, x, 1, (size_t) *n);
+  array_minmax(&mini, &maxi, x, 1, (size_t) *n);
   LOG(2, "Range of x values: %.4f ... %.4f", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, y, 1, (size_t) *n);
+  array_minmax(&mini, &maxi, y, 1, (size_t) *n);
   LOG(2, "Range of y values: %g ... %g", mini, maxi);
 }
 
@@ -6969,7 +7077,7 @@ void tangent_point(
   double *tplat) {
 
   /* Find minimum altitude... */
-  const size_t ip = gsl_stats_min_index(los->z, 1, (size_t) los->np);
+  const size_t ip = array_min_index(los->z, 1, (size_t) los->np);
 
   /* Nadir or zenith... */
   if (ip <= 0 || ip >= (size_t) los->np - 1) {
@@ -7346,24 +7454,24 @@ void write_atm(
   /* Write info... */
   double mini, maxi;
   LOG(2, "Number of data points: %d", atm->np);
-  gsl_stats_minmax(&mini, &maxi, atm->time, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->time, 1, (size_t) atm->np);
   LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->z, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->z, 1, (size_t) atm->np);
   LOG(2, "Altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->lon, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->lon, 1, (size_t) atm->np);
   LOG(2, "Longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->lat, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->lat, 1, (size_t) atm->np);
   LOG(2, "Latitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, atm->p, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->p, 1, (size_t) atm->np);
   LOG(2, "Pressure range: %g ... %g hPa", maxi, mini);
-  gsl_stats_minmax(&mini, &maxi, atm->t, 1, (size_t) atm->np);
+  array_minmax(&mini, &maxi, atm->t, 1, (size_t) atm->np);
   LOG(2, "Temperature range: %g ... %g K", mini, maxi);
   for (int ig = 0; ig < ctl->ng; ig++) {
-    gsl_stats_minmax(&mini, &maxi, atm->q[ig], 1, (size_t) atm->np);
+    array_minmax(&mini, &maxi, atm->q[ig], 1, (size_t) atm->np);
     LOG(2, "Emitter %s range: %g ... %g ppv", ctl->emitter[ig], mini, maxi);
   }
   for (int iw = 0; iw < ctl->nw; iw++) {
-    gsl_stats_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
+    array_minmax(&mini, &maxi, atm->k[iw], 1, (size_t) atm->np);
     LOG(2, "Extinction range (window %d): %g ... %g km^-1", iw, mini, maxi);
   }
   if (ctl->ncl > 0) {
@@ -8310,28 +8418,28 @@ void write_obs(
   /* Write info... */
   double mini, maxi;
   LOG(2, "Number of ray paths: %d", obs->nr);
-  gsl_stats_minmax(&mini, &maxi, obs->time, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->time, 1, (size_t) obs->nr);
   LOG(2, "Time range: %.2f ... %.2f s", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->obsz, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->obsz, 1, (size_t) obs->nr);
   LOG(2, "Observer altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->obslon, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->obslon, 1, (size_t) obs->nr);
   LOG(2, "Observer longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->obslat, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->obslat, 1, (size_t) obs->nr);
   LOG(2, "Observer latitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->vpz, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->vpz, 1, (size_t) obs->nr);
   LOG(2, "View point altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->vplon, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->vplon, 1, (size_t) obs->nr);
   LOG(2, "View point longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->vplat, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->vplat, 1, (size_t) obs->nr);
   LOG(2, "View point latitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->tpz, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->tpz, 1, (size_t) obs->nr);
   LOG(2, "Tangent point altitude range: %g ... %g km", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->tplon, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->tplon, 1, (size_t) obs->nr);
   LOG(2, "Tangent point longitude range: %g ... %g deg", mini, maxi);
-  gsl_stats_minmax(&mini, &maxi, obs->tplat, 1, (size_t) obs->nr);
+  array_minmax(&mini, &maxi, obs->tplat, 1, (size_t) obs->nr);
   LOG(2, "Tangent point latitude range: %g ... %g deg", mini, maxi);
   for (int id = 0; id < ctl->nd; id++) {
-    gsl_stats_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
+    array_minmax(&mini, &maxi, obs->rad[id], 1, (size_t) obs->nr);
     if (ctl->write_bbt) {
       LOG(2, "Brightness temperature (%.4f cm^-1) range: %g ... %g K",
 	  ctl->nu[id], mini, maxi);
@@ -8341,7 +8449,7 @@ void write_obs(
     }
   }
   for (int id = 0; id < ctl->nd; id++) {
-    gsl_stats_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
+    array_minmax(&mini, &maxi, obs->tau[id], 1, (size_t) obs->nr);
     LOG(2, "Transmittance (%.4f cm^-1) range: %g ... %g",
 	ctl->nu[id], mini, maxi);
   }

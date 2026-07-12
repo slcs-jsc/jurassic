@@ -148,12 +148,62 @@
 #include <math.h>
 #include <netcdf.h>
 #include <omp.h>
+#ifdef _OPENACC
+#include "openacc.h"
+#endif
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+
+/* ------------------------------------------------------------
+   Helper functions...
+   ------------------------------------------------------------ */
+
+#ifdef _OPENACC
+#pragma acc routine seq
+#endif
+static inline void array_minmax(
+  double *minv,
+  double *maxv,
+  const double *data,
+  const size_t stride,
+  const size_t n) {
+
+  if (n == 0) {
+    *minv = NAN;
+    *maxv = NAN;
+    return;
+  }
+
+  *minv = data[0];
+  *maxv = data[0];
+  for (size_t i = 1; i < n; i++) {
+    const double value = data[i * stride];
+    if (value < *minv)
+      *minv = value;
+    if (value > *maxv)
+      *maxv = value;
+  }
+}
+
+#ifdef _OPENACC
+#pragma acc routine seq
+#endif
+static inline size_t array_min_index(
+  const double *data,
+  const size_t stride,
+  const size_t n) {
+
+  size_t idx = 0;
+  for (size_t i = 1; i < n; i++)
+    if (data[i * stride] < data[idx * stride])
+      idx = i;
+
+  return idx;
+}
 
 /* ------------------------------------------------------------
    Constants...
@@ -415,9 +465,23 @@
  *
  * @author Lars Hoffmann
  */
+#ifdef _OPENACC
+#define ALLOC(ptr, type, n)				\
+  if(acc_get_num_devices(acc_device_nvidia) <= 0)	\
+    ERRMSG("Not running on a GPU device!");		\
+  if((ptr=calloc((size_t)(n), sizeof(type)))==NULL)	\
+    ERRMSG("Out of memory!");
+#else
 #define ALLOC(ptr, type, n)				 \
   if((ptr=calloc((size_t)(n), sizeof(type)))==NULL)      \
     ERRMSG("Out of memory!");
+#endif
+
+#define FORMOD_STATUS_OK 0
+#define FORMOD_STATUS_RFM_UNSUPPORTED 1
+#define FORMOD_STATUS_FOV_DATA_MISSING 2
+#define FORMOD_STATUS_OBSERVER_BELOW_SURFACE 3
+#define FORMOD_STATUS_TOO_MANY_LOS_POINTS 4
 
 /**
  * @brief Compute brightness temperature from radiance.
@@ -446,7 +510,7 @@
  * @author Lars Hoffmann
  */
 #define BRIGHT(rad, nu)					\
-  (C2 * (nu) / gsl_log1p(C1 * POW3(nu) / (rad)))
+  (C2 * (nu) / log1p(C1 * POW3(nu) / (rad)))
 
 /**
  * @brief Clamp a value to a specified range.
@@ -1002,7 +1066,7 @@
  * @see BRIGHT, C1, C2
  */
 #define PLANCK(T, nu) \
-  (C1 * POW3(nu) / gsl_expm1(C2 * (nu) / (T)))
+  (C1 * POW3(nu) / expm1(C2 * (nu) / (T)))
 
 /**
  * @brief Compute the square of a value.
@@ -1694,6 +1758,9 @@ typedef struct {
 
   /*! Radiance [W/(m^2 sr cm^-1)]. */
   double rad[ND][NR];
+
+  /*! Internal observation mask used by the forward model. */
+  int mask[ND][NR];
 
 } obs_t;
 
@@ -2426,6 +2493,8 @@ int find_emitter(
  * @param[in]  tbl  Emissivity and source-function lookup tables.
  * @param[in,out] atm  Atmospheric profile; may be adjusted for hydrostatic balance.
  * @param[in,out] obs  Observation geometry and radiance data; populated with model output.
+ * @param[in,out] los  Scratch line-of-sight structure reused during ray tracing.
+ * @param[in,out] obs2 Scratch observation structure reused for FOV convolution.
  *
  * @note The model type is selected via @ref ctl_t::formod:
  *       - 0 or 1 → pencil-beam models (@ref formod_pencil)  
@@ -2434,15 +2503,58 @@ int find_emitter(
  * @note The function preserves @p obs->rad elements marked as invalid
  *       (NaN) by applying an internal observation mask.
  *
+ * @return Forward-model status code, e.g. @ref FORMOD_STATUS_OK.
+ *
  * @see ctl_t, atm_t, obs_t, tbl_t, formod_pencil, formod_rfm, formod_fov, hydrostatic
  * 
  * @author Lars Hoffmann
  */
-void formod(
+int formod(
   const ctl_t * ctl,
   const tbl_t * tbl,
   atm_t * atm,
-  obs_t * obs);
+  obs_t * obs,
+  los_t * los,
+  obs_t * obs2);
+
+/**
+ * @brief Compute forward-model radiances for multiple atmospheric cases.
+ *
+ * Applies @ref formod to a batch of independent atmospheric and observation
+ * states. Each batch element is represented by one @ref atm_t and one
+ * @ref obs_t entry. For CGA/EGA forward models, the batch loop may run in
+ * parallel with OpenMP. For the RFM interface, execution remains serial
+ * because temporary filenames are shared internally.
+ *
+ * @param[in]  ctl        Control structure defining model settings and options.
+ * @param[in]  tbl        Emissivity and source-function lookup tables.
+ * @param[in,out] atm     Array of atmospheric states with at least
+ *                        @p nbatch entries.
+ * @param[in,out] obs     Array of observation states with at least
+ *                        @p nbatch entries.
+ * @param[in]  nbatch     Number of batch elements.
+ * @param[out] status     Optional array of length @p nbatch receiving per-case
+ *                        status codes such as @ref FORMOD_STATUS_OK. Pass
+ *                        `NULL` to preserve fail-fast behavior.
+ * @param[in,out] los     Scratch line-of-sight array with at least @p nbatch entries.
+ * @param[in,out] obs2    Scratch observation array with at least @p nbatch entries.
+ *
+ * @note This is a minimal batching wrapper around @ref formod and therefore
+ *       preserves the current forward-model implementation and side effects.
+ *
+ * @see formod
+ *
+ * @author Lars Hoffmann
+ */
+void formod_batch(
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  atm_t * atm,
+  obs_t * obs,
+  const int nbatch,
+  int * status,
+  los_t * los,
+  obs_t * obs2);
 
 /**
  * @brief Compute total extinction including gaseous continua.
@@ -2487,18 +2599,21 @@ void formod_continua(
  *                  (offsets @ref ctl_t::fov_dz and weights @ref ctl_t::fov_w).
  * @param[in,out] obs  Observation structure; input pencil-beam data are replaced
  *                     with FOV-convolved radiances and transmittances.
+ * @param[in,out] obs2 Scratch observation structure containing an unmodified
+ *                     snapshot of @p obs during convolution.
  *
  * @note The convolution is skipped if @ref ctl_t::fov starts with '-'
  *       (indicating no FOV correction). Requires at least two valid
  *       altitude samples per time step.
  *
- * @throws ERRMSG if insufficient data are available for convolution.
+ * @return Forward-model status code, e.g. @ref FORMOD_STATUS_OK.
  *
  * @author Lars Hoffmann
  */
-void formod_fov(
+int formod_fov(
   const ctl_t * ctl,
-  obs_t * obs);
+  obs_t * obs,
+  obs_t * obs2);
 
 /**
  * @brief Compute line-of-sight radiances using the pencil-beam forward model.
@@ -2516,6 +2631,9 @@ void formod_fov(
  * @param[in,out] obs  Observation data; updated with modeled radiances and
  *                     transmittances for the specified ray path.
  * @param[in]  ir   Index of the current ray path in @p obs.
+ * @param[in,out] los Scratch line-of-sight structure reused during ray tracing.
+ *
+ * @return Forward-model status code, e.g. @ref FORMOD_STATUS_OK.
  *
  * @note Depending on @ref ctl_t::formod, this function calls either
  *       @ref intpol_tbl_cga() (CGA) or @ref intpol_tbl_ega() (EGA)
@@ -2529,12 +2647,13 @@ void formod_fov(
  *
  * @author Lars Hoffmann
  */
-void formod_pencil(
+int formod_pencil(
   const ctl_t * ctl,
   const tbl_t * tbl,
   const atm_t * atm,
   obs_t * obs,
-  const int ir);
+  const int ir,
+  los_t * los);
 
 /**
  * @brief Forward-model radiance and transmittance with the Reference Forward Model (RFM).
@@ -3283,6 +3402,8 @@ size_t obs2y(
  * and vectors, all of which are freed before returning. The caller is responsible only for
  * memory outside this function.
  *
+ * @return Forward-model status code, e.g. @ref FORMOD_STATUS_OK.
+ *
  * @see formod(), cost_function(), analyze_avk(), set_cov_apr(), set_cov_meas()
  *
  * @par Reference
@@ -3341,7 +3462,7 @@ void optimal_estimation(
  *
  * @author Lars Hoffmann
  */
-void raytrace(
+int raytrace(
   const ctl_t * ctl,
   const atm_t * atm,
   obs_t * obs,
@@ -4072,7 +4193,7 @@ void read_rfm_spec(
  * - Data are stored directly in the provided arrays for subsequent interpolation
  *   or convolution.
  *
- * @see gsl_stats_minmax, formod_fov, init_srcfunc, read_obs_rfm
+ * @see array_minmax, formod_fov, init_srcfunc, read_obs_rfm
  *
  * @warning
  * - Aborts if the file cannot be opened or if fewer than two valid points are read.

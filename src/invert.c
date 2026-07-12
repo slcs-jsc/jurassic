@@ -55,7 +55,9 @@ int main(
 
   static atm_t atm, atm2;
 
-  static obs_t obs;
+  static obs_t obs, obs_scratch;
+
+  static los_t los_scratch;
 
   static FILE *in, *out;
 
@@ -166,7 +168,7 @@ int main(
 	  && atm.np > 0) {
 
 	/* Call forward model... */
-	formod(&ctl, tbl, &atm, &obs);
+	formod(&ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch);
 	obs_sim = obs.rad[0][0] - obs.rad[1][0];
 
 	/* Get time index... */

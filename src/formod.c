@@ -234,7 +234,8 @@ void call_formod(
   const char *obsref) {
 
   static atm_t atm, atm2;
-  static obs_t obs, obs2;
+  static obs_t obs, obs2, obs_scratch;
+  static los_t los_scratch;
 
   /* Read atmospheric data... */
   SELECT_TIMER("READ_ATM", "INPUT");
@@ -283,7 +284,7 @@ void call_formod(
       if (atm2.np > 0) {
 
 	/* Call forward model... */
-	formod(ctl, tbl, &atm2, &obs2);
+	formod(ctl, tbl, &atm2, &obs2, &los_scratch, &obs_scratch);
 
 	/* Save radiance data... */
 	for (int id = 0; id < ctl->nd; id++) {
@@ -303,7 +304,7 @@ void call_formod(
 
     /* Call forward model... */
     SELECT_TIMER("FORMOD", "FORWARD");
-    formod(ctl, tbl, &atm, &obs);
+    formod(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch);
 
     /* Save radiance data... */
     SELECT_TIMER("WRITE_OBS", "OUTPUT");
@@ -359,7 +360,7 @@ void call_formod(
 	      atm2.q[ig2][ip] = 0;
 
 	/* Call forward model... */
-	formod(ctl, tbl, &atm2, &obs);
+	formod(ctl, tbl, &atm2, &obs, &los_scratch, &obs_scratch);
 
 	/* Save radiance data... */
 	sprintf(filename, "%s.%s", radfile, ctl->emitter[ig]);
@@ -375,7 +376,7 @@ void call_formod(
 	  atm2.q[ig][ip] = 0;
 
       /* Call forward model... */
-      formod(ctl, tbl, &atm2, &obs);
+      formod(ctl, tbl, &atm2, &obs, &los_scratch, &obs_scratch);
 
       /* Save radiance data... */
       sprintf(filename, "%s.EXTINCT", radfile);
@@ -413,7 +414,7 @@ void call_formod(
 	/* Measure runtime... */
 	SELECT_TIMER("BENCHMARK_SAMPLE", "ANALYSIS");
 	double t0 = omp_get_wtime();
-	formod(ctl, tbl, &atm2, &obs);
+	formod(ctl, tbl, &atm2, &obs, &los_scratch, &obs_scratch);
 	double dt = omp_get_wtime() - t0;
 
 	/* Get runtime statistics... */
@@ -445,7 +446,7 @@ void call_formod(
       /* Reference run... */
       ctl->rayds = 0.1;
       ctl->raydz = 0.01;
-      formod(ctl, tbl, &atm, &obs);
+      formod(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch);
       copy_obs(ctl, &obs2, &obs, 0);
 
       /* Loop over step size... */
@@ -458,7 +459,7 @@ void call_formod(
 
 	  /* Measure runtime... */
 	  double t0 = omp_get_wtime();
-	  formod(ctl, tbl, &atm, &obs);
+	  formod(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch);
 	  double dt = omp_get_wtime() - t0;
 
 	  /* Calculate relative errors... */
