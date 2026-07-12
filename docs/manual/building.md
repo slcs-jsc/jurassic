@@ -114,7 +114,10 @@ directly.
 
 ### Compiler and flags
 
-- `CC` - C compiler (default: `gcc`)
+- `COMPILER` (default: `gcc`) - select the compiler preset from
+  `gcc`, `icx`, `nvc`, or `clang`
+- `CC` - low-level compiler command selected by the Makefile; normally
+  you should prefer `COMPILER` instead of overriding `CC` directly
 - `CFLAGS` - compile flags; overriding this variable replaces the
   Makefile defaults, including include paths, preprocessor definitions,
   warning flags, and OpenMP flags
@@ -123,7 +126,9 @@ directly.
 Examples:
 
 ```bash
-make CC=clang
+make COMPILER=clang
+make COMPILER=gcc OPT="-O2 -march=native"
+make COMPILER=nvc
 make OPT="-O2 -march=native"
 ```
 
@@ -147,15 +152,50 @@ make COV=1
 
 - `MPI` (default: `0`) - if set to `1`, builds with MPI support enabled
   and defines the `MPI` preprocessor macro
+- `MPICC` (default: `mpicc`) - MPI compiler wrapper used when `MPI=1`
 
 ```bash
 make MPI=1
+make MPI=1 MPICC=mpicc.openmpi
 ```
 
-When `MPI=1`, the Makefile uses `mpicc` unless `CC` is set explicitly.
-MPI-specific runtime behavior is implemented only in the retrieval
-executable, but the full tool suite is rebuilt with the selected MPI
-compiler wrapper.
+When `MPI=1`, the Makefile switches `CC` to `$(MPICC)` and adds the
+`MPI` preprocessor definition. MPI-specific runtime behavior is
+implemented only in the retrieval executable, but the full tool suite is
+rebuilt with the selected MPI compiler wrapper.
+
+This is particularly useful on systems that provide multiple MPI
+wrappers, for example:
+
+```bash
+make COMPILER=gcc MPI=1 MPICC=mpicc.openmpi
+make COMPILER=clang MPI=1 MPICC=mpicc.openmpi
+```
+
+### GPU / OpenACC support
+
+- `GPU` (default: `0`) - if set to `1`, enables the GPU/OpenACC build path
+- `GPU_PIN` (default: `0`) - if set to `1`, enables pinned-memory
+  allocation for supported `nvc` builds
+
+Examples:
+
+```bash
+make COMPILER=gcc GPU=1
+make COMPILER=nvc GPU=1
+make COMPILER=nvc MPI=1 MPICC=mpicc GPU=1 GPU_PIN=1
+```
+
+Compiler-specific behavior:
+
+- `gcc`: enables OpenACC/offload flags via the GCC toolchain
+- `nvc`: enables OpenACC with NVIDIA HPC SDK GPU flags
+- `clang`: GPU builds are rejected explicitly because this Makefile does
+  not support OpenACC with `clang`
+
+GPU support in this repository is a build-time option. Whether a given
+configuration is usable at runtime still depends on the local compiler,
+MPI stack, CUDA runtime, and target hardware.
 
 ### Static linking
 
@@ -243,8 +283,27 @@ dependency build step populates:
 
 ### MPI / OpenMP issues
 
-The Makefile enables OpenMP via `-fopenmp` in `CFLAGS` by default (for GCC).
-If you use a different compiler, you may need compiler-specific OpenMP flags.
+OpenMP flags are selected through the `COMPILER` preset:
+
+- `gcc`: `-fopenmp`
+- `icx`: `-qopenmp`
+- `nvc`: `-mp`
+- `clang`: `-fopenmp`
+
+For MPI builds, make sure that `MPICC` matches the compiler/MPI stack you
+intend to use at runtime.
+
+### GPU build issues
+
+If `GPU=1` fails:
+
+- verify that the selected `COMPILER` supports the GPU flags used by the
+  Makefile
+- use `COMPILER=nvc` for NVIDIA HPC SDK builds
+- do not use `COMPILER=clang` with `GPU=1`; this combination is blocked
+  intentionally
+- confirm that any required CUDA runtime libraries are available on the
+  target system
 
 ### CUDA / unified build issues
 

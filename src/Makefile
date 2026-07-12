@@ -17,11 +17,23 @@ INCDIR += -I ../libs/build/include
 # Library directories...
 LIBDIR += -L ../libs/build/lib
 
+# Compiler (gcc, icx, nvc, or clang)...
+COMPILER ?= gcc
+
 # User-defined preprocessor macros...
 DEFINES ?=
 
 # MPI compilation...
 MPI ?= 0
+
+# MPI C compiler wrapper...
+MPICC ?= mpicc
+
+# Compile for GPUs...
+GPU ?= 0
+
+# GPU memory pinning (for GH200)...
+GPU_PIN ?= 0
 
 # Static linking...
 STATIC ?= 0
@@ -45,29 +57,57 @@ UNIDIR = ../../jurassic-unified
 UNIFIED ?= 0
 
 # -----------------------------------------------------------------------------
-# Set flags for GNU compiler...
+# Set compiler flags...
 # -----------------------------------------------------------------------------
 
 # Get git version...
 VERSION ?= $(shell git describe --abbrev=6 --dirty --always --tags 2>/dev/null || echo unknown)
 
-# CFLAGS...
-CFLAGS ?= $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" -DHAVE_INLINE -DGSL_DISABLE_DEPRECATED -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp $(OPT) -g
+# Set CC and CFLAGS...
+CFLAGS += $(INCDIR) $(DEFINES) -DVERSION=\"$(VERSION)\" $(OPT) -g
+ifeq ($(COMPILER),gcc)
+  CC = gcc
+  CFLAGS += -DHAVE_INLINE -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp
+else ifeq ($(COMPILER),icx)
+  CC = icx
+  CFLAGS += -DHAVE_INLINE -pedantic -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp
+else ifeq ($(COMPILER),nvc)
+  CC = nvc
+  CFLAGS += -mp
+else ifeq ($(COMPILER),clang)
+  CC = clang
+  CFLAGS += -DHAVE_INLINE -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wnested-externs -Wno-long-long -Wmissing-declarations -Wredundant-decls -Winline -fno-common -fshort-enums -fopenmp
+else
+  $(error Compiler $(COMPILER) not supported)
+endif
+
+# Compile for GPUs...
+ifeq ($(GPU),1)
+  ifeq ($(COMPILER),gcc)
+    CFLAGS += -fopenacc -foffload=-lm
+  else ifeq ($(COMPILER),nvc)
+    CFLAGS += -acc -gpu=cc80,cc90
+    ifeq ($(GPU_PIN),1)
+      CFLAGS += -gpu=mem:separate:pinnedalloc
+    endif
+  else ifeq ($(COMPILER),clang)
+    $(error OpenACC is not supported by the clang compiler)
+  endif
+endif
 
 # LDFLAGS...
 LDFLAGS += $(LIBDIR) -lgsl -lgslcblas -lnetcdf -lm
 ifeq ($(STATIC),1)
   LDFLAGS += -lhdf5_hl -lhdf5 -lm -lz -lsz
 endif
+ifeq ($(GPU),1)
+  LDFLAGS += -L $(CUDA_PATH)/lib64 -lcudart
+endif
 
-# Compiler...
+# Compile with MPI...
 ifeq ($(MPI),1)
+  CC = $(MPICC)
   CFLAGS += -DMPI
-  ifneq ($(origin CC),command line)
-    CC := mpicc
-  endif
-else
-  CC ?= gcc
 endif
 
 # Use JURASSIC-UNIFIED library...

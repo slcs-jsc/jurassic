@@ -68,10 +68,12 @@ your local compiler and MPI setup.
 
 Typical configuration options include:
 
-- Selection of the C compiler and any optional external toolchains
+- Selection of the compiler preset via `COMPILER`
+- Selection of the MPI wrapper via `MPICC` when building with `MPI=1`
 - Compiler optimization and debugging flags
 - Enabling or disabling MPI support (retrieval only)
 - Enabling OpenMP parallelization
+- Enabling optional GPU/OpenACC builds via `GPU=1`
 
 On HPC systems, it is recommended to load the appropriate compiler and
 MPI modules before configuring the build.
@@ -122,15 +124,46 @@ To enable MPI support for the retrieval executable, build with:
 make -j MPI=1
 ```
 
+If your system provides multiple MPI wrappers, select the desired one explicitly:
+
+```bash
+make -j COMPILER=gcc MPI=1 MPICC=mpicc.openmpi
+```
+
 This will:
 
 - compile the full tool suite with the MPI compiler wrapper,
-- automatically select `mpicc` (unless `CC` is set explicitly),
+- use `MPICC` (default: `mpicc`) as the MPI compiler wrapper,
 - define the `MPI` preprocessor macro used by the retrieval source code.
 
 MPI-specific runtime behavior is implemented only in the retrieval
 executable. The other binaries are still rebuilt under the selected MPI
 toolchain when `MPI=1` is used.
+
+### Building with GPU support
+
+To enable the GPU/OpenACC build path, select a supported compiler and build with:
+
+```bash
+make -j COMPILER=gcc GPU=1
+make -j COMPILER=nvc GPU=1
+```
+
+For MPI-enabled GPU builds with the NVIDIA HPC SDK:
+
+```bash
+make -j COMPILER=nvc MPI=1 MPICC=mpicc GPU=1
+```
+
+Optional pinned-memory support for suitable `nvc` targets can be enabled with:
+
+```bash
+make -j COMPILER=nvc GPU=1 GPU_PIN=1
+```
+
+`clang` is supported for CPU builds, but the Makefile intentionally rejects
+`COMPILER=clang GPU=1` because this configuration does not provide the required
+OpenACC support.
 
 ---
 
@@ -205,9 +238,10 @@ provided in [Running JURASSIC](running.md) and
 Common issues during installation include:
 
 - Missing or incompatible compiler versions
-- Using an MPI-enabled build without `mpicc` or an MPI runtime
+- Using an MPI-enabled build without a working `MPICC` wrapper or MPI runtime
 - Mismatches between compile-time and runtime MPI environments
-- Incorrect OpenMP settings
+- Incorrect OpenMP settings for the selected `COMPILER` preset
+- Unsupported GPU/compiler combinations such as `COMPILER=clang GPU=1`
 - Runtime linker errors caused by missing shared-library paths
 
 If you encounter problems, consult the build output carefully and verify
