@@ -4484,17 +4484,32 @@ void kernel(
   /* Get sizes... */
   const size_t m = k->size1;
   const size_t n = k->size2;
+  const size_t batch_size = MIN(n, (size_t) MAX(1, 4 * omp_get_max_threads()));
 
   /* Allocate... */
   gsl_vector *x0 = gsl_vector_alloc(n);
   gsl_vector *yy0 = gsl_vector_alloc(m);
+  gsl_vector *x1 = gsl_vector_alloc(n);
+  gsl_vector *yy1 = gsl_vector_alloc(m);
   int *iqa;
   ALLOC(iqa, int,
-	N);
+        N);
+  double *h_batch;
+  int *status;
+  ALLOC(h_batch, double, batch_size);
+  ALLOC(status, int, batch_size);
   los_t *los0;
   obs_t *obs0;
+  atm_t *atm1;
+  obs_t *obs1;
+  los_t *los1;
+  obs_t *obs1_scratch;
   ALLOC(los0, los_t, 1);
   ALLOC(obs0, obs_t, 1);
+  ALLOC(atm1, atm_t, batch_size);
+  ALLOC(obs1, obs_t, batch_size);
+  ALLOC(los1, los_t, batch_size);
+  ALLOC(obs1_scratch, obs_t, batch_size);
 
   /* Compute radiance for undisturbed atmospheric data... */
   formod(ctl, tbl, atm, obs, los0, obs0);
@@ -4506,75 +4521,75 @@ void kernel(
   /* Initialize kernel matrix... */
   gsl_matrix_set_zero(k);
 
-  /* Loop over state vector elements... */
-#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,k,x0,yy0,n,m,iqa)
-  for (size_t j = 0; j < n; j++) {
+  /* Loop over state vector elements in batches... */
+  for (size_t j0 = 0; j0 < n; j0 += batch_size) {
 
-    /* Allocate... */
-    atm_t *atm1;
-    obs_t *obs1;
-    ALLOC(atm1, atm_t, 1);
-    ALLOC(obs1, obs_t, 1);
-    gsl_vector *x1 = gsl_vector_alloc(n);
-    gsl_vector *yy1 = gsl_vector_alloc(m);
+    const size_t nbatch = MIN(batch_size, n - j0);
 
-    /* Set perturbation size... */
-    double h;
-    if (iqa[j] == IDXP)
-      h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-7);
-    else if (iqa[j] == IDXT)
-      h = 1.0;
-    else if (iqa[j] >= IDXQ(0) && iqa[j] < IDXQ(ctl->ng))
-      h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-15);
-    else if (iqa[j] >= IDXK(0) && iqa[j] < IDXK(ctl->nw))
-      h = 1e-4;
-    else if (iqa[j] == IDXCLZ || iqa[j] == IDXCLDZ)
-      h = 1.0;
-    else if (iqa[j] >= IDXCLK(0) && iqa[j] < IDXCLK(ctl->ncl))
-      h = 1e-4;
-    else if (iqa[j] == IDXSFT)
-      h = 1.0;
-    else if (iqa[j] >= IDXSFEPS(0) && iqa[j] < IDXSFEPS(ctl->nsf))
-      h = 1e-2;
-    else
-      ERRMSG("Cannot set perturbation size!");
+    /* Prepare disturbed states... */
+    for (size_t jb = 0; jb < nbatch; jb++) {
+      const size_t j = j0 + jb;
 
-    /* Disturb state vector element... */
-    gsl_vector_memcpy(x1, x0);
-    gsl_vector_set(x1, j, gsl_vector_get(x1, j) + h);
-    copy_atm(ctl, atm1, atm, 0);
-    copy_obs(ctl, obs1, obs, 0);
-    x2atm(ctl, x1, atm1);
+      /* Set perturbation size... */
+      double h;
+      if (iqa[j] == IDXP)
+        h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-7);
+      else if (iqa[j] == IDXT)
+        h = 1.0;
+      else if (iqa[j] >= IDXQ(0) && iqa[j] < IDXQ(ctl->ng))
+        h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-15);
+      else if (iqa[j] >= IDXK(0) && iqa[j] < IDXK(ctl->nw))
+        h = 1e-4;
+      else if (iqa[j] == IDXCLZ || iqa[j] == IDXCLDZ)
+        h = 1.0;
+      else if (iqa[j] >= IDXCLK(0) && iqa[j] < IDXCLK(ctl->ncl))
+        h = 1e-4;
+      else if (iqa[j] == IDXSFT)
+        h = 1.0;
+      else if (iqa[j] >= IDXSFEPS(0) && iqa[j] < IDXSFEPS(ctl->nsf))
+        h = 1e-2;
+      else
+        ERRMSG("Cannot set perturbation size!");
+      h_batch[jb] = h;
+
+      /* Disturb state vector element... */
+      gsl_vector_memcpy(x1, x0);
+      gsl_vector_set(x1, j, gsl_vector_get(x1, j) + h);
+      copy_atm(ctl, &atm1[jb], atm, 0);
+      copy_obs(ctl, &obs1[jb], obs, 0);
+      x2atm(ctl, x1, &atm1[jb]);
+    }
 
     /* Compute radiance for disturbed atmospheric data... */
-    los_t *los1;
-    obs_t *obs1_scratch;
-    ALLOC(los1, los_t, 1);
-    ALLOC(obs1_scratch, obs_t, 1);
-    formod(ctl, tbl, atm1, obs1, los1, obs1_scratch);
+    formod_batch(ctl, tbl, atm1, obs1, (int) nbatch, status, los1,
+                 obs1_scratch);
 
-    /* Compose measurement vector for disturbed radiance data... */
-    obs2y(ctl, obs1, yy1, NULL, NULL);
-
-    /* Compute derivatives... */
-    for (size_t i = 0; i < m; i++)
-      gsl_matrix_set(k, i, j,
-		     (gsl_vector_get(yy1, i) - gsl_vector_get(yy0, i)) / h);
-
-    /* Free... */
-    gsl_vector_free(x1);
-    gsl_vector_free(yy1);
-    free(obs1_scratch);
-    free(los1);
-    free(atm1);
-    free(obs1);
+    /* Compose measurement vectors and derivatives... */
+    for (size_t jb = 0; jb < nbatch; jb++) {
+      const size_t j = j0 + jb;
+      if (status[jb] != FORMOD_STATUS_OK)
+        ERRMSG("Forward model failed with status code %d!", status[jb]);
+      obs2y(ctl, &obs1[jb], yy1, NULL, NULL);
+      for (size_t i = 0; i < m; i++)
+        gsl_matrix_set(k, i, j,
+                       (gsl_vector_get(yy1, i) - gsl_vector_get(yy0, i))
+                       / h_batch[jb]);
+    }
   }
 
   /* Free... */
   gsl_vector_free(x0);
   gsl_vector_free(yy0);
+  gsl_vector_free(x1);
+  gsl_vector_free(yy1);
+  free(obs1_scratch);
+  free(los1);
+  free(obs1);
+  free(atm1);
   free(obs0);
   free(los0);
+  free(status);
+  free(h_batch);
   free(iqa);
 }
 
