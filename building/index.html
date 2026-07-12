@@ -1066,6 +1066,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#gpu-openacc-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU / OpenACC support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#static-linking" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1142,6 +1153,17 @@
     <span class="md-ellipsis">
       
         MPI / OpenMP issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gpu-build-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU build issues
       
     </span>
   </a>
@@ -1456,6 +1478,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#gpu-openacc-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU / OpenACC support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#static-linking" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1532,6 +1565,17 @@
     <span class="md-ellipsis">
       
         MPI / OpenMP issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gpu-build-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU build issues
       
     </span>
   </a>
@@ -1662,14 +1706,19 @@ builds, prefer the high-level variables below over replacing <code>CFLAGS</code>
 directly.</p>
 <h3 id="compiler-and-flags">Compiler and flags</h3>
 <ul>
-<li><code>CC</code> - C compiler (default: <code>gcc</code>)</li>
+<li><code>COMPILER</code> (default: <code>gcc</code>) - select the compiler preset from
+  <code>gcc</code>, <code>icx</code>, <code>nvc</code>, or <code>clang</code></li>
+<li><code>CC</code> - low-level compiler command selected by the Makefile; normally
+  you should prefer <code>COMPILER</code> instead of overriding <code>CC</code> directly</li>
 <li><code>CFLAGS</code> - compile flags; overriding this variable replaces the
   Makefile defaults, including include paths, preprocessor definitions,
   warning flags, and OpenMP flags</li>
 <li><code>LDFLAGS</code> - link flags</li>
 </ul>
 <p>Examples:</p>
-<pre><code class="language-bash">make CC=clang
+<pre><code class="language-bash">make COMPILER=clang
+make COMPILER=gcc OPT=&quot;-O2 -march=native&quot;
+make COMPILER=nvc
 make OPT=&quot;-O2 -march=native&quot;
 </code></pre>
 <h3 id="optimization-and-diagnostics-flags">Optimization and diagnostics flags</h3>
@@ -1689,13 +1738,41 @@ make COV=1
 <ul>
 <li><code>MPI</code> (default: <code>0</code>) - if set to <code>1</code>, builds with MPI support enabled
   and defines the <code>MPI</code> preprocessor macro</li>
+<li><code>MPICC</code> (default: <code>mpicc</code>) - MPI compiler wrapper used when <code>MPI=1</code></li>
 </ul>
 <pre><code class="language-bash">make MPI=1
+make MPI=1 MPICC=mpicc.openmpi
 </code></pre>
-<p>When <code>MPI=1</code>, the Makefile uses <code>mpicc</code> unless <code>CC</code> is set explicitly.
-MPI-specific runtime behavior is implemented only in the retrieval
-executable, but the full tool suite is rebuilt with the selected MPI
-compiler wrapper.</p>
+<p>When <code>MPI=1</code>, the Makefile switches <code>CC</code> to <code>$(MPICC)</code> and adds the
+<code>MPI</code> preprocessor definition. MPI-specific runtime behavior is
+implemented only in the retrieval executable, but the full tool suite is
+rebuilt with the selected MPI compiler wrapper.</p>
+<p>This is particularly useful on systems that provide multiple MPI
+wrappers, for example:</p>
+<pre><code class="language-bash">make COMPILER=gcc MPI=1 MPICC=mpicc.openmpi
+make COMPILER=clang MPI=1 MPICC=mpicc.openmpi
+</code></pre>
+<h3 id="gpu-openacc-support">GPU / OpenACC support</h3>
+<ul>
+<li><code>GPU</code> (default: <code>0</code>) - if set to <code>1</code>, enables the GPU/OpenACC build path</li>
+<li><code>GPU_PIN</code> (default: <code>0</code>) - if set to <code>1</code>, enables pinned-memory
+  allocation for supported <code>nvc</code> builds</li>
+</ul>
+<p>Examples:</p>
+<pre><code class="language-bash">make COMPILER=gcc GPU=1
+make COMPILER=nvc GPU=1
+make COMPILER=nvc MPI=1 MPICC=mpicc GPU=1 GPU_PIN=1
+</code></pre>
+<p>Compiler-specific behavior:</p>
+<ul>
+<li><code>gcc</code>: enables OpenACC/offload flags via the GCC toolchain</li>
+<li><code>nvc</code>: enables OpenACC with NVIDIA HPC SDK GPU flags</li>
+<li><code>clang</code>: GPU builds are rejected explicitly because this Makefile does
+  not support OpenACC with <code>clang</code></li>
+</ul>
+<p>GPU support in this repository is a build-time option. Whether a given
+configuration is usable at runtime still depends on the local compiler,
+MPI stack, CUDA runtime, and target hardware.</p>
 <h3 id="static-linking">Static linking</h3>
 <ul>
 <li><code>STATIC</code> (default: <code>0</code>) - if set to <code>1</code>, attempts to add <code>-static</code></li>
@@ -1762,8 +1839,26 @@ dependency build step populates:</p>
 <li><code>../libs/build/lib</code></li>
 </ul>
 <h3 id="mpi-openmp-issues">MPI / OpenMP issues</h3>
-<p>The Makefile enables OpenMP via <code>-fopenmp</code> in <code>CFLAGS</code> by default (for GCC).
-If you use a different compiler, you may need compiler-specific OpenMP flags.</p>
+<p>OpenMP flags are selected through the <code>COMPILER</code> preset:</p>
+<ul>
+<li><code>gcc</code>: <code>-fopenmp</code></li>
+<li><code>icx</code>: <code>-qopenmp</code></li>
+<li><code>nvc</code>: <code>-mp</code></li>
+<li><code>clang</code>: <code>-fopenmp</code></li>
+</ul>
+<p>For MPI builds, make sure that <code>MPICC</code> matches the compiler/MPI stack you
+intend to use at runtime.</p>
+<h3 id="gpu-build-issues">GPU build issues</h3>
+<p>If <code>GPU=1</code> fails:</p>
+<ul>
+<li>verify that the selected <code>COMPILER</code> supports the GPU flags used by the
+  Makefile</li>
+<li>use <code>COMPILER=nvc</code> for NVIDIA HPC SDK builds</li>
+<li>do not use <code>COMPILER=clang</code> with <code>GPU=1</code>; this combination is blocked
+  intentionally</li>
+<li>confirm that any required CUDA runtime libraries are available on the
+  target system</li>
+</ul>
 <h3 id="cuda-unified-build-issues">CUDA / unified build issues</h3>
 <p>If <code>UNIFIED=1</code> fails:</p>
 <ul>

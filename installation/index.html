@@ -639,6 +639,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#building-with-gpu-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building with GPU support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#clean-rebuild" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1395,6 +1406,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#building-with-gpu-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building with GPU support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#clean-rebuild" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1540,10 +1562,12 @@ compilation, you may need to edit that file or set make variables to match
 your local compiler and MPI setup.</p>
 <p>Typical configuration options include:</p>
 <ul>
-<li>Selection of the C compiler and any optional external toolchains</li>
+<li>Selection of the compiler preset via <code>COMPILER</code></li>
+<li>Selection of the MPI wrapper via <code>MPICC</code> when building with <code>MPI=1</code></li>
 <li>Compiler optimization and debugging flags</li>
 <li>Enabling or disabling MPI support (retrieval only)</li>
 <li>Enabling OpenMP parallelization</li>
+<li>Enabling optional GPU/OpenACC builds via <code>GPU=1</code></li>
 </ul>
 <p>On HPC systems, it is recommended to load the appropriate compiler and
 MPI modules before configuring the build.</p>
@@ -1576,15 +1600,32 @@ for this configuration.</p>
 <p>To enable MPI support for the retrieval executable, build with:</p>
 <pre><code class="language-bash">make -j MPI=1
 </code></pre>
+<p>If your system provides multiple MPI wrappers, select the desired one explicitly:</p>
+<pre><code class="language-bash">make -j COMPILER=gcc MPI=1 MPICC=mpicc.openmpi
+</code></pre>
 <p>This will:</p>
 <ul>
 <li>compile the full tool suite with the MPI compiler wrapper,</li>
-<li>automatically select <code>mpicc</code> (unless <code>CC</code> is set explicitly),</li>
+<li>use <code>MPICC</code> (default: <code>mpicc</code>) as the MPI compiler wrapper,</li>
 <li>define the <code>MPI</code> preprocessor macro used by the retrieval source code.</li>
 </ul>
 <p>MPI-specific runtime behavior is implemented only in the retrieval
 executable. The other binaries are still rebuilt under the selected MPI
 toolchain when <code>MPI=1</code> is used.</p>
+<h3 id="building-with-gpu-support">Building with GPU support</h3>
+<p>To enable the GPU/OpenACC build path, select a supported compiler and build with:</p>
+<pre><code class="language-bash">make -j COMPILER=gcc GPU=1
+make -j COMPILER=nvc GPU=1
+</code></pre>
+<p>For MPI-enabled GPU builds with the NVIDIA HPC SDK:</p>
+<pre><code class="language-bash">make -j COMPILER=nvc MPI=1 MPICC=mpicc GPU=1
+</code></pre>
+<p>Optional pinned-memory support for suitable <code>nvc</code> targets can be enabled with:</p>
+<pre><code class="language-bash">make -j COMPILER=nvc GPU=1 GPU_PIN=1
+</code></pre>
+<p><code>clang</code> is supported for CPU builds, but the Makefile intentionally rejects
+<code>COMPILER=clang GPU=1</code> because this configuration does not provide the required
+OpenACC support.</p>
 <hr />
 <h3 id="clean-rebuild">Clean rebuild</h3>
 <p>To perform a clean rebuild:</p>
@@ -1631,9 +1672,10 @@ provided in <a href="../running/">Running JURASSIC</a> and
 <p>Common issues during installation include:</p>
 <ul>
 <li>Missing or incompatible compiler versions</li>
-<li>Using an MPI-enabled build without <code>mpicc</code> or an MPI runtime</li>
+<li>Using an MPI-enabled build without a working <code>MPICC</code> wrapper or MPI runtime</li>
 <li>Mismatches between compile-time and runtime MPI environments</li>
-<li>Incorrect OpenMP settings</li>
+<li>Incorrect OpenMP settings for the selected <code>COMPILER</code> preset</li>
+<li>Unsupported GPU/compiler combinations such as <code>COMPILER=clang GPU=1</code></li>
 <li>Runtime linker errors caused by missing shared-library paths</li>
 </ul>
 <p>If you encounter problems, consult the build output carefully and verify
