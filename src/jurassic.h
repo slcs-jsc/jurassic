@@ -1687,18 +1687,6 @@ typedef struct {
   /*! Segment length [km]. */
   double ds[NLOS];
 
-  /*! Column density [molecules/cm^2]. */
-  double u[NLOS][NG];
-
-  /*! Curtis-Godson pressure [hPa]. */
-  double cgp[NLOS][NG];
-
-  /*! Curtis-Godson temperature [K]. */
-  double cgt[NLOS][NG];
-
-  /*! Curtis-Godson column density [molecules/cm^2]. */
-  double cgu[NLOS][NG];
-
   /*! Segment emissivity. */
   double eps[NLOS][ND];
 
@@ -2578,6 +2566,7 @@ void formod_continua(
   const ctl_t * ctl,
   const los_t * los,
   const int ip,
+  const double *u,
   double *beta);
 
 /**
@@ -2907,9 +2896,9 @@ void intpol_atm(
  * @param[in]  tbl        Emissivity lookup tables (@ref tbl_t)
  *                        containing tabulated pressure, temperature,
  *                        and column density grids.
- * @param[in]  los        Line-of-sight structure providing Curtis–Godson
- *                        mean parameters and column densities.
- * @param[in]  ip         Index of the current LOS point.
+ * @param[in]  cgp        Curtis-Godson mean pressures [ng].
+ * @param[in]  cgt        Curtis-Godson mean temperatures [ng].
+ * @param[in]  cgu        Curtis-Godson cumulative column densities [ng].
  * @param[in,out] tau_path  Path transmittance array [nd][ng];
  *                          updated cumulatively for each gas.
  * @param[out] tau_seg    Total segment transmittance per channel [nd].
@@ -2928,8 +2917,9 @@ void intpol_atm(
 void intpol_tbl_cga(
   const ctl_t * ctl,
   const tbl_t * tbl,
-  const los_t * los,
-  const int ip,
+  const double *cgp,
+  const double *cgt,
+  const double *cgu,
   double tau_path[ND][NG],
   double tau_seg[ND]);
 
@@ -2949,8 +2939,10 @@ void intpol_tbl_cga(
  *                        containing tabulated pressure, temperature,
  *                        and column density grids.
  * @param[in]  los        Line-of-sight structure providing local
- *                        pressure, temperature, and column density data.
+ *                        pressure and temperature data.
  * @param[in]  ip         Index of the current LOS point.
+ * @param[in]  u          Local segment column densities [ng].
+ * @param[in]  cgu        Curtis-Godson cumulative column densities [ng].
  * @param[in,out] tau_path  Path transmittance array [nd][ng];
  *                          updated cumulatively for each gas.
  * @param[out] tau_seg    Total segment transmittance per channel [nd].
@@ -2976,6 +2968,8 @@ void intpol_tbl_ega(
   const tbl_t * tbl,
   const los_t * los,
   const int ip,
+  const double *u,
+  const double *cgu,
   double tau_path[ND][NG],
   double tau_seg[ND]);
 

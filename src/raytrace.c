@@ -150,7 +150,7 @@ int main(
     for (int ip = 0; ip < los.np; ip++) {
       s += los.ds[ip];
       for (int ig = 0; ig < ctl.ng; ig++)
-	u[ig] += los.u[ip][ig];
+	u[ig] += 10 * los.q[ip][ig] * los.p[ip] / (KB * los.t[ip]) * los.ds[ip];
     }
 
     /* Write summary data... */

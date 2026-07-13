@@ -3629,6 +3629,7 @@ void formod_continua(
   const ctl_t *ctl,
   const los_t *los,
   const int ip,
+  const double *u,
   double *beta) {
 
   /* Extinction... */
@@ -3639,13 +3640,13 @@ void formod_continua(
   if (ctl->ctm_co2 && ctl->ig_co2 >= 0)
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmco2(ctl->nu[id], los->p[ip], los->t[ip],
-			 los->u[ip][ctl->ig_co2]) / los->ds[ip];
+			 u[ctl->ig_co2]) / los->ds[ip];
 
   /* H2O continuum... */
   if (ctl->ctm_h2o && ctl->ig_h2o >= 0)
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmh2o(ctl->nu[id], los->p[ip], los->t[ip],
-			 los->q[ip][ctl->ig_h2o], los->u[ip][ctl->ig_h2o])
+			 los->q[ip][ctl->ig_h2o], u[ctl->ig_h2o])
 	/ los->ds[ip];
 
   /* N2 continuum... */
@@ -3734,12 +3735,21 @@ int formod_pencil(
   const int ir,
   los_t *los) {
 
-  double rad[ND], tau[ND], tau_path[ND][NG];
+  double cgp[NG], cgp_sum[NG], cgt[NG], cgt_sum[NG], cgu[NG], rad[ND],
+    tau[ND], tau_path[ND][NG], u[NG];
 
   /* Preserve the previous calloc-based semantics for scratch LOS data. */
   memset(los, 0, sizeof(*los));
 
   /* Initialize... */
+  for (int ig = 0; ig < ctl->ng; ig++) {
+    cgp[ig] = 0;
+    cgp_sum[ig] = 0;
+    cgt[ig] = 0;
+    cgt_sum[ig] = 0;
+    cgu[ig] = 0;
+    u[ig] = 0;
+  }
   for (int id = 0; id < ctl->nd; id++) {
     rad[id] = 0;
     tau[id] = 1;
@@ -3757,16 +3767,28 @@ int formod_pencil(
   /* Loop over LOS points... */
   for (int ip = 0; ip < los->np; ip++) {
 
+    /* Update local and Curtis-Godson column amounts... */
+    for (int ig = 0; ig < ctl->ng; ig++) {
+      u[ig] = 10 * los->q[ip][ig] * los->p[ip] / (KB * los->t[ip]) * los->ds[ip];
+      cgu[ig] += u[ig];
+      cgp_sum[ig] += u[ig] * los->p[ip];
+      cgt_sum[ig] += u[ig] * los->t[ip];
+      if (cgu[ig] > 0) {
+        cgp[ig] = cgp_sum[ig] / cgu[ig];
+        cgt[ig] = cgt_sum[ig] / cgu[ig];
+      }
+    }
+
     /* Get trace gas transmittance... */
     double tau_gas[ND];
     if (ctl->formod == 0)
-      intpol_tbl_cga(ctl, tbl, los, ip, tau_path, tau_gas);
+      intpol_tbl_cga(ctl, tbl, cgp, cgt, cgu, tau_path, tau_gas);
     else
-      intpol_tbl_ega(ctl, tbl, los, ip, tau_path, tau_gas);
+      intpol_tbl_ega(ctl, tbl, los, ip, u, cgu, tau_path, tau_gas);
 
     /* Get continuum absorption... */
     double beta_ctm[ND];
-    formod_continua(ctl, los, ip, beta_ctm);
+    formod_continua(ctl, los, ip, u, beta_ctm);
 
     /* Compute source function for the current LOS point. */
     double src_ip[ND];
@@ -4243,8 +4265,9 @@ void intpol_atm(
 void intpol_tbl_cga(
   const ctl_t *ctl,
   const tbl_t *tbl,
-  const los_t *los,
-  const int ip,
+  const double *cgp,
+  const double *cgt,
+  const double *cgu,
   double tau_path[ND][NG],
   double tau_seg[ND]) {
 
@@ -4252,7 +4275,7 @@ void intpol_tbl_cga(
 
   /* Precompute log-pressure... */
   for (int ig = 0; ig < ctl->ng; ig++)
-    lnp[ig] = log(los->cgp[ip][ig]);
+    lnp[ig] = log(cgp[ig]);
 
   /* Loop over channels... */
   for (int id = 0; id < ctl->nd; id++) {
@@ -4264,7 +4287,7 @@ void intpol_tbl_cga(
     for (int ig = 0; ig < ctl->ng; ig++) {
 
       /* Check size of table (pressure) and column density... */
-      if (tbl->np[id][ig] < 30 || los->cgu[ip][ig] <= 0)
+      if (tbl->np[id][ig] < 30 || cgu[ig] <= 0)
 	eps = 0;
 
       /* Check transmittance... */
@@ -4276,12 +4299,12 @@ void intpol_tbl_cga(
 
 	/* Determine pressure and temperature indices... */
 	const int ipr =
-	  locate_irr(tbl->p[id][ig], tbl->np[id][ig], los->cgp[ip][ig]);
+	  locate_irr(tbl->p[id][ig], tbl->np[id][ig], cgp[ig]);
 	const int it0 = locate_reg(tbl->t[id][ig][ipr], tbl->nt[id][ig][ipr],
-				   los->cgt[ip][ig]);
+				   cgt[ig]);
 	const int it1 =
 	  locate_reg(tbl->t[id][ig][ipr + 1], tbl->nt[id][ig][ipr + 1],
-		     los->cgt[ip][ig]);
+		     cgt[ig]);
 
 	/* Check size of table (temperature and column density)... */
 	if (tbl->nt[id][ig][ipr] < 2 || tbl->nt[id][ig][ipr + 1] < 2
@@ -4294,7 +4317,7 @@ void intpol_tbl_cga(
 	else {
 
 	  /* Get emissivities of extended path... */
-	  const double logu = log(los->cgu[ip][ig]);
+	  const double logu = log(cgu[ig]);
 	  double eps00 = intpol_tbl_eps(tbl, ig, id, ipr, it0, logu);
 	  double eps01 = intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1, logu);
 	  double eps10 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1, logu);
@@ -4302,10 +4325,10 @@ void intpol_tbl_cga(
 
 	  /* Interpolate with respect to temperature... */
 	  eps00 = LIN(tbl->t[id][ig][ipr][it0], eps00,
-		      tbl->t[id][ig][ipr][it0 + 1], eps01, los->cgt[ip][ig]);
+		      tbl->t[id][ig][ipr][it0 + 1], eps01, cgt[ig]);
 	  eps11 = LIN(tbl->t[id][ig][ipr + 1][it1], eps10,
 		      tbl->t[id][ig][ipr + 1][it1 + 1],
-		      eps11, los->cgt[ip][ig]);
+		      eps11, cgt[ig]);
 
 	  /* Interpolate with respect to log-pressure... */
 	  eps00 = LIN(tbl->lnp[id][ig][ipr], eps00,
@@ -4338,12 +4361,14 @@ void intpol_tbl_ega(
   const tbl_t *tbl,
   const los_t *los,
   const int ip,
+  const double *u,
+  const double *cgu,
   double tau_path[ND][NG],
   double tau_seg[ND]) {
 
   const double lnp = log(los->p[ip]);
 
-  double eps, u;
+  double eps, upath;
 
   /* Loop over channels... */
   for (int id = 0; id < ctl->nd; id++) {
@@ -4355,7 +4380,7 @@ void intpol_tbl_ega(
     for (int ig = 0; ig < ctl->ng; ig++) {
 
       /* Check size of table (pressure) and column density... */
-      if (tbl->np[id][ig] < 30 || los->cgu[ip][ig] <= 0)
+      if (tbl->np[id][ig] < 30 || cgu[ig] <= 0)
 	eps = 0;
 
       /* Check transmittance... */
@@ -4387,21 +4412,21 @@ void intpol_tbl_ega(
 	  /* Get emissivities of extended path... */
 	  const double logeps = log(1.0 - tau_path[id][ig]);
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0, logeps);
+	  upath = intpol_tbl_u(tbl, ig, id, ipr, it0, logeps);
 	  double eps00
-	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, log(u + los->u[ip][ig]));
+	    = intpol_tbl_eps(tbl, ig, id, ipr, it0, log(upath + u[ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, logeps);
+	  upath = intpol_tbl_u(tbl, ig, id, ipr, it0 + 1, logeps);
 	  double eps01 = intpol_tbl_eps(tbl, ig, id, ipr, it0 + 1,
-					log(u + los->u[ip][ig]));
+					log(upath + u[ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, logeps);
+	  upath = intpol_tbl_u(tbl, ig, id, ipr + 1, it1, logeps);
 	  double eps10 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1,
-					log(u + los->u[ip][ig]));
+					log(upath + u[ig]));
 
-	  u = intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, logeps);
+	  upath = intpol_tbl_u(tbl, ig, id, ipr + 1, it1 + 1, logeps);
 	  double eps11 = intpol_tbl_eps(tbl, ig, id, ipr + 1, it1 + 1,
-					log(u + los->u[ip][ig]));
+					log(upath + u[ig]));
 
 	  /* Interpolate with respect to temperature... */
 	  eps00 = LIN(tbl->t[id][ig][ipr][it0], eps00,
@@ -5384,31 +5409,6 @@ int raytrace(
   for (int ip = los->np - 1; ip >= 1; ip--)
     los->ds[ip] = 0.5 * (los->ds[ip - 1] + los->ds[ip]);
   los->ds[0] *= 0.5;
-
-  /* Compute column density... */
-  for (int ip = 0; ip < los->np; ip++)
-    for (int ig = 0; ig < ctl->ng; ig++)
-      los->u[ip][ig] = 10 * los->q[ip][ig] * los->p[ip]
-	/ (KB * los->t[ip]) * los->ds[ip];
-
-  /* Compute Curtis-Godson means... */
-  for (int ig = 0; ig < ctl->ng; ig++) {
-    los->cgu[0][ig] = los->u[0][ig];
-    los->cgp[0][ig] = los->u[0][ig] * los->p[0];
-    los->cgt[0][ig] = los->u[0][ig] * los->t[0];
-  }
-  for (int ip = 1; ip < los->np; ip++)
-    for (int ig = 0; ig < ctl->ng; ig++) {
-      los->cgu[ip][ig] = los->cgu[ip - 1][ig] + los->u[ip][ig];
-      los->cgp[ip][ig] = los->cgp[ip - 1][ig] + los->u[ip][ig] * los->p[ip];
-      los->cgt[ip][ig] = los->cgt[ip - 1][ig] + los->u[ip][ig] * los->t[ip];
-    }
-  for (int ip = 0; ip < los->np; ip++)
-    for (int ig = 0; ig < ctl->ng; ig++)
-      if (los->cgu[ip][ig] != 0) {
-	los->cgp[ip][ig] /= los->cgu[ip][ig];
-	los->cgt[ip][ig] /= los->cgu[ip][ig];
-      }
 
   return FORMOD_STATUS_OK;
 }
