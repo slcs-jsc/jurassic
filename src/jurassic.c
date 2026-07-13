@@ -3497,6 +3497,82 @@ int formod(
 
 /*****************************************************************************/
 
+#if defined(_OPENACC)
+static const ctl_t *acc_ctl_static = NULL;
+static const tbl_t *acc_tbl_static = NULL;
+
+static void acc_copyin_tbl(
+  const ctl_t *ctl,
+  const tbl_t *tbl) {
+
+  tbl_t *tbl_dev;
+  ALLOC(tbl_dev, tbl_t, 1);
+  *tbl_dev = *tbl;
+
+#pragma acc enter data copyin(tbl[0:1])
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ig = 0; ig < ctl->ng; ig++)
+      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+        for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
+          const size_t n = (size_t) tbl->nu[id][ig][ip][it];
+          if (tbl->logu[id][ig][ip][it] != NULL)
+            tbl_dev->logu[id][ig][ip][it]
+              = (float *) acc_copyin(tbl->logu[id][ig][ip][it],
+                                     n * sizeof(float));
+          if (tbl->logeps[id][ig][ip][it] != NULL)
+            tbl_dev->logeps[id][ig][ip][it]
+              = (float *) acc_copyin(tbl->logeps[id][ig][ip][it],
+                                     n * sizeof(float));
+        }
+
+  acc_memcpy_to_device(acc_deviceptr((void *) tbl), tbl_dev, sizeof(tbl_t));
+  free(tbl_dev);
+}
+
+/*****************************************************************************/
+
+static void acc_delete_tbl(
+  const ctl_t *ctl,
+  const tbl_t *tbl) {
+
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ig = 0; ig < ctl->ng; ig++)
+      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+        for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
+          const size_t n = (size_t) tbl->nu[id][ig][ip][it];
+          if (tbl->logu[id][ig][ip][it] != NULL)
+            acc_delete(tbl->logu[id][ig][ip][it], n * sizeof(float));
+          if (tbl->logeps[id][ig][ip][it] != NULL)
+            acc_delete(tbl->logeps[id][ig][ip][it], n * sizeof(float));
+        }
+
+#pragma acc exit data delete(tbl[0:1])
+}
+
+/*****************************************************************************/
+
+static void acc_ensure_static_data(
+  const ctl_t *ctl,
+  const tbl_t *tbl) {
+
+  if (acc_ctl_static == ctl && acc_tbl_static == tbl)
+    return;
+
+  if (acc_tbl_static != NULL && acc_ctl_static != NULL)
+    acc_delete_tbl(acc_ctl_static, acc_tbl_static);
+  if (acc_ctl_static != NULL)
+#pragma acc exit data delete(acc_ctl_static[0:1])
+    ;
+
+#pragma acc enter data copyin(ctl[0:1])
+  acc_copyin_tbl(ctl, tbl);
+  acc_ctl_static = ctl;
+  acc_tbl_static = tbl;
+}
+#endif
+
+/*****************************************************************************/
+
 void formod_batch(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -3529,9 +3605,12 @@ void formod_batch(
 #if defined(_OPENACC)
   if (status == NULL)
     ERRMSG("GPU batch execution requires a status array!");
+  acc_ensure_static_data(ctl, tbl);
+#pragma acc update device(atm[0:nbatch],obs[0:nbatch])
 #pragma acc parallel loop present(ctl,tbl,atm[0:nbatch],obs[0:nbatch],status[0:nbatch],los[0:nbatch],obs2[0:nbatch])
   for (int ib = 0; ib < nbatch; ib++)
     status[ib] = formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs2[ib]);
+#pragma acc update self(obs[0:nbatch],status[0:nbatch])
 #else
 #pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs2)
   for (int ib = 0; ib < nbatch; ib++) {
@@ -4516,6 +4595,11 @@ void kernel(
   /* Compute radiance for undisturbed atmospheric data... */
   formod(ctl, tbl, atm, obs, los0, obs0);
 
+#if defined(_OPENACC)
+#pragma acc enter data create(atm1[0:batch_size],obs1[0:batch_size],status[0:batch_size], \
+  los1[0:batch_size],obs1_scratch[0:batch_size])
+#endif
+
   /* Compose vectors... */
   atm2x(ctl, atm, x0, iqa, NULL);
   obs2y(ctl, obs, yy0, NULL, NULL);
@@ -4584,6 +4668,10 @@ void kernel(
   gsl_vector_free(yy0);
   gsl_vector_free(x1);
   gsl_vector_free(yy1);
+#if defined(_OPENACC)
+#pragma acc exit data delete(atm1[0:batch_size],obs1[0:batch_size],status[0:batch_size], \
+  los1[0:batch_size],obs1_scratch[0:batch_size])
+#endif
   free(obs1_scratch);
   free(los1);
   free(obs1);
