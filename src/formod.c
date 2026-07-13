@@ -260,7 +260,13 @@ void exec_formod_single(
   }
 
   int status[1];
+#if defined(_OPENACC)
+#pragma acc enter data create(atm[0:1],obs[0:1],status[0:1],los_scratch[0:1],   obs_scratch[0:1])
+#endif
   formod_batch(ctl, tbl, atm, obs, 1, status, los_scratch, obs_scratch);
+#if defined(_OPENACC)
+#pragma acc exit data delete(atm[0:1],obs[0:1],status[0:1],los_scratch[0:1],   obs_scratch[0:1])
+#endif
   if (status[0] != FORMOD_STATUS_OK)
     ERRMSG("Forward model failed with status code %d!", status[0]);
 }
