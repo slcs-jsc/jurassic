@@ -2475,7 +2475,8 @@ int find_emitter(
  * @param[in,out] atm  Atmospheric profile; may be adjusted for hydrostatic balance.
  * @param[in,out] obs  Observation geometry and radiance data; populated with model output.
  * @param[in,out] los  Scratch line-of-sight structure reused during ray tracing.
- * @param[in,out] obs2 Scratch observation structure reused for FOV convolution.
+ * @param[in,out] obs_scratch Scratch observation structure reused for FOV
+ *                             convolution.
  *
  * @note The model type is selected via @ref ctl_t::formod:
  *       - 0 or 1 → pencil-beam models (@ref formod_pencil)  
@@ -2496,7 +2497,7 @@ int formod(
   atm_t * atm,
   obs_t * obs,
   los_t * los,
-  obs_t * obs2);
+  obs_t * obs_scratch);
 
 /**
  * @brief Compute forward-model radiances for multiple atmospheric cases.
@@ -2518,7 +2519,8 @@ int formod(
  *                        status codes such as @ref FORMOD_STATUS_OK. Pass
  *                        `NULL` to preserve fail-fast behavior.
  * @param[in,out] los     Scratch line-of-sight array with at least @p nbatch entries.
- * @param[in,out] obs2    Scratch observation array with at least @p nbatch entries.
+ * @param[in,out] obs_scratch Scratch observation array with at least
+ *                             @p nbatch entries.
  *
  * @note This is a minimal batching wrapper around @ref formod and therefore
  *       preserves the current forward-model implementation and side effects.
@@ -2533,9 +2535,68 @@ void formod_batch(
   atm_t * atm,
   obs_t * obs,
   const int nbatch,
-  int * status,
+  int *status,
   los_t * los,
-  obs_t * obs2);
+  obs_t * obs_scratch);
+
+#if defined(_OPENACC)
+/**
+ * @brief Copy emissivity lookup table payloads to the OpenACC device.
+ *
+ * Creates a device copy of the host-side @ref tbl_t descriptor and transfers all
+ * dynamically allocated `logu` and `logeps` payload arrays referenced by the table.
+ * The host-side descriptor remains unchanged; only the device-side descriptor is
+ * patched to point to the copied device buffers.
+ *
+ * @param[in] ctl Control structure describing the active spectral dimensions.
+ * @param[in] tbl Emissivity lookup table to mirror on the device.
+ *
+ * @note This helper assumes that @p tbl itself is a valid host object and that its
+ *       nested payload pointers either reference host-allocated arrays or are `NULL`.
+ *
+ * @see acc_delete_tbl, acc_ensure_static_data
+ *
+ * @author Lars Hoffmann
+ */
+void acc_copyin_tbl(
+  const ctl_t * ctl,
+  const tbl_t * tbl);
+
+/**
+ * @brief Release device-side payloads belonging to an OpenACC table mirror.
+ *
+ * Deletes all device allocations created by @ref acc_copyin_tbl for the nested `logu`
+ * and `logeps` arrays and then removes the top-level device copy of @p tbl.
+ *
+ * @param[in] ctl Control structure describing the active spectral dimensions.
+ * @param[in] tbl Host-side table descriptor whose mirrored device payloads are removed.
+ *
+ * @see acc_copyin_tbl, acc_ensure_static_data
+ *
+ * @author Lars Hoffmann
+ */
+void acc_delete_tbl(
+  const ctl_t * ctl,
+  const tbl_t * tbl);
+
+/**
+ * @brief Ensure that the current control and table objects are resident on the device.
+ *
+ * Maintains a simple process-local cache of the most recently uploaded `ctl`/`tbl`
+ * pair for OpenACC execution. If the requested pair differs from the cached one, the
+ * previously cached device data are removed and the new pair is uploaded.
+ *
+ * @param[in] ctl Control structure to keep resident on the device.
+ * @param[in] tbl Lookup table structure to keep resident on the device.
+ *
+ * @see acc_copyin_tbl, acc_delete_tbl
+ *
+ * @author Lars Hoffmann
+ */
+void acc_ensure_static_data(
+  const ctl_t * ctl,
+  const tbl_t * tbl);
+#endif
 
 /**
  * @brief Compute total extinction including gaseous continua.
@@ -2552,6 +2613,7 @@ void formod_batch(
  * @param[in]  los  Line-of-sight data containing pressure, temperature,
  *                  gas concentrations, and extinction coefficients.
  * @param[in]  ip   Index of the line-of-sight point to process.
+ * @param[in]  u    Column amounts [molec/cm²] used for the continuum parameterizations.
  * @param[out] beta Array of total extinction coefficients [km⁻¹] per channel.
  *
  * @note Each continuum component is added only if its corresponding
@@ -2581,8 +2643,8 @@ void formod_continua(
  *                  (offsets @ref ctl_t::fov_dz and weights @ref ctl_t::fov_w).
  * @param[in,out] obs  Observation structure; input pencil-beam data are replaced
  *                     with FOV-convolved radiances and transmittances.
- * @param[in,out] obs2 Scratch observation structure containing an unmodified
- *                     snapshot of @p obs during convolution.
+ * @param[in,out] obs_scratch Scratch observation structure containing an
+ *                             unmodified snapshot of @p obs during convolution.
  *
  * @note The convolution is skipped if @ref ctl_t::fov starts with '-'
  *       (indicating no FOV correction). Requires at least two valid
@@ -2595,7 +2657,7 @@ void formod_continua(
 int formod_fov(
   const ctl_t * ctl,
   obs_t * obs,
-  obs_t * obs2);
+  obs_t * obs_scratch);
 
 /**
  * @brief Compute line-of-sight radiances using the pencil-beam forward model.
@@ -3388,8 +3450,6 @@ size_t obs2y(
  * Input structures must be properly initialized. The function allocates several GSL matrices
  * and vectors, all of which are freed before returning. The caller is responsible only for
  * memory outside this function.
- *
- * @return Forward-model status code, e.g. @ref FORMOD_STATUS_OK.
  *
  * @see formod(), cost_function(), analyze_avk(), set_cov_apr(), set_cov_meas()
  *
