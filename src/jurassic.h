@@ -466,18 +466,18 @@ static inline size_t array_min_index(
  * @author Lars Hoffmann
  */
 #ifdef _OPENACC
-#define ALLOC(ptr, type, n)                                           {                                                                     const acc_device_t acc_device = acc_get_device_type();              if (acc_device == acc_device_nvidia                                    && acc_get_num_devices(acc_device_nvidia) <= 0)                  ERRMSG("Not running on a GPU device!");                          if ((ptr = calloc((size_t) (n), sizeof(type))) == NULL)              ERRMSG("Out of memory!");                                      }
+#define ALLOC(ptr, type, n) {						\
+    const acc_device_t acc_device = acc_get_device_type();		\
+    if (acc_device == acc_device_nvidia					\
+	&& acc_get_num_devices(acc_device_nvidia) <= 0)			\
+      ERRMSG("Not running on a GPU device!");				\
+    if ((ptr = calloc((size_t) (n), sizeof(type))) == NULL)		\
+      ERRMSG("Out of memory!");                                      }
 #else
 #define ALLOC(ptr, type, n)				 \
   if((ptr=calloc((size_t)(n), sizeof(type)))==NULL)      \
     ERRMSG("Out of memory!");
 #endif
-
-#define FORMOD_STATUS_OK 0
-#define FORMOD_STATUS_RFM_UNSUPPORTED 1
-#define FORMOD_STATUS_FOV_DATA_MISSING 2
-#define FORMOD_STATUS_OBSERVER_BELOW_SURFACE 3
-#define FORMOD_STATUS_TOO_MANY_LOS_POINTS 4
 
 /**
  * @brief Compute brightness temperature from radiance.
@@ -1273,6 +1273,25 @@ static inline size_t array_min_index(
 	return EXIT_SUCCESS;						\
       }									\
   } while (0)
+
+/* ------------------------------------------------------------
+   Forward model status...
+   ------------------------------------------------------------ */
+
+/*! Forward model completed successfully. */
+#define FORMOD_STATUS_OK 0
+
+/*! The selected RFM forward-model branch is not supported in this context. */
+#define FORMOD_STATUS_RFM_UNSUPPORTED 1
+
+/*! Required neighbouring rays for the field-of-view convolution are missing. */
+#define FORMOD_STATUS_FOV_DATA_MISSING 2
+
+/*! The observer location lies below the surface altitude. */
+#define FORMOD_STATUS_OBSERVER_BELOW_SURFACE 3
+
+/*! Ray tracing exceeded the fixed maximum number of line-of-sight points. */
+#define FORMOD_STATUS_TOO_MANY_LOS_POINTS 4
 
 /* ------------------------------------------------------------
    Log messages...
