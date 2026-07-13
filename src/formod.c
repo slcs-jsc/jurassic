@@ -40,7 +40,19 @@ void call_formod(
   const char *atmfile,
   const char *radfile,
   const char *task,
-  const char *obsref);
+  const char *obsref,
+  int formod_scalar);
+
+/*! Execute a single forward model call via the default batch path or the
+  scalar debug path. */
+void exec_formod_single(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  atm_t *atm,
+  obs_t *obs,
+  los_t *los_scratch,
+  obs_t *obs_scratch,
+  int formod_scalar);
 
 /*! Calculate relative errors. */
 void compute_rel_errors(
@@ -104,6 +116,8 @@ int main(
 #else
 
   char dirlist[LEN], obsref[LEN], task[LEN];
+  const int formod_scalar =
+    (int) scan_ctl(argc, argv, "FORMOD_SCALAR", -1, "0", NULL);
 
   /* Initialize look-up tables... */
   SELECT_TIMER("READ_TBL", "INPUT");
@@ -123,7 +137,8 @@ int main(
 
   /* Single forward calculation... */
   if (dirlist[0] == '-')
-    call_formod(&ctl, tbl, NULL, argv[2], argv[3], argv[4], task, obsref);
+    call_formod(&ctl, tbl, NULL, argv[2], argv[3], argv[4], task, obsref,
+                formod_scalar);
 
   /* Work on directory list... */
   else {
@@ -141,7 +156,8 @@ int main(
       LOG(1, "\nWorking directory: %s", wrkdir);
 
       /* Call forward model... */
-      call_formod(&ctl, tbl, wrkdir, argv[2], argv[3], argv[4], task, obsref);
+      call_formod(&ctl, tbl, wrkdir, argv[2], argv[3], argv[4], task, obsref,
+                  formod_scalar);
     }
 
     /* Close dirlist... */
@@ -202,6 +218,10 @@ void usage(
     ("  OBSREF <file>    Read reference observations from <file> and print\n");
   printf
     ("                   relative-error diagnostics against the simulated output.\n");
+  printf
+    ("  FORMOD_SCALAR 1  Force the legacy scalar formod() path instead of the\n");
+  printf
+    ("                   default formod_batch() execution with batch size 1.\n");
   printf("\n");
   printf("Common control parameters:\n");
   printf
@@ -223,6 +243,30 @@ void usage(
 
 /*****************************************************************************/
 
+void exec_formod_single(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  atm_t *atm,
+  obs_t *obs,
+  los_t *los_scratch,
+  obs_t *obs_scratch,
+  int formod_scalar) {
+
+  if (formod_scalar) {
+    const int status = formod(ctl, tbl, atm, obs, los_scratch, obs_scratch);
+    if (status != FORMOD_STATUS_OK)
+      ERRMSG("Forward model failed with status code %d!", status);
+    return;
+  }
+
+  int status[1];
+  formod_batch(ctl, tbl, atm, obs, 1, status, los_scratch, obs_scratch);
+  if (status[0] != FORMOD_STATUS_OK)
+    ERRMSG("Forward model failed with status code %d!", status[0]);
+}
+
+/*****************************************************************************/
+
 void call_formod(
   ctl_t *ctl,
   const tbl_t *tbl,
@@ -231,7 +275,8 @@ void call_formod(
   const char *atmfile,
   const char *radfile,
   const char *task,
-  const char *obsref) {
+  const char *obsref,
+  int formod_scalar) {
 
   static atm_t atm, atm2;
   static obs_t obs, obs2, obs_scratch;
@@ -284,7 +329,8 @@ void call_formod(
       if (atm2.np > 0) {
 
 	/* Call forward model... */
-	formod(ctl, tbl, &atm2, &obs2, &los_scratch, &obs_scratch);
+	exec_formod_single(ctl, tbl, &atm2, &obs2, &los_scratch,
+	                   &obs_scratch, formod_scalar);
 
 	/* Save radiance data... */
 	for (int id = 0; id < ctl->nd; id++) {
@@ -304,7 +350,8 @@ void call_formod(
 
     /* Call forward model... */
     SELECT_TIMER("FORMOD", "FORWARD");
-    formod(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch);
+    exec_formod_single(ctl, tbl, &atm, &obs, &los_scratch,
+                       &obs_scratch, formod_scalar);
 
     /* Save radiance data... */
     SELECT_TIMER("WRITE_OBS", "OUTPUT");
@@ -360,7 +407,8 @@ void call_formod(
 	      atm2.q[ig2][ip] = 0;
 
 	/* Call forward model... */
-	formod(ctl, tbl, &atm2, &obs, &los_scratch, &obs_scratch);
+	exec_formod_single(ctl, tbl, &atm2, &obs, &los_scratch,
+	                   &obs_scratch, formod_scalar);
 
 	/* Save radiance data... */
 	sprintf(filename, "%s.%s", radfile, ctl->emitter[ig]);
@@ -376,7 +424,8 @@ void call_formod(
 	  atm2.q[ig][ip] = 0;
 
       /* Call forward model... */
-      formod(ctl, tbl, &atm2, &obs, &los_scratch, &obs_scratch);
+      exec_formod_single(ctl, tbl, &atm2, &obs, &los_scratch,
+                         &obs_scratch, formod_scalar);
 
       /* Save radiance data... */
       sprintf(filename, "%s.EXTINCT", radfile);
@@ -414,7 +463,8 @@ void call_formod(
 	/* Measure runtime... */
 	SELECT_TIMER("BENCHMARK_SAMPLE", "ANALYSIS");
 	double t0 = omp_get_wtime();
-	formod(ctl, tbl, &atm2, &obs, &los_scratch, &obs_scratch);
+	exec_formod_single(ctl, tbl, &atm2, &obs, &los_scratch,
+	                   &obs_scratch, formod_scalar);
 	double dt = omp_get_wtime() - t0;
 
 	/* Get runtime statistics... */
@@ -446,7 +496,8 @@ void call_formod(
       /* Reference run... */
       ctl->rayds = 0.1;
       ctl->raydz = 0.01;
-      formod(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch);
+      exec_formod_single(ctl, tbl, &atm, &obs, &los_scratch,
+                       &obs_scratch, formod_scalar);
       copy_obs(ctl, &obs2, &obs, 0);
 
       /* Loop over step size... */
@@ -459,7 +510,8 @@ void call_formod(
 
 	  /* Measure runtime... */
 	  double t0 = omp_get_wtime();
-	  formod(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch);
+	  exec_formod_single(ctl, tbl, &atm, &obs, &los_scratch,
+	                     &obs_scratch, formod_scalar);
 	  double dt = omp_get_wtime() - t0;
 
 	  /* Calculate relative errors... */

@@ -4593,7 +4593,9 @@ void kernel(
   ALLOC(obs1_scratch, obs_t, batch_size);
 
   /* Compute radiance for undisturbed atmospheric data... */
-  formod(ctl, tbl, atm, obs, los0, obs0);
+  formod_batch(ctl, tbl, atm, obs, 1, status, los0, obs0);
+  if (status[0] != FORMOD_STATUS_OK)
+    ERRMSG("Forward model failed with status code %d!", status[0]);
 
 #if defined(_OPENACC)
 #pragma acc enter data create(atm1[0:batch_size],obs1[0:batch_size],status[0:batch_size], \
