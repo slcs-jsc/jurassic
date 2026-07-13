@@ -172,7 +172,7 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
-.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test print-exc strip uninstall $(TESTS)
+.PHONY : all check clean coverage cppcheck dist doxygen gpu_test indent install lizard mkdocs mpi_test print-exc strip uninstall $(TESTS)
 
 all: $(EXC)
 	rm -f *~
@@ -191,7 +191,7 @@ check: $(TESTS)
 print-exc:
 	@printf '%s\n' $(EXC)
 
-$(TESTS) mpi_test: all
+$(TESTS) mpi_test gpu_test: all
 	@(echo "\n===== Running \"$@\" ... =====") ; \
 	  cd ../tests/$@ ; bash ./run.sh \
 	  && (echo "\n===== Test \"$@\" passed! =====") \
