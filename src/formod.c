@@ -41,7 +41,8 @@ void call_formod(
   const char *radfile,
   const char *task,
   const char *obsref,
-  int formod_scalar);
+  int formod_scalar,
+  int formod_batch_repeat);
 
 /*! Execute a single forward model call via the default batch path or the
   scalar debug path. */
@@ -53,6 +54,15 @@ void exec_formod_single(
   los_t *los_scratch,
   obs_t *obs_scratch,
   int formod_scalar);
+
+/*! Execute a replicated batch of identical forward model calls for throughput
+  measurements and return the first result in @p obs. */
+void exec_formod_batch_repeat(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  const atm_t *atm,
+  obs_t *obs,
+  int batch_repeat);
 
 /*! Calculate relative errors. */
 void compute_rel_errors(
@@ -118,6 +128,8 @@ int main(
   char dirlist[LEN], obsref[LEN], task[LEN];
   const int formod_scalar =
     (int) scan_ctl(argc, argv, "FORMOD_SCALAR", -1, "0", NULL);
+  const int formod_batch_repeat =
+    (int) scan_ctl(argc, argv, "FORMOD_BATCH_REPEAT", -1, "1", NULL);
 
   /* Initialize look-up tables... */
   SELECT_TIMER("READ_TBL", "INPUT");
@@ -138,7 +150,7 @@ int main(
   /* Single forward calculation... */
   if (dirlist[0] == '-')
     call_formod(&ctl, tbl, NULL, argv[2], argv[3], argv[4], task, obsref,
-                formod_scalar);
+                formod_scalar, formod_batch_repeat);
 
   /* Work on directory list... */
   else {
@@ -157,7 +169,7 @@ int main(
 
       /* Call forward model... */
       call_formod(&ctl, tbl, wrkdir, argv[2], argv[3], argv[4], task, obsref,
-                  formod_scalar);
+                  formod_scalar, formod_batch_repeat);
     }
 
     /* Close dirlist... */
@@ -222,6 +234,12 @@ void usage(
     ("  FORMOD_SCALAR 1  Force the legacy scalar formod() path instead of the\n");
   printf
     ("                   default formod_batch() execution with batch size 1.\n");
+  printf
+    ("  FORMOD_BATCH_REPEAT <n>  Replicate the input case <n> times and run\n");
+  printf
+    ("                   them in one formod_batch() call; only the first result\n");
+  printf
+    ("                   is written to the output file.\n");
   printf("\n");
   printf("Common control parameters:\n");
   printf
@@ -273,6 +291,60 @@ void exec_formod_single(
 
 /*****************************************************************************/
 
+void exec_formod_batch_repeat(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  const atm_t *atm,
+  obs_t *obs,
+  int batch_repeat) {
+
+  atm_t *atm_batch;
+  obs_t *obs_batch;
+  los_t *los_batch;
+  obs_t *obs_scratch_batch;
+  int *status;
+
+  if (batch_repeat < 1)
+    ERRMSG("FORMOD_BATCH_REPEAT must be positive!");
+
+  ALLOC(atm_batch, atm_t, batch_repeat);
+  ALLOC(obs_batch, obs_t, batch_repeat);
+  ALLOC(los_batch, los_t, batch_repeat);
+  ALLOC(obs_scratch_batch, obs_t, batch_repeat);
+  ALLOC(status, int, batch_repeat);
+
+  for (int ib = 0; ib < batch_repeat; ib++) {
+    atm_batch[ib] = *atm;
+    obs_batch[ib] = *obs;
+  }
+
+#if defined(_OPENACC)
+#pragma acc enter data create(atm_batch[0:batch_repeat],obs_batch[0:batch_repeat],status[0:batch_repeat],los_batch[0:batch_repeat],obs_scratch_batch[0:batch_repeat])
+#endif
+  formod_batch(ctl, tbl, atm_batch, obs_batch, batch_repeat, status, los_batch,
+               obs_scratch_batch);
+#if defined(_OPENACC)
+#pragma acc exit data delete(atm_batch[0:batch_repeat],obs_batch[0:batch_repeat],status[0:batch_repeat],los_batch[0:batch_repeat],obs_scratch_batch[0:batch_repeat])
+#endif
+
+  if (status[0] != FORMOD_STATUS_OK)
+    ERRMSG("Forward model failed with status code %d!", status[0]);
+  for (int ib = 1; ib < batch_repeat; ib++)
+    if (status[ib] != status[0])
+      ERRMSG("Replicated batch returned inconsistent status code %d at element %d!",
+             status[ib], ib);
+
+  *obs = obs_batch[0];
+
+  free(status);
+  free(obs_scratch_batch);
+  free(los_batch);
+  free(obs_batch);
+  free(atm_batch);
+}
+
+/*****************************************************************************/
+
 void call_formod(
   ctl_t *ctl,
   const tbl_t *tbl,
@@ -282,7 +354,8 @@ void call_formod(
   const char *radfile,
   const char *task,
   const char *obsref,
-  int formod_scalar) {
+  int formod_scalar,
+  int formod_batch_repeat) {
 
   static atm_t atm, atm2;
   static obs_t obs, obs2, obs_scratch;
@@ -356,8 +429,15 @@ void call_formod(
 
     /* Call forward model... */
     SELECT_TIMER("FORMOD", "FORWARD");
-    exec_formod_single(ctl, tbl, &atm, &obs, &los_scratch,
-                       &obs_scratch, formod_scalar);
+    if (formod_batch_repeat > 1) {
+      if (formod_scalar)
+        ERRMSG("FORMOD_BATCH_REPEAT cannot be combined with FORMOD_SCALAR!");
+      if (task[0] != '-')
+        ERRMSG("FORMOD_BATCH_REPEAT is only supported for the default forward-model task!");
+      exec_formod_batch_repeat(ctl, tbl, &atm, &obs, formod_batch_repeat);
+    } else
+      exec_formod_single(ctl, tbl, &atm, &obs, &los_scratch,
+                         &obs_scratch, formod_scalar);
 
     /* Save radiance data... */
     SELECT_TIMER("WRITE_OBS", "OUTPUT");

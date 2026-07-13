@@ -144,7 +144,15 @@ endif
 
 # Optimization information...
 ifeq ($(INFO),1)
-  CFLAGS += -fopt-info
+  ifeq ($(COMPILER),gcc)
+    CFLAGS += -fopt-info
+  else ifeq ($(COMPILER),icx)
+    CFLAGS += -fopt-info
+  else ifeq ($(COMPILER),nvc)
+    CFLAGS += -Minfo=all
+  else ifeq ($(COMPILER),clang)
+    $(error INFO flag not supported by clang compiler)
+  endif
 endif
 
 # Compile for profiling...
