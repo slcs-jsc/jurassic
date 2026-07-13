@@ -1702,9 +1702,6 @@ typedef struct {
   /*! Segment emissivity. */
   double eps[NLOS][ND];
 
-  /*! Segment source function [W/(m^2 sr cm^-1)]. */
-  double src[NLOS][ND];
-
 } los_t;
 
 /**

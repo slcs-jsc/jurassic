@@ -3768,8 +3768,9 @@ int formod_pencil(
     double beta_ctm[ND];
     formod_continua(ctl, los, ip, beta_ctm);
 
-    /* Compute Planck function... */
-    formod_srcfunc(ctl, tbl, los->t[ip], los->src[ip]);
+    /* Compute source function for the current LOS point. */
+    double src_ip[ND];
+    formod_srcfunc(ctl, tbl, los->t[ip], src_ip);
 
     /* Loop over channels... */
     for (int id = 0; id < ctl->nd; id++)
@@ -3779,7 +3780,7 @@ int formod_pencil(
 	los->eps[ip][id] = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
 
 	/* Compute radiance... */
-	rad[id] += los->src[ip][id] * los->eps[ip][id] * tau[id];
+	rad[id] += src_ip[id] * los->eps[ip][id] * tau[id];
 
 	/* Compute path transmittance... */
 	tau[id] *= (1 - los->eps[ip][id]);
@@ -3813,12 +3814,15 @@ int formod_pencil(
 	tau_refl[id] = 1;
 
       /* Add down-welling radiance... */
-      for (int ip = los->np - 1; ip >= 0; ip--)
+      for (int ip = los->np - 1; ip >= 0; ip--) {
+	double src_ip[ND];
+	formod_srcfunc(ctl, tbl, los->t[ip], src_ip);
 	for (int id = 0; id < ctl->nd; id++) {
-	  rad[id] += los->src[ip][id] * los->eps[ip][id] * tau_refl[id]
+	  rad[id] += src_ip[id] * los->eps[ip][id] * tau_refl[id]
 	    * tau[id] * (1 - los->sfeps[id]);
 	  tau_refl[id] *= (1 - los->eps[ip][id]);
 	}
+      }
 
       /* Add solar term... */
       if (ctl->sftype >= 3) {
