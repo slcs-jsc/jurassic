@@ -3438,9 +3438,6 @@ int find_emitter(
 
 /*****************************************************************************/
 
-#if defined(_OPENACC)
-#pragma acc routine worker
-#endif
 int formod(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -3730,9 +3727,6 @@ int formod_fov(
 
 /*****************************************************************************/
 
-#if defined(_OPENACC)
-#pragma acc routine worker
-#endif
 int formod_pencil(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -3849,9 +3843,6 @@ int formod_pencil(
 	tau_refl[id] = 1;
 
       /* Add down-welling radiance... */
-#if defined(_OPENACC)
-#pragma acc loop seq
-#endif
       for (int ip = los->np - 1; ip >= 0; ip--) {
 	double src_ip[ND];
 	formod_srcfunc(ctl, tbl, los->t[ip], src_ip);
