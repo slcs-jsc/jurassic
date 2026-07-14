@@ -3808,9 +3808,6 @@ int formod_pencil(
     formod_srcfunc(ctl, tbl, los->t[ip], src_ip);
 
     /* Loop over channels... */
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
     for (int id = 0; id < ctl->nd; id++)
       if (tau_gas[id] > 0) {
 
@@ -3831,9 +3828,6 @@ int formod_pencil(
     /* Add surface emissions... */
     double src_sf[ND];
     formod_srcfunc(ctl, tbl, los->sft, src_sf);
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
     for (int id = 0; id < ctl->nd; id++)
       rad[id] += los->sfeps[id] * src_sf[id] * tau[id];
 
@@ -3851,9 +3845,6 @@ int formod_pencil(
 
       /* Initialize... */
       double tau_refl[ND];
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
       for (int id = 0; id < ctl->nd; id++)
 	tau_refl[id] = 1;
 
@@ -3864,9 +3855,6 @@ int formod_pencil(
       for (int ip = los->np - 1; ip >= 0; ip--) {
 	double src_ip[ND];
 	formod_srcfunc(ctl, tbl, los->t[ip], src_ip);
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
 	for (int id = 0; id < ctl->nd; id++) {
 	  rad[id] += src_ip[id] * los->eps[ip][id] * tau_refl[id]
 	    * tau[id] * (1 - los->sfeps[id]);
@@ -3901,9 +3889,6 @@ int formod_pencil(
 	  const double rcos = cosa / cos_sza_val;
 
 	  /* Add solar radiance contribution... */
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
 	  for (int id = 0; id < ctl->nd; id++)
 	    rad[id] += 6.764e-5 / (2. * M_PI) * PLANCK(TSUN, ctl->nu[id])
 	      * tau_refl[id] * (1 - los->sfeps[id]) * tau[id] * rcos;
@@ -3913,9 +3898,6 @@ int formod_pencil(
   }
 
   /* Copy results... */
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
   for (int id = 0; id < ctl->nd; id++) {
     obs->rad[id][ir] = rad[id];
     obs->tau[id][ir] = tau[id];
