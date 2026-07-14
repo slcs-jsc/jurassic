@@ -3438,6 +3438,9 @@ int find_emitter(
 
 /*****************************************************************************/
 
+#if defined(_OPENACC)
+#pragma acc routine worker
+#endif
 int formod(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -3626,6 +3629,9 @@ void formod_batch(
 
 /*****************************************************************************/
 
+#if defined(_OPENACC)
+#pragma acc routine vector
+#endif
 void formod_continua(
   const ctl_t *ctl,
   const los_t *los,
@@ -3634,17 +3640,26 @@ void formod_continua(
   double *beta) {
 
   /* Extinction... */
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
   for (int id = 0; id < ctl->nd; id++)
     beta[id] = los->k[ip][id];
 
   /* CO2 continuum... */
   if (ctl->ctm_co2 && ctl->ig_co2 >= 0)
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmco2(ctl->nu[id], los->p[ip], los->t[ip],
 			 u[ctl->ig_co2]) / los->ds[ip];
 
   /* H2O continuum... */
   if (ctl->ctm_h2o && ctl->ig_h2o >= 0)
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmh2o(ctl->nu[id], los->p[ip], los->t[ip],
 			 los->q[ip][ctl->ig_h2o], u[ctl->ig_h2o])
@@ -3652,11 +3667,17 @@ void formod_continua(
 
   /* N2 continuum... */
   if (ctl->ctm_n2)
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmn2(ctl->nu[id], los->p[ip], los->t[ip]);
 
   /* O2 continuum... */
   if (ctl->ctm_o2)
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmo2(ctl->nu[id], los->p[ip], los->t[ip]);
 }
@@ -3727,6 +3748,9 @@ int formod_fov(
 
 /*****************************************************************************/
 
+#if defined(_OPENACC)
+#pragma acc routine vector
+#endif
 int formod_pencil(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -3753,6 +3777,9 @@ int formod_pencil(
   for (int id = 0; id < ctl->nd; id++) {
     rad[id] = 0;
     tau[id] = 1;
+#if defined(_OPENACC)
+#pragma acc loop seq
+#endif
     for (int ig = 0; ig < ctl->ng; ig++)
       tau_path[id][ig] = 1;
   }
@@ -3765,6 +3792,9 @@ int formod_pencil(
   }
 
   /* Loop over LOS points... */
+#if defined(_OPENACC)
+#pragma acc loop seq
+#endif
   for (int ip = 0; ip < los->np; ip++) {
 
     /* Update local and Curtis-Godson column amounts... */
@@ -3796,6 +3826,9 @@ int formod_pencil(
     formod_srcfunc(ctl, tbl, los->t[ip], src_ip);
 
     /* Loop over channels... */
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
     for (int id = 0; id < ctl->nd; id++)
       if (tau_gas[id] > 0) {
 
@@ -3816,6 +3849,9 @@ int formod_pencil(
     /* Add surface emissions... */
     double src_sf[ND];
     formod_srcfunc(ctl, tbl, los->sft, src_sf);
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
     for (int id = 0; id < ctl->nd; id++)
       rad[id] += los->sfeps[id] * src_sf[id] * tau[id];
 
@@ -3833,13 +3869,22 @@ int formod_pencil(
 
       /* Initialize... */
       double tau_refl[ND];
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
       for (int id = 0; id < ctl->nd; id++)
 	tau_refl[id] = 1;
 
       /* Add down-welling radiance... */
+#if defined(_OPENACC)
+#pragma acc loop seq
+#endif
       for (int ip = los->np - 1; ip >= 0; ip--) {
 	double src_ip[ND];
 	formod_srcfunc(ctl, tbl, los->t[ip], src_ip);
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
 	for (int id = 0; id < ctl->nd; id++) {
 	  rad[id] += src_ip[id] * los->eps[ip][id] * tau_refl[id]
 	    * tau[id] * (1 - los->sfeps[id]);
@@ -3874,6 +3919,9 @@ int formod_pencil(
 	  const double rcos = cosa / cos_sza_val;
 
 	  /* Add solar radiance contribution... */
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
 	  for (int id = 0; id < ctl->nd; id++)
 	    rad[id] += 6.764e-5 / (2. * M_PI) * PLANCK(TSUN, ctl->nu[id])
 	      * tau_refl[id] * (1 - los->sfeps[id]) * tau[id] * rcos;
@@ -3883,6 +3931,9 @@ int formod_pencil(
   }
 
   /* Copy results... */
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
   for (int id = 0; id < ctl->nd; id++) {
     obs->rad[id][ir] = rad[id];
     obs->tau[id][ir] = tau[id];
@@ -4054,6 +4105,9 @@ void formod_rfm(
 
 /*****************************************************************************/
 
+#if defined(_OPENACC)
+#pragma acc routine vector
+#endif
 void formod_srcfunc(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -4064,6 +4118,9 @@ void formod_srcfunc(
   const int it = locate_reg(tbl->st, TBLNS, t);
 
   /* Interpolate Planck function value... */
+#if defined(_OPENACC)
+#pragma acc loop vector
+#endif
   for (int id = 0; id < ctl->nd; id++)
     src[id] = LIN(tbl->st[it], tbl->sr[it][id],
 		  tbl->st[it + 1], tbl->sr[it + 1][id], t);
