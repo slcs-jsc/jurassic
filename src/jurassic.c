@@ -3629,9 +3629,6 @@ void formod_batch(
 
 /*****************************************************************************/
 
-#if defined(_OPENACC)
-#pragma acc routine vector
-#endif
 void formod_continua(
   const ctl_t *ctl,
   const los_t *los,
@@ -3640,26 +3637,17 @@ void formod_continua(
   double *beta) {
 
   /* Extinction... */
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
   for (int id = 0; id < ctl->nd; id++)
     beta[id] = los->k[ip][id];
 
   /* CO2 continuum... */
   if (ctl->ctm_co2 && ctl->ig_co2 >= 0)
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmco2(ctl->nu[id], los->p[ip], los->t[ip],
 			 u[ctl->ig_co2]) / los->ds[ip];
 
   /* H2O continuum... */
   if (ctl->ctm_h2o && ctl->ig_h2o >= 0)
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmh2o(ctl->nu[id], los->p[ip], los->t[ip],
 			 los->q[ip][ctl->ig_h2o], u[ctl->ig_h2o])
@@ -3667,17 +3655,11 @@ void formod_continua(
 
   /* N2 continuum... */
   if (ctl->ctm_n2)
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmn2(ctl->nu[id], los->p[ip], los->t[ip]);
 
   /* O2 continuum... */
   if (ctl->ctm_o2)
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
     for (int id = 0; id < ctl->nd; id++)
       beta[id] += ctmo2(ctl->nu[id], los->p[ip], los->t[ip]);
 }
@@ -4105,9 +4087,6 @@ void formod_rfm(
 
 /*****************************************************************************/
 
-#if defined(_OPENACC)
-#pragma acc routine vector
-#endif
 void formod_srcfunc(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -4118,9 +4097,6 @@ void formod_srcfunc(
   const int it = locate_reg(tbl->st, TBLNS, t);
 
   /* Interpolate Planck function value... */
-#if defined(_OPENACC)
-#pragma acc loop vector
-#endif
   for (int id = 0; id < ctl->nd; id++)
     src[id] = LIN(tbl->st[it], tbl->sr[it][id],
 		  tbl->st[it + 1], tbl->sr[it + 1][id], t);
