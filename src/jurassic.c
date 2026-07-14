@@ -5339,6 +5339,10 @@ int raytrace(
     /* Interpolate atmospheric data... */
     intpol_atm(ctl, atm, z, &p, &t, q, k);
 
+    /* Abort before writing beyond the fixed LOS scratch buffers. */
+    if (los->np >= NLOS)
+      return FORMOD_STATUS_TOO_MANY_LOS_POINTS;
+
     /* Save data... */
     los->lon[los->np] = lon;
     los->lat[los->np] = lat;
@@ -5362,9 +5366,8 @@ int raytrace(
       }
     }
 
-    /* Increment and check number of LOS points... */
-    if ((++los->np) > NLOS)
-      return FORMOD_STATUS_TOO_MANY_LOS_POINTS;
+    /* Increment number of LOS points... */
+    los->np++;
 
     /* Check stop flag... */
     if (stop) {
