@@ -75,7 +75,7 @@ For the nadir example, the core commands are:
 ```bash
 ../../src/climatology nadir.ctl atm.tab
 ../../src/nadir nadir.ctl obs.tab
-../../src/formod nadir.ctl obs.tab atm.tab rad.tab TASK time
+../../src/formod nadir.ctl obs.tab atm.tab rad.tab
 ../../src/kernel nadir.ctl obs.tab atm.tab kernel.tab
 ```
 

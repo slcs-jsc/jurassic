@@ -802,7 +802,12 @@ void call_formod(
     if (task_mode != 't' && batch_size > 1)
       ERRMSG("BATCH_SIZE > 1 is only supported for TASK=time!");
 
-    SELECT_TIMER("FORMOD", "FORWARD");
+    if (task_mode == 't') {
+      SELECT_TIMER("FORMOD_REFERENCE", "FORWARD");
+    }
+    else {
+      SELECT_TIMER("FORMOD", "FORWARD");
+    }
     exec_formod_default(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch,
 			formod_scalar);
 

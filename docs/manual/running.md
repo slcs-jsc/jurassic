@@ -61,6 +61,31 @@ This will:
 - run the forward model,
 - write simulated radiances or brightness temperatures to `rad.tab`.
 
+### Benchmark mode with `TASK=time`
+
+Use `TASK=time` to run the built-in runtime benchmark:
+
+```bash
+./formod run.ctl obs.tab atm.tab rad.tab TASK time
+```
+
+Optional benchmark-specific parameters are:
+
+- `EXECUTION batch|scalar` to select the batch path or the scalar debug path.
+- `BATCH_SIZE <n>` to set the batch size for `EXECUTION=batch`.
+
+Notes for interpreting the benchmark output:
+
+- `TASK=time` first performs one regular forward calculation and writes its result to
+  `<rad>`.
+- This initial reference run is timed as `FORMOD_REFERENCE`.
+- The actual benchmark loop is timed separately as `BENCHMARK_SAMPLE` and printed as
+  `RUNTIME: execution= ...`.
+- For throughput comparisons, use the reported benchmark runtime, not
+  `TIMER_FORMOD` or `FORMOD_REFERENCE`.
+- When `BATCH_SIZE > 1`, the benchmark internally evaluates perturbed atmospheric
+  cases and returns the first batch element as the written reference output.
+
 ---
 
 ### Multi-directory run with `DIRLIST`
