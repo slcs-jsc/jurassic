@@ -4968,6 +4968,8 @@ void optimal_estimation(
   free(iqa);
 }
 
+/*****************************************************************************/
+
 void raytrace(
   const ctl_t *ctl,
   const atm_t *atm,
@@ -5063,7 +5065,11 @@ void raytrace(
 
     /* Interpolate atmospheric data... */
     intpol_atm(ctl, atm, z, &p, &t, q, k);
-
+    
+    /* Abort before writing beyond the fixed LOS scratch buffers... */
+    if (los->np >= NLOS)
+      ERRMSG("Too many LOS points!");
+    
     /* Save data... */
     los->lon[los->np] = lon;
     los->lat[los->np] = lat;
@@ -5087,10 +5093,9 @@ void raytrace(
       }
     }
 
-    /* Increment and check number of LOS points... */
-    if ((++los->np) > NLOS)
-      ERRMSG("Too many LOS points!");
-
+    /* Increment number of LOS points... */
+    los->np++;
+    
     /* Check stop flag... */
     if (stop) {
 
