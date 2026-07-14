@@ -3731,7 +3731,7 @@ int formod_fov(
 /*****************************************************************************/
 
 #if defined(_OPENACC)
-#pragma acc routine vector
+#pragma acc routine worker
 #endif
 int formod_pencil(
   const ctl_t *ctl,
