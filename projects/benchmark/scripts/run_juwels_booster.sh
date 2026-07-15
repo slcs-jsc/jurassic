@@ -5,6 +5,8 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12
 #SBATCH --gpus-per-task=1
+# The default Slurm request matches one quarter of a Booster node: one A100
+# plus 12 CPU cores. Use sbatch --cpus-per-task=48 for CPU-only node tests.
 #SBATCH --time=00:30:00
 
 set -euo pipefail
@@ -41,8 +43,16 @@ ctl_rel=$(printf '%s
 ctl_template=${CTLFILE:-$repo_root/$ctl_rel}
 bench_tblbase=${BENCH_TBLBASE:-/p/data1/slmet/model_data/jurassic/tab/tria_1cm/nc_1e-6/tria}
 target=${TARGET:-gpu}
-threads=${THREADS:-"1 2 4 8 12"}
-cpu_batch_size=${CPU_BATCH_SIZE:-64}
+slurm_cpus_per_task=${SLURM_CPUS_PER_TASK:-12}
+full_node_cpu_cores=${FULL_NODE_CPU_CORES:-48}
+if [ -n "${THREADS:-}" ]; then
+  threads=$THREADS
+elif [ "$target" = gpu ]; then
+  threads="1 2 4 8 12"
+else
+  threads="1 2 4 8 12 24 48"
+fi
+cpu_batch_size=${CPU_BATCH_SIZE:-48}
 batches=${BATCHES:-"1 8 64 256"}
 compiler_cpu=${COMPILER_CPU:-gcc}
 compiler_gpu=${COMPILER_GPU:-nvc}
@@ -52,6 +62,8 @@ gpu_pin=${GPU_PIN:-1}
 info=${INFO:-0}
 acc_time=${ACC_TIME:-1}
 rebuild=${REBUILD:-1}
+omp_places=${OMP_PLACES:-cores}
+omp_proc_bind=${OMP_PROC_BIND:-close}
 
 mkdir -p "$work_dir"
 
@@ -89,11 +101,21 @@ if [ "$target" = both ] && [ "$rebuild" = 0 ]; then
   exit 1
 fi
 
+if [ "$target" = cpu ] || [ "$target" = both ]; then
+  if [ -z "${THREADS:-}" ] && [ "$slurm_cpus_per_task" -lt "$full_node_cpu_cores" ]; then
+    echo "CPU benchmark target needs --cpus-per-task=$full_node_cpu_cores for the default full-node thread sweep" >&2
+    echo "Override THREADS explicitly if you want a smaller CPU sweep inside a GPU-sized allocation" >&2
+    exit 1
+  fi
+fi
+
 # Run in a clean working directory with deterministic locale settings.
 cd "$work_dir"
 export LANG=C
 export LC_ALL=C
-export OMP_NUM_THREADS=${OMP_NUM_THREADS:-${SLURM_CPUS_PER_TASK:-12}}
+export OMP_PLACES="$omp_places"
+export OMP_PROC_BIND="$omp_proc_bind"
+export OMP_NUM_THREADS=${OMP_NUM_THREADS:-$slurm_cpus_per_task}
 
 # Load the compiler and plotting stack expected on JUWELS Booster.
 if command -v ml >/dev/null 2>&1; then
@@ -111,12 +133,25 @@ active_ctl="$work_dir/${case_name}.ctl"
 awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
 
 # Record the effective benchmark configuration for later inspection.
+collect_hardware_info() {
+  if command -v lscpu >/dev/null 2>&1; then
+    lscpu > "$run_dir/lscpu.txt"
+  fi
+  if command -v numactl >/dev/null 2>&1; then
+    numactl --hardware > "$run_dir/numactl_hardware.txt"
+  fi
+}
+
+collect_hardware_info
+
 printf 'case_name=%s
 geometry=%s
 ctl_template=%s
 active_ctl=%s
 bench_tblbase=%s
 target=%s
+slurm_cpus_per_task=%s
+full_node_cpu_cores=%s
 threads=%s
 cpu_batch_size=%s
 batches=%s
@@ -128,7 +163,9 @@ gpu_pin=%s
 info=%s
 acc_time=%s
 rebuild=%s
-'   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$target" "$threads" "$cpu_batch_size" "$batches" "$compiler_cpu" "$compiler_gpu" "$mpicc" "$mpi" "$gpu_pin" "$info" "$acc_time" "$rebuild" > "$run_dir/config.txt"
+omp_places=%s
+omp_proc_bind=%s
+'   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$target" "$slurm_cpus_per_task" "$full_node_cpu_cores" "$threads" "$cpu_batch_size" "$batches" "$compiler_cpu" "$compiler_gpu" "$mpicc" "$mpi" "$gpu_pin" "$info" "$acc_time" "$rebuild" "$omp_places" "$omp_proc_bind" > "$run_dir/config.txt"
 
 # Rebuild a CPU-only binary when the run requests it.
 build_cpu() {
@@ -179,7 +216,9 @@ run_cpu() {
     OMP_NUM_THREADS=$omp "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$cpu_batch_size" > "$log" 2>&1
     printf 'OMP_NUM_THREADS=%s
 CPU_BATCH_SIZE=%s
-' "$omp" "$cpu_batch_size" >> "$log"
+OMP_PLACES=%s
+OMP_PROC_BIND=%s
+' "$omp" "$cpu_batch_size" "$OMP_PLACES" "$OMP_PROC_BIND" >> "$log"
   done
   python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.cpu.tsv" | tee "$run_dir/summary.cpu.txt"
   maybe_plot "$run_dir/summary.cpu.tsv" "$run_dir/plot_cpu_scaling.png" "JURASSIC Booster CPU baseline"
