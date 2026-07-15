@@ -95,6 +95,11 @@ def plot_batch(ax_runtime, ax_throughput, rows):
 
     ax_runtime.plot(x, benchmark, marker='o', linewidth=2, label='Benchmark')
 
+    # Batch sizes usually follow powers of two, so a log2 axis makes the GPU
+    # scaling trend easier to compare across small and large batches.
+    ax_runtime.set_xscale('log', base=2)
+    ax_runtime.set_xticks(x)
+    ax_runtime.set_xticklabels([str(value) for value in x])
     ax_runtime.set_xlabel('BATCH_SIZE')
     ax_runtime.set_ylabel('Time [s]')
     ax_runtime.set_title('GPU batch runtime')
@@ -102,6 +107,9 @@ def plot_batch(ax_runtime, ax_throughput, rows):
     ax_runtime.legend()
 
     ax_throughput.plot(x, per_case, marker='o', linewidth=2, label='Time / case')
+    ax_throughput.set_xscale('log', base=2)
+    ax_throughput.set_xticks(x)
+    ax_throughput.set_xticklabels([str(value) for value in x])
     if any(v is not None for v in throughput):
         twin = ax_throughput.twinx()
         twin.plot(x, throughput, marker='^', linewidth=2, color='tab:red', label='Throughput')
