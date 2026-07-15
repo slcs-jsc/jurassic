@@ -21,7 +21,7 @@ geometry=$(printf '%s
 ctl_rel=$(printf '%s
 ' "$case_row" | awk -F'	' '{print $3}')
 ctl_template=${CTLFILE:-$repo_root/$ctl_rel}
-bench_tblbase=${BENCH_TBLBASE:-$HOME/wrk/jurassic/tab/tria_1cm/nc_1e-6}
+bench_tblbase=${BENCH_TBLBASE:-$HOME/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria}
 threads=${THREADS:-"1 2 4 8 12"}
 cpu_batch_size=${CPU_BATCH_SIZE:-64}
 compiler=${COMPILER:-gcc}
@@ -34,8 +34,9 @@ if [ ! -f "$ctl_template" ]; then
   echo "Control file not found: $ctl_template" >&2
   exit 1
 fi
-if [ ! -d "$bench_tblbase" ]; then
-  echo "Benchmark LUT directory not found: $bench_tblbase" >&2
+bench_tbl_dir=$(dirname "$bench_tblbase")
+if [ ! -d "$bench_tbl_dir" ]; then
+  echo "Benchmark LUT directory not found: $bench_tbl_dir" >&2
   exit 1
 fi
 
