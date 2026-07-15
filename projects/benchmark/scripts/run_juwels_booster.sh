@@ -9,6 +9,7 @@
 
 set -euo pipefail
 
+# Resolve repository-relative paths once so Slurm can stage the run from temporary launch directories.
 script_source=${BASH_SOURCE[0]:-$0}
 script_dir=$(cd "$(dirname "$script_source")" && pwd)
 repo_root=$(cd "$script_dir/../../.." && pwd)
@@ -25,6 +26,7 @@ run_id=${RUN_ID:-juwels_booster_${SLURM_JOB_ID:-manual}}
 run_dir="$runs_root/$run_id"
 work_dir="$run_dir/work"
 
+# Select the benchmark case from the shared baseline matrix.
 case_name=${CASE_NAME:-${GEOMETRY:-zenith}_baseline}
 baseline_cases="$repo_root/projects/benchmark/configs/baseline_cases.tsv"
 case_row=$(awk -F'	' -v key="$case_name" 'NR > 1 && $1 == key { print; exit }' "$baseline_cases")
@@ -53,6 +55,7 @@ rebuild=${REBUILD:-1}
 
 mkdir -p "$work_dir"
 
+# Validate the selected control template and LUT base path before staging work files.
 if [ ! -f "$ctl_template" ]; then
   echo "Control file not found: $ctl_template" >&2
   exit 1
@@ -86,11 +89,13 @@ if [ "$target" = both ] && [ "$rebuild" = 0 ]; then
   exit 1
 fi
 
+# Run in a clean working directory with deterministic locale settings.
 cd "$work_dir"
 export LANG=C
 export LC_ALL=C
 export OMP_NUM_THREADS=${OMP_NUM_THREADS:-${SLURM_CPUS_PER_TASK:-12}}
 
+# Load the compiler and plotting stack expected on JUWELS Booster.
 if command -v ml >/dev/null 2>&1; then
   ml Stages/2026 GCCcore/14.3.0
   ml CMake/4.0.3
@@ -101,9 +106,11 @@ fi
 
 export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${LD_LIBRARY_PATH:-}"
 
+# Materialize a run-local control file with the chosen LUT base name.
 active_ctl="$work_dir/${case_name}.ctl"
 awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
 
+# Record the effective benchmark configuration for later inspection.
 printf 'case_name=%s
 geometry=%s
 ctl_template=%s
@@ -123,6 +130,7 @@ acc_time=%s
 rebuild=%s
 '   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$target" "$threads" "$cpu_batch_size" "$batches" "$compiler_cpu" "$compiler_gpu" "$mpicc" "$mpi" "$gpu_pin" "$info" "$acc_time" "$rebuild" > "$run_dir/config.txt"
 
+# Rebuild a CPU-only binary when the run requests it.
 build_cpu() {
   cd "$src_dir"
   make clean
@@ -130,6 +138,7 @@ build_cpu() {
   cd "$work_dir"
 }
 
+# Rebuild a GPU-enabled binary with the requested compiler settings.
 build_gpu() {
   cd "$src_dir"
   make clean
@@ -137,6 +146,7 @@ build_gpu() {
   cd "$work_dir"
 }
 
+# Keep summary generation working even on systems without matplotlib.
 maybe_plot() {
   local summary_tsv=$1
   local output_png=$2
@@ -149,6 +159,7 @@ maybe_plot() {
   fi
 }
 
+# Create atmospheric and observation inputs for the selected geometry.
 prepare_inputs() {
   rm -rf data
   mkdir -p data
@@ -156,10 +167,12 @@ prepare_inputs() {
   "$src_dir/$geometry" "$active_ctl" data/obs.tab
 }
 
+# Execute the CPU benchmark sweep over OpenMP thread counts.
 run_cpu() {
   mkdir -p cpu
   cd cpu
   prepare_inputs
+  # Sweep OpenMP thread counts while keeping the synthetic workload fixed.
   for omp in $threads; do
     log="log.omp${omp}"
     out="/tmp/jurassic_bench_${run_id}_cpu_omp${omp}.tab"
@@ -175,6 +188,7 @@ CPU_BATCH_SIZE=%s
   cd "$work_dir"
 }
 
+# Execute the GPU benchmark sweep over configured batch sizes.
 run_gpu() {
   mkdir -p gpu
   cd gpu
@@ -195,6 +209,7 @@ run_gpu() {
   cd "$work_dir"
 }
 
+# Run the requested CPU and/or GPU benchmark sections.
 if [ "$target" = cpu ] || [ "$target" = both ]; then
   if [ "$rebuild" = 1 ]; then
     build_cpu

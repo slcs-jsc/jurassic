@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+# Resolve repository-relative paths once so runs can be staged anywhere.
 script_dir=$(cd "$(dirname "$0")" && pwd)
 repo_root=$(cd "$script_dir/../../.." && pwd)
 src_dir="$repo_root/src"
@@ -9,6 +10,7 @@ run_id=${RUN_ID:-local_$(date +%Y%m%d_%H%M%S)}
 run_dir="$runs_root/$run_id"
 work_dir="$run_dir/work"
 
+# Select the benchmark case from the shared baseline matrix.
 case_name=${CASE_NAME:-${GEOMETRY:-zenith}_baseline}
 baseline_cases="$repo_root/projects/benchmark/configs/baseline_cases.tsv"
 case_row=$(awk -F'	' -v key="$case_name" 'NR > 1 && $1 == key { print; exit }' "$baseline_cases")
@@ -30,6 +32,7 @@ rebuild=${REBUILD:-1}
 
 mkdir -p "$work_dir"
 
+# Validate the selected control template and LUT base path before staging work files.
 if [ ! -f "$ctl_template" ]; then
   echo "Control file not found: $ctl_template" >&2
   exit 1
@@ -49,6 +52,7 @@ case "$geometry" in
     ;;
 esac
 
+# Keep summary generation working even on systems without matplotlib.
 maybe_plot() {
   local summary_tsv=$1
   local output_png=$2
@@ -61,13 +65,16 @@ maybe_plot() {
   fi
 }
 
+# Run in a clean working directory with deterministic locale settings.
 cd "$work_dir"
 export LANG=C
 export LC_ALL=C
 
+# Materialize a run-local control file with the chosen LUT base name.
 active_ctl="$work_dir/${case_name}.ctl"
 awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
 
+# Record the effective benchmark configuration for later inspection.
 printf 'case_name=%s
 geometry=%s
 ctl_template=%s
@@ -87,12 +94,14 @@ if [ "$rebuild" = 1 ]; then
   cd "$work_dir"
 fi
 
+# Generate fresh benchmark input data inside the run workspace.
 rm -rf data
 mkdir -p data
 
 "$src_dir/climatology" "$active_ctl" data/atm.tab
 "$src_dir/$geometry" "$active_ctl" data/obs.tab
 
+# Sweep OpenMP thread counts while keeping the synthetic workload fixed.
 for omp in $threads; do
   log="log.omp${omp}"
   out="/tmp/jurassic_bench_${run_id}_omp${omp}.tab"
@@ -102,6 +111,7 @@ CPU_BATCH_SIZE=%s
 ' "$omp" "$cpu_batch_size" >> "$log"
 done
 
+# Summarize the raw timing logs and create plots when matplotlib is available.
 python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.tsv" | tee "$run_dir/summary.md"
 maybe_plot "$run_dir/summary.tsv" "$run_dir/plot_cpu_scaling.png" "JURASSIC local CPU baseline"
 cp -a data "$run_dir/"
