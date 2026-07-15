@@ -128,22 +128,36 @@ def fmt_seconds(value: object, digits: int = 3) -> str:
     return f'{float(value):.{digits}f} s'
 
 
-def print_markdown(mode: str, rows: list[dict[str, object]]):
+def print_table(mode: str, rows: list[dict[str, object]]):
     first_col = 'OMP' if mode == 'omp' else 'Batch'
-    print(f'| {first_col} | Batch | Benchmark | Time/Case | Throughput | Log |')
-    print('|---|---:|---:|---:|---:|---|')
+    headers = [first_col, 'Batch', 'Benchmark', 'Time/Case', 'Throughput', 'Log']
+    table_rows = []
     for row in rows:
         label = '' if row['label'] is None else str(row['label'])
         per_case = '' if row['time_per_case_s'] is None else f"{float(row['time_per_case_s']):.6f} s"
         batch = '' if row['batch_size'] is None else str(row['batch_size'])
         throughput = '' if row['throughput_cases_per_s'] is None else f"{float(row['throughput_cases_per_s']):.3f} /s"
-        print(
-            f'| {label} | {batch} | '
-            f'{fmt_seconds(row["benchmark_s"])} | '
-            f'{per_case} | '
-            f'{throughput} | '
-            f'{row["log"]} |'
-        )
+        table_rows.append([
+            label,
+            batch,
+            fmt_seconds(row['benchmark_s']),
+            per_case,
+            throughput,
+            str(row['log']),
+        ])
+
+    widths = [len(header) for header in headers]
+    for row in table_rows:
+        for idx, value in enumerate(row):
+            widths[idx] = max(widths[idx], len(value))
+
+    sep = '+' + '+'.join('-' * (width + 2) for width in widths) + '+'
+    print(sep)
+    print('| ' + ' | '.join(header.ljust(widths[idx]) for idx, header in enumerate(headers)) + ' |')
+    print(sep)
+    for row in table_rows:
+        print('| ' + ' | '.join(value.ljust(widths[idx]) for idx, value in enumerate(row)) + ' |')
+    print(sep)
 
 
 def main(argv: list[str]) -> int:
@@ -157,7 +171,7 @@ def main(argv: list[str]) -> int:
     if args.tsv_out:
         write_tsv(Path(args.tsv_out), rows)
 
-    print_markdown(args.mode, rows)
+    print_table(args.mode, rows)
     return 0
 
 

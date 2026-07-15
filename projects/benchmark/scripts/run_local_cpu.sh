@@ -112,7 +112,7 @@ CPU_BATCH_SIZE=%s
 done
 
 # Summarize the raw timing logs and create plots when matplotlib is available.
-python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.tsv" | tee "$run_dir/summary.md"
+python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.tsv" | tee "$run_dir/summary.txt"
 maybe_plot "$run_dir/summary.tsv" "$run_dir/plot_cpu_scaling.png" "JURASSIC local CPU baseline"
 cp -a data "$run_dir/"
 cp -a log.omp* "$run_dir/"

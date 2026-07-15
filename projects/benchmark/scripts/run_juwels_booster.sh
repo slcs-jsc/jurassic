@@ -181,7 +181,7 @@ run_cpu() {
 CPU_BATCH_SIZE=%s
 ' "$omp" "$cpu_batch_size" >> "$log"
   done
-  python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.cpu.tsv" | tee "$run_dir/summary.cpu.md"
+  python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.cpu.tsv" | tee "$run_dir/summary.cpu.txt"
   maybe_plot "$run_dir/summary.cpu.tsv" "$run_dir/plot_cpu_scaling.png" "JURASSIC Booster CPU baseline"
   cp -a data "$run_dir/data.cpu"
   cp -a log.omp* "$run_dir/"
@@ -202,7 +202,7 @@ run_gpu() {
       "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
     fi
   done
-  python3 "$script_dir/summarize_time_logs.py" batch 'log.batch*' --tsv-out "$run_dir/summary.gpu.tsv" | tee "$run_dir/summary.gpu.md"
+  python3 "$script_dir/summarize_time_logs.py" batch 'log.batch*' --tsv-out "$run_dir/summary.gpu.tsv" | tee "$run_dir/summary.gpu.txt"
   maybe_plot "$run_dir/summary.gpu.tsv" "$run_dir/plot_gpu_batch.png" "JURASSIC Booster GPU baseline"
   cp -a data "$run_dir/data.gpu"
   cp -a log.batch* "$run_dir/"
