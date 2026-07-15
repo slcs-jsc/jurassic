@@ -95,6 +95,7 @@ if command -v ml >/dev/null 2>&1; then
   ml Stages/2026 GCCcore/14.3.0
   ml CMake/4.0.3
   ml ecBuild
+  ml matplotlib/3.10.5
   ml nvidia-compilers ParaStationMPI
 fi
 
@@ -136,6 +137,18 @@ build_gpu() {
   cd "$work_dir"
 }
 
+maybe_plot() {
+  local summary_tsv=$1
+  local output_png=$2
+  local title=$3
+
+  if python3 -c "import matplotlib" >/dev/null 2>&1; then
+    python3 "$script_dir/plot_benchmark_results.py" "$summary_tsv" --output "$output_png" --title "$title"
+  else
+    echo "WARNING: matplotlib not available; skipping plot generation for $output_png" >&2
+  fi
+}
+
 prepare_inputs() {
   rm -rf data
   mkdir -p data
@@ -156,7 +169,7 @@ CPU_BATCH_SIZE=%s
 ' "$omp" "$cpu_batch_size" >> "$log"
   done
   python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.cpu.tsv" | tee "$run_dir/summary.cpu.md"
-  python3 "$script_dir/plot_benchmark_results.py" "$run_dir/summary.cpu.tsv" --output "$run_dir/plot_cpu_scaling.png" --title "JURASSIC Booster CPU baseline"
+  maybe_plot "$run_dir/summary.cpu.tsv" "$run_dir/plot_cpu_scaling.png" "JURASSIC Booster CPU baseline"
   cp -a data "$run_dir/data.cpu"
   cp -a log.omp* "$run_dir/"
   cd "$work_dir"
@@ -176,7 +189,7 @@ run_gpu() {
     fi
   done
   python3 "$script_dir/summarize_time_logs.py" batch 'log.batch*' --tsv-out "$run_dir/summary.gpu.tsv" | tee "$run_dir/summary.gpu.md"
-  python3 "$script_dir/plot_benchmark_results.py" "$run_dir/summary.gpu.tsv" --output "$run_dir/plot_gpu_batch.png" --title "JURASSIC Booster GPU baseline"
+  maybe_plot "$run_dir/summary.gpu.tsv" "$run_dir/plot_gpu_batch.png" "JURASSIC Booster GPU baseline"
   cp -a data "$run_dir/data.gpu"
   cp -a log.batch* "$run_dir/"
   cd "$work_dir"

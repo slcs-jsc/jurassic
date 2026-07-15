@@ -49,6 +49,18 @@ case "$geometry" in
     ;;
 esac
 
+maybe_plot() {
+  local summary_tsv=$1
+  local output_png=$2
+  local title=$3
+
+  if python3 -c "import matplotlib" >/dev/null 2>&1; then
+    python3 "$script_dir/plot_benchmark_results.py" "$summary_tsv" --output "$output_png" --title "$title"
+  else
+    echo "WARNING: matplotlib not available; skipping plot generation for $output_png" >&2
+  fi
+}
+
 cd "$work_dir"
 export LANG=C
 export LC_ALL=C
@@ -91,7 +103,7 @@ CPU_BATCH_SIZE=%s
 done
 
 python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.tsv" | tee "$run_dir/summary.md"
-python3 "$script_dir/plot_benchmark_results.py" "$run_dir/summary.tsv" --output "$run_dir/plot_cpu_scaling.png" --title "JURASSIC local CPU baseline"
+maybe_plot "$run_dir/summary.tsv" "$run_dir/plot_cpu_scaling.png" "JURASSIC local CPU baseline"
 cp -a data "$run_dir/"
 cp -a log.omp* "$run_dir/"
 cp -a "$active_ctl" "$run_dir/"

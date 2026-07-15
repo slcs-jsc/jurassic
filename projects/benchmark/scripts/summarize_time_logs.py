@@ -127,7 +127,7 @@ def fmt_seconds(value: object, digits: int = 3) -> str:
 
 def print_markdown(mode: str, rows: list[dict[str, object]]):
     first_col = 'OMP' if mode == 'omp' else 'Batch'
-    print(f'| {first_col} | Batch | Benchmark | Zeit/Fall | Durchsatz | Log |')
+    print(f'| {first_col} | Batch | Benchmark | Time/Case | Throughput | Log |')
     print('|---|---:|---:|---:|---:|---|')
     for row in rows:
         label = '' if row['label'] is None else str(row['label'])
