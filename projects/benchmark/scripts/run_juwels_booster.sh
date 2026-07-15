@@ -9,8 +9,15 @@
 
 set -euo pipefail
 
-script_dir=$(cd "$(dirname "$0")" && pwd)
+script_source=${BASH_SOURCE[0]:-$0}
+script_dir=$(cd "$(dirname "$script_source")" && pwd)
 repo_root=$(cd "$script_dir/../../.." && pwd)
+if [ ! -f "$repo_root/projects/benchmark/configs/baseline_cases.tsv" ] && [ -n "${SLURM_SUBMIT_DIR:-}" ]; then
+  submit_repo_root=$(cd "$SLURM_SUBMIT_DIR/../../.." && pwd)
+  if [ -f "$submit_repo_root/projects/benchmark/configs/baseline_cases.tsv" ]; then
+    repo_root=$submit_repo_root
+  fi
+fi
 src_dir="$repo_root/src"
 runs_root="$repo_root/projects/benchmark/runs"
 run_id=${RUN_ID:-juwels_booster_${SLURM_JOB_ID:-manual}}
@@ -29,7 +36,7 @@ geometry=$(printf '%s
 ctl_rel=$(printf '%s
 ' "$case_row" | awk -F'	' '{print $3}')
 ctl_template=${CTLFILE:-$repo_root/$ctl_rel}
-bench_tblbase=${BENCH_TBLBASE:-$HOME/wrk/jurassic/tab/tria_1cm/nc_1e-6}
+bench_tblbase=${BENCH_TBLBASE:-/p/data1/slmet/model_data/jurassic/tab/tria_1cm/nc_1e-6/tria}
 target=${TARGET:-gpu}
 threads=${THREADS:-"1 2 4 8 12"}
 cpu_batch_size=${CPU_BATCH_SIZE:-64}
