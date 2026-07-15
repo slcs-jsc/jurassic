@@ -16,6 +16,7 @@ if [ ! -f "$repo_root/projects/benchmark/configs/baseline_cases.tsv" ] && [ -n "
   submit_repo_root=$(cd "$SLURM_SUBMIT_DIR/../../.." && pwd)
   if [ -f "$submit_repo_root/projects/benchmark/configs/baseline_cases.tsv" ]; then
     repo_root=$submit_repo_root
+    script_dir="$repo_root/projects/benchmark/scripts"
   fi
 fi
 src_dir="$repo_root/src"
