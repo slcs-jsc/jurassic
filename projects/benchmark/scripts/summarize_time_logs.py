@@ -72,6 +72,9 @@ def rows_from_logs(mode: str, pattern: str):
         sample = extract_float(r'TIMER_BENCHMARK_SAMPLE = ([0-9.]+) s', text)
         runtime = extract_float(r'RUNTIME: .*?mean= ([0-9.]+) s', text)
         kernel = extract_int(r'formod_batch\s+NVIDIA.*?device time\(us\): total=([0-9,]+)', text)
+
+        # Prefer the dedicated benchmark timer, but fall back to the reported
+        # runtime summary for older logs.
         benchmark = runtime if runtime is not None else sample
         kernel_s = (kernel / 1e6) if kernel is not None else None
         batch_size = parse_batch_size(path, text)

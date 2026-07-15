@@ -49,6 +49,9 @@ def plot_omp(ax_runtime, ax_speedup, rows):
     per_case = [as_float(row['time_per_case_s']) for row in rows]
     throughput = [as_float(row['throughput_cases_per_s']) for row in rows]
     baseline = per_case[0] if per_case and per_case[0] not in (None, 0.0) else None
+
+    # Use the first valid run as the scaling reference to keep the summary TSV
+    # self-contained and avoid hard-coding a thread count here.
     speedup = [baseline / y if baseline is not None and y not in (None, 0.0) else math.nan for y in per_case]
     efficiency = [s / xi if not math.isnan(s) and xi not in (None, 0) else math.nan for s, xi in zip(speedup, x)]
 
@@ -65,6 +68,8 @@ def plot_omp(ax_runtime, ax_speedup, rows):
     ax_speedup.plot(x, per_case, marker='o', linewidth=2, label='Time / case')
     twin = None
     if any(v is not None for v in throughput):
+        # Plot throughput on a second axis so the time-per-case trend remains
+        # readable even when the absolute scales differ strongly.
         twin = ax_speedup.twinx()
         twin.plot(x, throughput, marker='s', linewidth=2, color='tab:red', label='Throughput')
         twin.set_ylabel('Cases / s', color='tab:red')
