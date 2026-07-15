@@ -56,8 +56,9 @@ if [ ! -f "$ctl_template" ]; then
   echo "Control file not found: $ctl_template" >&2
   exit 1
 fi
-if [ ! -d "$bench_tblbase" ]; then
-  echo "Benchmark LUT directory not found: $bench_tblbase" >&2
+bench_tbl_dir=$(dirname "$bench_tblbase")
+if [ ! -d "$bench_tbl_dir" ]; then
+  echo "Benchmark LUT directory not found: $bench_tbl_dir" >&2
   exit 1
 fi
 
