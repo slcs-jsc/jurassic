@@ -4,6 +4,9 @@ docs/manual/javascripts/
 docs/site/
 libs/build/
 projects/*
+!projects/benchmark/
+!projects/benchmark/**
+projects/benchmark/runs/
 !projects/limb/
 !projects/nadir/
 !projects/zenith/

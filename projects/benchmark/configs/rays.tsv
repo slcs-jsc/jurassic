@@ -1,0 +1,10 @@
+geometry	ray_set	nr
+zenith	small	16
+zenith	medium	64
+zenith	large	256
+nadir	small	1
+nadir	medium	8
+nadir	large	64
+limb	small	16
+limb	medium	64
+limb	large	128
