@@ -417,8 +417,8 @@ Candidate mechanisms include:
 
 - CPU profilers and counters, for example `perf` or `likwid`
 - OpenMP runtime environment reporting where useful
-- NVIDIA OpenACC diagnostics such as `NVCOMPILER_ACC_TIME` and related `NV_ACC_*`
-  or compiler/runtime diagnostic flags
+- NVIDIA OpenACC diagnostics such as `NVCOMPILER_ACC_TIME`, `NVCOMPILER_ACC_NOTIFY`,
+  and related `NV_ACC_*` or compiler/runtime diagnostic flags
 - system-specific profiler hooks on HPC platforms
 
 Potential uses:
@@ -429,15 +429,16 @@ Potential uses:
 - comparing CPU and GPU runs with richer evidence than wall-clock time alone
 - collecting supplementary data for compiler and system comparisons
 
-If added later, this should remain opt-in and should write separate raw diagnostic
-artifacts into the run directory, so that the standard benchmark workflow stays
-lightweight and reproducible.
+The JUWELS Booster runner already exposes `ACC_TIME` and `ACC_NOTIFY` as opt-in
+diagnostic controls. They write their raw compiler/runtime diagnostics into the
+regular batch logs while the standard summary output remains lightweight and
+reproducible.
 
 ### Summary Files and Plots
 
 The runners now generate both human-readable and machine-readable summaries:
 
-- markdown: `summary*.md`
+- plain-text ASCII table: `summary*.txt`
 - TSV: `summary*.tsv`
 - plots: `plot_*.png`
 

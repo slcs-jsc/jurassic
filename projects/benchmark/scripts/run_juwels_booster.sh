@@ -61,6 +61,7 @@ mpi=${MPI:-1}
 gpu_pin=${GPU_PIN:-1}
 info=${INFO:-0}
 acc_time=${ACC_TIME:-1}
+acc_notify=${ACC_NOTIFY:-0}
 rebuild=${REBUILD:-1}
 omp_places=${OMP_PLACES:-cores}
 omp_proc_bind=${OMP_PROC_BIND:-close}
@@ -162,10 +163,11 @@ mpi=%s
 gpu_pin=%s
 info=%s
 acc_time=%s
+acc_notify=%s
 rebuild=%s
 omp_places=%s
 omp_proc_bind=%s
-'   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$target" "$slurm_cpus_per_task" "$full_node_cpu_cores" "$threads" "$cpu_batch_size" "$batches" "$compiler_cpu" "$compiler_gpu" "$mpicc" "$mpi" "$gpu_pin" "$info" "$acc_time" "$rebuild" "$omp_places" "$omp_proc_bind" > "$run_dir/config.txt"
+'   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$target" "$slurm_cpus_per_task" "$full_node_cpu_cores" "$threads" "$cpu_batch_size" "$batches" "$compiler_cpu" "$compiler_gpu" "$mpicc" "$mpi" "$gpu_pin" "$info" "$acc_time" "$acc_notify" "$rebuild" "$omp_places" "$omp_proc_bind" > "$run_dir/config.txt"
 
 # Rebuild a CPU-only binary when the run requests it.
 build_cpu() {
@@ -235,11 +237,22 @@ run_gpu() {
   for batch in $batches; do
     log="log.batch${batch}"
     out="/tmp/jurassic_bench_${run_id}_gpu_batch${batch}.tab"
-    if [ "$acc_time" = 1 ]; then
-      NVCOMPILER_ACC_TIME=1 "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
+    if [ "$acc_time" = 1 ] || [ "$acc_notify" != 0 ]; then
+      env_cmd=(env)
+      if [ "$acc_time" = 1 ]; then
+        env_cmd+=(NVCOMPILER_ACC_TIME=1)
+      fi
+      if [ "$acc_notify" != 0 ]; then
+        env_cmd+=("NVCOMPILER_ACC_NOTIFY=$acc_notify")
+      fi
+      "${env_cmd[@]}" "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
     else
       "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
     fi
+    printf 'BATCH_SIZE=%s
+ACC_TIME=%s
+ACC_NOTIFY=%s
+' "$batch" "$acc_time" "$acc_notify" >> "$log"
   done
   python3 "$script_dir/summarize_time_logs.py" batch 'log.batch*' --tsv-out "$run_dir/summary.gpu.tsv" | tee "$run_dir/summary.gpu.txt"
   maybe_plot "$run_dir/summary.gpu.tsv" "$run_dir/plot_gpu_batch.png" "JURASSIC Booster GPU baseline"
