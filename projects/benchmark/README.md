@@ -430,9 +430,9 @@ Potential uses:
 - collecting supplementary data for compiler and system comparisons
 
 The JUWELS Booster runner already exposes `ACC_TIME` and `ACC_NOTIFY` as opt-in
-diagnostic controls. They write their raw compiler/runtime diagnostics into the
-regular batch logs while the standard summary output remains lightweight and
-reproducible.
+diagnostic controls. Both are disabled by default so standard benchmark runs stay
+lightweight and reproducible; enable them explicitly when raw compiler/runtime
+diagnostics are needed in the batch logs.
 
 ### Summary Files and Plots
 
