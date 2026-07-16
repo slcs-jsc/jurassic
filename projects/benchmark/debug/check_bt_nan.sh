@@ -26,8 +26,9 @@ ctl_rel=$(printf '%s
 ' "$case_row" | awk -F'	' '{print $3}')
 ctl_template=${CTLFILE:-$repo_root/$ctl_rel}
 bench_tblbase=${BENCH_TBLBASE:-/p/data1/slmet/model_data/jurassic/tab/tria_1cm/nc_1e-6/tria}
-mpi=${MPI:-1}
-mpicc=${MPICC:-mpicc}
+mpi_cpu=${MPI_CPU:-0}
+mpi_gpu=${MPI_GPU:-1}
+mpicc_gpu=${MPICC_GPU:-mpicc}
 compiler_cpu=${COMPILER_CPU:-gcc}
 compiler_gpu=${COMPILER_GPU:-nvc}
 gpu_pin=${GPU_PIN:-1}
@@ -87,7 +88,7 @@ prepare_inputs() {
 build_cpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0
+  make -j MPI="$mpi_cpu" COMPILER="$compiler_cpu" GPU=0
   cd "$work_dir"
 }
 
@@ -95,7 +96,7 @@ build_cpu() {
 build_gpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_PIN="$gpu_pin"
+  make -j MPI="$mpi_gpu" MPICC="$mpicc_gpu" COMPILER="$compiler_gpu" GPU=1 GPU_PIN="$gpu_pin"
   cd "$work_dir"
 }
 
@@ -144,8 +145,9 @@ geometry=%s
 ctl_template=%s
 active_ctl=%s
 bench_tblbase=%s
-mpi=%s
-mpicc=%s
+mpi_cpu=%s
+mpi_gpu=%s
+mpicc_gpu=%s
 compiler_cpu=%s
 compiler_gpu=%s
 gpu_pin=%s
@@ -153,7 +155,7 @@ gpu_batch_size=%s
 acc_time=%s
 acc_notify=%s
 load_modules=%s
-'   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$mpi" "$mpicc" "$compiler_cpu" "$compiler_gpu" "$gpu_pin" "$gpu_batch_size" "$acc_time" "$acc_notify" "$load_modules" > "$run_dir/config.txt"
+'   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$mpi_cpu" "$mpi_gpu" "$mpicc_gpu" "$compiler_cpu" "$compiler_gpu" "$gpu_pin" "$gpu_batch_size" "$acc_time" "$acc_notify" "$load_modules" > "$run_dir/config.txt"
 
 build_cpu
 prepare_inputs
