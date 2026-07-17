@@ -372,6 +372,29 @@ directory named from the Slurm job ID. `CASE_NAME` selects the baseline geometry
 and CTL template; `BENCH_TBLBASE` selects the actual `tria` directory; `CTLFILE` can
 still override the template explicitly.
 
+Current JUWELS Booster reference results with the corrected 1/cm `tria`
+benchmark channels on Friday, July 17, 2026 are:
+
+| Case | Batch | Time/Case [s] | Throughput [cases/s] |
+|---|---:|---:|---:|
+| `zenith_baseline` | 256 | 1.0612 | 0.942 |
+| `zenith_baseline` | 512 | 0.5370 | 1.862 |
+| `zenith_baseline` | 1024 | 0.3084 | 3.243 |
+| `zenith_baseline` | 2048 | 0.1723 | 5.805 |
+| `nadir_baseline` | 256 | 0.1202 | 8.316 |
+| `nadir_baseline` | 512 | 0.06535 | 15.302 |
+| `nadir_baseline` | 1024 | 0.03869 | 25.846 |
+| `nadir_baseline` | 2048 | 0.02675 | 37.382 |
+| `limb_baseline` | 256 | 0.8211 | 1.218 |
+| `limb_baseline` | 512 | 0.4234 | 2.362 |
+| `limb_baseline` | 1024 | 0.2536 | 3.944 |
+| `limb_baseline` | 2048 | 0.1352 | 7.399 |
+
+Within this setup, `2048` is the largest successful JUWELS Booster batch size
+observed so far for `zenith_baseline`; a targeted `4096` run failed with
+`CUDA_ERROR_OUT_OF_MEMORY`, so `2048` is the current practical upper bound for
+that case on a single A100.
+
 GPU invocation:
 
 ```bash
