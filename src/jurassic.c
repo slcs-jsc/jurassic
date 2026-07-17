@@ -4205,10 +4205,17 @@ void init_srcfunc(
   /* Loop over channels... */
   for (int id = 0; id < ctl->nd; id++) {
 
+    if (tbl->filt_n[id] < 2)
+      ERRMSG("Missing or invalid filter function for channel %.4f cm^-1!",
+	     ctl->nu[id]);
+
     /* Get minimum grid spacing... */
     double dnu = 1.0;
     for (int i = 1; i < tbl->filt_n[id]; i++)
       dnu = MIN(dnu, tbl->filt_nu[id][i] - tbl->filt_nu[id][i - 1]);
+    if (!(dnu > 0) || !isfinite(dnu))
+      ERRMSG("Invalid filter grid spacing for channel %.4f cm^-1!",
+	     ctl->nu[id]);
 
     /* Compute source function table... */
 #pragma omp parallel for default(none) shared(ctl,tbl,id,dnu)
@@ -4228,7 +4235,12 @@ void init_srcfunc(
 	fsum += ff;
 	tbl->sr[it][id] += ff * PLANCK(tbl->st[it], fnu);
       }
+      if (!(fsum > 0) || !isfinite(fsum))
+	ERRMSG("Invalid filter normalization for channel %.4f cm^-1!",
+	       ctl->nu[id]);
       tbl->sr[it][id] /= fsum;
+      if (!isfinite(tbl->sr[it][id]))
+	ERRMSG("Invalid source function for channel %.4f cm^-1!", ctl->nu[id]);
     }
 
     /* Write info... */
