@@ -7,7 +7,7 @@
 #SBATCH --gpus-per-task=1
 # The default Slurm request matches one quarter of a Booster node: one A100
 # plus 12 CPU cores. Use sbatch --cpus-per-task=48 for CPU-only node tests.
-#SBATCH --time=00:30:00
+#SBATCH --time=01:30:00
 
 set -euo pipefail
 
