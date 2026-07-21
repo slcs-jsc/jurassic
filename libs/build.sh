@@ -2,6 +2,7 @@
 
 # Setup...
 target=$(rm -rf build && mkdir -p build && cd build && pwd)
+export LD_LIBRARY_PATH="$target/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 # Prepare directories...
 mkdir -p $target/src $target/bin $target/lib $target/man/man1 \
