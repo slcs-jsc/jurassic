@@ -3545,6 +3545,7 @@ void acc_delete_tbl(
 	    acc_delete(tbl->logeps[id][ig][ip][it], n * sizeof(float));
 	}
 
+  /* Scratch objects have no useful lifetime beyond this kernel batch. */
 #pragma acc exit data delete(tbl[0:1])
 }
 
@@ -3560,6 +3561,7 @@ void acc_ensure_static_data(
   if (acc_tbl_static != NULL && acc_ctl_static != NULL)
     acc_delete_tbl(acc_ctl_static, acc_tbl_static);
   if (acc_ctl_static != NULL)
+  /* Scratch objects have no useful lifetime beyond this kernel batch. */
 #pragma acc exit data delete(acc_ctl_static[0:1])
     ;
 
@@ -4639,6 +4641,7 @@ void kernel(
 
   /* Compute radiance for undisturbed atmospheric data... */
 #if defined(_OPENACC)
+  /* Avoid allocating and releasing device scratch for every kernel column. */
 #pragma acc enter data create(atm[0:1],obs[0:1],status[0:1],los0[0:1],obs0[0:1])
 #endif
   formod_batch(ctl, tbl, atm, obs, 1, status, los0, obs0);
@@ -4646,7 +4649,9 @@ void kernel(
     ERRMSG("Forward model failed with status code %d!", status[0]);
 
 #if defined(_OPENACC)
+  /* Scratch objects have no useful lifetime beyond this kernel batch. */
 #pragma acc exit data delete(atm[0:1],obs[0:1],status[0:1],los0[0:1],obs0[0:1])
+  /* Avoid allocating and releasing device scratch for every kernel column. */
 #pragma acc enter data create(atm1[0:batch_size],obs1[0:batch_size],status[0:batch_size],   los1[0:batch_size],obs1_scratch[0:batch_size])
 #endif
 
@@ -4719,6 +4724,7 @@ void kernel(
   gsl_vector_free(x1);
   gsl_vector_free(yy1);
 #if defined(_OPENACC)
+  /* Scratch objects have no useful lifetime beyond this kernel batch. */
 #pragma acc exit data delete(atm1[0:batch_size],obs1[0:batch_size],status[0:batch_size], \
   los1[0:batch_size],obs1_scratch[0:batch_size])
 #endif
@@ -4731,6 +4737,159 @@ void kernel(
   free(status);
   free(h_batch);
   free(iqa);
+}
+
+/*****************************************************************************/
+
+void kernel_batch(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  atm_t *atm,
+  obs_t *obs,
+  gsl_matrix **k,
+  int nret,
+  int batch_size) {
+
+  if (nret < 1 || batch_size < 1)
+    ERRMSG("kernel_batch requires positive retrieval and batch sizes!");
+  if (k == NULL || k[0] == NULL)
+    ERRMSG("kernel_batch requires kernel matrices!");
+
+  const size_t m = k[0]->size1;
+  const size_t n = k[0]->size2;
+  /* All matrices must describe the same vector dimensions per retrieval. */
+  const size_t tile_size = MIN((size_t) nret, (size_t) batch_size);
+
+  for (int ir = 0; ir < nret; ir++)
+    if (k[ir] == NULL || k[ir]->size1 != m || k[ir]->size2 != n)
+      ERRMSG("kernel_batch requires equally sized kernel matrices!");
+
+  /* Keep reference vectors for every retrieval; work arrays remain tile-sized. */
+  gsl_matrix *x0 = gsl_matrix_alloc((size_t) nret, n);
+  gsl_matrix *y0 = gsl_matrix_alloc((size_t) nret, m);
+  gsl_vector *x1 = gsl_vector_alloc(n);
+  gsl_vector *y1 = gsl_vector_alloc(m);
+  int *iqa;
+  double *h_batch;
+  int *status;
+  los_t *los;
+  obs_t *obs_scratch;
+  atm_t *atm_work;
+  obs_t *obs_work;
+  /* These arrays are reused for each retrieval tile and stay device-resident. */
+  ALLOC(iqa, int, tile_size * n);
+  ALLOC(h_batch, double, tile_size);
+  ALLOC(status, int, tile_size);
+  ALLOC(los, los_t, tile_size);
+  ALLOC(obs_scratch, obs_t, tile_size);
+  ALLOC(atm_work, atm_t, tile_size);
+  ALLOC(obs_work, obs_t, tile_size);
+
+#if defined(_OPENACC)
+  /* Avoid allocating and releasing device scratch for every kernel column. */
+#pragma acc enter data create(atm_work[0:tile_size],obs_work[0:tile_size], \
+  status[0:tile_size],los[0:tile_size],obs_scratch[0:tile_size])
+#endif
+
+  /* Compute F(x0), retain y0, and preserve the resulting observation geometry. */
+  for (int ir0 = 0; ir0 < nret; ir0 += (int) tile_size) {
+    const int nbatch = MIN((int) tile_size, nret - ir0);
+    for (int ib = 0; ib < nbatch; ib++) {
+      copy_atm(ctl, &atm_work[ib], &atm[ir0 + ib], 0);
+      copy_obs(ctl, &obs_work[ib], &obs[ir0 + ib], 0);
+    }
+    formod_batch(ctl, tbl, atm_work, obs_work, nbatch, status, los,
+                 obs_scratch);
+    for (int ib = 0; ib < nbatch; ib++) {
+      const int ir = ir0 + ib;
+      if (status[ib] != FORMOD_STATUS_OK)
+        ERRMSG("Forward model failed with status code %d!", status[ib]);
+      copy_obs(ctl, &obs[ir], &obs_work[ib], 0);
+      if (atm2x(ctl, &atm[ir], NULL, NULL, NULL) != n
+          || obs2y(ctl, &obs[ir], NULL, NULL, NULL) != m)
+        ERRMSG("kernel_batch requires matching state and measurement vectors!");
+      gsl_vector_view x0_view = gsl_matrix_row(x0, (size_t) ir);
+      gsl_vector_view y0_view = gsl_matrix_row(y0, (size_t) ir);
+      atm2x(ctl, &atm[ir], &x0_view.vector, NULL, NULL);
+      obs2y(ctl, &obs[ir], &y0_view.vector, NULL, NULL);
+      gsl_matrix_set_zero(k[ir]);
+    }
+  }
+
+  /* Keep columns sequential; batch only independent retrievals for one column. */
+  for (size_t j = 0; j < n; j++)
+    for (int ir0 = 0; ir0 < nret; ir0 += (int) tile_size) {
+      const int nbatch = MIN((int) tile_size, nret - ir0);
+
+      for (int ib = 0; ib < nbatch; ib++) {
+        const int ir = ir0 + ib;
+        gsl_vector_view x0_view = gsl_matrix_row(x0, (size_t) ir);
+        /* State-vector layouts may differ between cases despite equal sizes. */
+        int *iqa_work = &iqa[(size_t) ib * n];
+        double h;
+        /* Rebuild the quantity map to choose the same finite-difference step as kernel(). */
+        atm2x(ctl, &atm[ir], &x0_view.vector, iqa_work, NULL);
+
+        if (iqa_work[j] == IDXP)
+          h = MAX(fabs(0.01 * gsl_vector_get(&x0_view.vector, j)), 1e-7);
+        else if (iqa_work[j] == IDXT)
+          h = 1.0;
+        else if (iqa_work[j] >= IDXQ(0) && iqa_work[j] < IDXQ(ctl->ng))
+          h = MAX(fabs(0.01 * gsl_vector_get(&x0_view.vector, j)), 1e-15);
+        else if (iqa_work[j] >= IDXK(0) && iqa_work[j] < IDXK(ctl->nw))
+          h = 1e-4;
+        else if (iqa_work[j] == IDXCLZ || iqa_work[j] == IDXCLDZ)
+          h = 1.0;
+        else if (iqa_work[j] >= IDXCLK(0) && iqa_work[j] < IDXCLK(ctl->ncl))
+          h = 1e-4;
+        else if (iqa_work[j] == IDXSFT)
+          h = 1.0;
+        else if (iqa_work[j] >= IDXSFEPS(0) && iqa_work[j] < IDXSFEPS(ctl->nsf))
+          h = 1e-2;
+        else
+          ERRMSG("Cannot set perturbation size!");
+
+        h_batch[ib] = h;
+        /* Form x0 + h e_j without modifying the caller-owned atmospheric state. */
+        gsl_vector_memcpy(x1, &x0_view.vector);
+        gsl_vector_set(x1, j, gsl_vector_get(x1, j) + h);
+        copy_atm(ctl, &atm_work[ib], &atm[ir], 0);
+        copy_obs(ctl, &obs_work[ib], &obs[ir], 0);
+        x2atm(ctl, x1, &atm_work[ib]);
+      }
+
+      formod_batch(ctl, tbl, atm_work, obs_work, nbatch, status, los,
+                   obs_scratch);
+      for (int ib = 0; ib < nbatch; ib++) {
+        const int ir = ir0 + ib;
+        if (status[ib] != FORMOD_STATUS_OK)
+          ERRMSG("Forward model failed with status code %d!", status[ib]);
+        gsl_vector_view y0_view = gsl_matrix_row(y0, (size_t) ir);
+        /* This is the finite-difference column (F(x0 + h e_j) - F(x0)) / h. */
+        obs2y(ctl, &obs_work[ib], y1, NULL, NULL);
+        for (size_t i = 0; i < m; i++)
+          gsl_matrix_set(k[ir], i, j,
+                         (gsl_vector_get(y1, i)
+                          - gsl_vector_get(&y0_view.vector, i)) / h_batch[ib]);
+      }
+    }
+
+#if defined(_OPENACC)
+  /* Scratch objects have no useful lifetime beyond this kernel batch. */
+#pragma acc exit data delete(atm_work[0:tile_size],obs_work[0:tile_size], \
+  status[0:tile_size],los[0:tile_size],obs_scratch[0:tile_size])
+#endif
+  free(obs_work);
+  free(atm_work);
+  free(obs_scratch);
+  free(los);
+  free(status);
+  free(h_batch);
+  free(iqa);
+  gsl_vector_free(y1);
+  gsl_vector_free(x1);
+  gsl_matrix_free(y0);
+  gsl_matrix_free(x0);
 }
 
 /*****************************************************************************/

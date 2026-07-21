@@ -37,6 +37,16 @@ void call_kernel(
   const char *atmfile,
   const char *kernelfile);
 
+/*! Read DIRLIST cases in bounded tiles and write one kernel matrix per case. */
+void call_kernel_batch(
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  const char *dirlist,
+  const char *obsfile,
+  const char *atmfile,
+  const char *kernelfile,
+  int batch_size);
+
 /*! Print command-line help. */
 void usage(
   void);
@@ -73,6 +83,13 @@ int main(
   /* Get dirlist... */
   SELECT_TIMER("READ_DIRLIST", "INPUT");
   scan_ctl(argc, argv, "DIRLIST", -1, "-", dirlist);
+  const int kernel_batch_size =
+    (int) scan_ctl(argc, argv, "KERNEL_BATCH", -1, "0", NULL);
+  if (kernel_batch_size < 0)
+    ERRMSG("KERNEL_BATCH must not be negative!");
+  /* Keep the established scalar and sequential DIRLIST behavior by default. */
+  if (dirlist[0] == '-' && kernel_batch_size > 0)
+    ERRMSG("KERNEL_BATCH requires DIRLIST!");
 
   /* Set flags... */
   ctl.write_matrix = 1;
@@ -82,6 +99,10 @@ int main(
     call_kernel(&ctl, tbl, NULL, argv[2], argv[3], argv[4]);
 
   /* Work on directory list... */
+  /* The batch path is meaningful only when independent cases come from DIRLIST. */
+  else if (kernel_batch_size > 0)
+    call_kernel_batch(&ctl, tbl, dirlist, argv[2], argv[3], argv[4],
+                      kernel_batch_size);
   else {
 
     /* Open directory list... */
@@ -137,6 +158,7 @@ void usage(
   printf
     ("                   <kernel> filenames relative to each listed directory.\n");
   printf("\n");
+  printf("  KERNEL_BATCH <n>  Process DIRLIST cases in batches of <n> retrievals.\n");
   printf("Common control parameters:\n");
   printf
     ("  TBLBASE, TBLFMT               Lookup-table base name and format.\n");
@@ -190,6 +212,7 @@ void call_kernel(
   gsl_matrix *k = gsl_matrix_alloc(m, n);
 
   /* Compute kernel matrix... */
+    /* Each tile is independent, so its matrices can be released immediately. */
   SELECT_TIMER("KERNEL", "FORWARD");
   kernel(ctl, tbl, &atm, &obs, k);
 
@@ -199,4 +222,86 @@ void call_kernel(
 
   /* Free... */
   gsl_matrix_free(k);
+}
+
+/*******************************************************************************/
+
+void call_kernel_batch(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  const char *dirlist,
+  const char *obsfile,
+  const char *atmfile,
+  const char *kernelfile,
+  int batch_size) {
+
+  FILE *in;
+  if (!(in = fopen(dirlist, "r")))
+    ERRMSG("Cannot open directory list!");
+
+  char *dirs;
+  atm_t *atm;
+  obs_t *obs;
+  gsl_matrix **k;
+  ALLOC(dirs, char, (size_t) batch_size * LEN);
+  ALLOC(atm, atm_t, batch_size);
+  ALLOC(obs, obs_t, batch_size);
+  /* Keep only one CLI tile in host memory, regardless of DIRLIST length. */
+  ALLOC(k, gsl_matrix *, batch_size);
+
+  /* The final tile may contain fewer cases than KERNEL_BATCH. */
+  while (1) {
+    int nret = 0;
+    size_t n = 0;
+    size_t m = 0;
+
+    /* Read one directory-list tile. */
+    while (nret < batch_size) {
+      char *dir = &dirs[(size_t) nret * LEN];
+      if (fscanf(in, "%4999s", dir) != 1)
+        break;
+      LOG(1, "\nWorking directory: %s", dir);
+
+      SELECT_TIMER("READ_OBS", "INPUT");
+      read_obs(dir, obsfile, ctl, &obs[nret], 0);
+      SELECT_TIMER("READ_ATM", "INPUT");
+      read_atm(dir, atmfile, ctl, &atm[nret], 0);
+
+      /* kernel_batch requires common vector sizes within the current tile. */
+      const size_t n0 = atm2x(ctl, &atm[nret], NULL, NULL, NULL);
+      const size_t m0 = obs2y(ctl, &obs[nret], NULL, NULL, NULL);
+      if (n0 == 0)
+        ERRMSG("No state vector elements!");
+      if (m0 == 0)
+        ERRMSG("No measurement vector elements!");
+      if (nret == 0) {
+        n = n0;
+        m = m0;
+      } else if (n0 != n || m0 != m)
+        ERRMSG("Kernel batch requires matching vector sizes!");
+
+      k[nret] = gsl_matrix_alloc(m, n);
+      nret++;
+    }
+    if (nret == 0)
+      break;
+
+    /* Each tile is independent, so its matrices can be released immediately. */
+    SELECT_TIMER("KERNEL", "FORWARD");
+    kernel_batch(ctl, tbl, atm, obs, k, nret, nret);
+
+    for (int ir = 0; ir < nret; ir++) {
+      SELECT_TIMER("WRITE_MATRIX", "OUTPUT");
+      /* Preserve the normal DIRLIST output convention for every case. */
+      write_matrix(&dirs[(size_t) ir * LEN], kernelfile, ctl, k[ir],
+                   &atm[ir], &obs[ir], "y", "x", "r", 0);
+      gsl_matrix_free(k[ir]);
+    }
+  }
+
+  free(k);
+  free(obs);
+  free(atm);
+  free(dirs);
+  fclose(in);
 }

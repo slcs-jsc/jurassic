@@ -150,6 +150,19 @@ output with respect to atmospheric/state variables.
 As with `formod`, `kernel` honors `DIRLIST` for multi-directory
 workflows.
 
+Set `KERNEL_BATCH` to a positive tile size to evaluate the listed cases with
+`kernel_batch()`. Kernel columns remain sequential, while the forward-model
+evaluations for one column are batched across independent cases. All cases must
+have the same state-vector and measurement-vector sizes.
+
+```bash
+./kernel run.ctl obs.tab atm.tab kernel.tab DIRLIST dirlist.txt KERNEL_BATCH 32
+```
+
+The output matrix is still written as `kernel.tab` in each listed case
+directory. Without `KERNEL_BATCH`, `kernel` retains the existing sequential
+`DIRLIST` behavior.
+
 ---
 
 ## Running retrievals (`retrieval`)

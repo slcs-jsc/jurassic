@@ -22,6 +22,20 @@ $jurassic/nadir mat.ctl data/obs_alt.tab OBSZ 650
 $jurassic/kernel mat.ctl data/obs.tab data/atm.tab data/matrix.tab
 $jurassic/kernel mat.ctl data/obs_alt.tab data/atm.tab data/matrix_alt.tab
 
+# Verify batched kernel calculations through the command-line interface...
+mkdir -p data/batch0 data/batch1 data/batch2
+cp data/atm.tab data/batch0/atm.tab
+cp data/atm.tab data/batch1/atm.tab
+cp data/atm.tab data/batch2/atm.tab
+cp data/obs.tab data/batch0/obs.tab
+cp data/obs_alt.tab data/batch1/obs.tab
+cp data/obs.tab data/batch2/obs.tab
+printf "%s\n" data/batch0 data/batch1 data/batch2 > data/dirlist
+$jurassic/kernel mat.ctl obs.tab atm.tab matrix.tab DIRLIST data/dirlist KERNEL_BATCH 2
+diff -q -s data/batch0/matrix.tab data/matrix.tab
+diff -q -s data/batch1/matrix.tab data/matrix_alt.tab
+diff -q -s data/batch2/matrix.tab data/matrix.tab
+
 # Test binary file-I/O...
 $jurassic/matfmt mat.ctl data/atm.tab data/obs.tab y x r \
   data/matrix.tab 1 data/matrix_asc2bin.bin 2

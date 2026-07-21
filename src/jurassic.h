@@ -3211,6 +3211,32 @@ void kernel(
   gsl_matrix * k);
 
 /**
+ * @brief Compute Jacobian matrices for independent retrievals in batches.
+ *
+ * Kernel columns are evaluated sequentially. For each column, a tile of
+ * independent retrievals is evaluated with @ref formod_batch, which bounds
+ * the scratch-memory requirement by @p batch_size.
+ *
+ * @param[in] ctl Control structure shared by all retrievals.
+ * @param[in] tbl Emissivity lookup tables shared by all retrievals.
+ * @param[in,out] atm Atmospheric states with @p nret elements.
+ * @param[in,out] obs Observations with @p nret elements.
+ * @param[out] k Jacobian matrices with @p nret equally sized elements.
+ * @param[in] nret Number of independent retrievals.
+ * @param[in] batch_size Maximum number of retrievals per forward-model batch.
+ *
+ * @author Lars Hoffmann
+ */
+void kernel_batch(
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  atm_t * atm,
+  obs_t * obs,
+  gsl_matrix ** k,
+  int nret,
+  int batch_size);
+
+/**
  * @brief Locate index for interpolation on an irregular grid.
  *
  * Finds the lower index `ilo` such that \f$ xx[ilo] \le x < xx[ilo+1] \f$
