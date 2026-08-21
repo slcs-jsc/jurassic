@@ -8,6 +8,7 @@
 # The default Slurm request matches one quarter of a Booster node: one A100
 # plus 12 CPU cores. Use sbatch --cpus-per-task=48 for CPU-only node tests.
 #SBATCH --time=01:30:00
+#SBATCH --exclusive
 
 set -euo pipefail
 
@@ -212,16 +213,20 @@ run_cpu() {
   cd cpu
   prepare_inputs
   # Sweep OpenMP thread counts while keeping the synthetic workload fixed.
+  reps=${REPS:-5}
   for omp in $threads; do
-    log="log.omp${omp}"
-    out="/tmp/jurassic_bench_${run_id}_cpu_omp${omp}.tab"
-    OMP_NUM_THREADS=$omp "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$cpu_batch_size" > "$log" 2>&1
-    printf 'OMP_NUM_THREADS=%s
-CPU_BATCH_SIZE=%s
-OMP_PLACES=%s
-OMP_PROC_BIND=%s
-' "$omp" "$cpu_batch_size" "$OMP_PLACES" "$OMP_PROC_BIND" >> "$log"
-  done
+    for rep in $(seq 1 "$reps"); do
+      log="log.omp${omp}.rep${rep}"
+      out="/tmp/jurassic_bench_${run_id}_cpu_omp${omp}_rep${rep}.tab"
+      OMP_NUM_THREADS=$omp "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$cpu_batch_size" > "$log" 2>&1
+      printf 'OMP_NUM_THREADS=%s
+  CPU_BATCH_SIZE=%s
+  OMP_PLACES=%s
+  OMP_PROC_BIND=%s
+  REP=%s
+  ' "$omp" "$cpu_batch_size" "$OMP_PLACES" "$OMP_PROC_BIND" "$rep" >> "$log"
+    done
+  done 
   python3 "$script_dir/summarize_time_logs.py" omp 'log.omp*' --tsv-out "$run_dir/summary.cpu.tsv" | tee "$run_dir/summary.cpu.txt"
   maybe_plot "$run_dir/summary.cpu.tsv" "$run_dir/plot_cpu_scaling.png" "JURASSIC Booster CPU baseline"
   cp -a data "$run_dir/data.cpu"
