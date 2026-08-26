@@ -113,6 +113,75 @@ and similarly for other configurations.
 
 ---
 
+## Numerical validation workflow
+
+Performance benchmarks and numerical validation are deliberately separate.
+The runners in `projects/benchmark/` measure performance, whereas
+`projects/validation/` compares candidate calculations with frozen reference data.
+This prevents an optimized candidate from regenerating the data used to judge its
+own accuracy.
+
+The validation matrix is defined in
+`projects/validation/configs/validation_cases.tsv`. The smoke profile covers limb,
+nadir, and zenith geometries at 125 channels from 500 to 2980 cm⁻¹ in 20 cm⁻¹
+steps. The full profile covers the complete 500 to 2999 cm⁻¹ range in 1 cm⁻¹ steps
+and uses the full trace-gas set. Full validation assumes a build with sufficient gas
+capacity, for example:
+
+```bash
+cd src
+make clean
+make DEFINES=-DNG=40 -j
+```
+
+Reference calculations are generated separately from a trusted scalar build and
+stored as double-precision netCDF files. They should only be replaced deliberately;
+normal candidate runs never modify them. From `projects/validation/`, run the quick
+profile with:
+
+```bash
+VALIDATION_TBLBASE=/path/to/tria scripts/run_validation.py --profile smoke
+```
+
+Use `--profile full` for the complete matrix. The default forward-model method is
+EGA. Other approximations can be evaluated against the same frozen references, for
+example:
+
+```bash
+VALIDATION_TBLBASE=/path/to/tria \
+  scripts/run_validation.py --profile smoke --formod-method cga
+```
+
+The pass/fail gate compares every brightness-temperature or radiance value and every
+transmittance value directly. Paired non-finite values are accepted, one-sided
+non-finite values fail, and each case uses the relative tolerance recorded in the
+manifest. Per-case logs, netCDF candidate results, accuracy reports, and a combined
+`summary.tsv` are written below `projects/validation/runs/`.
+
+Generate channel-wise diagnostic plots for a completed run with:
+
+```bash
+scripts/plot_summary.py runs/validation_<timestamp>
+```
+
+This creates three complementary summaries:
+
+- `summary_plot.png` is the main diagnostic: limb radiance uses relative error,
+  while nadir/zenith brightness temperature and all transmittances use absolute
+  error;
+- `summary_plot_re.png` shows relative-error statistics for every panel;
+- `summary_plot_ae.png` shows absolute-error statistics for every panel.
+
+The plotted channel statistics are `MeanRE`, `SDRE`, `MinRE`, and `MaxRE`, or their
+absolute-error counterparts `MeanAE`, `SDAE`, `MinAE`, and `MaxAE`. Here, “absolute”
+means an error in the native output units rather than a relative percentage; the
+values retain the sign of `simulation - reference`. Consequently, `MeanAE` measures
+bias, and `MinAE` and `MaxAE` show the signed extrema. See the project-level
+`projects/validation/README.md` for reference generation, provenance checks, custom
+output paths, and individual-case plots.
+
+---
+
 ## Automated test suite
 
 In addition to example projects, the build system provides a test
@@ -149,6 +218,18 @@ checked-in reference files under the corresponding `data.ref/`
 directory. This makes the test suite useful for detecting unintended
 changes in numerical output, file-format behavior, and command-line
 interfaces.
+
+### `OBSREF` diagnostics
+
+Supplying `OBSREF <file>` to `formod` prints two `EVAL` records per spectral
+channel. The relative record reports the signed relative error statistics
+`MeanRE`, `SDRE`, `MinRE`, and `MaxRE` in percent. The absolute record reports
+`MeanAE`, `SDAE`, `MinAE`, and `MaxAE` in the active observation output units
+(brightness temperature or radiance). Despite the `AE` label, these values use
+the signed difference `simulation - reference`; `MeanAE` therefore measures
+bias rather than mean absolute magnitude. `SDAE` is non-negative, while
+`MinAE` and `MaxAE` retain the negative and positive extrema. Non-finite
+simulation/reference pairs are excluded from both relative and absolute statistics.
 
 An additional `mpi_test` suite is available for MPI-enabled retrieval
 checks, but it is not part of the default `make check` target.

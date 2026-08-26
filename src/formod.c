@@ -88,6 +88,16 @@ void compute_rel_errors(
   double *minre,
   double *maxre);
 
+/*! Calculate signed absolute errors in the observation output units. */
+void compute_abs_errors(
+  const ctl_t * ctl,
+  const obs_t * obs_test,
+  const obs_t * obs_ref,
+  double *meanae,
+  double *sdae,
+  double *minae,
+  double *maxae);
+
 /*! Run the default forward-model path. */
 void exec_formod_default(
   const ctl_t * ctl,
@@ -314,7 +324,9 @@ void usage(
   printf
     ("  OBSREF <file>    Read reference observations from <file> and print\n");
   printf
-    ("                   relative-error diagnostics against the simulated output.\n");
+    ("                   relative and signed absolute-error diagnostics against\n");
+  printf
+    ("                   the simulated output.\n");
   printf
     ("  EXECUTION <mode> Select execution backend: batch (default) or scalar.\n");
   printf
@@ -591,12 +603,18 @@ void eval_formod_results(
   read_obs(wrkdir, obsref, ctl, obs_ref, 0);
 
   double mre[ND], sdre[ND], minre[ND], maxre[ND];
+  double meanae[ND], sdae[ND], minae[ND], maxae[ND];
   compute_rel_errors(ctl, obs, obs_ref, mre, sdre, minre, maxre);
+  compute_abs_errors(ctl, obs, obs_ref, meanae, sdae, minae, maxae);
 
-  for (int id = 0; id < ctl->nd; id++)
+  for (int id = 0; id < ctl->nd; id++) {
     printf
-      ("EVAL: nu= %.4f cm^-1 | MRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n",
+      ("EVAL: nu= %.4f cm^-1 | MeanRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n",
 	 ctl->nu[id], mre[id], sdre[id], minre[id], maxre[id]);
+    printf
+      ("EVAL: nu= %.4f cm^-1 | MeanAE= %g | SDAE= %g | MinAE= %g | MaxAE= %g\n",
+	 ctl->nu[id], meanae[id], sdae[id], minae[id], maxae[id]);
+  }
 }
 
 /*****************************************************************************/
@@ -758,7 +776,7 @@ void exec_formod_stepsize(
       for (int id = 0; id < ctl->nd; id++)
 	printf
 	  ("STEPSIZE: ds= %.4f km | dz= %g km | t= %g s | nu= %.4f cm^-1"
-	   " | MRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n",
+	   " | MeanRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n",
 	   ds, dz, dt, ctl->nu[id], mre[id], sdre[id], minre[id],
 	   maxre[id]);
     }
@@ -857,8 +875,10 @@ void compute_rel_errors(
     /* Loop over ray paths... */
     for (int ir = 0; ir < obs_test->nr; ir++) {
 
-      /* Check for zero... */
-      if (obs_ref->rad[id][ir] == 0)
+      /* Skip invalid pairs and zero references... */
+      if (!isfinite(obs_test->rad[id][ir])
+	  || !isfinite(obs_ref->rad[id][ir])
+	  || obs_ref->rad[id][ir] == 0)
 	continue;
 
       /* Calculate relative error... */
@@ -875,8 +895,60 @@ void compute_rel_errors(
       n++;
     }
 
-    /* Get mean and standard deviaton... */
-    mre[id] = sum / n;
-    sdre[id] = sqrt(sum2 / n - mre[id] * mre[id]);
+    /* Get mean and standard deviation... */
+    if (n > 0) {
+      mre[id] = sum / n;
+      sdre[id] = sqrt(fmax(0, sum2 / n - mre[id] * mre[id]));
+    } else
+      mre[id] = sdre[id] = minre[id] = maxre[id] = NAN;
+  }
+}
+
+/*****************************************************************************/
+
+void compute_abs_errors(
+  const ctl_t *ctl,
+  const obs_t *obs_test,
+  const obs_t *obs_ref,
+  double *meanae,
+  double *sdae,
+  double *minae,
+  double *maxae) {
+
+  /* Loop over channels... */
+  for (int id = 0; id < ctl->nd; id++) {
+
+    double sum = 0, sum2 = 0;
+    minae[id] = +1e100;
+    maxae[id] = -1e100;
+    int n = 0;
+
+    /* Loop over ray paths... */
+    for (int ir = 0; ir < obs_test->nr; ir++) {
+
+      /* Skip invalid pairs... */
+      if (!isfinite(obs_test->rad[id][ir])
+	  || !isfinite(obs_ref->rad[id][ir]))
+	continue;
+
+      /* Calculate signed absolute error in the observation output units... */
+      double err = obs_test->rad[id][ir] - obs_ref->rad[id][ir];
+
+      /* Get statistics... */
+      sum += err;
+      sum2 += err * err;
+      if (err > maxae[id])
+	maxae[id] = err;
+      if (err < minae[id])
+	minae[id] = err;
+      n++;
+    }
+
+    /* Get mean and standard deviation... */
+    if (n > 0) {
+      meanae[id] = sum / n;
+      sdae[id] = sqrt(fmax(0, sum2 / n - meanae[id] * meanae[id]));
+    } else
+      meanae[id] = sdae[id] = minae[id] = maxae[id] = NAN;
   }
 }

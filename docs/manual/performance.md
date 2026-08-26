@@ -221,7 +221,9 @@ Performance tuning should always be accompanied by validation:
 - benchmark representative workloads rather than minimal test cases.
 
 Small configuration changes can have a large impact on both performance
-and accuracy.
+and accuracy. Use the frozen-reference workflow described in
+[Validation and verification](validation.md#numerical-validation-workflow) to check
+candidate calculations independently of the performance benchmarks.
 
 ---
 

@@ -1,0 +1,5 @@
+runs/
+references/*/
+!references/.gitkeep
+scripts/__pycache__/
+plots/
