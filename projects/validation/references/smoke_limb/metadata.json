@@ -1,0 +1,24 @@
+{
+  "case": {
+    "case_name": "smoke_limb",
+    "gas_set": "core",
+    "geometry": "limb",
+    "max_abs_rel_percent": 0.01,
+    "nu_max": 2980,
+    "nu_min": 500,
+    "nu_step": 20,
+    "profile": "smoke",
+    "ray_set": "medium"
+  },
+  "channels": 125,
+  "created_utc": "2026-08-26T09:19:16.604455+00:00",
+  "files": {
+    "atm.tab": "dacb64443c75e5f7d2a5b982c1ff35a5829f79e5947b3ba79ab9fb3733185ca4",
+    "case.ctl": "5399fd33ec6fc16d8d569b0abd5d83c2d3589c8ea001a0b50f6dfaa6f1ecb20e",
+    "obs.nc": "231aaa8ddc60cfb9c12559807403931a1d65b32392fcf632dd58589e86b40827",
+    "rad.nc": "384e6014ea411df4c1c39b498de29999a54ab14b771fcb66bbcd90ef9dcd5a6f"
+  },
+  "reference_git_commit": "31b4fc8020f25e848fbd6c060d98a4d2fd849c35",
+  "reference_worktree_dirty": true,
+  "tblbase_at_generation": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria"
+}

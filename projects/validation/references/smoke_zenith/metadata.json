@@ -1,0 +1,24 @@
+{
+  "case": {
+    "case_name": "smoke_zenith",
+    "gas_set": "core",
+    "geometry": "zenith",
+    "max_abs_rel_percent": 0.01,
+    "nu_max": 2980,
+    "nu_min": 500,
+    "nu_step": 20,
+    "profile": "smoke",
+    "ray_set": "medium"
+  },
+  "channels": 125,
+  "created_utc": "2026-08-26T09:18:38.665322+00:00",
+  "files": {
+    "atm.tab": "1a2ed01ee157a583098be286a181fc85ee532972cca3994415689a411e2f175a",
+    "case.ctl": "13d6fd3f30ffdb9e5b5a6bf5d65659e96d90ab1e61c1d41911b26127760cd9d9",
+    "obs.nc": "a5e5f4bcc1a49b3d6bd527413c28f89f3c420ed3e56211229d4a99990e81073c",
+    "rad.nc": "4a5f4af6d60a2693b4f422e259b36f02c3d5a85c6a4e65e745189288cb9fcd64"
+  },
+  "reference_git_commit": "31b4fc8020f25e848fbd6c060d98a4d2fd849c35",
+  "reference_worktree_dirty": true,
+  "tblbase_at_generation": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria"
+}

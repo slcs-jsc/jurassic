@@ -1,5 +1,8 @@
 runs/
 references/*/
 !references/.gitkeep
+!references/smoke_*/
+references/smoke_*/*.log
 scripts/__pycache__/
-plots/
+plots/*
+!plots/reference_smoke_*.png

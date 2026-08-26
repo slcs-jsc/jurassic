@@ -40,9 +40,11 @@ Each reference directory contains the canonical control file, frozen atmospheric
 inputs, NetCDF observation geometry (`obs.nc`), double-precision NetCDF scalar
 radiances (`rad.nc`), logs, and `metadata.json`. Metadata records
 the reference commit, the resolved LUT base path, and SHA-256 checksums for the
-inputs, output, and control file. Reference directories are ignored by Git because
-full matrices may be large; archive and distribute the whole `references/` tree as
-one versioned validation artifact.
+inputs, output, and control file. The three smoke-reference directories and their reference-spectrum PNGs are
+versioned with the repository, so a fresh clone can run and inspect smoke validation
+immediately. Their large generation logs are excluded. Full-reference directories
+remain ignored because the complete matrix is substantially larger; archive and
+distribute the full reference tree as a separate versioned validation artifact.
 
 Audit completeness and provenance without running the forward model:
 

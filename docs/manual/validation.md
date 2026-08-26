@@ -135,9 +135,12 @@ make DEFINES=-DNG=40 -j
 ```
 
 Reference calculations are generated separately from a trusted scalar build and
-stored as double-precision netCDF files. They should only be replaced deliberately;
-normal candidate runs never modify them. From `projects/validation/`, run the quick
-profile with:
+stored as double-precision netCDF files. Smoke references and their diagnostic PNGs
+are included with the repository, excluding generation logs, so the quick validation
+works directly after cloning. The larger full-reference matrix is distributed as a
+separate versioned artifact. References should only be replaced deliberately; normal
+candidate runs never modify them. From `projects/validation/`, run the quick profile
+with:
 
 ```bash
 VALIDATION_TBLBASE=/path/to/tria scripts/run_validation.py --profile smoke

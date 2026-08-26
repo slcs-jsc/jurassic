@@ -1,0 +1,24 @@
+{
+  "case": {
+    "case_name": "smoke_nadir",
+    "gas_set": "core",
+    "geometry": "nadir",
+    "max_abs_rel_percent": 0.01,
+    "nu_max": 2980,
+    "nu_min": 500,
+    "nu_step": 20,
+    "profile": "smoke",
+    "ray_set": "medium"
+  },
+  "channels": 125,
+  "created_utc": "2026-08-26T09:18:58.446980+00:00",
+  "files": {
+    "atm.tab": "1a2ed01ee157a583098be286a181fc85ee532972cca3994415689a411e2f175a",
+    "case.ctl": "30fd27582e20382adef18ad04767ff688e7f41288713ee5187c32b57be671f27",
+    "obs.nc": "acacf75fc9cf03cc9cfbe9198d5d65aa7bae9f038ae8d1467ebf46fe2657b0f3",
+    "rad.nc": "0a73d991eb9ab446d963e55e12ee468dfd66208c68f5da1c63629f3d6134bd62"
+  },
+  "reference_git_commit": "31b4fc8020f25e848fbd6c060d98a4d2fd849c35",
+  "reference_worktree_dirty": true,
+  "tblbase_at_generation": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria"
+}
