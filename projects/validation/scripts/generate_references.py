@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import os
 from pathlib import Path
@@ -20,6 +21,13 @@ from validationlib import (
 )
 
 
+def positive_int(value: str) -> int:
+    jobs = int(value)
+    if jobs < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return jobs
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate immutable JURASSIC validation references.")
     parser.add_argument("--profile", choices=("smoke", "full"))
@@ -29,6 +37,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--replace", action="store_true", help="Replace explicitly selected existing references.")
     parser.add_argument("--missing", action="store_true", help="Skip references that already exist.")
     parser.add_argument("--allow-dirty", action="store_true")
+    parser.add_argument("--jobs", type=positive_int, default=1,
+                        help="Generate this many independent cases concurrently (default: 1).")
     return parser.parse_args()
 
 
@@ -70,6 +80,7 @@ def main() -> int:
             print(f"missing executable: {src / executable}", file=sys.stderr)
             return 2
 
+    selected = []
     for case in cases:
         geometry_exe = src / case.geometry
         if not geometry_exe.is_file():
@@ -86,13 +97,19 @@ def main() -> int:
             if not args.cases:
                 print("--replace requires at least one explicit --case", file=sys.stderr)
                 return 2
+        selected.append(case)
 
+    tblbase = str(Path(args.tblbase).expanduser().resolve())
+
+    def generate_reference(case):
+        geometry_exe = src / case.geometry
+        target = args.references / case.case_name
         with tempfile.TemporaryDirectory(prefix=f"{case.case_name}.", dir=args.references) as tmp_name:
             work = Path(tmp_name)
             canonical_ctl = work / "case.ctl"
             runtime_ctl = work / "runtime.ctl"
             canonical_ctl.write_text(render_ctl(case))
-            runtime_ctl.write_text(render_ctl(case, str(Path(args.tblbase).expanduser().resolve())))
+            runtime_ctl.write_text(render_ctl(case, tblbase))
             run([str(src / "climatology"), str(runtime_ctl), "atm.tab"], work / "climatology.log")
             run([str(geometry_exe), str(runtime_ctl), "obs.nc"], work / "geometry.log")
             run(
@@ -105,7 +122,7 @@ def main() -> int:
                 "created_utc": datetime.now(timezone.utc).isoformat(),
                 "reference_git_commit": commit,
                 "reference_worktree_dirty": dirty,
-                "tblbase_at_generation": str(Path(args.tblbase).expanduser().resolve()),
+                "tblbase_at_generation": tblbase,
                 "files": {
                     name: sha256_file(work / name)
                     for name in ("case.ctl", "atm.tab", "obs.nc", "rad.nc")
@@ -116,7 +133,19 @@ def main() -> int:
             if target.exists():
                 shutil.rmtree(target)
             shutil.move(str(work), target)
-        print(f"generated {target}")
+        return target
+
+    if args.jobs == 1:
+        targets = map(generate_reference, selected)
+    else:
+        executor = ThreadPoolExecutor(max_workers=args.jobs)
+        targets = executor.map(generate_reference, selected)
+    try:
+        for target in targets:
+            print(f"generated {target}", flush=True)
+    finally:
+        if args.jobs != 1:
+            executor.shutdown()
     return 0
 
 

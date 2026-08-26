@@ -32,9 +32,16 @@ unless both an explicit `--case` and `--replace` are supplied.
 cd projects/validation
 VALIDATION_TBLBASE=/path/to/tria scripts/generate_references.py --profile smoke
 VALIDATION_TBLBASE=/path/to/tria scripts/generate_references.py --profile full
+# Run independent scalar reference cases concurrently:
+VALIDATION_TBLBASE=/path/to/tria scripts/generate_references.py --profile full --jobs 6
 # Resume an interrupted matrix without replacing completed cases:
 VALIDATION_TBLBASE=/path/to/tria scripts/generate_references.py --profile full --missing
 ```
+
+`--jobs` defaults to one. Each worker still runs `formod` with
+`EXECUTION scalar`; only independent validation cases are generated concurrently.
+Allow about 3 GiB of memory per worker for the 128-channel full cases and select the
+worker count with sufficient memory and CPU headroom.
 
 Each reference directory contains the canonical control file, frozen atmospheric
 inputs, NetCDF observation geometry (`obs.nc`), double-precision NetCDF scalar
