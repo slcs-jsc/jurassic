@@ -3805,9 +3805,10 @@ int formod_pencil(
 
     /* Loop over channels... */
     for (int id = 0; id < ctl->nd; id++)
-      if (tau_gas[id] > 0) {
+      if (tau_gas[id] >= 0) {
 
-	/* Get segment emissivity... */
+	/* Get segment emissivity. An exactly zero transmittance represents
+	   a fully opaque segment and must contribute with emissivity one. */
 	los->eps[ip][id] = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
 
 	/* Compute radiance... */
