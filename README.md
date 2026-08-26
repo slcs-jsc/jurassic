@@ -195,13 +195,13 @@ the runtime library path for the bundled-library build automatically and
 use `gnuplot` to generate diagnostic plots:
 
     # Limb
-    cd [jurassic_directory]/projects/limb && ./run.sh
+    cd [jurassic_directory]/projects/examples/limb && ./run.sh
     
     # Nadir
-    cd [jurassic_directory]/projects/nadir && ./run.sh
+    cd [jurassic_directory]/projects/examples/nadir && ./run.sh
 
     # Zenith
-    cd [jurassic_directory]/projects/zenith && ./run.sh
+    cd [jurassic_directory]/projects/examples/zenith && ./run.sh
 
 Each example performs a complete radiative transfer simulation. Inside
 the corresponding example directory, the scripts generate an observation
@@ -227,19 +227,19 @@ verify the correctness of the results. Additionally, `gnuplot` is used
 to generate plots of the simulated radiances and kernel functions.
 
 <p align="center">
-  <img src="projects/limb/plot_rad.png" alt="limb radiance data" width="30%"/>
+  <img src="projects/examples/limb/plot_rad.png" alt="limb radiance data" width="30%"/>
   &emsp;
-  <img src="projects/nadir/plot_rad.png" alt="nadir radiance data" width="30%"/>
+  <img src="projects/examples/nadir/plot_rad.png" alt="nadir radiance data" width="30%"/>
   &emsp;
-  <img src="projects/zenith/plot_rad.png" alt="zenith radiance data" width="30%"/>
+  <img src="projects/examples/zenith/plot_rad.png" alt="zenith radiance data" width="30%"/>
 </p>
 
 <p align="center">
-  <img src="projects/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="30%"/>
+  <img src="projects/examples/limb/plot_kernel_temperature_792.png" alt="limb temperature kernel function" width="30%"/>
   &emsp;
-  <img src="projects/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="30%"/>
+  <img src="projects/examples/nadir/plot_kernel_temperature_668.5410.png" alt="nadir temperature kernel function" width="30%"/>
   &emsp;
-  <img src="projects/zenith/plot_kernel_temperature_792.0000.png" alt="zenith temperature kernel function" width="30%"/>
+  <img src="projects/examples/zenith/plot_kernel_temperature_792.0000.png" alt="zenith temperature kernel function" width="30%"/>
 </p>
 
 ### Lookup tables

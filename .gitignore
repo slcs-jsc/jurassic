@@ -10,9 +10,8 @@ projects/benchmark/runs/
 projects/benchmark/scripts/__pycache__/
 !projects/validation/
 !projects/validation/**
-!projects/limb/
-!projects/nadir/
-!projects/zenith/
+!projects/examples/
+!projects/examples/**
 src/*.o
 src/atmfmt
 src/brightness

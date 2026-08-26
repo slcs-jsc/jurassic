@@ -131,7 +131,8 @@ listed in `configs/baseline_cases.tsv`:
 | `limb_baseline` | `limb` | `projects/benchmark/cases/limb_baseline.ctl` | 64 | 7 | 32 | `BENCH_TBLBASE` |
 
 The baseline CTLs are separate from the shipped example projects. The example
-projects under `projects/zenith`, `projects/nadir`, and `projects/limb` stay as-is
+projects under `projects/examples/zenith`, `projects/examples/nadir`, and
+`projects/examples/limb` stay as-is
 with their small test LUTs; the benchmark runners only use the dedicated baseline
 CTLs and inject `TBLBASE` from `BENCH_TBLBASE` at runtime. These baseline cases
 are the concrete comparison anchor points for CPU/GPU, compiler, and system results.

@@ -105,7 +105,7 @@ verify that JURASSIC is functioning correctly on a given system.
 From the repository root, example projects are typically executed via:
 
 ```bash
-cd projects/limb
+cd projects/examples/limb
 ./run.sh
 ```
 

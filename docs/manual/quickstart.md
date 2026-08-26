@@ -34,12 +34,12 @@ scripts use it to generate diagnostic PNG plots.
 ## Run an Example
 
 The quickest end-to-end test is one of the example projects under
-`projects/`. Start from the repository root, then enter the project
+`projects/examples/`. Start from the repository root, then enter the project
 directory before running its script so the relative paths inside the
 script resolve correctly.
 
 ```bash
-cd projects/nadir
+cd projects/examples/nadir
 ./run.sh
 ```
 
@@ -73,10 +73,10 @@ Each example script performs the same basic workflow:
 For the nadir example, the core commands are:
 
 ```bash
-../../src/climatology nadir.ctl atm.tab
-../../src/nadir nadir.ctl obs.tab
-../../src/formod nadir.ctl obs.tab atm.tab rad.tab
-../../src/kernel nadir.ctl obs.tab atm.tab kernel.tab
+../../../src/climatology nadir.ctl atm.tab
+../../../src/nadir nadir.ctl obs.tab
+../../../src/formod nadir.ctl obs.tab atm.tab rad.tab
+../../../src/kernel nadir.ctl obs.tab atm.tab kernel.tab
 ```
 
 The limb and zenith examples use the same structure with `limb.ctl` or
