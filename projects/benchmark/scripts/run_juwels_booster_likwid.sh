@@ -81,9 +81,11 @@ export LC_ALL=C
 # Load the compiler and plotting stack expected on JUWELS Booster.
 if command -v ml >/dev/null 2>&1; then
   ml Stages/2026 GCC/14.3.0
-  module load likwid/5.4.1
+  ml likwid/5.4.1
   ml CMake/4.0.3
   ml ecBuild
+  ml SciPy-bundle/2025.07
+  ml netcdf4-python/1.7.2
 fi
 
 if ! command -v likwid-perfctr >/dev/null 2>&1; then
@@ -140,12 +142,14 @@ fi
 validation_status="$run_dir/validation_status.txt"
 run_profiling=1
 if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
+  set +e
   ( cd "$repo_root/projects/validation" && \
     VALIDATION_TBLBASE="$bench_tblbase" scripts/run_validation.py \
     > "$run_dir/validation.log" 2>&1 )
   validation_rc=$?
+  set -e
   echo "exit_code=$validation_rc" > "$validation_status"
-  
+
   latest_validation_run=$(ls -td "$repo_root/projects/validation"/runs/validation_*/ 2>/dev/null | head -n1)
   if [ -n "$latest_validation_run" ]; then
     cp -a "${latest_validation_run}summary.tsv" "$run_dir/validation_summary.tsv" 2>/dev/null || true
