@@ -136,47 +136,75 @@ if [ "$rebuild" = 1 ]; then
   build_cpu
 fi
 
+# Perform Validation before Profiling
+validation_status="$run_dir/validation_status.txt"
+run_profiling=1
+if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
+  ( cd "$repo_root/projects/validation" && \
+    VALIDATION_TBLBASE="$bench_tblbase" scripts/run_validation.py \
+    > "$run_dir/validation.log" 2>&1 )
+  validation_rc=$?
+  echo "exit_code=$validation_rc" > "$validation_status"
+  
+  latest_validation_run=$(ls -td "$repo_root/projects/validation"/runs/validation_*/ 2>/dev/null | head -n1)
+  if [ -n "$latest_validation_run" ]; then
+    cp -a "${latest_validation_run}summary.tsv" "$run_dir/validation_summary.tsv" 2>/dev/null || true
+  fi
+  if [ "$validation_rc" -ne 0 ]; then
+    echo "Validation FAILED (exit $validation_rc) -- skipping LIKWID profiling for this candidate." >&2
+    run_profiling=0
+  fi
+else
+  echo "exit_code=skipped" > "$validation_status"
+fi
+
 mkdir -p likwid
 cd likwid
 prepare_inputs
 
-# Validate LIKWID groups against what this node actually supports
-valid_groups=()
-for group in $likwid_groups; do
-  if grep -q -w "$group" "$run_dir/likwid_available_groups.txt"; then
-    valid_groups+=("$group")
-  else
-    echo "WARNING: LIKWID group '$group' not available on this node -- skipping. See likwid_available_groups.txt for valid options." >&2
-  fi
-done
+if [ "$run_profiling" = 1 ]; then
+  # Validate LIKWID groups against what this node actually supports
+  valid_groups=()
+  for group in $likwid_groups; do
+    if grep -q -w "$group" "$run_dir/likwid_available_groups.txt"; then
+      valid_groups+=("$group")
+    else
+      echo "WARNING: LIKWID group '$group' not available on this node -- skipping. See likwid_available_groups.txt for valid options." >&2
+    fi
+  done
 
-if [ ${#valid_groups[@]} -eq 0 ]; then
-  echo "No requested LIKWID groups are available on this node. Aborting LIKWID sweep." >&2
-  echo "Check $run_dir/likwid_available_groups.txt for valid group names and rerun with LIKWID_GROUPS set accordingly." >&2
-  exit 1
+  if [ ${#valid_groups[@]} -eq 0 ]; then
+    echo "No requested LIKWID groups are available on this node -- skipping LIKWID sweep." >&2
+    echo "Check $run_dir/likwid_available_groups.txt for valid group names and rerun with LIKWID_GROUPS set accordingly." >&2
+    run_profiling=0
+  fi
 fi
 
-# unset OMP_PLACES OMP_PROC_BIND ?
-for omp in $likwid_threads; do
-  core_list="0-$((omp - 1))"
-  out_tab="/tmp/jurassic_bench_${run_id}_likwid_omp${omp}.tab"
- 
-  for group in "${valid_groups[@]}"; do
-    log_txt="log.omp${omp}.${group}.txt"
-    log_csv="log.omp${omp}.${group}.csv"
- 
-    echo "Running LIKWID group=$group OMP_NUM_THREADS=$omp ..."
- 
-    OMP_NUM_THREADS=$omp likwid-perfctr -C "$core_list" -g "$group" \
-      -o "$log_csv" \
-      "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
-      TASK time BATCH_SIZE "$cpu_batch_size" \
-      > "$log_txt" 2>&1
- 
-    printf 'OMP_NUM_THREADS=%s\nLIKWID_GROUP=%s\nCPU_BATCH_SIZE=%s\nCORE_LIST=%s\n' \
-      "$omp" "$group" "$cpu_batch_size" "$core_list" >> "$log_txt"
+if [ "$run_profiling" = 1 ]; then
+  # unset OMP_PLACES OMP_PROC_BIND ?
+  for omp in $likwid_threads; do
+    core_list="S0:0-$((omp - 1))"
+    out_tab="/tmp/jurassic_bench_${run_id}_likwid_omp${omp}.tab"
+  
+    for group in "${valid_groups[@]}"; do
+      log_txt="log.omp${omp}.${group}.txt"
+      log_csv="log.omp${omp}.${group}.csv"
+  
+      echo "Running LIKWID group=$group OMP_NUM_THREADS=$omp ..."
+  
+      OMP_NUM_THREADS=$omp likwid-perfctr -C "$core_list" -g "$group" \
+        -o "$log_csv" \
+        "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
+        TASK time BATCH_SIZE "$cpu_batch_size" \
+        > "$log_txt" 2>&1
+  
+      printf 'OMP_NUM_THREADS=%s\nLIKWID_GROUP=%s\nCPU_BATCH_SIZE=%s\nCORE_LIST=%s\n' \
+        "$omp" "$group" "$cpu_batch_size" "$core_list" >> "$log_txt"
+    done
   done
-done
+else 
+  echo "Skipped LIKWID sweep -- validation failed for this candidate, or no requested LIKWID groups were available on this node." > skipped_profiling.txt
+fi
 
 cp -a data "$run_dir/data.likwid"
 cp -a log.omp*.txt log.omp*.csv "$run_dir/" 2>/dev/null || true
