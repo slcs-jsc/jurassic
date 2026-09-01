@@ -163,7 +163,10 @@
    ------------------------------------------------------------ */
 
 #ifdef LIKWID_PERFMON
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wredundant-decls"
 #include <likwid-marker.h>
+#pragma GCC diagnostic pop
 #else
 #define LIKWID_MARKER_INIT
 #define LIKWID_MARKER_THREADINIT
