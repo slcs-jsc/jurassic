@@ -27,8 +27,6 @@
 #include "jurassic_unified_library.h"
 #endif
 
-#include <likwid-marker.h>;
-
 /* ------------------------------------------------------------
    Functions...
    ------------------------------------------------------------ */
@@ -180,6 +178,15 @@ int main(
   int argc,
   char *argv[]) {
 
+  LIKWID_MARKER_INIT;
+
+  #pragma omp parallel
+  {
+    LIKWID_MARKER_THREADINIT;
+    LIKWID_MARKER_REGISTER("formod");
+  }
+
+
   static ctl_t ctl;
 
   /* Print usage information... */
@@ -277,6 +284,7 @@ int main(
   tbl_free(&ctl, tbl);
   PRINT_TIMERS;
 
+  LIKWID_MARKER_CLOSE;
   return EXIT_SUCCESS;
 }
 
@@ -844,10 +852,10 @@ void call_formod(
     }
 
     if (task_mode == 't') {
-      LIKWID_MARKER_START("analysis"); // Start LIKWID profiling, includes formods own setup i.e. gsl_rng_env_setup, gsl_rng_alloc, gsl_rng_free
+      //LIKWID_MARKER_START("analysis"); // Start LIKWID profiling, includes formods own setup i.e. gsl_rng_env_setup, gsl_rng_alloc, gsl_rng_free
       exec_formod_benchmark(ctl, tbl, &atm, &obs, &atm2, &los_scratch,
 			    &obs_scratch, formod_scalar, batch_size);
-      LIKWID_MARKER_STOP("analysis");
+      //LIKWID_MARKER_STOP("analysis");
     }
 
     if (task_mode == 's') {

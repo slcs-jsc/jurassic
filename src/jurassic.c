@@ -3616,8 +3616,10 @@ void formod_batch(
 #else
 #pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch)
   for (int ib = 0; ib < nbatch; ib++) {
+    LIKWID_MARKER_START("formod");
     const int ib_status =
       formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs_scratch[ib]);
+    LIKWID_MARKER_STOP("formod");
     if (status)
       status[ib] = ib_status;
     else if (ib_status != FORMOD_STATUS_OK)

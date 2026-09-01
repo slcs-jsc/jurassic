@@ -162,6 +162,17 @@
    Helper functions...
    ------------------------------------------------------------ */
 
+#ifdef LIKWID_PERFMON
+#include <likwid-marker.h>
+#else
+#define LIKWID_MARKER_INIT
+#define LIKWID_MARKER_THREADINIT
+#define LIKWID_MARKER_REGISTER(r)
+#define LIKWID_MARKER_START(r)
+#define LIKWID_MARKER_STOP(r)
+#define LIKWID_MARKER_CLOSE
+#endif
+
 #ifdef _OPENACC
 #pragma acc routine seq
 #endif

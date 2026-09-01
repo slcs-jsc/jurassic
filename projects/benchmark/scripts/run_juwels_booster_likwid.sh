@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=slmet
-#SBATCH --partition=booster
+#SBATCH --partition=batch
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
@@ -51,14 +51,14 @@ rebuild=${REBUILD:-1}
 
 # LIKWID Setup
 likwid_threads=${LIKWID_THREADS:-"1 12 48"}
-likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHES"} # performance groups to collect
+likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHES TMA"} # performance groups to collect
 
 mkdir -p "$work_dir" 
 
 echo "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unavailable)" > "$run_dir/perf_paranoid_status.txt"
 
 # Validate the selected control template and LUT base path before staging work files.
-if [ ! -f "$ctl_template" ]; thenecho "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unavailable)" > "$run_dir/per
+if [ ! -f "$ctl_template" ]; then
   echo "Control file not found: $ctl_template" >&2
   exit 1
 fi
@@ -144,13 +144,15 @@ fi
 # Perform Validation before Profiling
 validation_status="$run_dir/validation_status.txt"
 run_profiling=1
+
 if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
   set +e
   ( cd "$repo_root/projects/validation" && \
     VALIDATION_TBLBASE="$bench_tblbase" scripts/run_validation.py \
-    > "$run_dir/validation.log" 2>&1 )
+      > "$run_dir/validation.log" 2>&1 )
   validation_rc=$?
   set -e
+
   echo "exit_code=$validation_rc" > "$validation_status"
 
   latest_validation_run=$(ls -td "$repo_root/projects/validation"/runs/validation_*/ 2>/dev/null | head -n1)
@@ -188,7 +190,7 @@ if [ "$run_profiling" = 1 ]; then
 fi
 
 if [ "$run_profiling" = 1 ]; then
-  # unset OMP_PLACES OMP_PROC_BIND ?
+  unset OMP_PLACES OMP_PROC_BIND
   for omp in $likwid_threads; do
     core_list="S0:0-$((omp - 1))"
     out_tab="/tmp/jurassic_bench_${run_id}_likwid_omp${omp}.tab"
