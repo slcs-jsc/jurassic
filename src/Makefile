@@ -59,6 +59,9 @@ UNIDIR = ../../jurassic-unified
 # Use JURASSIC-UNIFIED library...
 UNIFIED ?= 0
 
+# Perform LIKWID-Profiling
+LIKWID ?= 0
+
 # -----------------------------------------------------------------------------
 # Set compiler flags...
 # -----------------------------------------------------------------------------
@@ -175,6 +178,14 @@ ifeq ($(STATIC),1)
   endif
   CFLAGS += -static
 endif
+
+# Compile with LIKWID marker...
+ifeq ($(LIKWID), 1)
+  CFLAGS += -DLIKWID_PERFMON
+  LDFLAGS += -llikwid
+endif
+
+
 
 # -----------------------------------------------------------------------------
 # Targets...

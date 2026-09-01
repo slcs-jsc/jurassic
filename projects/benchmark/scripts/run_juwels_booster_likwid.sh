@@ -6,6 +6,7 @@
 #SBATCH --cpus-per-task=48
 #SBATCH --time=00:45:00
 #SBATCH --exclusive
+#SBATCH --disable-perfparanoid
 
 # LIKWID reads hardware performance counters (cache misses, memory bandwith, FLOP rate etc.)
 
@@ -54,8 +55,10 @@ likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHES"} # performance groups to
 
 mkdir -p "$work_dir" 
 
+echo "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unavailable)" > "$run_dir/perf_paranoid_status.txt"
+
 # Validate the selected control template and LUT base path before staging work files.
-if [ ! -f "$ctl_template" ]; then
+if [ ! -f "$ctl_template" ]; thenecho "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unavailable)" > "$run_dir/per
   echo "Control file not found: $ctl_template" >&2
   exit 1
 fi
@@ -122,7 +125,7 @@ printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase
 build_cpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0
+  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1
   cd "$work_dir"
 }
 
@@ -196,7 +199,7 @@ if [ "$run_profiling" = 1 ]; then
   
       echo "Running LIKWID group=$group OMP_NUM_THREADS=$omp ..."
   
-      OMP_NUM_THREADS=$omp likwid-perfctr -C "$core_list" -g "$group" \
+      OMP_NUM_THREADS=$omp likwid-perfctr -C "$core_list" -g "$group" -m \
         -o "$log_csv" \
         "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
         TASK time BATCH_SIZE "$cpu_batch_size" \

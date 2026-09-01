@@ -27,6 +27,8 @@
 #include "jurassic_unified_library.h"
 #endif
 
+#include <likwid-marker.h>;
+
 /* ------------------------------------------------------------
    Functions...
    ------------------------------------------------------------ */
@@ -842,8 +844,10 @@ void call_formod(
     }
 
     if (task_mode == 't') {
+      LIKWID_MARKER_START("analysis"); // Start LIKWID profiling, includes formods own setup i.e. gsl_rng_env_setup, gsl_rng_alloc, gsl_rng_free
       exec_formod_benchmark(ctl, tbl, &atm, &obs, &atm2, &los_scratch,
 			    &obs_scratch, formod_scalar, batch_size);
+      LIKWID_MARKER_STOP("analysis");
     }
 
     if (task_mode == 's') {
