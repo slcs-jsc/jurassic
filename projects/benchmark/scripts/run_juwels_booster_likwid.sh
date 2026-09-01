@@ -123,10 +123,12 @@ printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase
 
 # Rebuild a CPU-only binary when the run requests it.
 build_cpu() {
-  cd "$src_dir"
-  make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1
-  cd "$work_dir"
+  cd "$src_dir" || return 1
+  make clean || return 1
+  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1 || return 1
+  # Return to work_dir (may have been entered via Slurm's temporary launch dir)
+  cd "$work_dir" 2>/dev/null || true
+  return 0
 }
 
 # Create atmospheric and observation inputs for the selected geometry.
