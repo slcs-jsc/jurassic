@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=slmet
-#SBATCH --partition=batch
+#SBATCH --partition=booster
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
