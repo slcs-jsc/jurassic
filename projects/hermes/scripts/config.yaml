@@ -1,0 +1,52 @@
+num_iterations: 5
+model_name: alias-large
+max_agent_iterations: 20 
+
+repo_dir: /home/niewoehner1/Documents/GSP26/jurassic/
+worktree_dir: /home/niewoehner1/Documents/GSP26/jurassic-agent-worktree
+experiment_dir: .hermes_optimization
+json_out: results.jsonl
+res_dir: runs
+thread_count_for_scoring: 24
+
+benchmark_env: 
+   CASE_NAME: zenith_baseline
+   LIKWID_THREADS: "1 12 24"
+   LIKWID_GROUPS: "FLOPS_DP MEM_DP CACHE TMA" 
+   BENCH_TBLBASE: /p/data1/slmet/model_data/jurassic/tab/tria_1cm/nc_1e-6/tria
+
+executor: 
+   ssh_host: juwels.fz-juelich.de
+   remote_work_dir: /p/project1/cslmet/niewoehner1/jurassic
+   benchmark_dir: projects/benchmark
+   submit_script: run_juwels_booster_likwid.sh
+   sync_excludes:
+    - .git/
+    - projects/benchmark/runs/
+    - projects/hermes/
+    - libs/build/
+   poll_interval: 20  
+   job_timeout: 7200
+
+instructions: |
+    You are optimizing the JURASSIC radiative transfer code for CPU performance under an automated benchmark loop.
+    You will receive a benchmark summary after each attempt showing whether your last change was kept or rolled back, and why.
+
+    The timed code path for TASK=time is exec_formod_benchmark() in formod.c (~line 677), called from call_formod() when task_mode == 't'. It repeatedly calls either
+    exec_formod_batch_repeat() or exec_formod_single(), which both eventually reach the OpenMP-parallel loop at jurassic.c:3617 (#pragma omp parallel for ... shared(ctl,tbl,
+    atm,obs,nbatch,status,los,obs_scratch)). This is the loop that requires optimization. 
+
+    The descriptors "analysis_s"/"input_s"/"total_s" in the benchmark summary are labels derived from the code's own TIMER_GROUP_ANALYSIS/TIMER_GROUP_INPUT/TIMER_TOTAL output
+    (via SELECT_TIMER/timer_group() in jurassic.c). They are not idnetifiers to search for in the code.
+
+    This is a fully automated, unattended loop. There is no human available to confirm changes with. When you decide on an optimization, apply it immediately by calling the
+    file-write tool in the same turn. Do not describe a proposed change and wait for approval; a described-but-unapplied change is indistinguishable from no change at all
+    and will be logged as a failed attempt.
+ 
+    Only read or write files under your working directory (the current directory you were started in). Do not read, reference, or attempt to analyze files at any other absolute
+    path, even if you recall or can access a similarly named project elsewhere on this machine. The code you're optimizing is entirely within your working directory.
+
+    - Do not change numerical formulas, algorithms, data structures, or control flow beyond what's needed to parallelize a loop safely.
+    - Do not touch build scripts, benchmark scripts/configs, or anything outside src/.
+    - The output must remain numerically correct. Watch for races on shared accumulators and false sharing on per-iteration writes; add reductions/private clauses as needed.
+    - Make one focused change per turn rather than parallelizing everything at once, so its performance impact can be isolated and evaluated.
