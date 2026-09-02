@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=slmet
-#SBATCH --partition=batch
+#SBATCH --partition=booster
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
@@ -39,6 +39,7 @@ if [ -z "$case_row" ]; then
   echo "Unknown benchmark baseline case: $case_name" >&2
   exit 1
 fi
+
 geometry=$(printf '%s
 ' "$case_row" | awk -F'	' '{print $2}')
 ctl_rel=$(printf '%s
@@ -53,7 +54,11 @@ rebuild=${REBUILD:-1}
 
 # LIKWID Setup
 likwid_threads=${LIKWID_THREADS:-"1 12 48"}
-likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHE TMA"} # performance groups to collect
+likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHE"} # performance groups to collect
+likwid_socket=${LIKWID_SOCKET:-0}
+
+# perf Setup
+perf_threads=${PERF_THREADS:-"$likwid_threads"}
 
 mkdir -p "$work_dir" 
 
@@ -99,7 +104,29 @@ if ! command -v likwid-perfctr >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v perf >/dev/null 2>&1; then
+  echo "perf not found on PATH will be skipped." >&2
+  perf_available=0
+else
+  perf_available=1
+  perf --version > "$run_dir/perf_version.txt" 2>&1 || true
+fi
+
+
 likwid-perfctr -a > "$run_dir/likwid_available_groups.txt" 2>&1 || true
+
+# Determine whether this perf supports --topdown.
+perf_topdown_available=0
+if [ "$perf_available" -eq 1 ]; then
+  if perf stat --help 2>&1 | grep -q -- '--topdown'; then
+    perf_topdown_available=1
+  else
+    echo "WARNING: installed perf does not expose --topdown; perf topdown sweep will be skipped." >&2
+  fi
+fi
+
+echo "perf_available=$perf_available" > "$run_dir/perf_status.txt"
+echo "perf_topdown_available=$perf_topdown_available" >> "$run_dir/perf_status.txt"
 
 export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${LD_LIBRARY_PATH:-}"
 
@@ -119,8 +146,23 @@ collect_hardware_info() {
 
 collect_hardware_info
 
-printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase=%s\ncpu_batch_size=%s\ncompiler_cpu=%s\nmpicc=%s\nmpi=%s\nrebuild=%s\nlikwid_threads=%s\nlikwid_groups=%s\n' \
-  "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" "$cpu_batch_size" "$compiler_cpu" "$mpicc" "$mpi" "$rebuild" "$likwid_threads" "$likwid_groups" > "$run_dir/config.txt"
+printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase=%s\ncpu_batch_size=%s\ncompiler_cpu=%s\nmpicc=%s\nmpi=%s\nrebuild=%s\nlikwid_threads=%s\nlikwid_groups=%s\nperf_threads=%s\nperf_available=%s\nperf_topdown_available=%s\n' \
+  "$case_name" \
+  "$geometry" \
+  "$ctl_template" \
+  "$active_ctl" \
+  "$bench_tblbase" \
+  "$cpu_batch_size" \
+  "$compiler_cpu" \
+  "$mpicc" \
+  "$mpi" \
+  "$rebuild" \
+  "$likwid_threads" \
+  "$likwid_groups" \
+  "$perf_threads" \
+  "$perf_available" \
+  "$perf_topdown_available" \
+  > "$run_dir/config.txt"
 
 
 # Rebuild a CPU-only binary when the run requests it.
@@ -175,6 +217,7 @@ mkdir -p likwid
 cd likwid
 prepare_inputs
 
+# likwid profiling
 if [ "$run_profiling" = 1 ]; then
   # Validate LIKWID groups against what this node actually supports
   valid_groups=()
@@ -216,13 +259,69 @@ if [ "$run_profiling" = 1 ]; then
     done
   done
 else 
-  echo "Skipped LIKWID sweep -- validation failed for this candidate, or no requested LIKWID groups were available on this node." > skipped_profiling.txt
+  echo "Skipped LIKWID sweep -- validation failed for this candidate, or no requested LIKWID groups were available on this node." > skipped_likwid.txt
+fi
+
+# perf profiling
+if [ "$run_profiling" = 1 ] && [ "$perf_topdown_available" -eq 1 ]; then
+  unset OMP_PLACES OMP_PROC_BIND
+
+  mkdir -p perf
+
+  for omp in $perf_threads; do
+    cpu_range="S0:0-$((omp - 1))" # perform experiment on fixed socket = S0
+
+    perf_txt="perf.omp${omp}.topdown.txt"
+    perf_stdout="perf.omp${omp}.stdout.txt"
+    out_tab="/tmp/jurassic_bench_${run_id}_perf_omp${omp}.tab"
+
+    echo "Running perf stat --topdown OMP_NUM_THREADS=$omp CPUs=$cpu_range ..."
+
+    set +e
+
+    OMP_NUM_THREADS=$omp \
+      taskset -c "$cpu_range" \
+      perf stat \
+        --topdown \
+        "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
+        TASK time BATCH_SIZE "$cpu_batch_size" \
+        > "$perf_stdout" \
+        2> "$perf_txt"
+
+    perf_rc=$?
+
+    set -e
+
+    {
+      printf 'OMP_NUM_THREADS=%s\n' "$omp"
+      printf 'PERF_MODE=--topdown\n'
+      printf 'CPU_RANGE=%s\n' "$cpu_range"
+      printf 'CPU_BATCH_SIZE=%s\n' "$cpu_batch_size"
+      printf 'EXIT_CODE=%s\n' "$perf_rc"
+    } >> "$perf_txt"
+
+    if [ "$perf_rc" -ne 0 ]; then
+      echo "WARNING: perf topdown failed for OMP_NUM_THREADS=$omp (exit $perf_rc)." >&2
+      echo "See $run_dir/perf/perf.omp${omp}.topdown.txt" >&2
+    fi
+  done
+elif [ "$run_profiling" = 1 ]; then
+  mkdir -p perf
+  echo "Skipped perf stat --topdown: perf is unavailable or --topdown is not supported." \
+    > perf/skipped_perf_topdown.txt
+else
+  mkdir -p perf
+  echo "Skipped perf stat --topdown: validation failed." \
+    > perf/skipped_perf_topdown.txt
 fi
 
 cp -a data "$run_dir/data.likwid"
 cp -a log.omp*.txt log.omp*.csv "$run_dir/" 2>/dev/null || true
+cp -a perf "$run_dir/" 2>/dev/null || true
 cp -a "$active_ctl" "$run_dir/"
  
 echo "LIKWID run directory: $run_dir"
-echo "Raw per-config output: $run_dir/log.omp<N>.<GROUP>.txt (human-readable) and .csv (machine-readable)"
+echo "Raw per-config output: $run_dir/log.omp<N>.<GROUP>.txt and .csv"
+echo "perf topdown output: $run_dir/perf/perf.omp<N>.topdown.txt"
+echo "perf stdout: $run_dir/perf/perf.omp<N>.stdout.txt"
 echo "Available groups on this node: $run_dir/likwid_available_groups.txt"
