@@ -11,6 +11,8 @@
 # LIKWID reads hardware performance counters (cache misses, memory bandwith, FLOP rate etc.)
 
 set -euo pipefail
+set -x                               
+trap 'echo "FAILED at line $LINENO: $BASH_COMMAND" >&2' ERR 
 
 # Resolve repository-relative paths once so Slurm can stage the run from temporary launch directories.
 script_source=${BASH_SOURCE[0]:-$0}
