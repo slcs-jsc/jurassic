@@ -12,6 +12,8 @@ projects/benchmark/scripts/__pycache__/
 !projects/validation/**
 !projects/examples/
 !projects/examples/**
+!projects/hermes/
+projects/hermes/*
 !projects/hermes/scripts/
 !projects/hermes/scripts/**
 src/*.o
