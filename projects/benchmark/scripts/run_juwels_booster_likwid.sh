@@ -53,7 +53,7 @@ rebuild=${REBUILD:-1}
 
 # LIKWID Setup
 likwid_threads=${LIKWID_THREADS:-"1 12 48"}
-likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHE"} # performance groups to collect
+likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHE TMA"} # performance groups to collect
 
 mkdir -p "$work_dir" 
 
