@@ -159,7 +159,7 @@ if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
 
   echo "exit_code=$validation_rc" > "$validation_status"
 
-  latest_validation_run=$(ls -td "$repo_root/projects/validation/runs/validation_*/" 2>/dev/null | head -n1)
+  latest_validation_run=$(ls -td "$repo_root/projects/validation/runs/validation_"*/ 2>/dev/null | head -n1 || true)
   if [ -n "$latest_validation_run" ]; then
     cp -a "${latest_validation_run}summary.tsv" "$run_dir/validation_summary.tsv" 2>/dev/null || true
   fi
