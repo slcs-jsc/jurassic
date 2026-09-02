@@ -13,6 +13,7 @@ projects/benchmark/scripts/__pycache__/
 !projects/examples/
 !projects/examples/**
 !projects/hermes/scripts/
+!projects/hermes/scripts/**
 src/*.o
 src/atmfmt
 src/brightness
