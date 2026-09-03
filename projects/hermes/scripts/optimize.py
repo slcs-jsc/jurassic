@@ -8,10 +8,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from statistics import mean
 
-from projects.hermes.scripts.checkpoint_manager import CheckpointManager
-from projects.hermes.scripts.execution import Executor
-from projects.hermes.scripts.parsing import parse_run_dir, summarize
-from projects.hermes.scripts.plot_results import plot_agent_progress, plot_metrics
+from checkpoint_manager import CheckpointManager
+from execution import Executor
+from parsing import parse_run_dir, summarize
+from plot_results import plot_agent_progress, plot_metrics
 
 from run_agent import AIAgent
 
