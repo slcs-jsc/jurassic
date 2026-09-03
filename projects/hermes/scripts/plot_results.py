@@ -40,7 +40,7 @@ def plot_agent_progress(source_file: Path, res_dir: Path) -> None:
     fig.savefig(res_dir / "agent_progress.png", bbox_inches="tight")
     plt.close(fig)
 
-def plot_metrics(configs: list, res_dir: Path):
+def plot_metrics(configs: list, res_dir: Path) -> None:
     threads = sorted({c["omp_threads"] for c in configs if c["group"] == "MEM_DP"})
 
     bandwidth = [
@@ -96,6 +96,7 @@ def _plot_scaling(
     
     res_dir.mkdir(parents=True, exist_ok=True)
     threads = np.asarray(threads, dtype=float)
+    print(values)
     values = np.asarray(values, dtype=float)
 
     ideal = (
@@ -105,8 +106,8 @@ def _plot_scaling(
     )
 
     fig, ax = plt.subplots()
-    ax.scatter(threads, values, "o-", color=color, label="Measured", zorder=3)
-    ax.scatter(threads, ideal, "--", color="#898781", label="Ideal linear scaling", zorder=2)
+    ax.plot(threads, values, "o-", color=color, label="Measured", zorder=3)
+    ax.plot(threads, ideal, "--", color="#898781", label="Ideal linear scaling", zorder=2)
     ax.set_xlabel("OMP_NUM_THREADS")
     ax.set_ylabel(label)
     ax.set_xscale("log")

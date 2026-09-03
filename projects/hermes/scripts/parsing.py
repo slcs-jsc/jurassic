@@ -97,7 +97,7 @@ def parse_run_dir(run_dir: Path) -> list:
 
         stat_table = csv_data["tables"].get(f"{group}:Group 1 Metric STAT", {})
         metrics_stat = {
-            metric_name: dict(zip(["sum", "min", "max", "avg"], values))
+            metric_name.removesuffix(" STAT"): dict(zip(["sum", "min", "max", "avg"], values))
             for metric_name, values in stat_table.items()
         }
 
