@@ -95,6 +95,8 @@ def _plot_scaling(
 ) -> None:
     
     res_dir.mkdir(parents=True, exist_ok=True)
+    threads = np.asarray(threads, dtype=float)
+    values = np.asarray(values, dtype=float)
 
     ideal = (
         values[0] * (threads / threads[0])

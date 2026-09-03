@@ -136,6 +136,8 @@ def optimize(args: argparse.Namespace, dry_run=False):
     best_configs = baseline_configs
     best_summary = summarize(baseline_configs)
 
+    plot_metrics(baseline_configs, res_dir)
+
     print(f"Baseline score (TIMER_GROUP_ANALYSIS @ {cfg['thread_count_for_scoring']} threads): {best_score}")
 
     last_res = "None yet. This is the first attempt"
