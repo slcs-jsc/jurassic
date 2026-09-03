@@ -46,7 +46,9 @@ def plot_metrics(configs: list, res_dir: Path):
     bandwidth = [
         next(
             (c["metrics_stat"]["Memory bandwidth [MBytes/s]"]["sum"]
-                for c in configs if c["omp_threads"] == t and c["group"] == "MEM_DP"),
+             if "Memory bandwidth [MBytes/s]" in c.get("metrics_stat", {})
+             else c["metrics"]["Memory bandwidth [MBytes/s]"]
+             for c in configs if c["omp_threads"] == t and c["group"] == "MEM_DP"),
             None,
         )
         for t in threads
@@ -57,6 +59,8 @@ def plot_metrics(configs: list, res_dir: Path):
     flops = [
         next(
             (c["metrics_stat"]["DP [MFLOP/s]"]["sum"]
+             if "DP [MFLOP/s]" in c.get("metrics_stat", {})
+             else c["metrics"]["DP [MFLOP/s]"]
              for c in configs if c["omp_threads"] == t and c["group"] == "FLOPS_DP"),
             None,
         )
