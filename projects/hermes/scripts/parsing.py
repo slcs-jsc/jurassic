@@ -94,13 +94,20 @@ def parse_run_dir(run_dir: Path) -> list:
         csv_data = parse_likwid_profile(csv_path)
         metric_table = csv_data["tables"].get(f"{group}:Group 1 Metric", {})
         metrics = {k: v[0] if len(v) == 1 else v for k, v in metric_table.items()}
- 
+
+        stat_table = csv_data["tables"].get(f"{group}:Group 1 Metric STAT", {})
+        metrics_stat = {
+            metric_name: dict(zip(["sum", "min", "max", "avg"], values))
+            for metric_name, values in stat_table.items()
+        }
+
         entry = {
             "omp_threads": omp_threads,
             "group": group,
             "group_recognized": bool(re.search(rf"^\s*{re.escape(group)}\b", available_groups, re.MULTILINE)),
             "cpu_info": csv_data["cpu_info"],
             "metrics": metrics,
+            "metrics_stat": metrics_stat,
         }
         if txt_path.exists():
             entry.update(parse_formod_log(txt_path))

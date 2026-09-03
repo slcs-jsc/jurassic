@@ -11,6 +11,7 @@ from statistics import mean
 from projects.hermes.scripts.checkpoint_manager import CheckpointManager
 from projects.hermes.scripts.execution import Executor
 from projects.hermes.scripts.parsing import parse_run_dir, summarize
+from projects.hermes.scripts.plot_results import plot_agent_progress, plot_metrics
 
 from run_agent import AIAgent
 
@@ -132,6 +133,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
 
     baseline_configs = parse_run_dir(res_dir)
     best_score = score(baseline_configs)
+    best_configs = baseline_configs
     best_summary = summarize(baseline_configs)
 
     print(f"Baseline score (TIMER_GROUP_ANALYSIS @ {cfg['thread_count_for_scoring']} threads): {best_score}")
@@ -198,6 +200,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
             checkpoints.commit(i, {"score": new_score})
             last_res = f"Accepted. Score improved from {best_score:.3f}s to {new_score:.3f}s"
             best_score = new_score
+            best_configs = new_configs
             best_summary = summarize(new_configs)
             log_experiment(Experiment(i, experiment_id, True, new_score, last_res, diff, agent_response))
         else:
@@ -206,8 +209,11 @@ def optimize(args: argparse.Namespace, dry_run=False):
             log_experiment(Experiment(i, experiment_id, False, new_score, last_res, diff, agent_response))
 
         last_diff = diff
+        plot_metrics(new_configs, res_dir)
 
+    plot_agent_progress(RESULTS_FILE, res_dir)
     print(f"\nFinished. Best score: {best_score}")
+
 
 def parse_args() -> argparse.Namespace:
     executor_defaults = cfg.get("executor") or {}
