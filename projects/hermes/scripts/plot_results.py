@@ -99,7 +99,7 @@ def _plot_scaling(
     )
 
     fig, ax = plt.subplots()
-    ax.scatter(threads, values, "o-" color=color, label="Measured", zorder=3)
+    ax.scatter(threads, values, "o-", color=color, label="Measured", zorder=3)
     ax.scatter(threads, ideal, "--", color="#898781", label="Ideal linear scaling", zorder=2)
     ax.set_xlabel("OMP_NUM_THREADS")
     ax.set_ylabel(label)
