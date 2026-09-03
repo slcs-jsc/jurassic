@@ -1,5 +1,5 @@
 import argparse
-
+import datetime
 import os
 import subprocess
 import json
@@ -8,17 +8,18 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from statistics import mean
 
-from checkpoint_manager import CheckpointManager
-from execution import Executor
-from parsing import parse_run_dir, summarize
+from projects.hermes.scripts.checkpoint_manager import CheckpointManager
+from projects.hermes.scripts.execution import Executor
+from projects.hermes.scripts.parsing import parse_run_dir, summarize
 
 from run_agent import AIAgent
 
 with open(Path(os.environ.get("HERMES_OPT_CONFIG", Path(__file__).parent / "config.yaml"))) as f: 
     cfg = yaml.safe_load(f)
 
-RESULTS_FILE = (Path(cfg["experiment_dir"]) / cfg["json_out"]).resolve()
-RESULTS_DIR = (Path(cfg["experiment_dir"]) / cfg["res_dir"]).resolve()
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+RESULTS_FILE = (Path(cfg["experiment_dir"]) / f"run_{timestamp}"/ cfg["json_out"]).resolve()
+RESULTS_DIR = (Path(cfg["experiment_dir"]) / f"run_{timestamp}"/ cfg["res_dir"]).resolve()
 
 @dataclass
 class Experiment:
@@ -100,7 +101,6 @@ def optimize(args: argparse.Namespace, dry_run=False):
     worktree_abs = Path(cfg["worktree_dir"]).resolve()
     os.environ["HERMES_WRITE_SAFE_ROOT"] = str(worktree_abs)
     os.environ["TERMINAL_CWD"] = str(worktree_abs)
-    os.chdir(Path(cfg["worktree_dir"]).resolve())
     os.chdir(worktree_abs)
 
     cwd_notice = (
@@ -124,7 +124,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
 
     # Peform baselin run
     success, res_dir = executor.run_benchmark(
-        "iter_000_baseline", cfg["benchmark_env"], RESULTS_DIR / "iter_000_baseline", 
+        f"run_{timestamp}_iter_000_baseline", cfg["benchmark_env"], RESULTS_DIR / "iter_000_baseline", 
         poll_interval=args.poll_interval, timeout=args.job_timeout,
     )
     if not success: 
@@ -140,7 +140,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
     last_diff = ""
 
     for i in range(1, cfg["num_iterations"] + 1):
-        experiment_id = f"iteration_{i:03d}"
+        experiment_id = f"run_{timestamp}_iteration_{i:03d}"
         prompt = build_prompt(best_summary, last_diff, last_res)
         result = agent.run_conversation(
             user_message=prompt, 
