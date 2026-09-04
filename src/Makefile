@@ -185,7 +185,7 @@ ifeq ($(LIKWID), 1)
   LDFLAGS += -llikwid
 endif
 
-
+CFLAGS += $(EXTRA_CFLAGS)
 
 # -----------------------------------------------------------------------------
 # Targets...

@@ -487,3 +487,26 @@ This contains at least:
 - generated `data/` snapshots
 
 These run directories are intentionally ignored by git.
+
+
+# LIKWID profiling
+
+https://github.com/rrze-hpc/likwid
+
+### Measurement Regions
+base: LIKWID_MARKER_START/STOP("formod") located in formod_batch() (jurassic.c:3619/3622)
+
+### Runner Scripts 
+| Script  | Config   | Metrics    | Purpose |
+| :---:   | :---: | :---: | :---: |
+| run_noise_floor.sh | single thread, fixed batch size -> N identical runs | Runtime, MEM_DP | Determine measurement noise |
+| run_roofline.sh | varies problem size, single thread | FLOPS_DP + MEM_DP → operational intensity | Memory- or compute-bound? |
+| run_scaling.sh | varies thread count (1,2,4,8,12,24) + 48 SMT separately, scale batch size with threads | MEM_DP, Runtime | Analyse scaling and saturation |
+| run_tma.sh | compare single thread vs max physical thread count (24) | TMA, Cache volume + miss ratio | Perform Top-down Microarchitecture Analysis |
+| run_compare_ab.sh | varies code, single thread, same job + same node | Write-/Call-/Read- volume, Runtime | Compare efficiency of two code versions |
+
+### Results 
+
+#### Noise 
+
+#### Roofline

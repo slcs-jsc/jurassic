@@ -16,6 +16,7 @@ projects/benchmark/scripts/__pycache__/
 projects/hermes/*
 !projects/hermes/scripts/
 !projects/hermes/scripts/**
+projects/hermes/scripts/*.yaml
 src/*.o
 src/atmfmt
 src/brightness
