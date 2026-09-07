@@ -8,6 +8,8 @@ projects/*
 !projects/benchmark/**
 projects/benchmark/runs/
 projects/benchmark/scripts/__pycache__/
+!projects/benchmark/utils/**
+projects/benchmark/results
 !projects/validation/
 !projects/validation/**
 !projects/examples/
