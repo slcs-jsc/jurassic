@@ -33,7 +33,7 @@ reps=${REPS:-3}
 thread_list=${THREAD_LIST:-"1 24"}
 per_thread=${WORK_PER_THREAD:-10}
 groups=${LIKWID_GROUPS:-"TMA CACHE L3"}
-variants=${VARIANTS:-"base nomemset"} 
+variants=${VARIANTS:-"base"} 
   
 bench_init
 bench_check_groups "$groups"

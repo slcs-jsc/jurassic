@@ -11,7 +11,9 @@
 
 # Physical Core Scaling with (1, 2, 4, 8, 12, 24)
 # Record SMT (48 logical CPUs on socket 0) separately 
-# Scale BATCH_SIZE with thread count so the work per thread stays constant
+
+# BATCH_SIZE is fixed across all thread counts, so every configuration solves the same total problem and 
+# wall-clock time is directly comparable (time-to-solution). 
 
 # Goal: Measure how runtime, calls and MEM_DP volumes compare scale with threadcount
 
@@ -32,7 +34,7 @@ source "$jr_scripts_dir/base.sh"
 reps=${REPS:-3}
 thread_list=${THREAD_LIST:-"1 2 4 8 12 24"}
 smt_threads=${SMT_THREADS:-48}
-per_thread=${WORK_PER_THREAD:-10}     # batch elements per thread
+batch=${BATCH_SIZE:-240}    # batch elements per thread
 groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"}
  
 bench_init
@@ -44,7 +46,6 @@ bench_check_groups "$groups"
 # physical cores
 for rep in $(seq 1 "$reps"); do
   for t in $thread_list; do
-    batch=$(( t * per_thread ))
     for group in "${JR_GROUPS[@]}"; do
       bench_run phys "$t" "$group" "$batch" "$rep" "$(cores_phys "$t")"
     done
@@ -53,7 +54,6 @@ done
  
 # SMT data point
 for rep in $(seq 1 "$reps"); do
-  batch=$(( smt_threads * per_thread ))
   for group in "${JR_GROUPS[@]}"; do
     bench_run smt "$smt_threads" "$group" "$batch" "$rep" "$(cores_smt "$smt_threads")"
   done
