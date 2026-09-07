@@ -19,7 +19,7 @@ printf "0\n1\n" > data/proflist.txt
 $jurassic/climatology ret.ctl data/case0/atm_apr.tab
 $jurassic/climatology ret.ctl data/case1/atm_apr.tab
 
-# Create observation geomtry...
+# Create observation geometry...
 $jurassic/limb ret.ctl data/case0/obs.tab
 $jurassic/limb ret.ctl data/case1/obs.tab OBSZ 760
 
