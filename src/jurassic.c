@@ -23,6 +23,7 @@
 */
 
 #include "jurassic.h"
+int jurassic_marker_ref = 0;
 
 /*****************************************************************************/
 
@@ -3614,12 +3615,13 @@ void formod_batch(
 			obs_scratch + ib);
 #pragma acc update self(obs[0:nbatch],status[0:nbatch])
 #else
-#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch)
+  const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
+#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,marker_region)
   for (int ib = 0; ib < nbatch; ib++) {
-    LIKWID_MARKER_START("formod");
+    LIKWID_MARKER_START(marker_region);
     const int ib_status =
       formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs_scratch[ib]);
-    LIKWID_MARKER_STOP("formod");
+    LIKWID_MARKER_STOP(marker_region);
     if (status)
       status[ib] = ib_status;
     else if (ib_status != FORMOD_STATUS_OK)

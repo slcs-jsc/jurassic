@@ -505,13 +505,17 @@ base: LIKWID_MARKER_START/STOP("formod") located in formod_batch() (jurassic.c:3
 | run_tma.sh | compare single thread vs max physical thread count (24) | TMA, Cache volume + miss ratio | Perform Top-down Microarchitecture Analysis |
 | run_compare_ab.sh | varies code, single thread, same job + same node | Write-/Call-/Read- volume, Runtime | Compare efficiency of two code versions |
 
-### Results 
+### Results - CPU verion 
 
 #### Noise 
 
-#### Scaling
-
-##### Scaling of CPU runtime
-(Case: zenith, tria_1cm/nc_1e-6/tria, batch size: 48)
+#### Parallel efficiency
+How does performance scale with computational resources?
+(Case: zenith, tria_1cm/nc_1e-6/tria, batch size: 48, strong scaling)
 [Thread Count vs. Runtime](results/baseline/e2_wallclock_scaling.png)
 [Thread Count vs. Speedup](results/baseline/e2_wallclock_speedup.png)
+[Thread Count vs. Memory bandwith](results/baseline/e2_memory_bandwidth_scaling.png)
+
+##### Resource contention
+Does one core's TMA profile change when 23 other cores are active and sharing the same memory, versus running alone?
+

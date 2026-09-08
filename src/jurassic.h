@@ -176,6 +176,8 @@
 #define LIKWID_MARKER_CLOSE
 #endif
 
+extern int jurassic_marker_ref;
+
 #ifdef _OPENACC
 #pragma acc routine seq
 #endif

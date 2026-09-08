@@ -118,24 +118,17 @@ def main():
         for metric in metrics:
             vals = []
             for e in kept:
-
-                raw = get_metric(e, "formod", "Memory data volume [GBytes]") 
-
-                #raw = get_metric(e, args.region, metric)
-
+                raw = get_metric(e, args.region, metric)
+                if raw is None:
+                    continue
                 cc = get_call_count(e, args.region)
-                if "bandwidth" in  metric.lower(): 
-                    v = raw
-                elif "volume" in metric.lower() or "energy" in metric.lower() and raw is not None:
-                    # volume is measured per-socket
-                    if raw is not None: 
-                        v = raw / e["batch_size"]
-                        v = per_call(raw, cc)
-                    else:  # only take volume reading from MEM_DP
-                        v = None
+                m = metric.lower()
+                if "bandwidth" in  m: 
+                    v = raw                             # already a rate, socket-wide
+                elif "volume" in m or "energy" in m:
+                    v = raw / e["batch_size"]           # socket-wide total ÷ scenes
                 else: 
-                    v = per_call(raw, cc)
-                    
+                    v = per_call(raw, cc)               # core-local ÷ per-thread calls
                 if v is not None:
                     vals.append(v)
             if not vals:
@@ -251,17 +244,17 @@ def main():
         lower = metric_name.lower()
         if metric_name == "wall_time":
             ideal, higher_is_better, ceiling = "linear", False, None
-            fname, ylabel, color = "e2_wallclock_scaling.png", "Wall-clock time [s]", "#efb239"
+            fname, ylabel, color = "e2_wallclock_scaling.png", f"Wall-clock time [s] ({e["batch_size"]} scenes)", "#efb239"
         elif "volume" in lower:
             ideal, higher_is_better, ceiling = "constant", True, None
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
-            fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name}/call", "#3ab9dc"
+            fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name} (socket-wide ÷ batch-size)", "#3ab9dc"
         elif "bandwidth" in lower:
             ideal, higher_is_better, ceiling = None, True, args.stream_bw
             if ceiling is None:
                 print(f"NOTE: --stream-bw not given, plotting '{metric_name}' without a reference ceiling.")
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
-            fname, ylabel, color = f"e2_{safe}_scaling.png", metric_name, "#c76ce0"
+            fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name} (socket-wide, not normalized)", "#c76ce0"
         else:
             ideal, higher_is_better, ceiling = "linear", True, None
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()

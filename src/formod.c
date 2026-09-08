@@ -184,7 +184,8 @@ int main(
   {
     LIKWID_MARKER_THREADINIT;
     LIKWID_MARKER_REGISTER("formod");
-    LIKWID_MARKER_REGISTER("batch_alloc");
+    LIKWID_MARKER_REGISTER("formod_ref");
+    //LIKWID_MARKER_REGISTER("batch_alloc");
     // TODO: add marker around free() calls?
   }
 
@@ -839,9 +840,10 @@ void call_formod(
     else {
       SELECT_TIMER("FORMOD", "FORWARD");
     }
+    jurassic_marker_ref = 1;
     exec_formod_default(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch,
 			formod_scalar);
-
+    jurassic_marker_ref = 0;
     SELECT_TIMER("WRITE_OBS", "OUTPUT");
     write_obs(wrkdir, radfile, ctl, &obs, 0);
 
@@ -855,10 +857,8 @@ void call_formod(
     }
 
     if (task_mode == 't') {
-      //LIKWID_MARKER_START("analysis"); // Start LIKWID profiling, includes formods own setup i.e. gsl_rng_env_setup, gsl_rng_alloc, gsl_rng_free
       exec_formod_benchmark(ctl, tbl, &atm, &obs, &atm2, &los_scratch,
 			    &obs_scratch, formod_scalar, batch_size);
-      //LIKWID_MARKER_STOP("analysis");
     }
 
     if (task_mode == 's') {
