@@ -9,6 +9,9 @@
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e1_roofline
 
+# TODO: single core (cores own bandwith) vs node-level roofline (full memory bandwith ceiling with all cores active)
+# cache aware roofline (separate L1/L2/L3/DRAM ceilings?)
+
 # Performs LIKWID profiling (FLOPS_DP, MEM_DP) to measure operational intensity 
 # i.e. the ratio of computational work to data movement: 
 #     operational intensity = DP [MFLOP/s] / (Memory bandwidth [MBytes/s])
