@@ -194,7 +194,9 @@ def get_metric(entry: dict, region: str, metric: str, stat: bool = False):
     """
     tables = entry.get("regions", {}).get(region, {}).get("tables", {})
     prefix = f"{entry['group']}:"
+
     for key, table in tables.items():
+
         if not key.startswith(prefix):
             continue
         kind = key[len(prefix):].strip()

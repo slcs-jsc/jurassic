@@ -19,6 +19,8 @@
 
 # Output: out/{phys,smt}.t<N>.<GROUP>.b<N>.rep<N>.csv
 
+# TODO: consider NUMA topology, report efficiency speedup/p
+
 set -euo pipefail
 
 JR_EXPERIMENT=e2_scaling
@@ -34,7 +36,7 @@ source "$jr_scripts_dir/base.sh"
 reps=${REPS:-3}
 thread_list=${THREAD_LIST:-"1 2 4 8 12 24"}
 smt_threads=${SMT_THREADS:-48}
-batch=${BATCH_SIZE:-240}    # batch elements per thread
+batch=${BATCH_SIZE:-48}    # batch elements per thread
 groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"}
  
 bench_init
@@ -60,4 +62,3 @@ for rep in $(seq 1 "$reps"); do
 done
  
 bench_finish
-

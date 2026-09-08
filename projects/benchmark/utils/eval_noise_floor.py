@@ -2,7 +2,7 @@ import argparse
 import statistics as st
 import sys
 from pathlib import Path
- 
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from likwid_parsing import parse_run_dir, get_metric, get_call_count, get_region_runtime 
  
@@ -16,13 +16,15 @@ def per_call(raw, call_count):
         return None 
     return raw / call_count
  
-def coefficient_of_variation(values):
-    if len(values) < 2:
-        return float("nan")
+def get_stats(values):
     mean = st.mean(values)
-    if mean == 0:
-        return float("nan")
-    return st.pstdev(values) / mean
+    median = st.median(values)
+    stdev = st.pstdev(values)
+    if mean == 0 : 
+        cv = float("nan")
+    else: 
+        cv = stdev / mean
+    return mean, median, stdev, cv
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -76,8 +78,8 @@ def main():
             if v is not None:
                 rt_per_call.append(v)
         if rt_per_call:
-            med, cv = st.median(rt_per_call), coefficient_of_variation(rt_per_call)
-            row_values.append(f"{med:.4g} (cv={cv:.1%})")
+            mean, median, stdev, cv = get_stats(rt_per_call)
+            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%}")
             if cv > max_cv:
                 max_cv, max_cv_desc = cv, (label, threads, group, batch, "runtime/call")
         else:
@@ -104,8 +106,8 @@ def main():
                     warned_metrics.add(metric)
                 row_values.append("n/a")
                 continue
-            med, cv = st.median(vals), coefficient_of_variation(vals)
-            row_values.append(f"{med:.4g} (cv={cv:.1%})")
+            mean, median, stdev, cv = get_stats(vals)
+            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%}")
             if cv > max_cv:
                 max_cv, max_cv_desc = cv, (label, threads, group, batch, metric)
  

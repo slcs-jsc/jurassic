@@ -71,7 +71,9 @@ bench_init() {
     export LD_LIBRARY_PATH="$JR_REPO_ROOT/libs/build/lib:$JR_REPO_ROOT/libs/build/lib64:${LD_LIBRARY_PATH:-}"
     
     # LIKWID pins via -C; a competing OpenMP affinity policy corrupts the mapping.
+    # If LIKWID is not used: set export OMP_PLACES=cores, export OMP_PROC_BIND=close
     unset OMP_PLACES OMP_PROC_BIND
+
 
     JR_ACTIVE_CTL="$JR_WORK_DIR/${JR_CASE_NAME}.ctl"
     awk -v tblbase="$JR_TBLBASE" \

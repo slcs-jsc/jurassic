@@ -4,16 +4,17 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=01:00:00
+#SBATCH --time=03:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e0_noise
+
+# TODO: pin process (taskset/numactl?)
 
 # Runs identical binary + config for N times 
 # Goal: determine measurement noise 
 
 # Output: out/noise.t1.<GROUP>.b<N>.rep<1..N>.csv
-
 
 set -euo pipefail
 set -x                               
@@ -31,7 +32,7 @@ source "$jr_scripts_dir/base.sh"
 
 reps=${REPS:-12}
 threads=${THREADS:-1}
-batch=${BATCH_SIZE:-240}
+batch=${BATCH_SIZE:-48}
 groups=${LIKWID_GROUPS:-"MEM_DP"}
 
 bench_init

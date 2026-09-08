@@ -118,12 +118,24 @@ def main():
         for metric in metrics:
             vals = []
             for e in kept:
-                raw = get_metric(e, args.region, metric)
+
+                raw = get_metric(e, "formod", "Memory data volume [GBytes]") 
+
+                #raw = get_metric(e, args.region, metric)
+
                 cc = get_call_count(e, args.region)
-                if "bandwidth" not in  metric.lower(): 
-                    v = per_call(raw, cc)
-                else: 
+                if "bandwidth" in  metric.lower(): 
                     v = raw
+                elif "volume" in metric.lower() or "energy" in metric.lower() and raw is not None:
+                    # volume is measured per-socket
+                    if raw is not None: 
+                        v = raw / e["batch_size"]
+                        v = per_call(raw, cc)
+                    else:  # only take volume reading from MEM_DP
+                        v = None
+                else: 
+                    v = per_call(raw, cc)
+                    
                 if v is not None:
                     vals.append(v)
             if not vals:
@@ -244,7 +256,6 @@ def main():
             ideal, higher_is_better, ceiling = "constant", True, None
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
             fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name}/call", "#3ab9dc"
-
         elif "bandwidth" in lower:
             ideal, higher_is_better, ceiling = None, True, args.stream_bw
             if ceiling is None:
@@ -264,4 +275,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
