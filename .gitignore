@@ -5,11 +5,14 @@ docs/site/
 libs/build/
 projects/*
 !projects/benchmark/
-!projects/benchmark/**
+projects/benchmark/*
 projects/benchmark/runs/
+!projects/benchmark/scripts/
 projects/benchmark/scripts/__pycache__/
-!projects/benchmark/utils/**
-projects/benchmark/results
+!projects/benchmark/utils/
+!projects/benchmark/results/
+projects/benchmark/results/*
+!projects/benchmark/results/baseline/
 !projects/validation/
 !projects/validation/**
 !projects/examples/

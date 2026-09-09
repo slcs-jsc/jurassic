@@ -21,13 +21,15 @@ def per_call(raw, call_count):
         return None 
     return raw / call_count
 
-def coefficient_of_variation(values):
-    if len(values) < 2:
-        return float("nan")
+def get_stats(values):
     mean = st.mean(values)
-    if mean == 0:
-        return float("nan")
-    return st.pstdev(values) / mean
+    median = st.median(values)
+    stdev = st.pstdev(values)
+    if mean == 0 : 
+        cv = float("nan")
+    else: 
+        cv = stdev / mean
+    return mean, median, stdev, cv
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -63,15 +65,16 @@ def main():
     max_cv = 0.0
     max_cv_desc = None
     warned_metrics = set()
-
     medians: dict[str, dict[tuple, float]] = {m: {} for m in ["wall_time", "runtime/call"] + metrics}
- 
+    batch_size_dict = {}
+    
     header = f"{'label':>8} {'thr':>4} {'group':>8} {'batch':>6} | " + \
              " | ".join(f"{m[:22]:>22}" for m in ["runtime/call [s]"] + metrics)
     print(header)
     print("-" * len(header))
 
     for (label, threads, group, batch), entries in sorted(groups.items()):
+        batch_size_dict[(label, threads)] = batch
         entries = sorted(entries, key=lambda e: e["rep"])
         kept = entries[args.warmup:]
         if len(kept) < 2:
@@ -90,9 +93,9 @@ def main():
             if b:
                 wall_time.append(b["mean_s"])
         if wall_time:
-            med, cv = st.median(wall_time), coefficient_of_variation(wall_time)
-            row_values.append(f"{med:.4g} (cv={cv:.1%})")
-            medians["wall_time"][(label, threads)] = med
+            mean, median, stdev, cv = get_stats(wall_time)
+            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%})")
+            medians["wall_time"][(label, threads)] = median
             if cv > max_cv:
                 max_cv, max_cv_desc = cv, (label, threads, group, batch, "wall_time")
         else:
@@ -107,9 +110,9 @@ def main():
             if v is not None:
                 rt_per_call.append(v)
         if rt_per_call:
-            med, cv = st.median(rt_per_call), coefficient_of_variation(rt_per_call)
-            row_values.append(f"{med:.4g} (cv={cv:.1%})")
-            medians["runtime/call"][(label, threads)] = med
+            mean, median, stdev, cv = get_stats(rt_per_call)
+            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%})")
+            medians["runtime/call"][(label, threads)] = median
             if cv > max_cv:
                 max_cv, max_cv_desc = cv, (label, threads, group, batch, "runtime/call")
         else:
@@ -144,9 +147,9 @@ def main():
                     warned_metrics.add(metric)
                 row_values.append("n/a")
                 continue
-            med, cv = st.median(vals), coefficient_of_variation(vals)
-            row_values.append(f"{med:.4g} (cv={cv:.1%})")
-            medians[metric][(label, threads)] = med
+            mean, median, stdev, cv = get_stats(vals)
+            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%})")
+            medians[metric][(label, threads)] = median
             if cv > max_cv:
                 max_cv, max_cv_desc = cv, (label, threads, group, batch, metric)
  
@@ -161,61 +164,38 @@ def main():
 
     phys_threads = sorted({t for (lbl, t) in medians["wall_time"] if lbl == "phys"})
     smt_threads = sorted({t for (lbl, t) in medians["wall_time"] if lbl == "smt"})
-    t1 = medians["wall_time"].get(("phys", 1))
+    spread_threads = sorted({t for (lbl, t) in medians["wall_time"] if lbl == "spread"})
 
+    t1 = medians["wall_time"].get(("phys", 1))
     if t1 is not None:
         # Wall-clock speedup relative to the 1-thread physical-core baseline
-        phys_speedups = {}
-        for t in phys_threads:
-            tn = medians["wall_time"].get(("phys", t))
-            if tn is not None:
-                phys_speedups[t] = t1 / tn
-
-        smt_speedups = {}
-        for t in smt_threads:
-            tn = medians["wall_time"].get(("smt", t))
-            if tn is not None:
-                smt_speedups[t] = t1 / tn
+        phys_speedups = {t: t1 / medians["wall_time"][("phys", t)] for t in phys_threads
+                          if medians["wall_time"].get(("phys", t)) is not None}
+        smt_speedups = {t: t1 / medians["wall_time"][("smt", t)] for t in smt_threads
+                         if medians["wall_time"].get(("smt", t)) is not None}
+        spread_speedups = {t: t1 / medians["wall_time"][("spread", t)] for t in spread_threads
+                            if medians["wall_time"].get(("spread", t)) is not None}
 
         if len(phys_threads) > 1:
             print()
             print(f"{'threads':>8} {'wall_time [s]':>14} {'speedup':>9} {'efficiency':>11}")
-            print("-" * 45)
+            print("-" * 55)
 
-            for t in phys_threads:
-                tn = medians["wall_time"].get(("phys", t))
-                speedup = phys_speedups.get(t)
+            for lbl, speedups in (("phys", phys_speedups), ("spread", spread_speedups)):
+                for t in sorted(speedups):
+                    tn = medians["wall_time"].get((lbl, t))
+                    print(f"{lbl:>8} {t:>8} {tn:>14.4g} {speedups[t]:>9.2f} {speedups[t] / t:>10.1%}")
 
-                if tn is None or speedup is None:
-                    continue
-
-                print(
-                    f"{t:>8} {tn:>14.4g} "
-                    f"{speedup:>9.2f} {speedup / t:>10.1%}"
-                )
-
-            for t in smt_threads:
+            for t in sorted(smt_speedups):
                 tn = medians["wall_time"].get(("smt", t))
-                speedup = smt_speedups.get(t)
-
-                if tn is None or speedup is None:
-                    continue
-
-                print(
-                    f"{t:>8} {tn:>14.4g} "
-                    f"{speedup:>9.2f} {'(SMT)':>11}"
-                )
+                print(f"{'smt':>8} {t:>8} {tn:>14.4g} {smt_speedups[t]:>9.2f} {'(SMT)':>11}")
 
         # Plot wall-clock speedup
-        speedup_threads = sorted(phys_speedups)
-        speedup_values = [phys_speedups[t] for t in speedup_threads]
-
         smt_speedup_points = [(t, smt_speedups[t], "SMT") for t in sorted(smt_speedups)]
-
-        if speedup_threads:
+        if phys_speedups:
             _plot_scaling(
-                np.asarray(speedup_threads),
-                np.asarray(speedup_values),
+                np.asarray(sorted(phys_speedups)),
+                np.asarray([phys_speedups[t] for t in sorted(phys_speedups)]),
                 "Wall-clock speedup",
                 "#efb239",
                 res_dir,
@@ -224,7 +204,46 @@ def main():
                 higher_is_better=True,
                 smt_points=smt_speedup_points,
             )
+        if spread_speedups:
+            _plot_scaling(
+                np.asarray(sorted(spread_speedups)),
+                np.asarray([spread_speedups[t] for t in sorted(spread_speedups)]),
+                "Wall-clock speedup (spread across sockets)",
+                "#89dd29",
+                res_dir,
+                "e2_wallclock_speedup_spread.png",
+                ideal="linear",
+                higher_is_better=True,
+            )
 
+        # Plot efficiency (speedup/p)
+        eff_threads = sorted(phys_speedups)
+        eff_values = [phys_speedups[t] / t for t in eff_threads]
+        if eff_threads:
+            fig, ax = plt.subplots()
+            ax.plot(eff_threads, eff_values, "o-", color="#efb239", label="phys", zorder=3)
+            if spread_speedups:
+                st_threads = sorted(spread_speedups)
+                ax.plot(st_threads, [spread_speedups[t] / t for t in st_threads],
+                        "s--", color="#7d8f69", label="spread", zorder=3)
+            if smt_speedups:
+                for t in sorted(smt_speedups):
+                    ax.scatter([t], [smt_speedups[t] / t], marker="D", s=60,
+                               color="#e67e22", zorder=4, label="SMT")
+            ax.axhline(1.0, linestyle="--", color="#898781", label="Ideal (100%)", zorder=2)
+            ax.set_xlabel("threads")
+            ax.set_ylabel("Parallel efficiency (speedup / threads)")
+            ax.set_xscale("log")
+            ax.set_xticks(eff_threads)
+            ax.xaxis.set_major_formatter(plt.ScalarFormatter())
+            ax.set_ylim(0, 1.15)
+            ax.set_title("Parallel efficiency vs thread count")
+            ax.legend(fontsize=8)
+            fig.tight_layout()
+            res_dir.mkdir(parents=True, exist_ok=True)
+            fig.savefig(res_dir / "e2_efficiency.png", bbox_inches="tight")
+            plt.close(fig)
+            print(f"  wrote {res_dir / 'e2_efficiency.png'}")
     else:
         print("\nNo 1-thread baseline found. Skipping speedup plot.")
 
@@ -236,15 +255,16 @@ def main():
         return [(t, v, "SMT (48 threads)")] if v is not None else None
 
     for metric_name in ["wall_time"] + metrics:
-        vals = [medians[metric_name].get(("phys", t)) for t in phys_threads]
-        if any(v is None for v in vals):
-            print(f"WARNING: missing '{metric_name}' for some thread counts. Skipping plot.")
+        phys_vals = [medians[metric_name].get(("phys", t)) for t in phys_threads]
+        if any(v is None for v in phys_vals):
+            print(f"WARNING: missing '{metric_name}' for some phys thread counts. Skipping plot.")
             continue
 
         lower = metric_name.lower()
         if metric_name == "wall_time":
+            b0 = batch_size_dict.get(("phys", phys_threads[0]), "?")
             ideal, higher_is_better, ceiling = "linear", False, None
-            fname, ylabel, color = "e2_wallclock_scaling.png", f"Wall-clock time [s] ({e["batch_size"]} scenes)", "#efb239"
+            fname, ylabel, color = "e2_wallclock_scaling.png", f"Wall-clock time [s] ({b0} scenes)", "#efb239"
         elif "volume" in lower:
             ideal, higher_is_better, ceiling = "constant", True, None
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
@@ -260,9 +280,19 @@ def main():
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
             fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name}/call", "#7d8f69"
 
-        _plot_scaling(phys_threads, vals, ylabel, color, res_dir, fname,
+        _plot_scaling(phys_threads, phys_vals, ylabel, color, res_dir, fname,
                     ideal=ideal, higher_is_better=higher_is_better,
                     stream_ceiling=ceiling, smt_points=_smt_point(metric_name))
+
+        spread_vals = [medians[metric_name].get(("spread", t)) for t in spread_threads]
+        if any(v is None for v in spread_vals):
+            print(f"WARNING: missing '{metric_name}' for some phys thread counts. Skipping plot.")
+            continue
+
+        spread_fname = fname.replace(".png", "_spread.png")
+        _plot_scaling(spread_threads, spread_vals, f"{ylabel} (spread)", color, res_dir, spread_fname,
+                          ideal=ideal, higher_is_better=higher_is_better,
+                          stream_ceiling=ceiling)
 
     print(f"\nPlots written to {res_dir}/")
 

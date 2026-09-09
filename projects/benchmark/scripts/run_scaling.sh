@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=06:00:00
+#SBATCH --time=02:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e2_scaling
@@ -56,7 +56,7 @@ if [ -z "${THREAD_LIST:-}" ]; then
   [ "$t" -ne $(( JR_PHYS_PER_SOCKET * 2 )) ] && thread_list="$thread_list $JR_PHYS_PER_SOCKET"
 fi
 smt_threads=${SMT_THREADS:-$(( JR_PHYS_PER_SOCKET * JR_SMT ))}
-spread_threads=${SPREAD_THREADS:-$JR_N_PHYS}
+spread_threads=${SPREAD_THREADS:-"$(( JR_PHYS_PER_SOCKET + 4 )) $(( JR_PHYS_PER_SOCKET * 2 ))"}
 
 for rep in $(seq 1 "$reps"); do
 
@@ -75,7 +75,7 @@ for rep in $(seq 1 "$reps"); do
   # physical cores spread across sockets
   for t in $thread_list $spread_threads; do
     [ "$t" -le "$JR_N_PHYS" ] || continue
-    [ "$t" -le "$JR_PHYS_PER_SOCKET" ] && continue
+    [ "$t" -le "$JR_PHYS_PER_SOCKET" ] && continue # only use settings that actually cross sockets 
     for group in "${JR_GROUPS[@]}"; do
       bench_run_forward spread "$t" "$group" "$batch" "$rep" "$(cpus_spread "$t")"
     done
