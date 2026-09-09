@@ -3745,7 +3745,10 @@ int formod_pencil(
     tau[ND], tau_path[ND][NG], u[NG];
 
   /* Preserve the previous calloc-based semantics for scratch LOS data. */
-  memset(los, 0, sizeof(*los));
+
+  #ifndef NO_LOS_MEMSET
+    memset(los, 0, sizeof(*los));
+  #endif
 
   /* Initialize... */
   for (int ig = 0; ig < ctl->ng; ig++) {
@@ -5172,7 +5175,7 @@ void optimal_estimation(
 
   /* Compute initial kernel... */
   SELECT_TIMER("RET_KERNEL_INIT", "RETRIEVAL");
-  
+
   LIKWID_MARKER_START("kernel_jacobian");
   kernel(ctl, tbl, atm_i, obs_i, k_i);
   LIKWID_MARKER_STOP("kernel_jacobian");

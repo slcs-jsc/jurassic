@@ -185,7 +185,7 @@ int main(
     LIKWID_MARKER_THREADINIT;
     LIKWID_MARKER_REGISTER("formod");
     LIKWID_MARKER_REGISTER("formod_ref");
-    //LIKWID_MARKER_REGISTER("batch_alloc");
+    LIKWID_MARKER_REGISTER("batch_alloc");
     // TODO: add marker around free() calls?
   }
 
