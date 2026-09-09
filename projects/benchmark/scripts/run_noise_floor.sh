@@ -36,14 +36,14 @@ batch=${BATCH_SIZE:-48}
 groups=${LIKWID_GROUPS:-"MEM_DP"}
 
 bench_init
-bench_build "${VARIANT:-base}"
+bench_build_forward "${VARIANT:-base}"
 bench_validate
 bench_prepare_inputs
 bench_check_groups "$groups"
 
 for rep in $(seq 1 "$reps"); do
   for group in "${JR_GROUPS[@]}"; do
-    bench_run noise "$threads" "$group" "$batch" "$rep"
+    bench_run_forward noise "$threads" "$group" "$batch" "$rep"
   done
 done
 

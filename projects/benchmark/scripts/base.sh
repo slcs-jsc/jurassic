@@ -1,6 +1,45 @@
-#shared logic for the benchmark experiments
+# Shared logic for the likwid benchmark profiling runner scripts:
+# Resolve paths, select benchmark case, load modules, set env
 
-# resolve paths, select benchmark case, load modules, set env
+bench_analyse_topology() {
+JR_TOPO_MAP="$JR_RUN_DIR/cpu_topology.csv"
+  lscpu -p=CPU,CORE,SOCKET,NODE | grep -v '^#' > "$JR_TOPO_MAP"
+
+  JR_N_LOGICAL=$(wc -l < "$JR_TOPO_MAP")
+  JR_N_SOCKETS=$(awk -F, '{print $3}' "$JR_TOPO_MAP" | sort -un | wc -l)
+  JR_N_NUMA=$(awk -F, '{print $4}' "$JR_TOPO_MAP" | sort -un | wc -l)
+  JR_N_PHYS=$(awk -F, '{print $3"-"$2}' "$JR_TOPO_MAP" | sort -u | wc -l)
+  JR_SMT=$(( JR_N_LOGICAL / JR_N_PHYS ))
+  JR_PHYS_PER_SOCKET=$(( JR_N_PHYS / JR_N_SOCKETS ))
+
+  {
+    echo "logical_cpus=$JR_N_LOGICAL"
+    echo "physical_cores=$JR_N_PHYS"
+    echo "sockets=$JR_N_SOCKETS"
+    echo "numa_domains=$JR_N_NUMA"
+    echo "smt_per_core=$JR_SMT"
+    echo "phys_cores_per_socket=$JR_PHYS_PER_SOCKET"
+  } | tee "$JR_RUN_DIR/topology.txt"
+}
+
+# N physical cores on socket 0 (no SMT)
+cpus_phys() {
+  awk -F, '$3 == 0 { if (!($2 in s)) { s[$2]=1; print $1 } }' "$JR_TOPO_MAP" \
+    | sort -n | head -n "$1" | paste -sd,
+}
+
+# N logical CPUs on socket 0: physical cores first, then SMT
+cpus_smt() {
+  awk -F, '$3 == 0 {print $1}' "$JR_TOPO_MAP" | sort -n | head -n "$1" | paste -sd,
+}
+
+# N physical cores spread across all sockets
+cpus_spread() {
+  awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; i[$3]++; print i[$3], $3, $1 } }' \
+    "$JR_TOPO_MAP" | sort -k1,1n -k2,2n | awk '{print $3}' \
+    | head -n "$1" | paste -sd,
+}
+
 bench_init() {
     local script_source=${BASH_SOURCE[1]:-$0}
     JR_SCRIPT_DIR=$(cd "$(dirname "$script_source")" && pwd)
@@ -74,7 +113,6 @@ bench_init() {
     # If LIKWID is not used: set export OMP_PLACES=cores, export OMP_PROC_BIND=close
     unset OMP_PLACES OMP_PROC_BIND
 
-
     JR_ACTIVE_CTL="$JR_WORK_DIR/${JR_CASE_NAME}.ctl"
     awk -v tblbase="$JR_TBLBASE" \
     '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' \
@@ -88,6 +126,8 @@ bench_init() {
     ( cd "$JR_REPO_ROOT" && git rev-parse HEAD 2>/dev/null ) \
         > "$JR_RUN_DIR/git_commit.txt" || true
     
+    bench_analyse_topology
+
     {
         echo "experiment=${JR_EXPERIMENT:-unknown}"
         echo "run_id=$JR_RUN_ID"
@@ -103,7 +143,7 @@ bench_init() {
 
 # build CPU binaries
 # nomemset: exclude  memset(los, 0, sizeof(*los)) in jurassic.c
-bench_build() {
+bench_build_forward() {
     local variant=$1
     local extra=""
     case "$variant" in
@@ -120,7 +160,25 @@ bench_build() {
     
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
     cd "$JR_WORK_DIR"
+}
 
+bench_build_retrieval() {
+  local variant=$1
+    local extra=""
+    case "$variant" in
+        base)     extra="" ;;
+        nomemset) extra="-DNO_LOS_MEMSET" ;;
+        *) echo "Unknown build variant: $variant" >&2; return 1 ;;
+    esac
+
+    echo "=== building retrieval variant '$variant' (EXTRA_CFLAGS='$extra') ==="
+    ( cd "$JR_SRC_DIR" \
+        && make clean \
+        && make -j MPI=1 MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
+                GPU=0 LIKWID=1 EXTRA_CFLAGS="$extra" ) || return 1
+
+    echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
+    cd "$JR_WORK_DIR"
 }
 
 # generate data/atm.tab and data/obs.tab
@@ -176,14 +234,10 @@ bench_check_groups() {
   fi
   return 0
 }
-# physical cores only 
-cores_phys() { echo "E:S0:$1:1:2"; }
-cores_smt()  { echo "S0:0-$(( $1 - 1 ))"; }
  
-bench_run() {
+bench_run_forward() {
   local label=$1 threads=$2 group=$3 batch=$4 rep=$5
-  local cores=${6:-$(cores_phys "$threads")}
- 
+  local cores=${6:-$(cpus_phys "$threads")}
   local tag="${label}.t${threads}.${group}.b${batch}.rep${rep}"
   local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
@@ -216,12 +270,48 @@ bench_run() {
   return 0
 }
 
+bench_run_retrieval() {
+  local label=$1 ranks=$2 threads=$3 group=$4 rep=$5 cores=$6
+  # core setup needs to be explicitly defined in order to set up MPI ranks
+  if [ -z "$cores" ]; then
+    echo "bench_run_retrieval: core list (arg 6) is required" >&2
+    return 1
+  fi
+  local tag="${label}.r${ranks}.t${threads}.${group}.rep${rep}"
+  local csv="$JR_WORK_DIR/out/${tag}.csv"
+  local txt="$JR_WORK_DIR/out/${tag}.txt"
+  mkdir -p "$JR_WORK_DIR/out"
+ 
+  echo "--- $tag (cores=$cores) ---"
+
+  set +e
+  OMP_NUM_THREADS=$threads mpirun -np "$ranks" \
+    likwid-perfctr -C "$cores" -g "$group" -m -o  "$csv" \
+    "$JR_SRC_DIR/retrieval" "$JR_ACTIVE_CTL" "$JR_RET_DIRLIST" \
+    > "$txt" 2>&1
+  local rc=$?
+  set -e
+ 
+  {
+    echo "label=$label"
+    echo "ranks=$ranks"
+    echo "threads=$threads"
+    echo "group=$group"
+    echo "rep=$rep"
+    echo "core_list=$cores"
+    echo "exit_code=$rc"
+  } >> "$txt"
+
+  [ "$rc" -ne 0 ] && echo "WARNING: run failed ($tag, exit $rc)" >&2
+  return 0
+}
+
 # copy results to run directory
 bench_finish() {
   cp -a "$JR_WORK_DIR/out" "$JR_RUN_DIR/" 2>/dev/null || true
   cp -a "$JR_ACTIVE_CTL" "$JR_RUN_DIR/" 2>/dev/null || true
   echo
-  echo "=== ${EXPERIMENT:-experiment} complete ==="
+  echo "=== ${JR_EXPERIMENT:-experiment} complete ==="
   echo "Run directory: $JR_RUN_DIR"
   echo "Raw output:    $JR_RUN_DIR/out/<label>.t<N>.<GROUP>.b<N>.rep<N>.{csv,txt}"
 }

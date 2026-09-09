@@ -50,7 +50,7 @@ for case_name in $case_list; do
  
   bench_init
   if [ "$first" -eq 1 ]; then
-    bench_build "${VARIANT:-base}"
+    bench_build_forward "${VARIANT:-base}"
     bench_validate
     bench_check_groups "$groups"
     first=0
@@ -59,7 +59,7 @@ for case_name in $case_list; do
  
   for rep in $(seq 1 "$reps"); do
     for group in "${JR_GROUPS[@]}"; do
-      bench_run "size_${case_name}" "$threads" "$group" "$batch" "$rep"
+      bench_run_forward "size_${case_name}" "$threads" "$group" "$batch" "$rep"
     done
   done
 done

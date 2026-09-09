@@ -39,7 +39,7 @@ bench_init
 bench_check_groups "$groups"
  
 for variant in $variants; do
-  bench_build "$variant"
+  bench_build_forward "$variant"
   bench_validate
   if [ "$JR_VALIDATION_OK" -ne 1 ]; then
     echo "Variant '$variant' failed validation -- skipping." >&2
@@ -51,7 +51,7 @@ for variant in $variants; do
     for t in $thread_list; do
       batch=$(( t * per_thread ))
       for group in "${JR_GROUPS[@]}"; do
-        bench_run "tma_${variant}" "$t" "$group" "$batch" "$rep" "$(cores_phys "$t")"
+        bench_run_forward "tma_${variant}" "$t" "$group" "$batch" "$rep" "$(cores_phys "$t")"
       done
     done
   done

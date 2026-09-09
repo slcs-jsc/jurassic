@@ -5172,7 +5172,10 @@ void optimal_estimation(
 
   /* Compute initial kernel... */
   SELECT_TIMER("RET_KERNEL_INIT", "RETRIEVAL");
+  
+  LIKWID_MARKER_START("kernel_jacobian");
   kernel(ctl, tbl, atm_i, obs_i, k_i);
+  LIKWID_MARKER_STOP("kernel_jacobian");
 
   /* ------------------------------------------------------------
      Levenberg-Marquardt minimization...

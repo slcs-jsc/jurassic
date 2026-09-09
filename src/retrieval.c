@@ -63,6 +63,13 @@ int main(
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 #endif
 
+  LIKWID_MARKER_INIT;
+  #pragma omp parallel
+  {
+    LIKWID_MARKER_THREADINIT;
+    LIKWID_MARKER_REGISTER("kernel_jacobian");
+  }
+
   /* Print usage information... */
   USAGE;
 
@@ -175,6 +182,8 @@ int main(
   if (proflist != NULL)
     fclose(proflist);
   tbl_free(&ctl, tbl);
+
+  LIKWID_MARKER_CLOSE;
 
 #ifdef MPI
   MPI_Finalize();
