@@ -157,7 +157,7 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
-.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test print-exc strip uninstall $(TESTS)
+.PHONY : all binaries check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test print-exc strip uninstall $(TESTS)
 
 all: $(EXC)
 	rm -f *~
@@ -181,6 +181,21 @@ $(TESTS) mpi_test: all
 	  cd ../tests/$@ ; bash ./run.sh \
 	  && (echo "\n===== Test \"$@\" passed! =====") \
 	  || (echo "\n===== Test \"$@\" failed! =====" ; exit 1)
+
+binaries: all
+	$(MAKE) --no-print-directory strip
+	rm -rf ../jurassic_$(VERSION)_linux_x86_64
+	$(MAKE) --no-print-directory install DESTDIR=../jurassic_$(VERSION)_linux_x86_64/bin
+	cd .. && cp README.md COPYING jurassic_$(VERSION)_linux_x86_64/ \
+	  && printf '%s\n' \
+	  "JURASSIC precompiled binaries" \
+	  "Version: $(VERSION)" \
+	  "Platform: Linux x86_64" \
+	  "MPI: disabled" \
+	  "OpenMP: enabled" \
+	  > jurassic_$(VERSION)_linux_x86_64/BUILD-INFO.txt \
+	  && tar -czf jurassic_$(VERSION)_linux_x86_64.tgz jurassic_$(VERSION)_linux_x86_64 \
+	  && rm -rf jurassic_$(VERSION)_linux_x86_64
 
 clean:
 	rm -rf $(EXC) *.o *.gcda *.gcno *.gcov coverage* *~

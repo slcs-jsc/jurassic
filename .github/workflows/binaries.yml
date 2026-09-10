@@ -1,0 +1,38 @@
+name: binaries
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  linux-x86_64:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: sudo apt-get update ; sudo apt-get install libgsl-dev libnetcdf-dev libhdf5-dev
+
+      - name: Build static binaries
+        run: cd src ; make STATIC=1
+
+      - name: Run tests
+        run: cd src ; make STATIC=1 check
+
+      - name: Check binary linkage
+        run: file src/formod ; ldd src/formod || true
+
+      - name: Create binary package
+        run: cd src ; make STATIC=1 binaries
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: jurassic-linux-x86_64-${{ github.sha }}
+          path: jurassic_*_linux_x86_64.tgz
+          retention-days: 14
+          if-no-files-found: error
