@@ -30,6 +30,8 @@ These links provide further information for users and developers of JURASSIC:
 
 - [GitHub releases](https://github.com/slcs-jsc/jurassic/releases)
 
+- [Precompiled development binaries](https://github.com/slcs-jsc/jurassic/actions/workflows/binaries.yml)
+
 ## Project files
 
 - [Code of conduct](https://github.com/slcs-jsc/jurassic/blob/HEAD/CODE_OF_CONDUCT.md)

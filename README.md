@@ -129,6 +129,13 @@ Alternatively, to get the latest development version, clone the GitHub repositor
 
     git clone https://github.com/slcs-jsc/jurassic.git
 
+Precompiled Linux x86_64 binaries for development versions are available
+from successful runs of the
+[binaries workflow](https://github.com/slcs-jsc/jurassic/actions/workflows/binaries.yml).
+These working artifacts are intended for testing and expire after 30 days;
+see the [installation manual](https://slcs-jsc.github.io/jurassic/installation/)
+for download instructions and platform limitations.
+
 **2. Install dependencies**
 
 For the default build, the JURASSIC git repository includes bundled

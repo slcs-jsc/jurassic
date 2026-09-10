@@ -60,6 +60,37 @@ Alternatively, download a release archive from the
 
 ------------------------------------------------------------------------
 
+## Precompiled development binaries
+
+Successful runs of the
+[binaries workflow](https://github.com/slcs-jsc/jurassic/actions/workflows/binaries.yml)
+provide working artifacts for Linux x86_64. These packages allow JURASSIC to
+be used without installing a compiler or the GSL, netCDF, and HDF5 libraries.
+
+To download a package:
+
+1. Open the binaries workflow and select the latest successful run for the
+   `master` branch.
+2. In the **Artifacts** section, download the
+   `jurassic-linux-x86_64-<commit>` artifact. A GitHub login may be required.
+3. Extract the downloaded ZIP file. It contains a `.tar.gz` archive and its
+   SHA-256 checksum.
+4. Verify and extract the archive:
+
+```bash
+sha256sum -c jurassic-linux-x86_64-<commit>.tar.gz.sha256
+tar -xzf jurassic-linux-x86_64-<commit>.tar.gz
+./jurassic-linux-x86_64-<commit>/bin/formod --help
+```
+
+The binaries are built on Ubuntu 22.04 in CPU/OpenMP configuration without
+MPI, GPU, or JURASSIC-UNIFIED support. They are intended for Ubuntu 22.04 or
+newer and may work on other Linux x86_64 systems with a compatible glibc.
+Each package is a development snapshot identified by its Git commit, not a
+versioned release, and is retained by GitHub for 30 days.
+
+------------------------------------------------------------------------
+
 ## Configuring the build
 
 JURASSIC uses a Makefile-based build system in `src/Makefile`. Prior to
