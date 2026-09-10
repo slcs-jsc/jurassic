@@ -30,20 +30,29 @@ dependencies() {
   ldd "$1" | awk '$2 == "=>" && $3 ~ /^\// { print $3 }'
 }
 
+require_command() {
+  command -v "$1" >/dev/null || {
+    echo "Required command not found: $1" >&2
+    exit 1
+  }
+}
+
 create_bundle() {
   local output_dir="${1:-${root_dir}}"
   local commit package stage archive library target count_before count_after
+  local package_name copyright_file library_path
 
-  command -v ldd >/dev/null
-  command -v patchelf >/dev/null
-  command -v sha256sum >/dev/null
+  require_command ldd
+  require_command patchelf
+  require_command sha256sum
 
   commit="$(git -C "${root_dir}" rev-parse --short=7 HEAD)"
   package="jurassic-${platform}-${commit}"
   stage="$(mktemp -d)"
   trap 'rm -rf "${stage}"' RETURN
 
-  mkdir -p "${stage}/${package}/bin" "${stage}/${package}/lib" "${output_dir}"
+  mkdir -p "${stage}/${package}/bin" "${stage}/${package}/lib" \
+    "${stage}/${package}/licenses" "${output_dir}"
 
   while IFS= read -r executable; do
     test -x "${src_dir}/${executable}" || {
@@ -67,7 +76,20 @@ create_bundle() {
         echo "Conflicting libraries named $(basename "${library}")" >&2
         exit 1
       fi
-      [[ -e "${target}" ]] || cp -L "${library}" "${target}"
+      if [[ ! -e "${target}" ]]; then
+        cp -L "${library}" "${target}"
+        if command -v dpkg-query >/dev/null; then
+          library_path="$(readlink -f "${library}")"
+          package_name="$(dpkg-query -S "${library_path}" 2>/dev/null |
+            sed -n '1{s/: .*//;p}' || true)"
+          package_name="${package_name%%:*}"
+          copyright_file="/usr/share/doc/${package_name}/copyright"
+          if [[ -n "${package_name}" && -f "${copyright_file}" ]]; then
+            cp -L "${copyright_file}" \
+              "${stage}/${package}/licenses/${package_name}.copyright"
+          fi
+        fi
+      fi
     done < <(
       find "${stage}/${package}/bin" "${stage}/${package}/lib" \
         -maxdepth 1 -type f -exec ldd {} \; 2>/dev/null |
@@ -95,6 +117,24 @@ create_bundle() {
     echo "Compiler: $(gcc --version | head -n 1)"
     echo "Configuration: MPI=0 GPU=0 UNIFIED=0"
   } >"${stage}/${package}/BUILD-INFO.txt"
+
+  {
+    echo "JURASSIC precompiled development binaries"
+    echo
+    echo "This package contains Linux x86_64 CPU/OpenMP binaries."
+    echo "MPI, GPU, and JURASSIC-UNIFIED support are not included."
+    echo
+    echo "Run a program directly from the bin directory, for example:"
+    echo
+    echo "  ./bin/formod --help"
+    echo
+    echo "The bundled libraries are found relative to the executables; no"
+    echo "compiler or separate GSL, netCDF, or HDF5 installation is needed."
+    echo "See BUILD-INFO.txt for the exact source commit and build details."
+  } >"${stage}/${package}/README-BINARY.txt"
+
+  find "${stage}/${package}/lib" -maxdepth 1 -type f -printf '%f\n' |
+    sort >"${stage}/${package}/THIRD-PARTY-LIBRARIES.txt"
 
   archive="${output_dir}/${package}.tar.gz"
   tar -C "${stage}" -czf "${archive}" "${package}"
@@ -126,6 +166,8 @@ verify_bundle() {
   package="$(tar -tzf "${archive}" | sed -n '1{s|/.*||;p}')"
 
   test -f "${stage}/${package}/BUILD-INFO.txt"
+  test -f "${stage}/${package}/README-BINARY.txt"
+  test -s "${stage}/${package}/THIRD-PARTY-LIBRARIES.txt"
   test -f "${stage}/${package}/README.md"
   test -f "${stage}/${package}/COPYING"
 

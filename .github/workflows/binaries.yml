@@ -33,6 +33,15 @@ jobs:
       - name: Verify package
         run: .github/scripts/package-linux-binaries.sh verify "${{ steps.package.outputs.archive }}"
 
+      - name: Test package in clean container
+        run: |
+          archive="${{ steps.package.outputs.archive }}"
+          docker run --rm \
+            --env ARCHIVE="$(basename "${archive}")" \
+            --volume "$(dirname "${archive}"):/artifacts:ro" \
+            ubuntu:22.04 \
+            bash -c 'mkdir /tmp/jurassic && tar -xzf "/artifacts/${ARCHIVE}" -C /tmp/jurassic && /tmp/jurassic/*/bin/formod --help'
+
       - name: Upload binaries
         uses: actions/upload-artifact@v7
         with:
