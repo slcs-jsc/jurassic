@@ -34,7 +34,7 @@ jobs:
         run: .github/scripts/package-linux-binaries.sh verify "${{ steps.package.outputs.archive }}"
 
       - name: Upload binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.package.outputs.package }}
           path: |
