@@ -1365,10 +1365,10 @@ scripts use it to generate diagnostic PNG plots.</p>
 <hr />
 <h2 id="run-an-example">Run an Example</h2>
 <p>The quickest end-to-end test is one of the example projects under
-<code>projects/</code>. Start from the repository root, then enter the project
+<code>projects/examples/</code>. Start from the repository root, then enter the project
 directory before running its script so the relative paths inside the
 script resolve correctly.</p>
-<pre><code class="language-bash">cd projects/nadir
+<pre><code class="language-bash">cd projects/examples/nadir
 ./run.sh
 </code></pre>
 <p>A successful run ends with a comparison of the newly generated
@@ -1393,10 +1393,10 @@ cd ../zenith
 <li>Generate diagnostic plots if <code>gnuplot</code> is available.</li>
 </ol>
 <p>For the nadir example, the core commands are:</p>
-<pre><code class="language-bash">../../src/climatology nadir.ctl atm.tab
-../../src/nadir nadir.ctl obs.tab
-../../src/formod nadir.ctl obs.tab atm.tab rad.tab TASK time
-../../src/kernel nadir.ctl obs.tab atm.tab kernel.tab
+<pre><code class="language-bash">../../../src/climatology nadir.ctl atm.tab
+../../../src/nadir nadir.ctl obs.tab
+../../../src/formod nadir.ctl obs.tab atm.tab rad.tab TASK time
+../../../src/kernel nadir.ctl obs.tab atm.tab kernel.tab
 </code></pre>
 <p>The limb and zenith examples use the same structure with <code>limb.ctl</code> or
 <code>zenith.ctl</code> and the corresponding geometry generator.</p>
