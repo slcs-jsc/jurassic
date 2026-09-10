@@ -300,7 +300,7 @@ in the [Quickstart](quickstart.md).
 
 ## Tips for robust configurations
 
-- Start from the **example projects** (`projects/limb`, `projects/nadir`, `projects/zenith`) and modify incrementally.
+- Start from the **example projects** (`projects/examples/limb`, `projects/examples/nadir`, `projects/examples/zenith`) and modify incrementally.
 - Keep `ND`, `NW`, and `WINDOW[i]` consistent; mismatches are a common source of confusing results.
 - When changing `NG`/`EMITTER`, ensure the corresponding lookup tables exist under `TBLBASE`.
 - If you tune `RAYDS`/`RAYDZ`, validate against reference output to ensure accuracy remains acceptable.

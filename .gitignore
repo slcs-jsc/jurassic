@@ -4,9 +4,8 @@ docs/manual/javascripts/
 docs/site/
 libs/build/
 projects/*
-!projects/limb/
-!projects/nadir/
-!projects/zenith/
+!projects/examples/
+!projects/examples/**
 src/*.o
 src/atmfmt
 src/brightness

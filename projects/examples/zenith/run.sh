@@ -1,10 +1,10 @@
 #! /bin/bash
 
 # Set environment...
-export LD_LIBRARY_PATH=../../libs/build/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=../../../libs/build/lib:$LD_LIBRARY_PATH
 
 # Setup...
-jurassic=../../src
+jurassic=../../../src
 
 # Create atmospheric data file...
 $jurassic/climatology zenith.ctl atm.tab
