@@ -178,6 +178,7 @@ int main(
   int argc,
   char *argv[]) {
 
+  #ifdef LIKWID_PERFMON
   LIKWID_MARKER_INIT;
 
   #pragma omp parallel
@@ -188,7 +189,7 @@ int main(
     LIKWID_MARKER_REGISTER("batch_alloc");
     // TODO: add marker around free() calls?
   }
-
+  #endif
 
   static ctl_t ctl;
 
@@ -287,7 +288,10 @@ int main(
   tbl_free(&ctl, tbl);
   PRINT_TIMERS;
 
+  #ifdef LIKWID_PERFMON
   LIKWID_MARKER_CLOSE;
+  #endif
+
   return EXIT_SUCCESS;
 }
 
@@ -471,13 +475,19 @@ void exec_formod_batch_repeat(
   if (batch_size < 1)
     ERRMSG("BATCH_SIZE must be positive!");
 
+  #ifdef LIKWID_PERFMON
   LIKWID_MARKER_START("batch_alloc");
+  #endif
+
   ALLOC(atm_batch, atm_t, batch_size);
   ALLOC(obs_batch, obs_t, batch_size);
   ALLOC(los_batch, los_t, batch_size);
   ALLOC(obs_scratch_batch, obs_t, batch_size);
   ALLOC(status, int, batch_size);
+
+  #ifdef LIKWID_PERFMON
   LIKWID_MARKER_STOP("batch_alloc");
+  #endif
 
   gsl_rng_env_setup();
   rng = gsl_rng_alloc(gsl_rng_default);

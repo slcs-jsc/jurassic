@@ -3618,10 +3618,15 @@ void formod_batch(
   const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
 #pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,marker_region)
   for (int ib = 0; ib < nbatch; ib++) {
+
+    #ifdef LIKWID_PERFMON
     LIKWID_MARKER_START(marker_region);
+    #endif
     const int ib_status =
       formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs_scratch[ib]);
+    #ifdef LIKWID_PERFMON
     LIKWID_MARKER_STOP(marker_region);
+    #endif
     if (status)
       status[ib] = ib_status;
     else if (ib_status != FORMOD_STATUS_OK)
@@ -5176,9 +5181,13 @@ void optimal_estimation(
   /* Compute initial kernel... */
   SELECT_TIMER("RET_KERNEL_INIT", "RETRIEVAL");
 
+  #ifdef LIKWID_PERFMON
   LIKWID_MARKER_START("kernel_jacobian");
+  #endif
   kernel(ctl, tbl, atm_i, obs_i, k_i);
+  #ifdef LIKWID_PERFMON
   LIKWID_MARKER_STOP("kernel_jacobian");
+  #endif
 
   /* ------------------------------------------------------------
      Levenberg-Marquardt minimization...
