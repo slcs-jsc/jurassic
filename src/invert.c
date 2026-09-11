@@ -62,7 +62,7 @@ int main(
   static char line[LEN];
 
   static double rtime[NLMAX], rz[NLMAX], rlon[NLMAX], rlat[NLMAX], obs_meas,
-    obs_sim, scl = 1.0, scl_err, c0, c1, cov00, cov01, cov11, sumsq,
+    scl = 1.0, scl_err, c0, c1, cov00, cov01, cov11, sumsq,
     x[NMAX], x2[NMAX], y[NMAX], y_err[NMAX], y2[NMAX], y2_err[NMAX],
     y2_sim[NMAX], y2_sim_err[NMAX], w2[NMAX];
 
@@ -167,11 +167,11 @@ int main(
 
 	/* Call forward model... */
 	formod(&ctl, tbl, &atm, &obs);
-	obs_sim = obs.rad[0][0] - obs.rad[1][0];
+	const double obs_sim = obs.rad[0][0] - obs.rad[1][0];
 
 	/* Get time index... */
 	i = (int) ((atm.time[0] - rtime[0]) / dt);
-	if (i < 0 && i >= NMAX)
+	if (i < 0 || i >= NMAX)
 	  ERRMSG("Time index out of range!");
 
 	/* Get maxima... */

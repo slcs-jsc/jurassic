@@ -736,6 +736,17 @@
     }									\
   }
 
+/**
+ * @brief Enable quantization for the current NetCDF variable.
+ *
+ * This macro applies Granular BitRound quantization to the variable identified
+ * by `varid` in the NetCDF file identified by `ncid`. If the installed NetCDF
+ * version does not support quantization, requesting it raises an error.
+ *
+ * @param quant Number of significant digits to retain (0 = off).
+ *
+ * @author Lars Hoffmann
+ */
 #ifdef NC_QUANTIZE_GRANULARBR
 #define NC_DEF_VAR_QUANTIZE(quant) do { \
     if((quant) > 0) \

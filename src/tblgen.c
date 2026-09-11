@@ -55,7 +55,7 @@ int main(
   static char *line = NULL;
 
   static double dnu, abs[MAXNPTS], epsold, f, filt[MAXNF],
-    nu, nu0, nu1, nuf[MAXNF], press, temp, u;
+    nu0, nu1, nuf[MAXNF], press, temp, u;
 
   static int i, idx, nf, npts;
 
@@ -118,7 +118,7 @@ int main(
     /* Integrate... */
     double epssum = 0, fsum = 0;
     for (i = i0; i < npts; i++) {
-      nu = nu0 + dnu * (double) i;
+      const double nu = nu0 + dnu * (double) i;
       if (nu < nuf[0])
 	continue;
       else if (nu > nuf[nf - 1])
