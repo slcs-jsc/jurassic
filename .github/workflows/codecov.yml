@@ -5,9 +5,10 @@ on: [push, pull_request]
 jobs:
   run:
     runs-on: ubuntu-24.04
+
     steps:
       - name: fetch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: install
         run: |
@@ -20,7 +21,7 @@ jobs:
           make coverage
 
       - name: upload
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           files: ./src/coverage.info
           disable_search: true

@@ -9,11 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: install
         run: sudo apt-get update ; sudo apt-get install libgsl-dev libnetcdf-dev libhdf5-dev
+
       - name: make
         run: cd src ; make
+
       - name: make check
         run: cd src ; make check
