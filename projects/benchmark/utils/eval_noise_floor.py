@@ -4,27 +4,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from likwid_parsing import parse_run_dir, get_metric, get_call_count, get_region_runtime 
+from likwid_parsing import parse_run_dir, get_metric, get_call_count, get_region_runtime, get_stats, per_call
  
 DEFAULT_METRICS = [
     "Memory data volume [GBytes]",
     "Memory bandwidth [MBytes/s]",
 ]
-
-def per_call(raw, call_count):
-    if raw is None or call_count in (None, 0) or isinstance(raw, list):
-        return None 
-    return raw / call_count
- 
-def get_stats(values):
-    mean = st.mean(values)
-    median = st.median(values)
-    stdev = st.pstdev(values)
-    if mean == 0 : 
-        cv = float("nan")
-    else: 
-        cv = stdev / mean
-    return mean, median, stdev, cv
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)

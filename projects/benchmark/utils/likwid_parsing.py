@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+import statistics as st
 
 # Matches the file naming produced by base.sh's jr_run():
 #   <label>.t<threads>.<group>.b<batch>.rep<rep>.csv
@@ -181,16 +182,55 @@ def parse_run_dir(run_dir: Path) -> list:
         configs.append(entry)
  
     return configs
- 
+
+def per_call(raw, call_count):
+    if raw is None or call_count in (None, 0) or isinstance(raw, list):
+        return None
+    return raw / call_count
+
+def get_stats(values):
+    mean = st.mean(values)
+    median = st.median(values)
+    stdev = st.pstdev(values)
+    if mean == 0 : 
+        cv = float("nan")
+    else: 
+        cv = stdev / mean
+    return mean, median, stdev, cv
+
+CAS_LINE_SIZE_BYTES = 64
+def get_cas_total_gbytes(entry, region, prefix):
+    """CAS_COUNT_RD/WR appear once per MBOX channel, not as a single named row.
+    Need to sum over channels and convert to GBytes (1 CAS = one 64-byte transfer)."""
+    tables = entry.get("regions", {}).get(region, {}).get("tables", {})
+    group_prefix = f"{entry['group']}:"
+    total_cas = 0
+    found = False
+    for key, table in tables.items():
+        if not key.startswith(group_prefix):
+            continue
+        for name, values in table.items():
+            if not name.startswith(prefix):
+                continue
+            if isinstance(values, list):
+                numeric = [v for v in values if isinstance(v, (int, float))]
+                if not numeric:
+                    continue
+                total_cas += numeric[0]
+                found = True
+            elif isinstance(values, (int, float)):
+                total_cas += values
+                found = True
+    return total_cas * CAS_LINE_SIZE_BYTES / 1e9 if found else None
+
+def get_value(entry, region, metric):
+    if metric in ("CAS_COUNT_RD", "CAS_COUNT_WR"):
+        return get_cas_total_gbytes(entry, region, metric)
+    return get_metric(entry, region, metric)
  
 def get_metric(entry: dict, region: str, metric: str, stat: bool = False):
     """
-    Convenience accessor: pull a single metric value out of a parsed entry.
-
-    Searches any table belonging to `entry["group"]` in the given region,
-    rather than assuming a fixed "kind" label (LIKWID versions have been
-    observed to differ here, e.g. "Metric" vs. "Group 1 Metric") -- so this
-    works regardless of exactly how your installed likwid-perfctr names it.
+    Searches any table belonging to `entry["group"]` in the given region
     """
     tables = entry.get("regions", {}).get(region, {}).get("tables", {})
     prefix = f"{entry['group']}:"
@@ -211,7 +251,30 @@ def get_metric(entry: dict, region: str, metric: str, stat: bool = False):
             numeric = [v for v in values if isinstance(v, (int, float))]
             return numeric[0] if len(numeric) == 1 else sum(numeric)
     return None
- 
+
+def normalize(raw, metric, entry, call_count):
+    m = metric.lower()
+    if "bandwidth" in m or "mflop/s" in m:
+        return raw
+    if "volume" in m or "energy" in m or metric.startswith("CAS_COUNT"):
+        return raw / entry["batch_size"]
+    return per_call(raw, call_count)
+
+def get_summed_metric(entry, region, prefix):
+    """
+    Helper function to sum up matching rows
+    """
+    tables = entry.get("regions", {}).get(region, {}).get("tables", {})
+    key = next((k for k in tables if k.startswith(f"{entry['group']}:")), None)
+    if not key:
+        return None
+    total = 0
+    found = False
+    for name, values in tables[key].items():
+        if name.startswith(prefix):
+            total += values[0] if not isinstance(values, list) else sum(v for v in values if isinstance(v, (int, float)))
+            found = True
+    return total if found else None
  
 def get_call_count(entry: dict, region: str):
     """Total call count recorded for `region` (summed across threads)."""

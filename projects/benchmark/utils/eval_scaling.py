@@ -9,27 +9,12 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from plot_results import _plot_scaling
-from likwid_parsing import parse_run_dir, get_metric, get_call_count, get_region_runtime
+from likwid_parsing import parse_run_dir, get_metric, get_call_count, get_region_runtime, per_call, get_stats
  
 DEFAULT_METRICS = [
     "Memory data volume [GBytes]",
     "Memory bandwidth [MBytes/s]",
 ]
-
-def per_call(raw, call_count):
-    if raw is None or call_count in (None, 0) or isinstance(raw, list):
-        return None 
-    return raw / call_count
-
-def get_stats(values):
-    mean = st.mean(values)
-    median = st.median(values)
-    stdev = st.pstdev(values)
-    if mean == 0 : 
-        cv = float("nan")
-    else: 
-        cv = stdev / mean
-    return mean, median, stdev, cv
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -216,20 +201,12 @@ def main():
                 higher_is_better=True,
             )
 
-        # Plot efficiency (speedup/p)
+        # Plot efficiency (speedup/p) of physical threads
         eff_threads = sorted(phys_speedups)
         eff_values = [phys_speedups[t] / t for t in eff_threads]
         if eff_threads:
             fig, ax = plt.subplots()
             ax.plot(eff_threads, eff_values, "o-", color="#efb239", label="phys", zorder=3)
-            if spread_speedups:
-                st_threads = sorted(spread_speedups)
-                ax.plot(st_threads, [spread_speedups[t] / t for t in st_threads],
-                        "s--", color="#7d8f69", label="spread", zorder=3)
-            if smt_speedups:
-                for t in sorted(smt_speedups):
-                    ax.scatter([t], [smt_speedups[t] / t], marker="D", s=60,
-                               color="#e67e22", zorder=4, label="SMT")
             ax.axhline(1.0, linestyle="--", color="#898781", label="Ideal (100%)", zorder=2)
             ax.set_xlabel("threads")
             ax.set_ylabel("Parallel efficiency (speedup / threads)")
