@@ -6,7 +6,8 @@ import json
 import yaml
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from statistics import mean
+from statistics import mean, pstdev
+import math
 
 from checkpoint_manager import CheckpointManager
 from execution import Executor
@@ -58,13 +59,38 @@ def check_validation(res_dir: Path, dry_run=False) -> tuple[bool, str]:
     log_tail = log_path.read_text()[-2000:] if log_path.exists() else "(no validation.log found)"
     return return_code == 0, f"validation exit_code={return_code}\n{log_tail}"
 
-def score(configs: list, thread_count: int = cfg["thread_count_for_scoring"]) -> float | None:
+def score(configs: list, thread_count: int = cfg["thread_count_for_scoring"]) -> tuple[float | None, float, int]:
     values = [
         c["timers"]["TIMER_GROUP_ANALYSIS"]
         for c in configs
         if c["omp_threads"] == thread_count and "TIMER_GROUP_ANALYSIS" in c.get("timers", {})
     ]
-    return mean(values) if values else None
+    if not values:
+        return None, 0.0, 0
+    m = mean(values)
+    sd = pstdev(values) if len(values) > 1 else 0.0
+    return m, sd, len(values)
+
+def is_improvement(
+    baseline_mean: float, 
+    baseline_std: float, 
+    baseline_n: int, 
+    candidate_mean: float, 
+    candidate_std: float, 
+    candidate_n: int,
+    z_threshold: float = 1.5,
+    ) -> bool:
+
+    baseline_variance = (baseline_std ** 2) / max(baseline_n, 1)
+    candidate_variance = (candidate_std ** 2) / max(candidate_n, 1)
+
+    standard_error = math.sqrt(baseline_variance + candidate_variance)
+
+    if standard_error == 0:
+        return candidate_mean < baseline_mean
+    z = (baseline_mean - candidate_mean) / standard_error # lower is better
+    return z >= z_threshold
+
 
 def log_experiment(experiment: Experiment) -> None: 
     RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -132,7 +158,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
         raise RuntimeError(f"Could not execute baseline. Abort optimization loop.") 
 
     baseline_configs = parse_run_dir(res_dir)
-    best_score = score(baseline_configs)
+    best_score, best_sd, best_n = score(baseline_configs)
     best_configs = baseline_configs
     best_summary = summarize(baseline_configs)
 
@@ -194,11 +220,11 @@ def optimize(args: argparse.Namespace, dry_run=False):
             continue
 
         new_configs = parse_run_dir(res_dir)
-        new_score = score(new_configs)
+        new_score, new_sd, new_n = score(new_configs)
 
         # If candidate > baseline Then baseline = candidate 
         # else rollback changes 
-        if new_score is not None and best_score is not None and new_score < best_score:
+        if new_score is not None and best_score is not None and is_improvement(best_score, best_sd, best_n, new_score, new_sd, new_n):
             checkpoints.commit(i, {"score": new_score})
             last_res = f"Accepted. Score improved from {best_score:.3f}s to {new_score:.3f}s"
             best_score = new_score
