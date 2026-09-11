@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=01:30:00
+#SBATCH --time=03:30:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e4_compare_ab
@@ -26,17 +26,18 @@ else
 fi
 source "$jr_scripts_dir/base.sh"
  
-reps=${REPS:-5}
-threads=${THREADS:-1}
-batch=${BATCH_SIZE:-240}
-groups=${LIKWID_GROUPS:-"MEM_DP CACHE"}
+reps=${REPS:-3}
+threads=${THREADS:-1 2 4 8 12 24}
+batch=${BATCH_SIZE:-48}
+groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"}
  
 bench_init
 bench_check_groups "$groups"
  
 for variant in base nomemset; do
-  bench_build "$variant"
- 
+  bench_build_forward "$variant"
+  cp -a "$JR_SRC_DIR/formod" "$JR_RUN_DIR/formod.${variant}"
+
   # Correctness gate per variant: a faster wrong answer is not an optimization.
   bench_validate
   cp -a "$JR_RUN_DIR/validation_status.txt" \
@@ -51,8 +52,11 @@ for variant in base nomemset; do
   bench_prepare_inputs
  
   for rep in $(seq 1 "$reps"); do
-    for group in "${JR_GROUPS[@]}"; do
-      bench_run "$variant" "$threads" "$group" "$batch" "$rep"
+    for t in $threads; do
+      for group in "${JR_GROUPS[@]}"; do
+        bench_run_forward "$variant" "$t" "$group" "$batch" "$rep" "$(cpus_phys "$t")"
+        sleep 3 # this delay solved issue with likwid profiler having a stale state
+      done
     done
   done
 done
