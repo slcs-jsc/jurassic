@@ -156,7 +156,7 @@ bench_build_forward() {
     ( cd "$JR_SRC_DIR" \
         && make clean \
         && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
-                GPU=0 LIKWID=1 EXTRA_CFLAGS="$extra" ) || return 1
+                GPU=0 LIKWID=1 CFLAGS+="$extra" ) || return 1
     
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
     cd "$JR_WORK_DIR"
@@ -175,7 +175,7 @@ bench_build_retrieval() {
     ( cd "$JR_SRC_DIR" \
         && make clean \
         && make -j MPI=1 MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
-                GPU=0 LIKWID=1 EXTRA_CFLAGS="$extra" ) || return 1
+                GPU=0 LIKWID=1 CFLAGS+="$extra"  ) || return 1
 
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
     cd "$JR_WORK_DIR"
