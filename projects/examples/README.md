@@ -4,11 +4,25 @@ These examples provide small, self-contained introductions showing how to run
 radiative transfer calculations with JURASSIC for three common observation
 geometries:
 
-- `limb/` observes atmospheric tangent paths and writes radiances.
-- `nadir/` observes the atmosphere from above and writes brightness
-  temperatures.
-- `zenith/` observes upward from the surface and writes brightness
-  temperatures.
+- `limb/` simulates atmospheric limb sounding along tangent paths.
+- `nadir/` simulates downward-looking observations from above the atmosphere.
+- `zenith/` simulates upward-looking observations from the surface.
+
+JURASSIC simulates thermal infrared radiative transfer through the atmosphere.
+Along a line of sight, atmospheric layers both emit thermal radiation and
+absorb radiation emitted elsewhere along the path. The resulting radiance
+depends on atmospheric temperature, absorber concentrations, spectral channel,
+and optical path length, while the observation geometry determines which layers
+contribute most strongly to the signal and its sensitivity to atmospheric
+parameters.
+
+## Scope
+
+The examples use the small set of lookup tables under `tests/data/` and are
+intended for installation checks, tutorials, and configuration experiments.
+Numerical validation across broader spectral and gas configurations is provided
+separately under `projects/validation/`; performance measurements are under
+`projects/benchmark/`.
 
 ## Installation
 
@@ -157,15 +171,6 @@ weighting of downwelling thermal emission: compared with the shorter vertical
 path, more oblique rays generally give greater weight to the lower, denser
 atmosphere. The kernel is a sensitivity diagnostic, not an independent
 validation result.
-
-## Scope
-
-The examples use the small set of lookup tables under `tests/data/` and are
-intended for installation checks, tutorials, and configuration experiments.
-Numerical validation across broader spectral and gas configurations is provided
-separately
-under `projects/validation/`; performance measurements are under
-`projects/benchmark/`.
 
 The scripts overwrite their generated TAB and PNG outputs in place. Run
 `make check` from `src/` for the regression suite.
