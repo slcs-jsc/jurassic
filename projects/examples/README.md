@@ -109,11 +109,9 @@ cd projects/examples/nadir
 across the latitude scan.*
 
 Brightness temperature is the temperature a blackbody would need to reproduce
-the simulated channel radiance. The CO<sub>2</sub> channels at
-667.7820,
+the simulated channel radiance. The CO<sub>2</sub> channels at 667.7820,
 668.5410, and 669.8110 cm<sup>-1</sup> have different absorption
-strengths and therefore
-sample different effective emitting levels and temperature ranges. This
+strengths and therefore sample different effective emitting levels and temperature ranges. This
 explains the physically plausible separation of their brightness temperatures.
 
 ![Nadir temperature kernel at 668.5410 cm-1](nadir/plot_kernel_temperature_668.5410.png)
