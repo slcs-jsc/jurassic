@@ -1,13 +1,16 @@
 # JURASSIC examples
 
-These examples provide small, self-contained introductions to three common
-observation geometries:
+These examples provide small, self-contained introductions showing how to run
+radiative transfer calculations with JURASSIC for three common observation
+geometries:
 
 - `limb/` observes atmospheric tangent paths and writes radiances.
 - `nadir/` observes the atmosphere from above and writes brightness
   temperatures.
 - `zenith/` observes upward from the surface and writes brightness
   temperatures.
+
+## Installation
 
 Build JURASSIC and its bundled libraries from the repository root before running
 an example:
@@ -153,9 +156,10 @@ test.
 
 ## Scope
 
-The examples use the small lookup tables under `tests/data/` and are intended
-for installation checks, tutorials, and configuration experiments. Numerical
-validation across broader spectral and gas configurations is provided separately
+The examples use the small set of lookup tables under `tests/data/` and are
+intended for installation checks, tutorials, and configuration experiments.
+Numerical validation across broader spectral and gas configurations is provided
+separately
 under `projects/validation/`; performance measurements are under
 `projects/benchmark/`.
 
