@@ -1,13 +1,15 @@
 #! /bin/bash
 
 # Set environment...
-export LD_LIBRARY_PATH=../../../libs/build/lib:$LD_LIBRARY_PATH
+if [ -z "${JURASSIC_BIN:-}" ]; then
+    export LD_LIBRARY_PATH=../../../libs/build/lib:${LD_LIBRARY_PATH:-}
+fi
 export OMP_NUM_THREADS=4
 export LANG=C
 export LC_ALL=C
 
 # Setup...
-jurassic=../../../src
+jurassic=${JURASSIC_BIN:-../../../src}
 
 # Create atmospheric data file...
 $jurassic/climatology nadir.ctl atm.tab

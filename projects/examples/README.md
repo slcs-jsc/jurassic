@@ -27,6 +27,28 @@ cd projects/examples/nadir
 ./run.sh
 ```
 
+## Using precompiled binaries
+
+The examples normally use the locally built executables in `src/`. To use an
+extracted precompiled development package instead, set `JURASSIC_BIN` to its
+`bin` directory:
+
+```bash
+git clone https://github.com/slcs-jsc/jurassic.git
+cd jurassic
+
+export JURASSIC_BIN=/path/to/jurassic-linux-x86_64-<commit>/bin
+
+cd projects/examples/nadir
+./run.sh
+```
+
+The repository is still needed for the example configurations, lookup tables,
+scripts, and reference data, but JURASSIC itself does not need to be compiled
+when `JURASSIC_BIN` points to the packaged executables. Without `JURASSIC_BIN`,
+the scripts use the normal source build in `src/`. Gnuplot is still required for
+the diagnostic plots.
+
 Each script generates an atmosphere (`atm.tab`), observation geometry
 (`obs.tab`), radiative-transfer result (`rad.tab`), kernel functions
 (`kernel.tab`), and diagnostic PNG plots. It finishes by comparing `rad.tab`
