@@ -1,13 +1,5 @@
 # JURASSIC examples
 
-These examples provide small, self-contained introductions showing how to run
-radiative transfer calculations with JURASSIC for three common observation
-geometries:
-
-- `limb/` simulates atmospheric limb sounding along tangent paths.
-- `nadir/` simulates downward-looking observations from above the atmosphere.
-- `zenith/` simulates upward-looking observations from the surface.
-
 JURASSIC simulates thermal infrared radiative transfer through the atmosphere.
 Along a line of sight, atmospheric layers both emit thermal radiation and
 absorb radiation emitted elsewhere along the path. The resulting radiance
@@ -16,7 +8,13 @@ and optical path length, while the observation geometry determines which layers
 contribute most strongly to the signal and its sensitivity to atmospheric
 parameters.
 
-## Scope
+These examples provide small, self-contained introductions showing how to run
+radiative transfer calculations with JURASSIC for three common observation
+geometries:
+
+- `limb/` simulates atmospheric limb sounding along tangent paths.
+- `nadir/` simulates downward-looking observations from above the atmosphere.
+- `zenith/` simulates upward-looking observations from the surface.
 
 The examples use the small set of lookup tables under `tests/data/` and are
 intended for installation checks, tutorials, and configuration experiments.
