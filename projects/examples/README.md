@@ -60,10 +60,10 @@ they differ.
 
 ## Limb example
 
-The limb case views long, nearly horizontal paths through atmospheric tangent
-points at different altitudes. This geometry provides strong vertical
-sensitivity to temperature and trace gases by resolving how their contributions
-to the measured radiance vary with altitude.
+The limb case views long slant paths through atmospheric tangent points at
+different altitudes. Because each ray spends a long distance near its lowest
+altitude, the geometry provides strong vertical sensitivity to temperature and
+trace gases near the tangent region.
 
 ```bash
 cd projects/examples/limb
@@ -77,19 +77,20 @@ tangent altitude.*
 
 The radiance profiles show the simulated signal at 792 and 832 cm<sup>-1</sup>
 as a function of tangent height. Their channel-dependent shapes are physically
-plausible: lowering the tangent point increases the absorbing and emitting
-column, while temperature and gas abundance also vary along the path. The
-result is not expected to be a simple monotonic curve.
+plausible: temperature, absorber amount, Planck emission, and the optical depth
+of the long slant path all change with tangent altitude, so the radiance need
+not vary monotonically.
 
 ![Limb temperature kernel at 792 cm-1](limb/plot_kernel_temperature_792.png)
 
 *Temperature kernel profiles for the limb geometry at 792 cm<sup>-1</sup>.*
 
-The temperature kernel is the change in radiance caused by a small temperature
-change at each altitude. Each coloured profile belongs to a different tangent
-height. Sensitivity is concentrated near and above the corresponding tangent
-region because the ray does not sample lower altitudes, while absorption limits
-how deeply an optically thick ray can sense.
+The temperature kernel is the sensitivity of simulated radiance to a local
+temperature perturbation. Each coloured profile belongs to a different tangent
+height. The long path segment near the tangent point localizes the sensitivity
+near and above that region; the ray does not sample lower altitudes, and optical
+depth limits contributions from more distant layers. The kernel is therefore a
+sensitivity diagnostic, not an independent validation result.
 
 ## Nadir example
 
@@ -108,19 +109,21 @@ cd projects/examples/nadir
 across the latitude scan.*
 
 Brightness temperature is the temperature a blackbody would need to reproduce
-the simulated channel radiance. Differences among the three curves are
-reasonable because each channel has different CO2 absorption and therefore
-samples a different range of atmospheric levels. Variation across the scan is
-also expected as the viewing path becomes more slanted away from nadir.
+the simulated channel radiance. The CO<sub>2</sub> channels at 667.7820,
+668.5410, and
+669.8110 cm<sup>-1</sup> have different absorption strengths and therefore
+sample different effective emitting levels and temperature ranges. This
+explains the physically plausible separation of their brightness temperatures.
 
 ![Nadir temperature kernel at 668.5410 cm-1](nadir/plot_kernel_temperature_668.5410.png)
 
 *Temperature kernel profiles for the nadir scan at 668.5410 cm<sup>-1</sup>.*
 
-This kernel shows how brightness temperature responds to temperature changes
-with altitude for the different scan positions. Peaks mark the layers that
-contribute most strongly; their displacement with viewing geometry reflects
-the changing path length and optical depth.
+This kernel is the sensitivity of simulated brightness temperature to local
+temperature perturbations. Its vertical structure shows the thermal-emission
+weighting: peaks mark the atmospheric levels that contribute most strongly in
+the channel at each scan position. It is a sensitivity diagnostic, not an
+independent validation result.
 
 ## Zenith example
 
@@ -140,19 +143,21 @@ across the angular scan.*
 
 The brightness-temperature curves are approximately symmetric around the
 vertical view because opposite viewing directions traverse equivalent model
-atmospheres. Toward more oblique angles, the longer atmospheric path increases
-absorption and emission, so changes in brightness temperature and decreasing
-transmittance are physically expected.
+atmospheres. Toward more oblique angles, the atmospheric path length and optical
+depth increase, enhancing the contribution of the lower atmosphere; the
+resulting brightness-temperature changes and decreasing transmittance are
+physically expected.
 
 ![Zenith temperature kernel at 792 cm-1](zenith/plot_kernel_temperature_792.0000.png)
 
 *Temperature kernel profiles for the zenith geometry at 792 cm<sup>-1</sup>.*
 
-The temperature kernel identifies the atmospheric layers controlling the
-downwelling signal. More oblique rays generally place greater weight on the
-lower, denser atmosphere, while the vertical ray samples a shorter column. The
-kernel structure is a sensitivity diagnostic, not an independent accuracy
-test.
+The temperature kernel is the sensitivity of simulated brightness temperature
+to a local temperature perturbation. Its vertical structure describes the
+weighting of downwelling thermal emission: compared with the shorter vertical
+path, more oblique rays generally give greater weight to the lower, denser
+atmosphere. The kernel is a sensitivity diagnostic, not an independent
+validation result.
 
 ## Scope
 
