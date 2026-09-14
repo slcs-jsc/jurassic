@@ -8,6 +8,9 @@ and optical path length, while the observation geometry determines which layers
 contribute most strongly to the signal and its sensitivity to atmospheric
 parameters.
 
+For details of the radiative-transfer method, see the
+[physical background and theory](../../docs/manual/theory.md).
+
 These examples provide small, self-contained introductions showing how to run
 radiative transfer calculations with JURASSIC for three common observation
 geometries:
@@ -23,6 +26,9 @@ separately under `projects/validation/`; performance measurements are under
 `projects/benchmark/`.
 
 ## Installation
+
+For detailed build requirements and alternative installation options, see the
+[installation guide](../../docs/manual/installation.md).
 
 Build JURASSIC and its bundled libraries from the repository root before running
 an example:
@@ -108,6 +114,9 @@ height. The long path segment near the tangent point localizes the sensitivity
 near and above that region; the ray does not sample lower altitudes, and optical
 depth limits contributions from more distant layers. The kernel is therefore a
 sensitivity diagnostic, not an independent validation result.
+
+For more background on kernels and Jacobians, see
+[Jacobians and sensitivity matrices](../../docs/manual/retrieval_theory.md#jacobians-and-sensitivity-matrices).
 
 ## Nadir example
 
