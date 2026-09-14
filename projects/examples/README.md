@@ -66,11 +66,16 @@ when `JURASSIC_BIN` points to the packaged executables. Without `JURASSIC_BIN`,
 the scripts use the normal source build in `src/`. Gnuplot is still required for
 the diagnostic plots.
 
-Each script generates an atmosphere (`atm.tab`), observation geometry
+## Outputs
+
+Each example generates an atmosphere (`atm.tab`), observation geometry
 (`obs.tab`), radiative-transfer result (`rad.tab`), kernel functions
-(`kernel.tab`), and diagnostic PNG plots. It finishes by comparing `rad.tab`
-exactly with the checked-in `rad.org` reference and returns a nonzero status if
-they differ.
+(`kernel.tab`), and diagnostic PNG plots. The scripts overwrite these generated
+files in place.
+
+At the end of each run, `rad.tab` is compared exactly with the checked-in
+`rad.org` reference and the script returns a nonzero status if they differ.
+Run `make check` from `src/` for the full regression-test suite.
 
 ## Limb example
 
@@ -125,8 +130,9 @@ across the latitude scan.*
 Brightness temperature is the temperature a blackbody would need to reproduce
 the simulated channel radiance. The CO<sub>2</sub> channels at 667.7820,
 668.5410, and 669.8110 cm<sup>-1</sup> have different absorption
-strengths and therefore sample different effective emitting levels and temperature ranges. This
-explains the physically plausible separation of their brightness temperatures.
+strengths and therefore sample different effective emitting levels and
+temperature ranges. This explains the physically plausible separation of their
+brightness temperatures.
 
 ![Nadir temperature kernel at 668.5410 cm-1](nadir/plot_kernel_temperature_668.5410.png)
 
@@ -171,6 +177,3 @@ weighting of downwelling thermal emission: compared with the shorter vertical
 path, more oblique rays generally give greater weight to the lower, denser
 atmosphere. The kernel is a sensitivity diagnostic, not an independent
 validation result.
-
-The scripts overwrite their generated TAB and PNG outputs in place. Run
-`make check` from `src/` for the regression suite.
