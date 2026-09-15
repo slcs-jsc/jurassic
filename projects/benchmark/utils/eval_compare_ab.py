@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
  
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from likwid_parsing import parse_run_dir, get_call_count, get_region_runtime, get_value, per_call, get_stats, normalize
+from likwid_parsing import parse_run_dir, collect, collect_runtime
  
 DEFAULT_METRICS = [
     "Memory write data volume [GBytes]",   
@@ -16,35 +16,6 @@ DEFAULT_METRICS = [
     "CAS_COUNT_WR",
     "CAS_COUNT_RD",
 ]
-
-def collect(entries, region, metric, warmup):
-    """Median + CV of one metric across the kept repetitions."""
-    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
-    vals = []
-    for e in entries:
-        raw = get_value(e, region, metric)
-        if raw is None:
-            continue
-        v = normalize(raw, metric, e, get_call_count(e, region))
-        if v is not None:
-            vals.append(v)
-    if not vals:
-        return None, float("nan"), 0
-
-    _, median, _, cv = get_stats(vals)
-    return median, cv, len(vals)
- 
-def collect_runtime(entries, region, warmup):
-    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
-    vals = []
-    for e in entries:
-        b = e.get("batch")
-        if b:
-            vals.append(b["mean_s"])
-    if not vals:
-        return None, float("nan"), 0
-    _ , median, _, cv = get_stats(vals)
-    return median, cv, len(vals)
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
@@ -88,8 +59,8 @@ def main():
         b_entries = groups.get((args.baseline, threads, groups_present[0]), [])
         v_entries = groups.get((args.variant, threads, groups_present[0]), [])
         if b_entries and v_entries:
-            bm, bcv, bn = collect_runtime(b_entries, args.region, args.warmup)
-            vm, vcv, vn = collect_runtime(v_entries, args.region, args.warmup)
+            _, bm, _, bcv, bn = collect_runtime(b_entries, args.region, args.warmup)
+            _, vm, _, vcv, vn = collect_runtime(v_entries, args.region, args.warmup)
             if bm and vm:
                 change = (vm - bm) / bm
                 noise = max(bcv, vcv) if not (np.isnan(bcv) or np.isnan(vcv)) else float("nan")
@@ -103,8 +74,8 @@ def main():
             if not b_entries or not v_entries:
                 continue
             for metric in metrics:
-                bm, bcv, bn = collect(b_entries, args.region, metric, args.warmup)
-                vm, vcv, vn = collect(v_entries, args.region, metric, args.warmup)
+                _, bm, _, bcv, bn = collect(b_entries, args.region, metric, args.warmup)
+                _, vm, _, vcv, vn = collect(v_entries, args.region, metric, args.warmup)
                 if bm is None or vm is None:
                     continue
                 if bn < 2 or vn < 2:

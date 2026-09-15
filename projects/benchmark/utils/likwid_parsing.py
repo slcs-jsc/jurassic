@@ -236,7 +236,6 @@ def get_metric(entry: dict, region: str, metric: str, stat: bool = False):
     prefix = f"{entry['group']}:"
 
     for key, table in tables.items():
-
         if not key.startswith(prefix):
             continue
         kind = key[len(prefix):].strip()
@@ -252,11 +251,14 @@ def get_metric(entry: dict, region: str, metric: str, stat: bool = False):
             return numeric[0] if len(numeric) == 1 else sum(numeric)
     return None
 
+# TODO: CAS_COUNT_RD/_WR need to be normalized using marker runtime
 def normalize(raw, metric, entry, call_count):
     m = metric.lower()
-    if "bandwidth" in m or "mflop/s" in m:
+    if "bandwidth" in m or "mflop/s" in m: 
+        # already a rate, socket-wide
         return raw
-    if "volume" in m or "energy" in m or metric.startswith("CAS_COUNT"):
+    if "volume" in m or "energy" in m:
+        # socket-wide total ÷ scenes
         return raw / entry["batch_size"]
     return per_call(raw, call_count)
 
@@ -294,7 +296,33 @@ def get_region_runtime(entry: dict, region: str):
             vals = info[key]
             return sum(v for v in vals if isinstance(v, (int, float)))
     return None
+
+def collect(entries, region, metric, warmup):
+    """Median + CV of one metric across the kept repetitions."""
+    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
+    vals = []
+    for e in entries:
+        raw = get_value(e, region, metric)
+        if raw is None:
+            continue
+        v = normalize(raw, metric, e, get_call_count(e, region))
+        if v is not None:
+            vals.append(v)
+    if not vals:
+        return None, None, None, float("nan"), 0
+    
+    return *get_stats(vals), len(vals)
  
+def collect_runtime(entries, warmup):
+    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
+    vals = []
+    for e in entries:
+        b = e.get("batch")
+        if b:
+            vals.append(b["mean_s"])
+    if not vals:
+        return None, None, None, float("nan"), 0
+    return *get_stats(vals), len(vals)
  
 def summarize(configs: list) -> str:
     if not configs:

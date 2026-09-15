@@ -9,11 +9,13 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from plot_results import _plot_scaling
-from likwid_parsing import parse_run_dir, get_metric, get_call_count, get_region_runtime, per_call, get_stats
+from likwid_parsing import parse_run_dir, collect_runtime, collect
  
 DEFAULT_METRICS = [
     "Memory data volume [GBytes]",
     "Memory bandwidth [MBytes/s]",
+    "CAS_COUNT_WR",
+    "CAS_COUNT_RD",
 ]
 
 def main():
@@ -49,7 +51,6 @@ def main():
     # Coefficient of Variation
     max_cv = 0.0
     max_cv_desc = None
-    warned_metrics = set()
     medians: dict[str, dict[tuple, float]] = {m: {} for m in ["wall_time", "runtime/call"] + metrics}
     batch_size_dict = {}
     
@@ -69,71 +70,30 @@ def main():
             continue
 
         row_values = []
-
         # total wall-clock time for the batch call, from omp_get_wtime()
         # batch size is held FIXED across thread counts, so this is directly the time-to-solution for the same problem.
-        wall_time = []
-        for e in kept:
-            b = e.get("batch")
-            if b:
-                wall_time.append(b["mean_s"])
-        if wall_time:
-            mean, median, stdev, cv = get_stats(wall_time)
-            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%})")
-            medians["wall_time"][(label, threads)] = median
-            if cv > max_cv:
-                max_cv, max_cv_desc = cv, (label, threads, group, batch, "wall_time")
-        else:
-            row_values.append("n/a")
+        mean, median, stdev, cv, _ =  collect_runtime(kept, warmup=1)
+        row_values.append(
+            f"{f'{mean:.4g}' if mean is not None else 'N/A'}, "
+            f"{f'{median:.4g}' if median is not None else 'N/A'}, "
+            f"stdev={f'{stdev:.4g}' if stdev is not None else 'N/A'}, "
+            f"cv={f'{cv:.1%}' if cv is not None else 'N/A'})"
+        )
+        medians["wall_time"][(label, threads)] = median
 
-        #  marker-based runtime/call, kept for reference only
-        rt_per_call = []
-        for e in kept:
-            rt = get_region_runtime(e, args.region)
-            cc = get_call_count(e, args.region)
-            v = per_call(rt, cc)
-            if v is not None:
-                rt_per_call.append(v)
-        if rt_per_call:
-            mean, median, stdev, cv = get_stats(rt_per_call)
-            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%})")
-            medians["runtime/call"][(label, threads)] = median
-            if cv > max_cv:
-                max_cv, max_cv_desc = cv, (label, threads, group, batch, "runtime/call")
+        if cv > max_cv:
+            max_cv, max_cv_desc = cv, (label, threads, group, batch, "wall_time")
         else:
             row_values.append("n/a")
 
         for metric in metrics:
-            vals = []
-            for e in kept:
-                raw = get_metric(e, args.region, metric)
-                if raw is None:
-                    continue
-                cc = get_call_count(e, args.region)
-                m = metric.lower()
-                if "bandwidth" in  m: 
-                    v = raw                             # already a rate, socket-wide
-                elif "volume" in m or "energy" in m:
-                    v = raw / e["batch_size"]           # socket-wide total ÷ scenes
-                else: 
-                    v = per_call(raw, cc)               # core-local ÷ per-thread calls
-                if v is not None:
-                    vals.append(v)
-            if not vals:
-                if metric not in warned_metrics:
-                    available = set()
-                    for e in kept:
-                        t = e.get("regions", {}).get(args.region, {}).get("tables", {})
-                        for tbl in t.values():
-                            available.update(tbl.keys())
-                    print(f"  WARNING: metric '{metric}' not found for group "
-                          f"'{group}', region '{args.region}'. Available metrics: "
-                          f"{sorted(available)}", file=sys.stderr)
-                    warned_metrics.add(metric)
-                row_values.append("n/a")
-                continue
-            mean, median, stdev, cv = get_stats(vals)
-            row_values.append(f"{mean:.4g}, {median:.4g}, stdev={stdev:.4g}, cv={cv:.1%})")
+            mean, median, stdev, cv, _ = collect(kept, args.region, metric, warmup=1)
+            row_values.append(
+                f"{f'{mean:.4g}' if mean is not None else 'N/A'}, "
+                f"{f'{median:.4g}' if median is not None else 'N/A'}, "
+                f"stdev={f'{stdev:.4g}' if stdev is not None else 'N/A'}, "
+                f"cv={f'{cv:.1%}' if cv is not None else 'N/A'})"
+            )
             medians[metric][(label, threads)] = median
             if cv > max_cv:
                 max_cv, max_cv_desc = cv, (label, threads, group, batch, metric)
@@ -252,6 +212,11 @@ def main():
                 print(f"NOTE: --stream-bw not given, plotting '{metric_name}' without a reference ceiling.")
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
             fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name} (socket-wide, not normalized)", "#c76ce0"
+        elif metric_name.startswith("CAS_COUNT"):
+            ideal, higher_is_better, ceiling = "constant", False, None
+            fname = f"e2_{metric_name.lower()}_scaling.png"
+            ylabel = f"{metric_name} [GBytes-equiv] (socket-wide / batch-size)"
+            color = "#c0392b" if metric_name.endswith("_RD") else "#2980b9"
         else:
             ideal, higher_is_better, ceiling = "linear", True, None
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
