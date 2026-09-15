@@ -9,11 +9,12 @@ contribute most strongly to the signal and its sensitivity to atmospheric
 parameters.
 
 For details of the radiative-transfer method, see the
-[physical background and theory](../../docs/manual/theory.md).
+[physical background and theory](../../docs/manual/theory.md) section
+in the user manual.
 
-These examples provide small, self-contained introductions showing how to run
-radiative transfer calculations with JURASSIC for three common observation
-geometries:
+The examples in this directory provide small, self-contained introductions
+showing how to run radiative transfer calculations with JURASSIC for three common
+observation geometries:
 
 - `limb/` simulates atmospheric limb sounding along tangent paths.
 - `nadir/` simulates downward-looking observations from above the atmosphere.
@@ -25,13 +26,13 @@ Numerical validation across broader spectral and gas configurations is provided
 separately under `projects/validation/`; performance measurements are under
 `projects/benchmark/`.
 
-## Installation
+## Installation and running the examples
 
 For detailed build requirements and alternative installation options, see the
 [installation guide](../../docs/manual/installation.md).
 
-Build JURASSIC and its bundled libraries from the repository root before running
-an example:
+We recommend building JURASSIC and its bundled libraries from the repository
+root before running an example:
 
 ```bash
 cd libs
@@ -41,7 +42,7 @@ make -j
 cd ..
 ```
 
-Then run an example from its own directory:
+Then run an example from its own directory, for example:
 
 ```bash
 cd projects/examples/nadir
@@ -73,20 +74,21 @@ the diagnostic plots.
 ## Outputs
 
 Each example generates an atmosphere (`atm.tab`), observation geometry
-(`obs.tab`), radiative-transfer result (`rad.tab`), kernel functions
-(`kernel.tab`), and diagnostic PNG plots. The scripts overwrite these generated
+(`obs.tab`), radiative transfer result (`rad.tab`), kernel functions
+(`kernel.tab`), and diagnostic plots. The scripts overwrite these generated
 files in place.
 
 At the end of each run, `rad.tab` is compared exactly with the checked-in
-`rad.org` reference and the script returns a nonzero status if they differ.
-Run `make check` from `src/` for the full regression-test suite.
+`rad.org` reference file and the script returns a nonzero status if they differ.
+Run `make check` from `src/` for the full regression test suite.
 
 ## Limb example
 
 The limb case views long slant paths through atmospheric tangent points at
 different altitudes. Because each ray spends a long distance near its lowest
-altitude, the geometry provides strong vertical sensitivity to temperature and
-trace gases near the tangent region.
+altitude and atmospheric density increases exponentially towards the ground,
+the limb geometry typically provides strong vertical sensitivity to temperature
+and trace gases near the tangent point region.
 
 ```bash
 cd projects/examples/limb
@@ -102,27 +104,30 @@ The radiance profiles show the simulated signal at 792 and 832 cm<sup>-1</sup>
 as a function of tangent height. Their channel-dependent shapes are physically
 plausible: temperature, absorber amount, Planck emission, and the optical depth
 of the long slant path all change with tangent altitude, so the radiance need
-not vary monotonically.
+not vary monotonically. The 792 cm<sup>-1</sup> channel coincides with
+strong CO<sub>2</sub> emission/absorption features. It has lower transparency
+than the 832 cm<sup>-1</sup> channel, which coincides with a spectral window
+region.
 
 ![Limb temperature kernel at 792 cm-1](limb/plot_kernel_temperature_792.png)
 
 *Temperature kernel profiles for the limb geometry at 792 cm<sup>-1</sup>.*
 
-The temperature kernel is the sensitivity of simulated radiance to a local
-temperature perturbation. Each coloured profile belongs to a different tangent
-height. The long path segment near the tangent point localizes the sensitivity
-near and above that region; the ray does not sample lower altitudes, and optical
-depth limits contributions from more distant layers. The kernel is therefore a
-sensitivity diagnostic, not an independent validation result.
+The temperature kernels or weighting functions show the sensitivity of
+simulated radiance to a local temperature perturbation. Each coloured profile
+belongs to a different tangent height. The long path segment near the tangent
+point localizes the sensitivity near and above that region; the ray does not
+sample lower altitudes, and optical depth limits contributions from more distant layers.
 
 For more background on kernels and Jacobians, see
 [Jacobians and sensitivity matrices](../../docs/manual/retrieval_theory.md#jacobians-and-sensitivity-matrices).
 
 ## Nadir example
 
-The nadir case looks down from a satellite across a latitude scan. It
-demonstrates how thermal emission emerging from the atmosphere is represented
-as brightness temperature in three nearby channels.
+The nadir case looks down from a satellite over an across-track scan. For
+convenience, this geometry is realized here simply as a scan over view point
+latitude. The example demonstrates how thermal emission emerging from the
+atmosphere is represented as brightness temperature in three nearby channels.
 
 ```bash
 cd projects/examples/nadir
@@ -145,11 +150,13 @@ brightness temperatures.
 
 *Temperature kernel profiles for the nadir scan at 668.5410 cm<sup>-1</sup>.*
 
-This kernel is the sensitivity of simulated brightness temperature to local
-temperature perturbations. Its vertical structure shows the thermal-emission
+The kernel shows the sensitivity of simulated brightness temperature to local
+temperature perturbations. Its vertical structure shows the thermal emission
 weighting: peaks mark the atmospheric levels that contribute most strongly in
-the channel at each scan position. It is a sensitivity diagnostic, not an
-independent validation result.
+the channel at each scan position. The three channels considered here are
+located in the 15 micron
+CO<sub>2</sub> fundamental band and become optically thick at different levels
+in the stratosphere.
 
 ## Zenith example
 
@@ -167,11 +174,11 @@ cd projects/examples/zenith
 *Simulated zenith-viewing brightness temperatures at 792 and 832 cm<sup>-1</sup>
 across the angular scan.*
 
-The brightness-temperature curves are approximately symmetric around the
+The brightness temperature curves are approximately symmetric around the
 vertical view because opposite viewing directions traverse equivalent model
 atmospheres. Toward more oblique angles, the atmospheric path length and optical
 depth increase, enhancing the contribution of the lower atmosphere; the
-resulting brightness-temperature changes and decreasing transmittance are
+resulting brightness temperature changes and decreasing transmittance are
 physically expected.
 
 ![Zenith temperature kernel at 792 cm-1](zenith/plot_kernel_temperature_792.0000.png)
@@ -182,5 +189,4 @@ The temperature kernel is the sensitivity of simulated brightness temperature
 to a local temperature perturbation. Its vertical structure describes the
 weighting of downwelling thermal emission: compared with the shorter vertical
 path, more oblique rays generally give greater weight to the lower, denser
-atmosphere. The kernel is a sensitivity diagnostic, not an independent
-validation result.
+atmosphere.

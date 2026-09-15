@@ -1,17 +1,14 @@
 #! /bin/bash
 
-# Set environment...
-if [ -z "${JURASSIC_BIN:-}" ]; then
-    export LD_LIBRARY_PATH=../../../libs/build/lib:${LD_LIBRARY_PATH:-}
-fi
-
 # Setup...
+[ -z "${JURASSIC_BIN:-}" ] && \
+    export LD_LIBRARY_PATH=../../../libs/build/lib:${LD_LIBRARY_PATH:-}
 jurassic=${JURASSIC_BIN:-../../../src}
 
 # Create atmospheric data file...
 $jurassic/climatology zenith.ctl atm.tab
 
-# Create observation geomtry...
+# Create observation geometry...
 $jurassic/zenith zenith.ctl obs.tab
 
 # Call forward model...
