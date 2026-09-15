@@ -76,7 +76,13 @@ void exec_formod_batch_repeat(
   const tbl_t * tbl,
   const atm_t * atm,
   obs_t * obs,
-  int batch_size);
+  int batch_size, 
+  atm_t *atm_batch,
+  obs_t *obs_batch,
+  los_t *los_batch, 
+  obs_t *obs_scratch_batch,
+  int *status
+);
 
 /*! Calculate relative errors. */
 void compute_rel_errors(
@@ -463,31 +469,17 @@ void exec_formod_batch_repeat(
   const tbl_t *tbl,
   const atm_t *atm,
   obs_t *obs,
-  int batch_size) {
+  int batch_size, 
+  atm_t *atm_batch,
+  obs_t *obs_batch,
+  los_t *los_batch,
+  obs_t *obs_scratch_batch,
+  int *status) {
 
-  atm_t *atm_batch;
-  obs_t *obs_batch;
-  los_t *los_batch;
-  obs_t *obs_scratch_batch;
-  int *status;
   gsl_rng *rng;
 
   if (batch_size < 1)
     ERRMSG("BATCH_SIZE must be positive!");
-
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_START("batch_alloc");
-  #endif
-
-  ALLOC(atm_batch, atm_t, batch_size);
-  ALLOC(obs_batch, obs_t, batch_size);
-  ALLOC(los_batch, los_t, batch_size);
-  ALLOC(obs_scratch_batch, obs_t, batch_size);
-  ALLOC(status, int, batch_size);
-
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_STOP("batch_alloc");
-  #endif
 
   gsl_rng_env_setup();
   rng = gsl_rng_alloc(gsl_rng_default);
@@ -513,14 +505,8 @@ void exec_formod_batch_repeat(
     }
   }
 
-#if defined(_OPENACC)
-#pragma acc enter data create(atm_batch[0:batch_size],obs_batch[0:batch_size],status[0:batch_size],los_batch[0:batch_size],obs_scratch_batch[0:batch_size])
-#endif
   formod_batch(ctl, tbl, atm_batch, obs_batch, batch_size, status,
 	       los_batch, obs_scratch_batch);
-#if defined(_OPENACC)
-#pragma acc exit data delete(atm_batch[0:batch_size],obs_batch[0:batch_size],status[0:batch_size],los_batch[0:batch_size],obs_scratch_batch[0:batch_size])
-#endif
 
   if (status[0] != FORMOD_STATUS_OK)
     ERRMSG("Forward model failed with status code %d!", status[0]);
@@ -532,11 +518,6 @@ void exec_formod_batch_repeat(
   *obs = obs_batch[0];
 
   gsl_rng_free(rng);
-  free(status);
-  free(obs_scratch_batch);
-  free(los_batch);
-  free(obs_batch);
-  free(atm_batch);
 }
 
 /*****************************************************************************/
@@ -718,24 +699,58 @@ void exec_formod_benchmark(
   if (formod_scalar && batch_size > 1)
     ERRMSG("BATCH_SIZE > 1 cannot be combined with EXECUTION scalar!");
 
+  atm_t *atm_batch = NULL;
+  obs_t *obs_batch = NULL;
+  int *status = NULL;
+  los_t *los_batch = NULL;
+  obs_t *obs_scratch_batch = NULL;
+
+  #ifdef LIKWID_PERFMON
+  LIKWID_MARKER_START("batch_alloc");
+  #endif
+  
+  if (batch_size > 1) {
+    ALLOC(atm_batch, atm_t, batch_size);
+    ALLOC(obs_batch, obs_t, batch_size);
+    ALLOC(los_batch, los_t, batch_size);
+    ALLOC(obs_scratch_batch, obs_t, batch_size);
+    ALLOC(status, int, batch_size);
+  }
+
+  #ifdef LIKWID_PERFMON
+  LIKWID_MARKER_STOP("batch_alloc");
+  #endif
+
+  const char* env_max_iter = getenv("JURASSIC_MAX_ITER");
+  const int max_iter = env_max_iter ? atoi(env_max_iter) : INT_MAX;
+
+  const char *env_budget = getenv("JURASSIC_TIME_BUDGET");
+  const double t_budget = env_budget ? atof(env_budget) : 10.0;
+
+  #if defined(_OPENACC)
+    if (batch_size > 1)
+  #pragma acc enter data create(atm_batch[0:batch_size],obs_batch[0:batch_size],status[0:batch_size],los_batch[0:batch_size],obs_scratch_batch[0:batch_size])
+  #endif
   do {
     SELECT_TIMER("BENCHMARK_SAMPLE", "ANALYSIS");
     double t0 = omp_get_wtime();
 
     if (batch_size > 1)
-      exec_formod_batch_repeat(ctl, tbl, atm, obs, batch_size);
+      exec_formod_batch_repeat(ctl, tbl, atm, obs, batch_size,
+                              atm_batch, obs_batch, los_batch, 
+                              obs_scratch_batch, status);
     else {
       copy_atm(ctl, atm_scratch, atm, 0);
       double dtemp = 40. * (gsl_rng_uniform(rng) - 0.5);
       double dpress = 1. - 0.1 * gsl_rng_uniform(rng);
       double dq[NG];
       for (int ig = 0; ig < ctl->ng; ig++)
-	dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
+	      dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
       for (int ip = 0; ip < atm_scratch->np; ip++) {
-	atm_scratch->t[ip] += dtemp;
-	atm_scratch->p[ip] *= dpress;
-	for (int ig = 0; ig < ctl->ng; ig++)
-	  atm_scratch->q[ig][ip] *= dq[ig];
+        atm_scratch->t[ip] += dtemp;
+        atm_scratch->p[ip] *= dpress;
+        for (int ig = 0; ig < ctl->ng; ig++)
+          atm_scratch->q[ig][ip] *= dq[ig];
       }
 
       exec_formod_single(ctl, tbl, atm_scratch, obs, los_scratch,
@@ -752,8 +767,19 @@ void exec_formod_benchmark(
       t_max = dt;
     n++;
 
-  } while (t_mean < 10.0);
+  } while (t_mean < t_budget && n < max_iter);
 
+  if (batch_size > 1) {
+  #if defined(_OPENACC)
+  #pragma acc exit data delete(atm_batch[0:batch_size],obs_batch[0:batch_size],status[0:batch_size],los_batch[0:batch_size],obs_scratch_batch[0:batch_size])
+  #endif
+
+  free(status);
+  free(obs_scratch_batch);
+  free(los_batch);
+  free(obs_batch);
+  free(atm_batch);
+  }
   t_mean /= (double) n;
   t_sd = sqrt(t_sd / (double) n - POW2(t_mean));
   printf("RUNTIME: execution= %s | batch_size= %d | mean= %g s"

@@ -218,7 +218,7 @@ run_cpu() {
     for rep in $(seq 1 "$reps"); do
       log="log.omp${omp}.rep${rep}"
       out="/tmp/jurassic_bench_${run_id}_cpu_omp${omp}_rep${rep}.tab"
-      OMP_NUM_THREADS=$omp "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$cpu_batch_size" > "$log" 2>&1
+      JURASSIC_TIME_BUDGET=60 OMP_NUM_THREADS=$omp "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$cpu_batch_size" > "$log" 2>&1
       printf 'OMP_NUM_THREADS=%s
   CPU_BATCH_SIZE=%s
   OMP_PLACES=%s
@@ -250,9 +250,9 @@ run_gpu() {
       if [ "$acc_notify" != 0 ]; then
         env_cmd+=("NVCOMPILER_ACC_NOTIFY=$acc_notify")
       fi
-      "${env_cmd[@]}" "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
+      JURASSIC_TIME_BUDGET=60 "${env_cmd[@]}" "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
     else
-      "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
+      JURASSIC_TIME_BUDGET=60 "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$batch" > "$log" 2>&1
     fi
     printf 'BATCH_SIZE=%s
 ACC_TIME=%s

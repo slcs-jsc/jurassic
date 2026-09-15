@@ -250,7 +250,7 @@ bench_run_forward() {
   OMP_NUM_THREADS=$threads likwid-perfctr -C "$cores" -g "$group" -m \
     -o "$csv" \
     "$JR_SRC_DIR/formod" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
-    TASK time BATCH_SIZE "$batch" \
+    JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$batch" \
     > "$txt" 2>&1
   local rc=$?
   set -e
