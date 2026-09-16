@@ -8,14 +8,12 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from plot_results import _plot_scaling
+from plot_results import plot_scaling, boxplot
 from likwid_parsing import parse_run_dir, collect_runtime, collect
  
 DEFAULT_METRICS = [
     "Memory data volume [GBytes]",
     "Memory bandwidth [MBytes/s]",
-    "CAS_COUNT_WR",
-    "CAS_COUNT_RD",
 ]
 
 def main():
@@ -52,6 +50,7 @@ def main():
     max_cv = 0.0
     max_cv_desc = None
     medians: dict[str, dict[tuple, float]] = {m: {} for m in ["wall_time", "runtime/call"] + metrics}
+    values: dict[str, dict[tuple, list]] = {m: {} for m in ["wall_time", "runtime/call"] + metrics}
     batch_size_dict = {}
     
     header = f"{'label':>8} {'thr':>4} {'group':>8} {'batch':>6} | " + \
@@ -72,13 +71,14 @@ def main():
         row_values = []
         # total wall-clock time for the batch call, from omp_get_wtime()
         # batch size is held FIXED across thread counts, so this is directly the time-to-solution for the same problem.
-        mean, median, stdev, cv, _ =  collect_runtime(kept, warmup=1)
+        mean, median, stdev, cv, _, vals =  collect_runtime(kept, warmup=1)
         row_values.append(
             f"{f'{mean:.4g}' if mean is not None else 'N/A'}, "
             f"{f'{median:.4g}' if median is not None else 'N/A'}, "
             f"stdev={f'{stdev:.4g}' if stdev is not None else 'N/A'}, "
             f"cv={f'{cv:.1%}' if cv is not None else 'N/A'})"
         )
+        values["wall_time"][(label, threads)] = vals
         medians["wall_time"][(label, threads)] = median
 
         if cv > max_cv:
@@ -87,13 +87,14 @@ def main():
             row_values.append("n/a")
 
         for metric in metrics:
-            mean, median, stdev, cv, _ = collect(kept, args.region, metric, warmup=1)
+            mean, median, stdev, cv, _, vals = collect(kept, args.region, metric, warmup=1)
             row_values.append(
                 f"{f'{mean:.4g}' if mean is not None else 'N/A'}, "
                 f"{f'{median:.4g}' if median is not None else 'N/A'}, "
                 f"stdev={f'{stdev:.4g}' if stdev is not None else 'N/A'}, "
                 f"cv={f'{cv:.1%}' if cv is not None else 'N/A'})"
             )
+            values[metric][(label, threads)] = vals
             medians[metric][(label, threads)] = median
             if cv > max_cv:
                 max_cv, max_cv_desc = cv, (label, threads, group, batch, metric)
@@ -138,7 +139,7 @@ def main():
         # Plot wall-clock speedup
         smt_speedup_points = [(t, smt_speedups[t], "SMT") for t in sorted(smt_speedups)]
         if phys_speedups:
-            _plot_scaling(
+            plot_scaling(
                 np.asarray(sorted(phys_speedups)),
                 np.asarray([phys_speedups[t] for t in sorted(phys_speedups)]),
                 "Wall-clock speedup",
@@ -150,7 +151,7 @@ def main():
                 smt_points=smt_speedup_points,
             )
         if spread_speedups:
-            _plot_scaling(
+            plot_scaling(
                 np.asarray(sorted(spread_speedups)),
                 np.asarray([spread_speedups[t] for t in sorted(spread_speedups)]),
                 "Wall-clock speedup (spread across sockets)",
@@ -192,8 +193,9 @@ def main():
         return [(t, v, "SMT (48 threads)")] if v is not None else None
 
     for metric_name in ["wall_time"] + metrics:
-        phys_vals = [medians[metric_name].get(("phys", t)) for t in phys_threads]
-        if any(v is None for v in phys_vals):
+        phys_vals_med = [medians[metric_name].get(("phys", t)) for t in phys_threads]
+        phys_vals = [values[metric_name].get(("phys", t)) for t in phys_threads]
+        if any(v is None for v in phys_vals_med):
             print(f"WARNING: missing '{metric_name}' for some phys thread counts. Skipping plot.")
             continue
 
@@ -202,16 +204,36 @@ def main():
             b0 = batch_size_dict.get(("phys", phys_threads[0]), "?")
             ideal, higher_is_better, ceiling = "linear", False, None
             fname, ylabel, color = "e2_wallclock_scaling.png", f"Wall-clock time [s] ({b0} scenes)", "#efb239"
+
+            plot_scaling(phys_threads, phys_vals_med, ylabel, color, res_dir, fname,
+                                ideal=ideal, higher_is_better=higher_is_better,
+                                stream_ceiling=ceiling, smt_points=_smt_point(metric_name))
+            
+            spread_vals = [medians[metric_name].get(("spread", t)) for t in spread_threads]
+            if any(v is None for v in spread_vals):
+                print(f"WARNING: missing '{metric_name}' for some phys thread counts. Skipping plot.")
+                continue
+    
+            spread_fname = fname.replace(".png", "_spread.png")
+            plot_scaling(spread_threads, spread_vals, f"{ylabel} (spread)", color, res_dir, spread_fname,
+                                ideal=ideal, higher_is_better=higher_is_better,
+                                stream_ceiling=ceiling)
+            
         elif "volume" in lower:
             ideal, higher_is_better, ceiling = "constant", True, None
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
             fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name} (socket-wide ÷ batch-size)", "#3ab9dc"
+            
         elif "bandwidth" in lower:
             ideal, higher_is_better, ceiling = None, True, args.stream_bw
             if ceiling is None:
                 print(f"NOTE: --stream-bw not given, plotting '{metric_name}' without a reference ceiling.")
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
             fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name} (socket-wide, not normalized)", "#c76ce0"
+
+            print(phys_vals)
+            boxplot(phys_threads, phys_vals, ylabel, res_dir, fname)
+
         elif metric_name.startswith("CAS_COUNT"):
             ideal, higher_is_better, ceiling = "constant", False, None
             fname = f"e2_{metric_name.lower()}_scaling.png"
@@ -221,20 +243,6 @@ def main():
             ideal, higher_is_better, ceiling = "linear", True, None
             safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
             fname, ylabel, color = f"e2_{safe}_scaling.png", f"{metric_name}/call", "#7d8f69"
-
-        _plot_scaling(phys_threads, phys_vals, ylabel, color, res_dir, fname,
-                    ideal=ideal, higher_is_better=higher_is_better,
-                    stream_ceiling=ceiling, smt_points=_smt_point(metric_name))
-
-        spread_vals = [medians[metric_name].get(("spread", t)) for t in spread_threads]
-        if any(v is None for v in spread_vals):
-            print(f"WARNING: missing '{metric_name}' for some phys thread counts. Skipping plot.")
-            continue
-
-        spread_fname = fname.replace(".png", "_spread.png")
-        _plot_scaling(spread_threads, spread_vals, f"{ylabel} (spread)", color, res_dir, spread_fname,
-                          ideal=ideal, higher_is_better=higher_is_better,
-                          stream_ceiling=ceiling)
 
     print(f"\nPlots written to {res_dir}/")
 

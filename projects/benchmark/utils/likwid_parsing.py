@@ -309,9 +309,9 @@ def collect(entries, region, metric, warmup):
         if v is not None:
             vals.append(v)
     if not vals:
-        return None, None, None, float("nan"), 0
+        return None, None, None, float("nan"), 0, []
     
-    return *get_stats(vals), len(vals)
+    return *get_stats(vals), len(vals), vals
  
 def collect_runtime(entries, warmup):
     entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
@@ -321,8 +321,8 @@ def collect_runtime(entries, warmup):
         if b:
             vals.append(b["mean_s"])
     if not vals:
-        return None, None, None, float("nan"), 0
-    return *get_stats(vals), len(vals)
+        return None, None, None, float("nan"), 0, []
+    return *get_stats(vals), len(vals), vals
  
 def summarize(configs: list) -> str:
     if not configs:

@@ -10,8 +10,35 @@ import json
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 
-def _plot_scaling(
+def boxplot(
+    threads: np.ndarray, 
+    value_arr: np.ndarray,
+    label: str, 
+    res_dir: Path,
+    filename: str,
+    show_outliers: bool = False
+) -> None:
+    res_dir.mkdir(parents=True, exist_ok=True)
+    threads = np.asarray(threads, dtype=float)
+
+    fig, ax = plt.subplots()
+    if show_outliers:
+        ax.boxplot(value_arr)
+    else:
+        ax.boxplot(value_arr, sym='')
+
+    ax.set_xlabel("threads (physical cores)")
+    ax.set_ylabel(label)
+    ax.xaxis.set_major_formatter(plt.ScalarFormatter())
+    ax.set_title(f"{label} vs thread count")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(res_dir / filename, bbox_inches="tight")
+    plt.close(fig)
+
+def plot_scaling(
     threads: np.ndarray, 
     values: np.ndarray,
     label: str,
