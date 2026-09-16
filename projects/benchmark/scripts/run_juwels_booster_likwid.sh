@@ -53,8 +53,8 @@ mpi=${MPI:-0}
 rebuild=${REBUILD:-1}
 
 # LIKWID Setup
-likwid_threads=${LIKWID_THREADS:-"1 12 48"}
-likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHE TMA"} # performance groups to collect
+likwid_threads=${LIKWID_THREADS:-"1 12 24"}
+likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHE"} # performance groups to collect
 likwid_socket=${LIKWID_SOCKET:-0}
 
 # perf Setup
@@ -251,7 +251,7 @@ if [ "$run_profiling" = 1 ]; then
       OMP_NUM_THREADS=$omp likwid-perfctr -C "$core_list" -g "$group" -m \
         -o "$log_csv" \
         "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
-        TASK time BATCH_SIZE "$cpu_batch_size" \
+        JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$cpu_batch_size" \
         > "$log_txt" 2>&1
   
       printf 'OMP_NUM_THREADS=%s\nLIKWID_GROUP=%s\nCPU_BATCH_SIZE=%s\nCORE_LIST=%s\n' \
@@ -284,7 +284,7 @@ if [ "$run_profiling" = 1 ] && [ "$perf_topdown_available" -eq 1 ]; then
       perf stat \
         --topdown \
         "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
-        TASK time BATCH_SIZE "$cpu_batch_size" \
+        JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$cpu_batch_size" \
         > "$perf_stdout" \
         2> "$perf_txt"
 
