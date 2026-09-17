@@ -126,6 +126,9 @@ if command -v ml >/dev/null 2>&1; then
   ml ecBuild
   ml matplotlib/3.10.5
   ml nvidia-compilers ParaStationMPI
+  ml SciPy-bundle/2025.07
+  ml netcdf4-python/1.7.2
+  ml likwid/5.4.1
 fi
 
 export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${LD_LIBRARY_PATH:-}"
@@ -209,7 +212,7 @@ bench_validate() {
 build_cpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0
+  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=0
   cd "$work_dir"
 }
 
@@ -217,7 +220,7 @@ build_cpu() {
 build_gpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_PIN="$gpu_pin" INFO="$info"
+  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 LIKWID=0 GPU_PIN="$gpu_pin" INFO="$info"
   cd "$work_dir"
 }
 

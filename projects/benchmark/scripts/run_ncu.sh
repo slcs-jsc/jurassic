@@ -94,7 +94,6 @@ ncu --version
 
 export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${LD_LIBRARY_PATH:-}"
 
-
 active_ctl="$work_dir/${case_name}.ctl"
 awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
 
@@ -108,37 +107,18 @@ mkdir -p data
 "$src_dir/climatology" "$active_ctl" data/atm.tab
 "$src_dir/$geometry" "$active_ctl" data/obs.tab
 
-#ncu_output="$nvidia_profile_output/formod_batch${nvidia_profile_batch}"
-#ncu_log="$run_dir/ncu.log"
-#out="/tmp/jurassic_ncu_${run_id}_b${nvidia_profile_batch}.tab"
+ncu_output="$nvidia_profile_output/formod_batch${nvidia_profile_batch}"
+ncu_log="$run_dir/ncu.log"
+out="/tmp/jurassic_ncu_${run_id}_b${nvidia_profile_batch}.tab"
 
-#srun -n1 -N1 ncu \
-#  --target-processes all \
-#  --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed,dram__throughput.avg.pct_of_peak_sustained_elapsed,sm__warps_active.avg.pct_of_peak_sustained_active \
-#  --kernel-name-base function \
-#  --force-overwrite \
-#  --export "$ncu_output" \
-#  "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$nvidia_profile_batch" \
-#  2>&1 | tee "$ncu_log"
-
-echo "Running Nsight Systems"
-
-nsys_output="$run_dir/nsys_report"
-
-srun -n1 -N1 nsys profile \
-    --trace=cuda,openacc,mpi,nvtx \
-    --sample=cpu \
-    --backtrace=dwarf \
-    --stats=true \
-    --force-overwrite=true \
-    --output="$nsys_output" \
-    "$src_dir/formod" \
-    "$active_ctl" \
-    data/obs.tab \
-    data/atm.tab \
-    "$out" \
-    JURASSIC_MAX_ITER=1 TASK time BATCH_SIZE "$nvidia_profile_batch" \
-    2>&1 | tee "$run_dir/nsys.log"
+srun -n1 -N1 ncu \
+  --target-processes all \
+  --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed,dram__throughput.avg.pct_of_peak_sustained_elapsed,sm__warps_active.avg.pct_of_peak_sustained_active \
+  --kernel-name-base function \
+  --force-overwrite \
+  --export "$ncu_output" \
+  "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$nvidia_profile_batch" \
+  2>&1 | tee "$ncu_log"
 
 echo "Done."
 echo "Nsight Systems report: ${nsys_output}.nsys-rep"
