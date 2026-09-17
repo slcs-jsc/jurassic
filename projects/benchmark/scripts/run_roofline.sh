@@ -25,7 +25,7 @@ set -euo pipefail
  
 JR_EXPERIMENT=e1_roofline
 RUN_ID=${RUN_ID:-e1_roofline_${SLURM_JOB_ID:-manual}}
-
+ 
 if [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/base.sh" ]; then
   jr_scripts_dir="$SLURM_SUBMIT_DIR"
 else
@@ -34,32 +34,48 @@ fi
 source "$jr_scripts_dir/base.sh"
  
 reps=${REPS:-3}
-threads=${THREADS:-1}
+threads=${THREADS:-24}
 batch=${BATCH_SIZE:-240}
-groups=${LIKWID_GROUPS:-"FLOPS_DP MEM_DP CACHE"}
+groups=${LIKWID_GROUPS:-"FLOPS_DP MEM_DP"}
  
-# Cases to sweep. Defaults to the three geometries: zenith, nadir, limb
-# Can be overwritten with a list of case names from configs/baseline_cases.tsv 
-# that differ in channel count, gas count or lookup-table size.
+# Cases to sweep -- defaults to all three geometries.
+# Override with e.g. CASE_LIST="zenith_baseline" for a single case.
 case_list=${CASE_LIST:-"zenith_baseline nadir_baseline limb_baseline"}
  
 first=1
 for case_name in $case_list; do
   export CASE_NAME="$case_name"
-  export RUN_ID="${RUN_ID%%_case_*}"
  
   bench_init
   if [ "$first" -eq 1 ]; then
     bench_build_forward "${VARIANT:-base}"
     bench_validate
     bench_check_groups "$groups"
+ 
+    cores="$(cpus_all_phys "$threads")"
+    ceilings_file="$JR_RUN_DIR/ceilings.txt"
+ 
+    echo "=== measuring compute ceiling (peakflops_avx_fma, threads=$threads, cores=$cores) ==="
+    peak_flops=$(likwid-bench -t peakflops_avx_fma -w "S0:1GB:${threads}" 2>&1 \
+      | tee "$JR_RUN_DIR/likwid_bench_flops.txt" \
+      | awk '/MFlops\/s:/ { print $2; exit }')
+ 
+    echo "=== measuring bandwidth ceiling (stream_mem_avx, threads=$threads, cores=$cores) ==="
+    stream_bw=$(likwid-bench -t stream_mem_avx -w "S0:1GB:${threads}" 2>&1 \
+      | tee "$JR_RUN_DIR/likwid_bench_bw.txt" \
+      | awk '/MByte\/s:/ { print $2; exit }')
+ 
+    echo "peak_flops_mflops=${peak_flops}" | tee "$ceilings_file"
+    echo "stream_bw_mbytes=${stream_bw}"   | tee -a "$ceilings_file"
+    echo "threads=${threads}"              | tee -a "$ceilings_file"
+ 
     first=0
   fi
   bench_prepare_inputs
  
   for rep in $(seq 1 "$reps"); do
     for group in "${JR_GROUPS[@]}"; do
-      bench_run_forward "size_${case_name}" "$threads" "$group" "$batch" "$rep"
+      bench_run_forward "$case_name" "$threads" "$group" "$batch" "$rep"
     done
   done
 done
