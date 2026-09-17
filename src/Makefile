@@ -185,6 +185,13 @@ ifeq ($(LIKWID), 1)
   LDFLAGS += -llikwid
 endif
 
+FLAT_ARRAYS ?= 0
+
+# If enabled, append the compiler flag
+ifeq ($(FLAT_ARRAYS), 1)
+    CFLAGS += -D_FLAT_ARRAYS
+endif
+
 # -----------------------------------------------------------------------------
 # Targets...
 # -----------------------------------------------------------------------------

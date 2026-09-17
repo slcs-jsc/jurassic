@@ -28,6 +28,12 @@ cpus_phys() {
     | sort -n | head -n "$1" | paste -sd,
 }
 
+# All N physical cores across all sockets
+cpus_all_phys() {
+  awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; print $1 } }' "$JR_TOPO_MAP" \
+    | sort -n | head -n "$1" | paste -sd,
+}
+
 # N logical CPUs on socket 0: physical cores first, then SMT
 cpus_smt() {
   awk -F, '$3 == 0 {print $1}' "$JR_TOPO_MAP" | sort -n | head -n "$1" | paste -sd,
@@ -96,6 +102,7 @@ bench_init() {
     
     if command -v ml >/dev/null 2>&1; then
         ml Stages/2026 GCC/14.3.0
+        ml ParaStationMPI
         ml likwid/5.4.1
         ml CMake/4.0.3
         ml ecBuild
@@ -148,16 +155,20 @@ bench_build_forward() {
     local extra=""
     case "$variant" in
         base)     extra="" ;;
-        nomemset) extra="-DNO_LOS_MEMSET" ;;                          
+        flat_array)  extra="FLAT_ARRAYS=1" ;;                        
         *) echo "Unknown build variant: $variant" >&2; return 1 ;;
     esac
     
     echo "=== building variant '$variant' (EXTRA_CFLAGS='$extra') ==="
-    ( cd "$JR_SRC_DIR" \
-        && make clean \
-        && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
-                GPU=0 LIKWID=1 CFLAGS+="$extra" ) || return 1
-    
+
+    if [ -n "$extra" ]; then
+    ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
+        COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra ) || return 1
+    else
+        ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 ) || return 1
+    fi
+
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
     cd "$JR_WORK_DIR"
 }
@@ -167,15 +178,19 @@ bench_build_retrieval() {
     local extra=""
     case "$variant" in
         base)     extra="" ;;
-        nomemset) extra="-DNO_LOS_MEMSET" ;;
+        flat_array)  extra="FLAT_ARRAYS=1" ;;
         *) echo "Unknown build variant: $variant" >&2; return 1 ;;
     esac
 
     echo "=== building retrieval variant '$variant' (EXTRA_CFLAGS='$extra') ==="
-    ( cd "$JR_SRC_DIR" \
-        && make clean \
-        && make -j MPI=1 MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
-                GPU=0 LIKWID=1 CFLAGS+="$extra"  ) || return 1
+
+    if [ -n "$extra" ]; then
+    ( cd "$JR_SRC_DIR" && make clean && make -j MPI=1 MPICC="$JR_MPICC" \
+        COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra ) || return 1
+    else
+        ( cd "$JR_SRC_DIR" && make clean && make -j MPI=1 MPICC="$JR_MPICC" \
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 ) || return 1
+    fi
 
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
     cd "$JR_WORK_DIR"
@@ -237,7 +252,7 @@ bench_check_groups() {
  
 bench_run_forward() {
   local label=$1 threads=$2 group=$3 batch=$4 rep=$5
-  local cores=${6:-$(cpus_phys "$threads")}
+  local cores=${6:-$(cpus_all_phys "$threads")}
   local tag="${label}.t${threads}.${group}.b${batch}.rep${rep}"
   local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
