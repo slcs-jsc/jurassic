@@ -1944,9 +1944,14 @@ typedef struct {
 
   /*! Logarithm of column density [molecules/cm^2]. */
   float *logu[ND][NG][TBLNP][TBLNT];
+  float *logu_flat; // single buffer that concatenates all (id,ig,ip,it) entries
+  size_t logu_offset[ND][NG][TBLNP][TBLNT]; // location of each entries starting point in logu_flat
+  size_t logu_flat_size;  // alloc-capacity
+  size_t logu_flat_used;  // acts as cursor to fill logu
 
   /*! Logarithm of emissivity. */
   float *logeps[ND][NG][TBLNP][TBLNT];
+  float *logeps_flat; // reuse logu_offset to operate on the flatted array
 
   /*! Filter function number of spectral grid points. */
   int filt_n[ND];

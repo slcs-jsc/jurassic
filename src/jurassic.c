@@ -3505,28 +3505,14 @@ void acc_copyin_tbl(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
-  tbl_t *tbl_dev;
-  ALLOC(tbl_dev, tbl_t, 1);
-  *tbl_dev = *tbl;
+  (void) ctl;
+  if (tbl->logu_flat == NULL || tbl->logu_flat_used == 0)
+    ERRMSG("Flattened data of lookup-table is missing. GPU transfer not possible!");
 
-#pragma acc enter data copyin(tbl[0:1])
-  for (int id = 0; id < ctl->nd; id++)
-    for (int ig = 0; ig < ctl->ng; ig++)
-      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
-	for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
-	  const size_t n = (size_t) tbl->nu[id][ig][ip][it];
-	  if (tbl->logu[id][ig][ip][it] != NULL)
-	    tbl_dev->logu[id][ig][ip][it]
-	      = (float *) acc_copyin(tbl->logu[id][ig][ip][it],
-				     n * sizeof(float));
-	  if (tbl->logeps[id][ig][ip][it] != NULL)
-	    tbl_dev->logeps[id][ig][ip][it]
-	      = (float *) acc_copyin(tbl->logeps[id][ig][ip][it],
-				     n * sizeof(float));
-	}
+  #pragma acc enter data copyin(tbl[0:1])
+  #pragma acc enter data copyin(tbl->logu_flat[0:tbl->logu_flat_used], tbl->logeps_flat[0:tbl->logu_flat_used]) attach(tbl->logu_flat, tbl->logeps_flat)
 
-  acc_memcpy_to_device(acc_deviceptr((void *) tbl), tbl_dev, sizeof(tbl_t));
-  free(tbl_dev);
+  //#pragma acc enter data attach(tbl->logu_flat, tbl->logeps_flat)
 }
 
 /*****************************************************************************/
@@ -3535,19 +3521,27 @@ void acc_delete_tbl(
   const ctl_t *ctl,
   const tbl_t *tbl) {
 
-  for (int id = 0; id < ctl->nd; id++)
-    for (int ig = 0; ig < ctl->ng; ig++)
-      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
-	for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
-	  const size_t n = (size_t) tbl->nu[id][ig][ip][it];
-	  if (tbl->logu[id][ig][ip][it] != NULL)
-	    acc_delete(tbl->logu[id][ig][ip][it], n * sizeof(float));
-	  if (tbl->logeps[id][ig][ip][it] != NULL)
-	    acc_delete(tbl->logeps[id][ig][ip][it], n * sizeof(float));
-	}
+  (void) ctl;
+  //#pragma acc exit data detach(tbl->logu_flat, tbl->logeps_flat)
+  #pragma acc exit data detach(tbl->logu_flat, tbl->logeps_flat) delete(tbl->logu_flat[0:tbl->logu_flat_used], tbl->logeps_flat[0:tbl->logu_flat_used])
 
   /* Scratch objects have no useful lifetime beyond this kernel batch. */
-#pragma acc exit data delete(tbl[0:1])
+  #pragma acc exit data delete(tbl[0:1])
+}
+
+void debug_gpu_transfer(const tbl_t *tbl) {
+  #pragma acc parallel num_gangs(1) num_workers(1) vector_length(1) present(tbl[0:1])
+  {
+     // 1. Test if the attached array pointer is even dereferenceable 
+     if (tbl->logu_flat != NULL) {
+         printf("GPU: logu_flat is attached! First element: %f\n", tbl->logu_flat[0]);
+     } else {
+         printf("GPU ERROR: logu_flat is NULL on device!\n");
+     }
+
+     // 2. Test if a known coordinate evaluates to a sane offset
+     printf("GPU: Offset sample: %lu\n", (unsigned long)tbl->logu_offset[0][0][0][0]);
+  }
 }
 
 /*****************************************************************************/
@@ -3568,6 +3562,7 @@ void acc_ensure_static_data(
 
 #pragma acc enter data copyin(ctl[0:1])
   acc_copyin_tbl(ctl, tbl);
+  debug_gpu_transfer(tbl);
   acc_ctl_static = ctl;
   acc_tbl_static = tbl;
 }
@@ -4498,8 +4493,8 @@ inline double intpol_tbl_eps(
   const double logu) {
 
   const int nu = tbl->nu[id][ig][ip][it];
-  const float *logu_arr = tbl->logu[id][ig][ip][it];
-  const float *logeps_arr = tbl->logeps[id][ig][ip][it];
+  const float *logu_arr = &tbl->logu_flat[tbl->logu_offset[id][ig][ip][it]];
+  const float *logeps_arr = &tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it]];
 
   /* Work in log-space and only convert back when needed... */
   const double logu_min = (double) logu_arr[0];
@@ -4543,8 +4538,8 @@ inline double intpol_tbl_u(
   const double logeps) {
 
   const int nu = tbl->nu[id][ig][ip][it];
-  const float *logeps_arr = tbl->logeps[id][ig][ip][it];
-  const float *logu_arr = tbl->logu[id][ig][ip][it];
+  const float *logu_arr = &tbl->logu_flat[tbl->logu_offset[id][ig][ip][it]];
+  const float *logeps_arr = &tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it]];
 
   /* Work in log-space and only convert back when needed.... */
   const double logeps_min = (double) logeps_arr[0];
@@ -6753,6 +6748,56 @@ void read_shape(
 }
 
 /*****************************************************************************/
+static void tbl_flatten(
+  const ctl_t *ctl,
+  tbl_t *tbl) {
+
+  /* Total number of table values across all (id,ig,ip,it)... */
+  size_t total = 0;
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ig = 0; ig < ctl->ng; ig++)
+      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+        for (int it = 0; it < tbl->nt[id][ig][ip]; it++)
+          total += (size_t) tbl->nu[id][ig][ip][it];
+
+  if (total == 0)
+    return;
+
+  ALLOC(tbl->logu_flat, float, total);
+  ALLOC(tbl->logeps_flat, float, total);
+  tbl->logu_flat_size = total;
+  tbl->logu_flat_used = 0;
+
+  /* Concatenate arrays (id,ig,ip,it) into a single flat array and record where each entry starts... */
+  for (int id = 0; id < ctl->nd; id++)
+    for (int ig = 0; ig < ctl->ng; ig++)
+      for (int ip = 0; ip < tbl->np[id][ig]; ip++)
+        for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
+          const size_t n = (size_t) tbl->nu[id][ig][ip][it];
+          tbl->logu_offset[id][ig][ip][it] = tbl->logu_flat_used;
+          if (tbl->logu[id][ig][ip][it] != NULL)
+            memcpy(&tbl->logu_flat[tbl->logu_flat_used],
+                   tbl->logu[id][ig][ip][it], n * sizeof(float));
+          if (tbl->logeps[id][ig][ip][it] != NULL)
+            memcpy(&tbl->logeps_flat[tbl->logu_flat_used],
+                   tbl->logeps[id][ig][ip][it], n * sizeof(float));
+          tbl->logu_flat_used += n;
+
+          /* Staging arrays are no longer needed... */
+          free(tbl->logu[id][ig][ip][it]);
+          free(tbl->logeps[id][ig][ip][it]);
+          tbl->logu[id][ig][ip][it] = NULL;
+          tbl->logeps[id][ig][ip][it] = NULL;
+        }
+  printf("HOST CHECK: Sample index tracking:\n");
+  for (int id = 0; id < 2; id++) {
+    for (int ig = 0; ig < 2; ig++) {
+      printf("  host logu_offset[%d][%d][0][0] = %lu\n", 
+              id, ig, (unsigned long)tbl->logu_offset[id][ig][0][0]);
+    }
+}
+fflush(stdout);
+}
 
 tbl_t *read_tbl(
   const ctl_t *ctl) {
@@ -6760,6 +6805,11 @@ tbl_t *read_tbl(
   /* Allocate... */
   tbl_t *tbl;
   ALLOC(tbl, tbl_t, 1);
+
+  tbl->logu_flat = NULL;
+  tbl->logeps_flat = NULL;
+  tbl->logu_flat_size = 0;
+  tbl->logu_flat_used = 0;
 
   /* Initialize filter function sizes... */
   for (int id = 0; id < ctl->nd; id++)
@@ -6798,12 +6848,16 @@ tbl_t *read_tbl(
       /* Read channels... */
       for (int id = 0; id < ctl->nd; id++) {
 	read_tbl_nc_channel(ctl, tbl, id, ig, ncid);
-	TBL_LOG(tbl, id, ig);
+	//TBL_LOG(tbl, id, ig);    // TODO: need to adjust parsing of flat tbl structures here
       }
 
       /* Close file... */
       NC(nc_close(ncid));
     }
+  }
+
+  if (ctl->tblfmt == 1) {
+    tbl_flatten(ctl, tbl);
   }
 
   /* Calculate log-pressure... */
@@ -7458,6 +7512,8 @@ void tbl_free(
     }
 
   /* Free... */
+  free(tbl->logu_flat);
+  free(tbl->logeps_flat);
   free(tbl);
 }
 
@@ -7493,10 +7549,12 @@ void tbl_pack(
       memcpy(cur, &nu, sizeof(nu));
       cur += sizeof(nu);
 
-      memcpy(cur, tbl->logu[id][ig][ip][it], (size_t) nu * sizeof(float));
+      memcpy(cur, &tbl->logu_flat[tbl->logu_offset[id][ig][ip][it]],
+             (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
 
-      memcpy(cur, tbl->logeps[id][ig][ip][it], (size_t) nu * sizeof(float));
+      memcpy(cur, &tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it]],
+             (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
     }
   }
@@ -7594,16 +7652,30 @@ size_t tbl_unpack(
 	ERRMSG("nu out of range!");
       tbl->nu[id][ig][ip][it] = nu;
 
-      ALLOC(tbl->logu[id][ig][ip][it], float,
-	    nu);
-      ALLOC(tbl->logeps[id][ig][ip][it], float,
-	    nu);
+      const size_t required_size = tbl->logu_flat_used + (size_t) nu;
+      if (required_size > tbl->logu_flat_size) {
+        // Grow buffer logu_flat if entry does not fit
+        size_t new_size = tbl->logu_flat_size == 0 ? 1024 : tbl->logu_flat_size * 2;
+        while (new_size < required_size)
+          new_size *= 2;
+        tbl->logu_flat = (float *) realloc(tbl->logu_flat, new_size * sizeof(float));
+        tbl->logeps_flat = (float *) realloc(tbl->logeps_flat, new_size * sizeof(float));
+        if (!tbl->logu_flat || !tbl->logeps_flat)
+          ERRMSG("Ran out of memory while growing table buffers logu_flat / logeps_flat!");
+        tbl->logu_flat_size = new_size;
+      }      
 
-      memcpy(tbl->logu[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
+      // record starting offset
+      tbl->logu_offset[id][ig][ip][it] = tbl->logu_flat_used;
+
+      memcpy(&tbl->logu_flat[tbl->logu_flat_used], cur, (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
 
-      memcpy(tbl->logeps[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
+      memcpy(&tbl->logeps_flat[tbl->logu_flat_used], cur, (size_t) nu * sizeof(float));
       cur += ((size_t) nu * sizeof(float));
+
+      tbl->logu_flat_used += (size_t) nu;
+
     }
   }
 
@@ -9219,8 +9291,8 @@ void write_tbl_asc(
       for (int iu = 0; iu < tbl->nu[id][ig][ip][it]; iu++)
 	fprintf(out, "%g %g %e %e\n",
 		tbl->p[id][ig][ip], tbl->t[id][ig][ip][it],
-		exp(tbl->logu[id][ig][ip][it][iu]),
-		exp(tbl->logeps[id][ig][ip][it][iu]));
+    exp(tbl->logu_flat[tbl->logu_offset[id][ig][ip][it] + (size_t) iu]),
+		exp(tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it] + (size_t) iu]));
     }
 
   /* Close file... */
