@@ -149,7 +149,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
     )
     conversation_history = []
 
-    # Peform baselin run
+    # Perform baselin run
     success, res_dir = executor.run_benchmark(
         f"run_{timestamp}_iter_000_baseline", cfg["benchmark_env"], RESULTS_DIR / "iter_000_baseline", 
         poll_interval=args.poll_interval, timeout=args.job_timeout,
