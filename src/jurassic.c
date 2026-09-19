@@ -3705,6 +3705,49 @@ void formod_pencil(
 
 /*****************************************************************************/
 
+static double convolve_rfm(
+  const double *nurfm,
+  const double *spec,
+  const int npts,
+  const double *nu,
+  const double *f,
+  const int n) {
+
+  double fsum = 0, specsum = 0;
+
+  /* Convolute... */
+  for (int ipts = 0; ipts < npts; ipts++)
+    if (nurfm[ipts] >= nu[0] && nurfm[ipts] <= nu[n - 1]) {
+      const int idx = locate_irr(nu, n, nurfm[ipts]);
+      const double filt =
+	LIN(nu[idx], f[idx], nu[idx + 1], f[idx + 1], nurfm[ipts]);
+      fsum += filt;
+      specsum += filt * spec[ipts];
+    }
+
+  return specsum / fsum;
+}
+
+/*****************************************************************************/
+
+static void find_rfm_file(
+  char *filename,
+  const char *basename,
+  const double z) {
+
+  /* Search RFM spectrum... */
+  FILE *in;
+  sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000));
+  if (!(in = fopen(filename, "r"))) {
+    sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000) + 1);
+    if (!(in = fopen(filename, "r")))
+      ERRMSG("Cannot find RFM data file!");
+  }
+  fclose(in);
+}
+
+/*****************************************************************************/
+
 void formod_rfm(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -3713,15 +3756,17 @@ void formod_rfm(
 
   los_t *los;
 
-  char cmd[2 * LEN], rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
+  char cmd[2 * LEN], filename[LEN], rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
 
-  double f[NSHAPE], nu[NSHAPE], nu0, nu1, obsz = -999, tsurf,
+  double lower[ND], upper[ND], nu0, nu1, obsz = -999, *nurfm, *spec, tsurf,
     xd[3], xo[3], xv[3], z[NR], zmin, zmax;
 
-  int n, nadir = 0, zenith = 0;
+  int nadir = 0, npts, order[ND], zenith = 0;
 
   /* Allocate... */
   ALLOC(los, los_t, 1);
+  ALLOC(nurfm, double, RFMNPTS);
+  ALLOC(spec, double, RFMNPTS);
 
   /* Check observer positions... */
   for (int ir = 1; ir < obs->nr; ir++)
@@ -3801,19 +3846,39 @@ void formod_rfm(
   /* Write atmospheric data file... */
   write_atm_rfm("rfm.atm", ctl, atm);
 
-  /* Loop over channels... */
+  /* Check filter functions and initialize channel order... */
   for (int id = 0; id < ctl->nd; id++) {
-
-    /* Get filter function from lookup table... */
-    n = tbl->filt_n[id];
-    if (n <= 0 || n > NSHAPE)
+    const int n = tbl->filt_n[id];
+    if (n < 2 || n > NSHAPE)
       ERRMSG("Missing or invalid filter function in lookup table!");
-    memcpy(nu, tbl->filt_nu[id], (size_t) n * sizeof(double));
-    memcpy(f, tbl->filt_f[id], (size_t) n * sizeof(double));
+    for (int i = 1; i < n; i++)
+      if (tbl->filt_nu[id][i] <= tbl->filt_nu[id][i - 1])
+	ERRMSG("Filter wavenumbers must be strictly increasing!");
+    lower[id] = tbl->filt_nu[id][0];
+    upper[id] = tbl->filt_nu[id][n - 1];
+    order[id] = id;
+  }
 
-    /* Set spectral range... */
-    nu0 = nu[0];
-    nu1 = nu[n - 1];
+  /* Sort channels by lower filter bound... */
+  for (int i = 1; i < ctl->nd; i++) {
+    const int id = order[i];
+    int j = i;
+    while (j > 0 && lower[order[j - 1]] > lower[id]) {
+      order[j] = order[j - 1];
+      j--;
+    }
+    order[j] = id;
+  }
+
+  /* Loop over overlapping spectral blocks... */
+  for (int ib = 0; ib < ctl->nd;) {
+    int ie = ib + 1;
+    nu0 = lower[order[ib]];
+    nu1 = upper[order[ib]];
+    while (ie < ctl->nd && lower[order[ie]] <= nu1) {
+      nu1 = MAX(nu1, upper[order[ie]]);
+      ie++;
+    }
 
     /* Create RFM driver file... */
     FILE *out;
@@ -3849,11 +3914,25 @@ void formod_rfm(
     if (system(cmd))
       ERRMSG("Error while calling RFM!");
 
-    /* Read data... */
+    /* Read and convolute each spectrum once... */
     for (int ir = 0; ir < obs->nr; ir++) {
-      obs->rad[id][ir] = read_obs_rfm("rad", z[ir], nu, f, n) * 1e-5;
-      obs->tau[id][ir] = read_obs_rfm("tra", z[ir], nu, f, n);
+      find_rfm_file(filename, "rad", z[ir]);
+      read_rfm_spec(filename, nurfm, spec, &npts);
+      for (int i = ib; i < ie; i++) {
+	const int id = order[i];
+	obs->rad[id][ir] = convolve_rfm(nurfm, spec, npts,
+	  tbl->filt_nu[id], tbl->filt_f[id], tbl->filt_n[id]) * 1e-5;
+      }
+
+      find_rfm_file(filename, "tra", z[ir]);
+      read_rfm_spec(filename, nurfm, spec, &npts);
+      for (int i = ib; i < ie; i++) {
+	const int id = order[i];
+	obs->tau[id][ir] = convolve_rfm(nurfm, spec, npts,
+	  tbl->filt_nu[id], tbl->filt_f[id], tbl->filt_n[id]);
+      }
     }
+    ib = ie;
   }
 
   /* Remove temporary files... */
@@ -3862,6 +3941,8 @@ void formod_rfm(
 
   /* Free... */
   free(los);
+  free(nurfm);
+  free(spec);
 }
 
 /*****************************************************************************/
@@ -6102,52 +6183,27 @@ double read_obs_rfm(
   const double *f,
   const int n) {
 
-  double fsum = 0, nu2[NSHAPE], *nurfm, *rad, radsum = 0;
+  double *nurfm, *spec;
 
   int npts;
 
   /* Allocate... */
-  ALLOC(nurfm, double,
-	RFMNPTS);
-  ALLOC(rad, double,
-	RFMNPTS);
+  ALLOC(nurfm, double, RFMNPTS);
+  ALLOC(spec, double, RFMNPTS);
 
-  /* Search RFM spectrum... */
-  FILE *in;
+  /* Search and read RFM spectrum... */
   char filename[LEN];
-  sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000));
-  if (!(in = fopen(filename, "r"))) {
-    sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000) + 1);
-    if (!(in = fopen(filename, "r")))
-      ERRMSG("Cannot find RFM data file!");
-  }
-  fclose(in);
-
-  /* Read RFM spectrum... */
-  read_rfm_spec(filename, nurfm, rad, &npts);
-
-  /* Set wavenumbers... */
-  nu2[0] = nu[0];
-  nu2[n - 1] = nu[n - 1];
-  for (int i = 1; i < n - 1; i++)
-    nu2[i] = LIN(0.0, nu2[0], n - 1.0, nu2[n - 1], i);
+  find_rfm_file(filename, basename, z);
+  read_rfm_spec(filename, nurfm, spec, &npts);
 
   /* Convolute... */
-  for (int ipts = 0; ipts < npts; ipts++)
-    if (nurfm[ipts] >= nu2[0] && nurfm[ipts] <= nu2[n - 1]) {
-      const int idx = locate_irr(nu2, n, nurfm[ipts]);
-      const double filt =
-	LIN(nu2[idx], f[idx], nu2[idx + 1], f[idx + 1], nurfm[ipts]);
-      fsum += filt;
-      radsum += filt * rad[ipts];
-    }
+  const double result = convolve_rfm(nurfm, spec, npts, nu, f, n);
 
   /* Free... */
   free(nurfm);
-  free(rad);
+  free(spec);
 
-  /* Return radiance... */
-  return radsum / fsum;
+  return result;
 }
 
 /*****************************************************************************/

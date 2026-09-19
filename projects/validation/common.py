@@ -59,7 +59,7 @@ def run(command, cwd, log, env):
     return elapsed
 
 
-def parse_timers(log, rfm_channels=None):
+def parse_timers(log):
     text = log.read_text()
     values = {}
     for name in TIMER_NAMES:
@@ -70,15 +70,13 @@ def parse_timers(log, rfm_channels=None):
     values["input_setup_s"] = sum(values[name.lower() + "_s"] for name in TIMER_NAMES[:7])
     values["forward_section_s"] = values["formod_s"]
     values["output_s"] = values["write_obs_s"]
-    # FORMOD=2 launches RFM once per channel. Sum every invocation, not just
-    # the first timer line, and reject incomplete instrumented output.
+    # FORMOD=2 launches RFM once per overlapping spectral block. Sum every
+    # invocation, not just the first timer line.
     for prefix, names in (("RFM_PHASE_", ("DRIVER_S", "PROFILE_S", "PATH_S", "SPECTRAL_S", "OUTPUT_S", "SPECTRAL_EX_OUTPUT_S")),
                           ("RFM_HITRAN_", ("BIN_READ_S", "BIN_READ_CALLS", "INIT_S", "INIT_CALLS"))):
         for name in names:
             matches = re.findall(rf"^{prefix}{name}=\s*([0-9.eE+-]+)$", text, re.MULTILINE)
             if matches:
-                if rfm_channels is not None and len(matches) != rfm_channels:
-                    raise ValueError(f"{prefix}{name} occurs {len(matches)} times in {log}; expected {rfm_channels}")
                 value = sum(float(item) for item in matches)
                 key = ("rfm_phase_" if prefix == "RFM_PHASE_" else "rfm_hitran_") + name.lower()
                 values[key] = int(value) if name.endswith("CALLS") else value
@@ -315,7 +313,7 @@ def main():
                 (method_dir / "command.json").write_text(json.dumps(command, indent=2) + "\n")
                 log = method_dir / "formod.log"
                 wall = run(command, method_dir, log, env)
-                timing = parse_timers(log, len(channels) if method == "rfm" else None)
+                timing = parse_timers(log)
                 timer_complete = True
                 if method == "rfm":
                     required = ("rfm_phase_driver_s", "rfm_phase_path_s",
