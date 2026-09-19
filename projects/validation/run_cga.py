@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Run the complete single-core JURASSIC CGA validation spectrum calculation."""
 
-import argparse
 import sys
 from run_ega import add_common_arguments, execute, make_parser
 

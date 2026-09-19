@@ -41,6 +41,7 @@ TIMER_NAMES = ("READ_CTL", "READ_TBL", "READ_TASK", "READ_DIRLIST",
 
 
 def sha256(path):
+    """Return the SHA-256 digest of a potentially large external input."""
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
@@ -49,6 +50,7 @@ def sha256(path):
 
 
 def run(command, cwd, log, env):
+    """Run one model command, capture its output, and return wall time."""
     start = time.perf_counter()
     result = subprocess.run(command, cwd=cwd, env=env, text=True,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -60,6 +62,7 @@ def run(command, cwd, log, env):
 
 
 def parse_timers(log):
+    """Collect JURASSIC timers and sum all instrumented RFM invocations."""
     text = log.read_text()
     values = {}
     for name in TIMER_NAMES:
@@ -84,6 +87,7 @@ def parse_timers(log):
 
 
 def read_science(path, nus):
+    """Read channel radiances from one JURASSIC NetCDF result."""
     import netCDF4
     with netCDF4.Dataset(path) as dataset:
         rows = None
@@ -105,7 +109,6 @@ def read_science(path, nus):
     if not rows:
         raise ValueError(f"empty spectrum: {path}")
     return rows
-
 
 
 def merge_limb_observations(paths, view_heights, output):
@@ -173,7 +176,7 @@ def main():
         if path and not path.is_file():
             parser.error(f"required RFM file missing: {path}")
     if rfm_bin and args.rfm_xsc_dir is None:
-        parser.error("set --rfm-xsc-dir or JURASSIC_RFM_XSC_DIR for the 36-gas RFM run")
+        parser.error("set --rfm-xsc-dir or RFM_XSC_DIR for the 36-gas RFM run")
     xsc_dir = args.rfm_xsc_dir.expanduser().resolve() if args.rfm_xsc_dir else None
     if rfm_bin:
         if not xsc_dir.is_dir():
@@ -227,7 +230,7 @@ def main():
         "omp_num_threads": env["OMP_NUM_THREADS"],
         "timing_definition": "sum of per-chunk formod wall and named timer sections; excludes input generation and plots; chunks may run concurrently",
         "model_time_definition": {"jurassic": "sum of TIMER_FORMOD across chunks",
-                                  "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across per-channel calls and chunks",
+                                  "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across spectral-block invocations and chunks",
                                   "per_spectrum": "geometry model time divided by number of rays; includes all requested channels",
                                   "rfm_minus_measured_hitran_input": "RFM model time minus timed HITRAN initialization and binary record READs"},
         "rfm_forward_section_includes_internal_io": True,

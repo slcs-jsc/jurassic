@@ -27,10 +27,8 @@ python3 projects/validation/analyze.py
 
 The analysis reports relative radiance differences for all limb channels with
 nonzero RFM radiance. A true zero reference would be reported as undefined.
-For nadir and zenith, the channel-averaged radiances are converted with JURASSIC's inverse
-Planck definition and differences are reported in kelvin. The analysis also
-includes the channel-wise 50/50 mean of the EGA and CGA radiances; this is a
-derived result rather than another forward-model mode.
+For nadir and zenith, the channel-averaged radiances are converted with
+JURASSIC's inverse Planck definition and differences are reported in kelvin.
 
 Main outputs are:
 
@@ -113,7 +111,3 @@ model times.
 its HITRAN initialization and binary-read measurements separately. Hardware,
 thread count, external-data provenance, and the timing definition must remain
 with any reported speed-up.
-
-The simple EGA/CGA radiance mean follows the approach discussed by Marshall et
-al. (1994, DOI: 10.1016/0022-4073(94)90026-4) and Francis et al. (2006, DOI:
-10.1029/2005JD006270).

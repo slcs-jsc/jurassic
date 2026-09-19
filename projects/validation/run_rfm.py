@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Generate the complete channel-matched RFM reference spectra."""
 
-import argparse
 import os
 import sys
 from pathlib import Path

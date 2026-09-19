@@ -3,8 +3,8 @@
 
 import argparse
 import csv
-import json
 import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
@@ -17,6 +17,7 @@ GEOMETRIES = ("limb", "nadir", "zenith")
 
 
 def sha256(path):
+    """Return the SHA-256 digest recorded in a result manifest."""
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
@@ -25,6 +26,7 @@ def sha256(path):
 
 
 def make_parser(description):
+    """Create a parser that documents the fixed scientific setup."""
     return argparse.ArgumentParser(
         description=description,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -35,6 +37,7 @@ def make_parser(description):
 
 
 def add_common_arguments(parser):
+    """Add execution options shared by the EGA, CGA, and RFM runners."""
     parser.add_argument("--tbl-dir", type=Path,
                         default=os.environ.get("JURASSIC_TBL_DIR", ROOT / "tab/tria_1cm/nc_1e-6"),
                         help="directory containing the external tria_<gas>.nc lookup tables")
@@ -49,6 +52,7 @@ def add_common_arguments(parser):
 
 
 def write_spectra(work, method, output):
+    """Merge per-geometry work files into one compact spectrum table."""
     with output.open("w", newline="") as stream:
         writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(("geometry", "nu_cm-1", "ray", "radiance_W_m-2_sr-1_cm"))
@@ -61,6 +65,7 @@ def write_spectra(work, method, output):
 
 
 def geometry_rows(work):
+    """Extract the common ray definitions from the first spectral chunk."""
     import netCDF4
     rows = []
     names = ("time", "obs_z", "obs_lon", "obs_lat", "vp_z", "vp_lon", "vp_lat")
@@ -73,6 +78,7 @@ def geometry_rows(work):
 
 
 def write_inputs(work, output):
+    """Record the atmosphere and geometry used to create the RFM reference."""
     output.mkdir()
     first_chunk = sorted((work / "limb").glob("[0-9]*_[0-9]*"))[0]
     shutil.copy2(first_chunk / "atm.tab", output / "atmosphere.tab")
@@ -84,6 +90,7 @@ def write_inputs(work, output):
 
 
 def check_reference_inputs(work):
+    """Require JURASSIC runs to reproduce the recorded RFM input state."""
     reference = HERE / "rfm_reference/input"
     first_chunk = sorted((work / "limb").glob("[0-9]*_[0-9]*"))[0]
     if (first_chunk / "atm.tab").read_bytes() != (reference / "atmosphere.tab").read_bytes():
@@ -100,6 +107,7 @@ def check_reference_inputs(work):
 
 
 def execute(method, target_name, args, extra=()):
+    """Run one method and atomically replace its compact result directory."""
     target = HERE / target_name
     if target.exists() and any(target.iterdir()) and not args.force:
         raise RuntimeError(f"{target} already contains results; pass --force to replace them")
@@ -118,6 +126,8 @@ def execute(method, target_name, args, extra=()):
     env = {**os.environ, "OMP_NUM_THREADS": "1"}
     subprocess.run(command, check=True, env=env)
 
+    # Build a complete replacement beside the current result.  The existing
+    # compact result remains usable if calculation or validation fails.
     staging = HERE / f".{target_name}.new"
     if staging.exists():
         shutil.rmtree(staging)

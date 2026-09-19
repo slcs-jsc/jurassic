@@ -8,13 +8,13 @@ import math
 from pathlib import Path
 
 HEIGHTS = (5, 10, 20, 50)
-METHODS = (("ega", "EGA", "#0072B2"), ("cga", "CGA", "#E69F00"),
-           ("mean", "EGA/CGA mean", "#009E73"))
+METHODS = (("ega", "EGA", "#0072B2"), ("cga", "CGA", "#E69F00"))
 C1 = 1.19104259e-8
 C2 = 1.43877506
 
 
 def load_spectrum(path, geometry):
+    """Load one geometry keyed by ray number and channel wavenumber."""
     values = {}
     if not path.is_file():
         raise FileNotFoundError(f"missing spectrum: {path}")
@@ -29,15 +29,9 @@ def load_spectrum(path, geometry):
 
 
 def read_rows(root, geometry, method):
+    """Align one JURASSIC method with RFM and calculate channel errors."""
     reference = load_spectrum(root / "rfm_reference" / "spectra.csv", geometry)
-    if method == "mean":
-        ega = load_spectrum(root / "test_ega" / "spectra.csv", geometry)
-        cga = load_spectrum(root / "test_cga" / "spectra.csv", geometry)
-        if ega.keys() != cga.keys():
-            raise ValueError(f"EGA/CGA grid mismatch for {geometry}")
-        candidate = {key: 0.5 * (ega[key] + cga[key]) for key in ega}
-    else:
-        candidate = load_spectrum(root / f"test_{method}" / "spectra.csv", geometry)
+    candidate = load_spectrum(root / f"test_{method}" / "spectra.csv", geometry)
     if candidate.keys() != reference.keys():
         raise ValueError(f"{method}/RFM grid mismatch for {geometry}")
     rows = []
@@ -61,6 +55,7 @@ def brightness_temperature(radiance, wavenumber):
 
 
 def percentile(values, fraction):
+    """Return a linearly interpolated percentile from a nonempty sequence."""
     values = sorted(values)
     position = fraction * (len(values) - 1)
     lower = int(position)
@@ -69,6 +64,7 @@ def percentile(values, fraction):
 
 
 def statistics(values):
+    """Summarize finite absolute errors without discarding large values."""
     absolute = [abs(value) for value in values if math.isfinite(value)]
     return {
         "count": len(absolute),
@@ -280,7 +276,7 @@ def write_report(root, metrics, output):
         f"- Atmospheric composition: mid-latitude climatology with {len(manifest['gases'])} gases",
         "- Geometries: limb at 5, 10, 20, and 50 km geometric tangent height; one nadir and one zenith ray",
         "- Refraction: enabled consistently for JURASSIC and RFM",
-        "- JURASSIC modes: EGA and CGA, plus the channel-wise arithmetic EGA/CGA mean",
+        "- JURASSIC modes: EGA and CGA",
         "- Threads per model process: 1",
         "- Channels compared per spectrum: 2500",
         "",

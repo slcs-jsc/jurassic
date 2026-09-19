@@ -10,7 +10,7 @@ files in this validation project. No values below are entered manually.
 - Atmospheric composition: mid-latitude climatology with 36 gases
 - Geometries: limb at 5, 10, 20, and 50 km geometric tangent height; one nadir and one zenith ray
 - Refraction: enabled consistently for JURASSIC and RFM
-- JURASSIC modes: EGA and CGA, plus the channel-wise arithmetic EGA/CGA mean
+- JURASSIC modes: EGA and CGA
 - Threads per model process: 1
 - Channels compared per spectrum: 2500
 
@@ -39,10 +39,6 @@ only an exactly zero RFM radiance would have an undefined relative error.
 | 10 km geometric | CGA | 2.086 | 0.852 | 4.523 | 19.069 |
 | 20 km geometric | CGA | 1.775 | 0.723 | 3.786 | 15.901 |
 | 50 km geometric | CGA | 1.057 | 0.245 | 2.368 | 8.883 |
-| 5 km geometric | EGA/CGA mean | 2.333 | 1.228 | 4.533 | 17.102 |
-| 10 km geometric | EGA/CGA mean | 1.874 | 0.797 | 3.878 | 18.488 |
-| 20 km geometric | EGA/CGA mean | 1.483 | 0.672 | 3.008 | 15.951 |
-| 50 km geometric | EGA/CGA mean | 0.625 | 0.172 | 1.302 | 9.793 |
 
 ## Nadir and zenith brightness temperature
 
@@ -60,8 +56,6 @@ only an exactly zero RFM radiance would have an undefined relative error.
 | Zenith | EGA | 0.574 | 0.152 | 1.311 | 4.865 |
 | Nadir | CGA | 0.590 | 0.111 | 1.028 | 4.169 |
 | Zenith | CGA | 0.589 | 0.166 | 1.275 | 4.873 |
-| Nadir | EGA/CGA mean | 0.496 | 0.110 | 0.969 | 3.661 |
-| Zenith | EGA/CGA mean | 0.517 | 0.155 | 0.982 | 4.869 |
 
 ## Runtime
 
