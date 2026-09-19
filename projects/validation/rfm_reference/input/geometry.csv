@@ -1,0 +1,7 @@
+geometry,ray,time_s,observer_z_km,observer_lon_deg,observer_lat_deg,view_z_km,view_lon_deg,view_lat_deg
+limb,0,0.0,780.0,0.0,0.0,5.0,0.0,26.9289
+limb,1,0.0,780.0,0.0,0.0,10.0,0.0,26.8403
+limb,2,0.0,780.0,0.0,0.0,20.0,0.0,26.6622
+limb,3,0.0,780.0,0.0,0.0,50.0,0.0,26.1211
+nadir,0,0.0,700.0,0.0,0.0,0.0,0.0,0.0
+zenith,0,0.0,0.0,0.0,0.0,700.0,0.0,0.0

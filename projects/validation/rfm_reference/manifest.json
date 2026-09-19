@@ -1,0 +1,164 @@
+{
+  "git_commit": "759780e2080a4c28c1fb183f677c4d5b4e3284ef",
+  "table_dir": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6",
+  "table_files": {
+    "CO2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_CO2.nc",
+    "H2O": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_H2O.nc",
+    "N2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_N2.nc",
+    "O2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_O2.nc",
+    "O3": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_O3.nc",
+    "C2H2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_C2H2.nc",
+    "C2H6": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_C2H6.nc",
+    "CCl4": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_CCl4.nc",
+    "CH4": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_CH4.nc",
+    "ClO": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_ClO.nc",
+    "ClONO2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_ClONO2.nc",
+    "CO": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_CO.nc",
+    "COF2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_COF2.nc",
+    "F11": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_F11.nc",
+    "F12": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_F12.nc",
+    "F14": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_F14.nc",
+    "F22": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_F22.nc",
+    "H2O2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_H2O2.nc",
+    "HCN": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_HCN.nc",
+    "HNO3": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_HNO3.nc",
+    "HNO4": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_HNO4.nc",
+    "N2O": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_N2O.nc",
+    "N2O5": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_N2O5.nc",
+    "NH3": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_NH3.nc",
+    "NO": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_NO.nc",
+    "NO2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_NO2.nc",
+    "OCS": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_OCS.nc",
+    "SF6": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_SF6.nc",
+    "SO2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_SO2.nc",
+    "F113": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_F113.nc",
+    "F114": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_F114.nc",
+    "HF": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_HF.nc",
+    "HCl": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_HCl.nc",
+    "HBr": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_HBr.nc",
+    "HOCl": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_HOCl.nc",
+    "H2CO": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_H2CO.nc"
+  },
+  "gases": [
+    "CO2",
+    "H2O",
+    "N2",
+    "O2",
+    "O3",
+    "C2H2",
+    "C2H6",
+    "CCl4",
+    "CH4",
+    "ClO",
+    "ClONO2",
+    "CO",
+    "COF2",
+    "F11",
+    "F12",
+    "F14",
+    "F22",
+    "H2O2",
+    "HCN",
+    "HNO3",
+    "HNO4",
+    "N2O",
+    "N2O5",
+    "NH3",
+    "NO",
+    "NO2",
+    "OCS",
+    "SF6",
+    "SO2",
+    "F113",
+    "F114",
+    "HF",
+    "HCl",
+    "HBr",
+    "HOCl",
+    "H2CO"
+  ],
+  "cross_sections": {
+    "CCl4": {
+      "path": "/home/lars/wrk/rfm/xsc20/CCl4.xsc",
+      "sha256": "2d392770f7d959f83a3c5e83b522b958620d3747f7dafe8645ddd951ea5d9265"
+    },
+    "ClONO2": {
+      "path": "/home/lars/wrk/rfm/xsc20/ClONO2.xsc",
+      "sha256": "dd261324db25d1d1e8d4447339bfc2ef7d1817309b84bb5992698a778541fff7"
+    },
+    "F11": {
+      "path": "/home/lars/wrk/rfm/xsc20/CFC-11.xsc",
+      "sha256": "289e96a5269a759fc706423a6219eb9b64c2619bb5a073891a7310d23d34f5e8"
+    },
+    "F12": {
+      "path": "/home/lars/wrk/rfm/xsc20/CFC-12.xsc",
+      "sha256": "4437787384344ad28636d9f479f32926a332b612d62d3db42fa90e493a972d1a"
+    },
+    "F14": {
+      "path": "/home/lars/wrk/rfm/xsc20/CFC-14.xsc",
+      "sha256": "a2d2b53436dd83d47747901bc0e1feb9c751b4fc0b7f5a52c89bebec6106f67d"
+    },
+    "F22": {
+      "path": "/home/lars/wrk/rfm/xsc20/HCFC-22.xsc",
+      "sha256": "b36d4cd0e02d761e38fc27c34eae923a0fed3840f62048fedc2f74a81f5a8ef7"
+    },
+    "HNO4": {
+      "path": "/home/lars/wrk/rfm/xsc20/HNO4.xsc",
+      "sha256": "388f17a3d5fc26d26b68463ae28ff2b855f0a465369363fe1702db63c4eb0325"
+    },
+    "N2O5": {
+      "path": "/home/lars/wrk/rfm/xsc20/N2O5.xsc",
+      "sha256": "d7c049c3db3d4b43fc6a1dcb2ff84d2631bfe30c292ddab127649cc1708d9315"
+    },
+    "SF6": {
+      "path": "/home/lars/wrk/rfm/xsc20/SF6.xsc",
+      "sha256": "42beb6002f85ead343747fe2b9e11b7703f5bb0ef9fe1aad14dbd34686a687e9"
+    },
+    "F113": {
+      "path": "/home/lars/wrk/rfm/xsc20/CFC-113.xsc",
+      "sha256": "158638478fe30beb152e3c77b8e5ff0063a728a8d4128c6be13c08df23998fff"
+    },
+    "F114": {
+      "path": "/home/lars/wrk/rfm/xsc20/CFC-114.xsc",
+      "sha256": "624b88b439a80b10d36c0a6fda8e5acd35bbd7fbaf0e8678c3a2c4a6ad942b8f"
+    }
+  },
+  "nu_start": 500,
+  "nu_end": 2999,
+  "chunk_size": 128,
+  "parallel_jobs": 2,
+  "geometries": [
+    "limb",
+    "nadir",
+    "zenith"
+  ],
+  "limb_geometric_tangent_heights_km": [
+    5,
+    10,
+    20,
+    50
+  ],
+  "rfm_binary": "/home/lars/wrk/rfm/v521_timings/rfm",
+  "rfm_hitran": "/home/lars/wrk/rfm/hitbin20/hitran2020_mir.bin",
+  "rfm_hitran_sha256": "4b2027f995f1fd4a5ced3f6d193aec09a4e456541bd163540859334196fe386d",
+  "rfm_binary_sha256": "22cd9925fa67ed23a630de9e595043f12ebd14eab4f7669f1ac6250a477ab9ce",
+  "rfm_source_timers_required": true,
+  "omp_num_threads": "1",
+  "timing_definition": "sum of per-chunk formod wall and named timer sections; excludes input generation and plots; chunks may run concurrently",
+  "model_time_definition": {
+    "jurassic": "sum of TIMER_FORMOD across chunks",
+    "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across per-channel calls and chunks",
+    "per_spectrum": "geometry model time divided by number of rays; includes all requested channels",
+    "rfm_minus_measured_hitran_input": "RFM model time minus timed HITRAN initialization and binary record READs"
+  },
+  "rfm_forward_section_includes_internal_io": true,
+  "status": "complete",
+  "cga_parallel_jobs": 2,
+  "method": "rfm",
+  "spectrum_sha256": "a2f054b46f379d6ac12313211dfb8c50d398486cec96d211486e302b77abdb7e",
+  "layout": "compact validation result",
+  "input_sha256": {
+    "atmosphere.tab": "7796080b7bcbfb20b2ae80dbc1b2cfcb1b49a04c436abc93fd85b9d1bf6dc2c4",
+    "geometry.csv": "4a176198b72f253ecf2125cfc24286d87ce4ee89c43a9ddfc139806c72cf8879"
+  }
+}

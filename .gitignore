@@ -6,6 +6,10 @@ libs/build/
 projects/*
 !projects/examples/
 !projects/examples/**
+!projects/benchmark/
+!projects/benchmark/**
+!projects/validation/
+!projects/validation/**
 src/*.o
 src/atmfmt
 src/brightness
