@@ -136,7 +136,22 @@ def execute(method, target_name, args, extra=()):
     shutil.copy2(work / "timings.csv", staging / "timings.csv")
     manifest = json.loads((work / "manifest.json").read_text())
     manifest["method"] = method
-    manifest["generation_command"] = command
+    # Preserve the executed options without committing user-specific paths.
+    substitutions = {
+        str(HERE / "common.py"): "projects/validation/common.py",
+        str(args.tbl_dir): "$JURASSIC_TBL_DIR",
+        str(args.bin_dir): "src",
+        str(work): f"projects/validation/work/{method}",
+    }
+    for option, variable in (("--rfm-bin", "$RFM_BIN"),
+                             ("--rfm-hit", "$RFM_HIT"),
+                             ("--rfm-xsc-dir", "$RFM_XSC_DIR")):
+        if option in command:
+            substitutions[command[command.index(option) + 1]] = variable
+    manifest["generation_command"] = [
+        "python3" if item == sys.executable else substitutions.get(item, item)
+        for item in command
+    ]
     manifest["spectrum_sha256"] = sha256(staging / "spectra.csv")
     manifest.pop("methods", None)
     if method == "rfm":

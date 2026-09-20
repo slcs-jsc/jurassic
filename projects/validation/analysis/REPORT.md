@@ -8,9 +8,10 @@ files in this validation project. No values below are entered manually.
 - JURASSIC commit: `98ea98c949a283fa5ffa7c7eb4961af7e538ed89`
 - Spectral grid: 500–2999 cm⁻¹ at 1 cm⁻¹ sampling
 - Atmospheric composition: mid-latitude climatology with 36 gases
-- Geometries: limb at 5, 10, 20, and 50 km geometric tangent height; one nadir and one zenith ray
+- Geometries: limb at 5, 10, 20, 50 km geometric tangent height; one nadir and one zenith ray
 - Refraction: enabled consistently for JURASSIC and RFM
 - JURASSIC modes: EGA and CGA
+- RFM spectral step: 0.0005 cm⁻¹
 - Threads per model process: 1
 - Channels compared per spectrum: 2500
 - Spectral execution: 20 chunks of at most 128 channels; one contiguous RFM block per chunk
@@ -19,6 +20,29 @@ RFM spectra are averaged with the same channel response functions used by
 JURASSIC. Limb errors are relative radiance errors. Nadir and zenith errors
 are absolute brightness temperature errors. All limb channels are included;
 only an exactly zero RFM radiance would have an undefined relative error.
+
+## Lookup-table applicability
+
+The external netCDF files store pressure, temperature, absorber-column, and
+filter grids inside each packed gas/channel variable; they do not expose one
+global validity range as netCDF metadata. Representative active variables in
+the table set used here have a pressure grid of 0.0103181–1017 hPa. The stored
+atmosphere spans 0.00184003–1017 hPa; its ten levels from 81 to 90 km fall
+below that grid and require pressure extrapolation when sampled. Temperatures
+in the stored atmosphere are inside the pressure-dependent temperature grid of
+the representative CO2 table checked at 1500 cm⁻¹. This is a targeted check,
+not proof of every gas/channel grid.
+
+Absorber-column grids differ by gas, channel, pressure, and temperature and
+cannot be summarized by one supported interval. JURASSIC interpolates pressure
+logarithmically and temperature linearly; the boundary grid pairs are used for
+extrapolation. Below the tabulated column range emissivity is scaled linearly,
+and above it an exponential continuation approaches unity. The runner verifies
+that all 36 files exist and that every requested CO2 and H2O channel is present.
+A missing individual gas/channel table is warned about and contributes no
+absorption for that gas. Accuracy near or outside any table boundary must
+therefore be established for the intended atmosphere and table set; it does not
+follow from this validation.
 
 ## Interpretation of the approximation errors
 
@@ -49,6 +73,21 @@ References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807);
 [Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4);
 [Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).
 
+## Reviewer-facing summary
+
+For this 2500-channel, 36-gas mid-latitude test, the four limb cases have median
+absolute relative radiance differences of 0.128–1.269% for EGA and
+0.245–1.206% for CGA. The corresponding 95th percentiles are
+1.151–4.534% and 2.368–4.523%. Nadir and zenith RMS brightness-temperature
+differences are 0.464–0.574 K for EGA and 0.589–0.590 K for CGA.
+On the recorded Intel Core i7-1365U run, RFM/EGA speed-ups range from
+103× to 839× and RFM/CGA speed-ups from 196× to 1338×. These ratios compare
+total model time: limb is one joint four-ray calculation, while nadir and
+zenith contain one ray each. Accuracy and runtime results apply to this
+atmosphere, channel responses, model settings,
+timing definition, and hardware. Full spectra, statistics, timings, and
+provenance are provided in `projects/validation`.
+
 ## Limb spectra and errors
 
 ![Limb radiance spectra](limb_radiance_spectra.png)
@@ -69,6 +108,23 @@ References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807);
 | 10 km geometric | CGA | 2.086 | 0.854 | 4.523 | 19.069 |
 | 20 km geometric | CGA | 1.775 | 0.723 | 3.786 | 15.901 |
 | 50 km geometric | CGA | 1.055 | 0.245 | 2.368 | 8.883 |
+
+The maximum percentages are retained for completeness. Their radiance context
+is listed below; the absolute difference is not suppressed when the reference
+radiance is weak. The maxima at 5, 10, and 50 km occur in weak-radiance
+channels, while the 20 km maximum occurs at a larger radiance. Median and
+95th-percentile values characterize the bulk of the 2500 channels more robustly.
+
+| Height | Method | Channel [cm⁻¹] | RFM radiance [W m⁻² sr⁻¹ cm] | Absolute difference [W m⁻² sr⁻¹ cm] |
+|---:|:---|---:|---:|---:|
+| 5 km geometric | EGA | 2980 | 4.171396e-06 | 7.254287e-07 |
+| 10 km geometric | EGA | 2756 | 1.591986e-06 | 2.850872e-07 |
+| 20 km geometric | EGA | 1923 | 9.082896e-05 | 1.453303e-05 |
+| 50 km geometric | EGA | 2197 | 3.058876e-06 | 3.274089e-07 |
+| 5 km geometric | CGA | 2980 | 4.171396e-06 | 7.013632e-07 |
+| 10 km geometric | CGA | 2756 | 1.591986e-06 | 3.035723e-07 |
+| 20 km geometric | CGA | 1923 | 9.082896e-05 | 1.444232e-05 |
+| 50 km geometric | CGA | 2197 | 3.058876e-06 | 2.717154e-07 |
 
 ## Nadir and zenith brightness temperature
 

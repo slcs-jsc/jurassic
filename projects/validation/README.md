@@ -4,7 +4,8 @@ This directory contains a reproducible comparison of the current CPU JURASSIC
 implementation with the RFM line-by-line model. It covers 500–2999 cm⁻¹ at
 1 cm⁻¹ sampling with the mid-latitude climatology and 36 gases. Limb rays use
 geometric tangent heights of 5, 10, 20, and 50 km; refraction is enabled.
-Nadir and zenith each use one representative vertical ray.
+Nadir and zenith each use one representative vertical ray. RFM line-by-line
+spectra are calculated at a fixed 0.0005 cm⁻¹ spectral step.
 
 The repository contains compact reference results:
 
@@ -73,6 +74,46 @@ against line-by-line calculations using its own spectral response functions.
 References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807),
 [Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4), and
 [Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).
+
+## Lookup-table applicability
+
+The external netCDF tables contain packed grids for each gas and channel rather
+than one global pressure, temperature, or absorber-column range in the netCDF
+metadata. Representative active variables in the table set used for this run
+have a pressure grid of 0.0103181–1017 hPa. The committed atmosphere spans
+0.00184003–1017 hPa: its ten levels from 81 to 90 km fall below that grid
+and therefore require pressure extrapolation when sampled. Its temperatures are within the pressure-dependent temperature
+grid of the representative CO2 table checked at 1500 cm⁻¹. This check does not
+establish the domain of every gas/channel table.
+
+Absorber-column grids differ by gas, channel, pressure, and temperature.
+JURASSIC interpolates pressure logarithmically and temperature linearly and
+uses the boundary grid pairs for extrapolation. Below a tabulated column range,
+emissivity is scaled linearly; above it, an exponential continuation approaches
+unity. These continuations keep the calculation defined but do not establish
+line-by-line accuracy outside the sampled state space.
+
+The runner requires all 36 table files and verifies that every requested CO2
+and H2O channel is present. Other gases may cover only their active spectral regions; the core emits a warning and applies zero absorption for an
+individual missing gas/channel table. New table sets and atmospheres must be
+checked separately, especially near pressure, temperature, and column-density
+boundaries. Accuracy outside or near those boundaries should not be inferred
+from this validation.
+
+## Reviewer-facing summary
+
+For this 2500-channel, 36-gas mid-latitude test, median absolute relative limb
+radiance differences are 0.128–1.269% for EGA and 0.245–1.206% for CGA across the four
+tangent heights. The corresponding 95th percentiles are 1.151–4.534% and
+2.368–4.523%. Nadir and zenith RMS brightness-temperature differences are
+0.464–0.574 K for EGA and 0.589–0.590 K for CGA. On the recorded Intel Core
+i7-1365U run, the observed speed-ups are 103–839× for RFM/EGA and 196–1338×
+for RFM/CGA. These ratios compare total model time for each validation case:
+limb is one joint four-ray calculation, while nadir and zenith contain one ray
+each. The results are specific to this atmosphere, spectral responses, model
+configuration, timing definition, and hardware. See
+`projects/validation/analysis/REPORT.md` for complete spectra, statistics,
+timings, limitations, and provenance.
 
 ## Repeat the calculations
 

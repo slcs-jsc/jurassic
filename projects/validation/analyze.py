@@ -80,6 +80,18 @@ def limb_data(root, method):
     return [[row for row in rows if int(row["ray"]) == ray] for ray in range(len(HEIGHTS))]
 
 
+def limb_statistics(rows):
+    """Summarize relative errors and retain context for the largest value."""
+    result = statistics(float(row["relative_difference_percent"]) for row in rows)
+    maximum = max(rows, key=lambda row: abs(float(row["relative_difference_percent"])))
+    result.update({
+        "maximum_channel_cm-1": float(maximum["nu_cm-1"]),
+        "reference_at_maximum": float(maximum["rfm_radiance"]),
+        "absolute_difference_at_maximum": float(maximum["absolute_difference"]),
+    })
+    return result
+
+
 def bt_data(root, geometry, method):
     rows = read_rows(root, geometry, method)
     result = []
@@ -164,16 +176,17 @@ def write_metrics(root, output):
     rows = []
     for method, label, _ in METHODS:
         for ray, height in enumerate(HEIGHTS):
-            values = [float(row["relative_difference_percent"])
-                      for row in limb_data(root, method)[ray]]
+            data = limb_data(root, method)[ray]
             rows.append({"geometry": "limb", "case": f"{height} km geometric",
                          "method": label, "quantity": "absolute relative radiance difference",
-                         "unit": "%", **statistics(values)})
+                         "unit": "%", **limb_statistics(data)})
         for geometry in ("nadir", "zenith"):
             values = [row[3] for row in bt_data(root, geometry, method)]
             rows.append({"geometry": geometry, "case": geometry, "method": label,
                          "quantity": "absolute brightness temperature difference",
-                         "unit": "K", **statistics(values)})
+                         "unit": "K", **statistics(values),
+                         "maximum_channel_cm-1": "", "reference_at_maximum": "",
+                         "absolute_difference_at_maximum": ""})
     with output.open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=rows[0].keys(), lineterminator="\n")
         writer.writeheader()
@@ -268,6 +281,23 @@ def write_report(root, metrics, output):
             for row in csv.DictReader(stream):
                 timings[row["geometry"], method] = float(row["model_s"])
 
+    def metric_span(method, geometries, key):
+        values = [row[key] for row in metrics
+                  if row["method"] == method and row["geometry"] in geometries]
+        return min(values), max(values)
+
+    limb_median = {method: metric_span(method, ("limb",), "median")
+                   for method in ("EGA", "CGA")}
+    limb_p95 = {method: metric_span(method, ("limb",), "p95")
+                for method in ("EGA", "CGA")}
+    bt_rms = {method: metric_span(method, ("nadir", "zenith"), "rms")
+              for method in ("EGA", "CGA")}
+    speedup = {
+        method: [timings[geometry, "RFM"] / timings[geometry, method]
+                 for geometry in ("limb", "nadir", "zenith")]
+        for method in ("EGA", "CGA")
+    }
+
     lines = [
         "# JURASSIC–RFM validation report",
         "",
@@ -279,17 +309,42 @@ def write_report(root, metrics, output):
         f"- JURASSIC commit: `{manifest['git_commit']}`",
         f"- Spectral grid: {manifest['nu_start']}–{manifest['nu_end']} cm⁻¹ at 1 cm⁻¹ sampling",
         f"- Atmospheric composition: mid-latitude climatology with {len(manifest['gases'])} gases",
-        "- Geometries: limb at 5, 10, 20, and 50 km geometric tangent height; one nadir and one zenith ray",
-        "- Refraction: enabled consistently for JURASSIC and RFM",
+        f"- Geometries: limb at {', '.join(map(str, manifest['limb_geometric_tangent_heights_km']))} km geometric tangent height; one nadir and one zenith ray",
+        f"- Refraction: {'enabled' if manifest['refraction_enabled'] else 'disabled'} consistently for JURASSIC and RFM",
         "- JURASSIC modes: EGA and CGA",
-        "- Threads per model process: 1",
-        "- Channels compared per spectrum: 2500",
-        "- Spectral execution: 20 chunks of at most 128 channels; one contiguous RFM block per chunk",
+        f"- RFM spectral step: {manifest['rfm_spectral_step_cm-1']} cm⁻¹",
+        f"- Threads per model process: {manifest['omp_num_threads']}",
+        f"- Channels compared per spectrum: {manifest['channel_count']}",
+        f"- Spectral execution: {manifest['spectral_chunk_count']} chunks of at most "
+        f"{manifest['chunk_size']} channels; one contiguous RFM block per chunk",
         "",
         "RFM spectra are averaged with the same channel response functions used by",
         "JURASSIC. Limb errors are relative radiance errors. Nadir and zenith errors",
         "are absolute brightness temperature errors. All limb channels are included;",
         "only an exactly zero RFM radiance would have an undefined relative error.",
+        "",
+        "## Lookup-table applicability",
+        "",
+        "The external netCDF files store pressure, temperature, absorber-column, and",
+        "filter grids inside each packed gas/channel variable; they do not expose one",
+        "global validity range as netCDF metadata. Representative active variables in",
+        "the table set used here have a pressure grid of 0.0103181–1017 hPa. The stored",
+        "atmosphere spans 0.00184003–1017 hPa; its ten levels from 81 to 90 km fall",
+        "below that grid and require pressure extrapolation when sampled. Temperatures",
+        "in the stored atmosphere are inside the pressure-dependent temperature grid of",
+        "the representative CO2 table checked at 1500 cm⁻¹. This is a targeted check,",
+        "not proof of every gas/channel grid.",
+        "",
+        "Absorber-column grids differ by gas, channel, pressure, and temperature and",
+        "cannot be summarized by one supported interval. JURASSIC interpolates pressure",
+        "logarithmically and temperature linearly; the boundary grid pairs are used for",
+        "extrapolation. Below the tabulated column range emissivity is scaled linearly,",
+        "and above it an exponential continuation approaches unity. The runner verifies",
+        "that all 36 files exist and that every requested CO2 and H2O channel is present.",
+        "A missing individual gas/channel table is warned about and contributes no",
+        "absorption for that gas. Accuracy near or outside any table boundary must",
+        "therefore be established for the intended atmosphere and table set; it does not",
+        "follow from this validation.",
         "",
         "## Interpretation of the approximation errors",
         "",
@@ -320,6 +375,21 @@ def write_report(root, metrics, output):
         "[Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4);",
         "[Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).",
         "",
+        "## Reviewer-facing summary",
+        "",
+        f"For this {manifest['channel_count']}-channel, {len(manifest['gases'])}-gas mid-latitude test, the four limb cases have median",
+        f"absolute relative radiance differences of {limb_median['EGA'][0]:.3f}–{limb_median['EGA'][1]:.3f}% for EGA and",
+        f"{limb_median['CGA'][0]:.3f}–{limb_median['CGA'][1]:.3f}% for CGA. The corresponding 95th percentiles are",
+        f"{limb_p95['EGA'][0]:.3f}–{limb_p95['EGA'][1]:.3f}% and {limb_p95['CGA'][0]:.3f}–{limb_p95['CGA'][1]:.3f}%. Nadir and zenith RMS brightness-temperature",
+        f"differences are {bt_rms['EGA'][0]:.3f}–{bt_rms['EGA'][1]:.3f} K for EGA and {bt_rms['CGA'][0]:.3f}–{bt_rms['CGA'][1]:.3f} K for CGA.",
+        "On the recorded Intel Core i7-1365U run, RFM/EGA speed-ups range from",
+        f"{min(speedup['EGA']):.0f}× to {max(speedup['EGA']):.0f}× and RFM/CGA speed-ups from {min(speedup['CGA']):.0f}× to {max(speedup['CGA']):.0f}×. These ratios compare",
+        "total model time: limb is one joint four-ray calculation, while nadir and",
+        "zenith contain one ray each. Accuracy and runtime results apply to this",
+        "atmosphere, channel responses, model settings,",
+        "timing definition, and hardware. Full spectra, statistics, timings, and",
+        "provenance are provided in `projects/validation`.",
+        "",
         "## Limb spectra and errors",
         "",
         "![Limb radiance spectra](limb_radiance_spectra.png)",
@@ -337,6 +407,24 @@ def write_report(root, metrics, output):
         if row["geometry"] == "limb":
             lines.append(f"| {row['case']} | {row['method']} | {row['rms']:.3f} | "
                          f"{row['median']:.3f} | {row['p95']:.3f} | {row['maximum']:.3f} |")
+
+    lines += [
+        "",
+        "The maximum percentages are retained for completeness. Their radiance context",
+        "is listed below; the absolute difference is not suppressed when the reference",
+        "radiance is weak. The maxima at 5, 10, and 50 km occur in weak-radiance",
+        "channels, while the 20 km maximum occurs at a larger radiance. Median and",
+        f"95th-percentile values characterize the bulk of the {manifest['channel_count']} channels more robustly.",
+        "",
+        "| Height | Method | Channel [cm⁻¹] | RFM radiance [W m⁻² sr⁻¹ cm] | Absolute difference [W m⁻² sr⁻¹ cm] |",
+        "|---:|:---|---:|---:|---:|",
+    ]
+    for row in metrics:
+        if row["geometry"] == "limb":
+            lines.append(f"| {row['case']} | {row['method']} | "
+                         f"{row['maximum_channel_cm-1']:.0f} | "
+                         f"{row['reference_at_maximum']:.6e} | "
+                         f"{row['absolute_difference_at_maximum']:.6e} |")
 
     lines += [
         "",
