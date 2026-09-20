@@ -1458,6 +1458,11 @@ dimensions include:</p>
 <p>The exact grid definition depends on how the tables were generated and
 must be compatible with the atmospheric conditions encountered during
 runtime.</p>
+<p>H2O line tables used together with the built-in MT_CKD 4.1 continuum must
+follow the CKD line-wing convention. When RFM is used to generate these
+tables, specify <code>H2O(sub)</code>: RFM then subtracts the Lorentz line-profile value
+at 25 cm⁻¹ from line center before tabulation. Using ordinary H2O line tables
+with <code>CTM_H2O = 1</code> double-counts this far-wing contribution.</p>
 <hr />
 <h2 id="table-organization-and-naming">Table organization and naming</h2>
 <p>Lookup tables are located using the control parameter:</p>

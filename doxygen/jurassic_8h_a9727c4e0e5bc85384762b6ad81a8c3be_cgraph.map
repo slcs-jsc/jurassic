@@ -8,7 +8,7 @@
 <area shape="rect" id="node15" href="$jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="323,285,425,312"/>
 <area shape="rect" id="node17" href="$jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="181,462,249,489"/>
 <area shape="rect" id="node4" href="$jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="341,133,407,160"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute water vapor continuum (optical depth)." alt="" coords="341,184,407,210"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth)." alt="" coords="341,184,407,210"/>
 <area shape="rect" id="node6" href="$jurassic_8c.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision&#45;induced absorption coefficient." alt="" coords="345,82,403,109"/>
 <area shape="rect" id="node8" href="$jurassic_8c.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="345,32,403,58"/>
 <area shape="rect" id="node7" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="483,82,566,109"/>
