@@ -50,6 +50,30 @@ kelvin. Accuracy and runtime summaries are separate figures. `analysis/REPORT.md
 embeds all figures and tabulates the principal accuracy and timing results for
 review.
 
+## Interpreting approximation errors
+
+EGA follows the growth of channel-mean emissivity along an inhomogeneous ray,
+while CGA represents the path by equivalent homogeneous conditions. Both are
+band approximations. They do not exactly retain correlations between the
+spectral variation of the Planck function and emissivity along the path.
+Combining the mean transmissions of individual gases also neglects correlations
+between overlapping gas absorption structures within a channel. The method and
+these residual correlation terms are described by
+[Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022).
+
+Errors therefore depend on the spectral interval, instrument response,
+atmospheric state, gas overlap, and viewing geometry. Published results for
+other configurations are useful context rather than general error bounds.
+Gordley and Russell (1981) reported about 0.5% for a single-gas broadband limb
+case, and Francis et al. (2006) reported channel-dependent radiance accuracies
+of 0.5-1.0% or better for the HIRDLS fast model, which combined CGA, EGA, and
+statistical regression. Each instrument or application must be validated
+against line-by-line calculations using its own spectral response functions.
+
+References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807),
+[Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4), and
+[Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).
+
 ## Repeat the calculations
 
 Build the CPU executables with capacity for all 36 gases:
@@ -104,10 +128,20 @@ started 20 times per geometry.
 
 `timings.csv` records the summed single-process times across spectral chunks.
 JURASSIC model time is `TIMER_FORMOD`. Instrumented RFM model time is the
-reported path plus spectral phases minus output time. For limb, the reported
-per-spectrum time is the four-ray calculation divided by four. Parallel jobs
-reduce elapsed execution time but do not alter these summed single-process
+reported path plus spectral phases minus output time. The main report uses
+the total model time for each validation case: limb contains four jointly
+calculated rays, while nadir and zenith contain one ray each. A limb RFM
+invocation shares its spectral setup and HITRAN processing across all four rays,
+so its total time is not the cost of four independent RFM runs. The CSV file
+also records the resulting amortized throughput time per spectrum. Parallel
+jobs reduce elapsed execution time but do not alter these summed single-process
 model times.
+
+Each result manifest records the CPU model, physical and logical CPU counts,
+and the logical CPUs made available to the model processes. The supplied
+reference timings were measured on a 13th Gen Intel Core i7-1365U with 10
+physical cores and 12 logical CPUs. Two single-thread processes ran
+concurrently, restricted to logical CPUs 0 and 2.
 
 `READ_TBL` includes reading and preparing the lookup tables. RFM timing keeps
 its HITRAN initialization and binary-read measurements separately. Hardware,

@@ -20,6 +20,35 @@ JURASSIC. Limb errors are relative radiance errors. Nadir and zenith errors
 are absolute brightness temperature errors. All limb channels are included;
 only an exactly zero RFM radiance would have an undefined relative error.
 
+## Interpretation of the approximation errors
+
+JURASSIC replaces monochromatic radiative transfer by channel-averaged
+emissivities and Planck functions. EGA follows emissivity growth along an
+inhomogeneous ray path, whereas CGA replaces that path by an equivalent
+homogeneous path. Both remain band approximations: correlations between the
+spectral variation of the Planck function and emissivity along the path are
+not represented exactly. In addition, JURASSIC combines the channel-mean
+transmissions of individual gases multiplicatively. This neglects spectral
+correlation terms between overlapping absorption structures of different
+gases. These mechanisms are described for JURASSIC by
+[Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022).
+
+The largest errors below occur in individual channels and should be read
+together with the median and 95th-percentile statistics. Published accuracies
+are specific to their setup: Gordley and Russell (1981) reported about 0.5%
+for a single-gas, approximately 100 cm^-1 broadband limb calculation, while
+Francis et al. (2006) reported channel-dependent radiance accuracies of
+0.5-1.0% or better for the 21-channel HIRDLS fast model, which combined CGA,
+EGA, and statistical regression. Neither result is a universal bound for the
+present 1 cm^-1, 36-gas calculation. Errors depend on spectral interval,
+channel response, atmospheric state, gas overlap, and viewing geometry.
+Consequently, each instrument or application requires its own line-by-line
+validation with the applicable spectral response functions.
+
+References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807);
+[Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4);
+[Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).
+
 ## Limb spectra and errors
 
 ![Limb radiance spectra](limb_radiance_spectra.png)
@@ -62,17 +91,25 @@ only an exactly zero RFM radiance would have an undefined relative error.
 
 ![Single-core model runtime](runtime_summary.png)
 
+Reference timing hardware and execution:
+
+- Processor: 13th Gen Intel(R) Core(TM) i7-1365U
+- CPU topology: 10 physical cores, 12 logical CPUs
+- Execution: 2 concurrent single-thread processes restricted to logical CPUs 0, 2
+
 The model times exclude validation input generation, plotting, and final output
 writing. JURASSIC time is `TIMER_FORMOD`. RFM time is its measured path plus
-spectral phases minus measured output time. For limb, the four-ray calculation
-is divided by four. Lookup-table reading and preparation are therefore not part
-of the per-spectrum forward-model times shown here.
+spectral phases minus measured output time. Times are totals for each validation
+case: limb contains four jointly calculated rays, while nadir and zenith contain
+one ray each. RFM shares spectral setup and HITRAN processing across the four
+limb rays; this is one joint calculation rather than four independent runs.
+Lookup-table reading and preparation are not included.
 
 | Geometry | EGA [s] | CGA [s] | RFM [s] | RFM/EGA | RFM/CGA |
 |:---|---:|---:|---:|---:|---:|
-| Limb (per ray) | 32.45 | 17.11 | 3352.47 | 103× | 196× |
-| Nadir | 16.27 | 10.79 | 13647.73 | 839× | 1265× |
-| Zenith | 25.86 | 10.03 | 13412.67 | 519× | 1338× |
+| Limb (4 rays) | 129.80 | 68.45 | 13409.89 | 103× | 196× |
+| Nadir (1 ray) | 16.27 | 10.79 | 13647.73 | 839× | 1265× |
+| Zenith (1 ray) | 25.86 | 10.03 | 13412.67 | 519× | 1338× |
 
 These timings describe this recorded run and machine; they are not portable
 performance guarantees. Accuracy statistics are computed from the complete

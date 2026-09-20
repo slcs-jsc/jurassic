@@ -40,6 +40,34 @@ TIMER_NAMES = ("READ_CTL", "READ_TBL", "READ_TASK", "READ_DIRLIST",
                "WRITE_OBS", "FINALIZE")
 
 
+def hardware_metadata():
+    """Record CPU identity and the logical CPUs available to this run."""
+    cpu_model = "unknown"
+    physical_cores = set()
+    current_physical = None
+    current_core = None
+    cpuinfo = Path("/proc/cpuinfo")
+    if cpuinfo.is_file():
+        for line in [*cpuinfo.read_text().splitlines(), ""]:
+            if line.startswith("model name") and cpu_model == "unknown":
+                cpu_model = line.split(":", 1)[1].strip()
+            elif line.startswith("physical id"):
+                current_physical = line.split(":", 1)[1].strip()
+            elif line.startswith("core id"):
+                current_core = line.split(":", 1)[1].strip()
+            elif not line.strip():
+                if current_physical is not None and current_core is not None:
+                    physical_cores.add((current_physical, current_core))
+                current_physical = current_core = None
+    affinity = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else []
+    return {
+        "cpu_model": cpu_model,
+        "physical_cores": len(physical_cores) or None,
+        "logical_cpus": os.cpu_count(),
+        "process_affinity_logical_cpus": affinity,
+    }
+
+
 def sha256(path):
     """Return the SHA-256 digest of a potentially large external input."""
     digest = hashlib.sha256()
@@ -228,6 +256,7 @@ def main():
         "rfm_binary_sha256": sha256(rfm_bin) if rfm_bin else None,
         "rfm_source_timers_required": args.require_rfm_timers,
         "omp_num_threads": env["OMP_NUM_THREADS"],
+        "hardware": hardware_metadata(),
         "timing_definition": "sum of per-chunk formod wall and named timer sections; excludes input generation and plots; chunks may run concurrently",
         "model_time_definition": {"jurassic": "sum of TIMER_FORMOD across chunks",
                                   "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across spectral-block invocations and chunks",

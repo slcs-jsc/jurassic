@@ -128,5 +128,14 @@
     "/home/lars/wrk/jurassic/projects/validation/work/ega"
   ],
   "spectrum_sha256": "f393e4e0729e91c3ea157e1bfcb59c54457f20bd282712a6d0a14ea6d5225c26",
-  "reference_spectrum_sha256": "85d4aff863ac73b0a7c23748479e44a5cd82012f36c4e1a8f6ae23b3f4988ef2"
+  "reference_spectrum_sha256": "85d4aff863ac73b0a7c23748479e44a5cd82012f36c4e1a8f6ae23b3f4988ef2",
+  "hardware": {
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-1365U",
+    "physical_cores": 10,
+    "logical_cpus": 12,
+    "process_affinity_logical_cpus": [
+      0,
+      2
+    ]
+  }
 }

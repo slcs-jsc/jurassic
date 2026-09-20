@@ -183,5 +183,14 @@
   "input_sha256": {
     "atmosphere.tab": "7796080b7bcbfb20b2ae80dbc1b2cfcb1b49a04c436abc93fd85b9d1bf6dc2c4",
     "geometry.csv": "4a176198b72f253ecf2125cfc24286d87ce4ee89c43a9ddfc139806c72cf8879"
+  },
+  "hardware": {
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-1365U",
+    "physical_cores": 10,
+    "logical_cpus": 12,
+    "process_affinity_logical_cpus": [
+      0,
+      2
+    ]
   }
 }
