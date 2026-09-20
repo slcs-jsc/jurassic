@@ -63,6 +63,12 @@ The exact grid definition depends on how the tables were generated and
 must be compatible with the atmospheric conditions encountered during
 runtime.
 
+H2O line tables used together with the built-in MT_CKD 4.1 continuum must
+follow the CKD line-wing convention. When RFM is used to generate these
+tables, specify `H2O(sub)`: RFM then subtracts the Lorentz line-profile value
+at 25 cm⁻¹ from line center before tabulation. Using ordinary H2O line tables
+with `CTM_H2O = 1` double-counts this far-wing contribution.
+
 ---
 
 ## Table organization and naming

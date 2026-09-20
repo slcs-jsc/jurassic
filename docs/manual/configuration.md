@@ -116,6 +116,7 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
 
 - `CTM_CO2` *(default: `1`)*
 - `CTM_H2O` *(default: `1`)*
+  Uses the MT_CKD 4.1 water vapor continuum. H2O line lookup tables must be generated with RFM `H2O(sub)` so that the 25 cm⁻¹ line-wing contribution is not counted twice.
 - `CTM_N2`  *(default: `1`)*
 - `CTM_O2`  *(default: `1`)*
 

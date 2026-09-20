@@ -128,8 +128,9 @@ make DEFINES=-DNG=40 -j
 Supply the external JURASSIC lookup-table directory with `JURASSIC_TBL_DIR` or
 `--tbl-dir`.
 It must contain `tria_<gas>.nc` for all gases recorded in the manifests. The
-lookup tables are not part of this repository. All generated control files use
-`TBLFMT 3`.
+lookup tables are not part of this repository. Its H2O table must have been
+generated with RFM `H2O(sub)` for consistency with JURASSIC's MT_CKD 4.1
+continuum. All generated control files use `TBLFMT 3`.
 
 Generate the RFM reference first:
 

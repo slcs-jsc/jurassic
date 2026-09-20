@@ -10,7 +10,9 @@ Build the CPU executable. Supply an external TRIA directory containing
 `tria_CO2.nc`, `tria_H2O.nc`, `tria_O3.nc`, `tria_F11.nc`, and
 `tria_CCl4.nc` (the nadir case uses only CO2). The scripts pass its
 `tria` file prefix as `TBLBASE` with `TBLFMT 3`; no tables are copied
-into the repository. From the repository root:
+into the repository. The H2O table must have been generated with RFM
+`H2O(sub)` for consistency with JURASSIC's MT_CKD 4.1 continuum. From the
+repository root:
 
 ```sh
 cd src && make -j && cd ..
