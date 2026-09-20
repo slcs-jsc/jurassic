@@ -1,5 +1,5 @@
 {
-  "git_commit": "759780e2080a4c28c1fb183f677c4d5b4e3284ef",
+  "git_commit": "98ea98c949a283fa5ffa7c7eb4961af7e538ed89",
   "table_dir": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6",
   "table_files": {
     "CO2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_CO2.nc",
@@ -102,13 +102,13 @@
   "timing_definition": "sum of per-chunk formod wall and named timer sections; excludes input generation and plots; chunks may run concurrently",
   "model_time_definition": {
     "jurassic": "sum of TIMER_FORMOD across chunks",
-    "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across per-channel calls and chunks",
+    "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across spectral-block invocations and chunks",
     "per_spectrum": "geometry model time divided by number of rays; includes all requested channels",
     "rfm_minus_measured_hitran_input": "RFM model time minus timed HITRAN initialization and binary record READs"
   },
   "rfm_forward_section_includes_internal_io": true,
   "status": "complete",
-  "execution_wall_s": 1382.3407063589984,
+  "execution_wall_s": 1398.5349685129986,
   "method": "ega",
   "generation_command": [
     "taskset",
@@ -127,6 +127,6 @@
     "--output",
     "/home/lars/wrk/jurassic/projects/validation/work/ega"
   ],
-  "spectrum_sha256": "9f28db2a37d2a3ef820258ff0160ae04d03862fd5c217e1505a90fb4a2544d52",
-  "reference_spectrum_sha256": "a2f054b46f379d6ac12313211dfb8c50d398486cec96d211486e302b77abdb7e"
+  "spectrum_sha256": "f393e4e0729e91c3ea157e1bfcb59c54457f20bd282712a6d0a14ea6d5225c26",
+  "reference_spectrum_sha256": "85d4aff863ac73b0a7c23748479e44a5cd82012f36c4e1a8f6ae23b3f4988ef2"
 }

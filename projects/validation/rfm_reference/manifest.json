@@ -1,5 +1,5 @@
 {
-  "git_commit": "759780e2080a4c28c1fb183f677c4d5b4e3284ef",
+  "git_commit": "98ea98c949a283fa5ffa7c7eb4961af7e538ed89",
   "table_dir": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6",
   "table_files": {
     "CO2": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria_CO2.nc",
@@ -147,16 +147,39 @@
   "timing_definition": "sum of per-chunk formod wall and named timer sections; excludes input generation and plots; chunks may run concurrently",
   "model_time_definition": {
     "jurassic": "sum of TIMER_FORMOD across chunks",
-    "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across per-channel calls and chunks",
+    "rfm": "sum of RFM PATH + SPECTRAL - OUTPUT across spectral-block invocations and chunks",
     "per_spectrum": "geometry model time divided by number of rays; includes all requested channels",
     "rfm_minus_measured_hitran_input": "RFM model time minus timed HITRAN initialization and binary record READs"
   },
   "rfm_forward_section_includes_internal_io": true,
   "status": "complete",
-  "cga_parallel_jobs": 2,
+  "execution_wall_s": 21749.602547668,
   "method": "rfm",
-  "spectrum_sha256": "a2f054b46f379d6ac12313211dfb8c50d398486cec96d211486e302b77abdb7e",
-  "layout": "compact validation result",
+  "generation_command": [
+    "taskset",
+    "-c",
+    "0,2",
+    "/usr/bin/python3",
+    "/home/lars/wrk/jurassic/projects/validation/common.py",
+    "--method",
+    "rfm",
+    "--tbl-dir",
+    "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6",
+    "--bin-dir",
+    "/home/lars/wrk/jurassic/src",
+    "--jobs",
+    "2",
+    "--output",
+    "/home/lars/wrk/jurassic/projects/validation/work/rfm",
+    "--rfm-bin",
+    "/home/lars/wrk/rfm/v521_timings/rfm",
+    "--rfm-hit",
+    "/home/lars/wrk/rfm/hitbin20/hitran2020_mir.bin",
+    "--rfm-xsc-dir",
+    "/home/lars/wrk/rfm/xsc20",
+    "--require-rfm-timers"
+  ],
+  "spectrum_sha256": "85d4aff863ac73b0a7c23748479e44a5cd82012f36c4e1a8f6ae23b3f4988ef2",
   "input_sha256": {
     "atmosphere.tab": "7796080b7bcbfb20b2ae80dbc1b2cfcb1b49a04c436abc93fd85b9d1bf6dc2c4",
     "geometry.csv": "4a176198b72f253ecf2125cfc24286d87ce4ee89c43a9ddfc139806c72cf8879"

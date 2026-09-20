@@ -96,7 +96,9 @@ them against `rfm_reference/input/` before accepting their results. Thus all
 three methods use the same atmospheric state and viewing geometry. In RFM
 mode, JURASSIC applies the spectral response stored in each TRIA channel to
 the high-resolution RFM output; arbitrary monochromatic RFM samples are not
-used as references.
+used as references. With these 1 cm^-1 tables, adjacent channel responses overlap
+and each of the 20 chunks forms one contiguous RFM block. RFM is therefore
+started 20 times per geometry.
 
 ## Timing interpretation
 

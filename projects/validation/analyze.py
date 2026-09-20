@@ -279,6 +279,7 @@ def write_report(root, metrics, output):
         "- JURASSIC modes: EGA and CGA",
         "- Threads per model process: 1",
         "- Channels compared per spectrum: 2500",
+        "- Spectral execution: 20 chunks of at most 128 channels; one contiguous RFM block per chunk",
         "",
         "RFM spectra are averaged with the same channel response functions used by",
         "JURASSIC. Limb errors are relative radiance errors. Nadir and zenith errors",
