@@ -2209,7 +2209,23 @@ double cost_function(
   const gsl_vector * sig_eps_inv);
 
 /**
- * @brief Compute carbon dioxide continuum (optical depth).
+ * @brief Compute carbon dioxide continuum optical depth.
+ *
+ * Uses the RFM CO2 continuum coefficients tabulated from 0 to 4000 cm^-1
+ * at 230, 260, and 296 K. The coefficients represent residual CO2 line-wing
+ * absorption outside the +/-25 cm^-1 line-calculation interval.
+ *
+ * @param[in] nu  Wavenumber [cm^-1].
+ * @param[in] p   Pressure [hPa].
+ * @param[in] t   Temperature [K].
+ * @param[in] u   CO2 column density [molecules cm^-2].
+ *
+ * @return CO2 continuum optical depth.
+ *
+ * @par References
+ *   Clough et al., Proc. SPIE 277, 152--166 (1981).
+ *
+ *   Clough et al., Current Issues in Atmospheric Transparency, CUEN (1987).
  *
  * @author Lars Hoffmann
  */
@@ -2249,14 +2265,16 @@ double ctmh2o(
  *
  * @return N₂ absorption coefficient [km⁻¹].
  *
- * @note Valid for approximately 2120–2600 cm⁻¹ (4.0–4.7 µm) where
- *       N₂–N₂ and N₂–O₂ CIA dominates. Returns zero outside the tabulated
- *       range.
+ * @note The coefficients cover 2120--2605 cm^-1. The end points at 2120 and
+ *       2605 cm^-1 were added with zero absorption to taper the tabulation
+ *       smoothly to zero. The implementation assumes a fixed N2 volume
+ *       mixing ratio of 0.78084 and the remaining gas to have the RFM O2
+ *       foreign-broadening efficiency.
  *
  * @see locate_reg, LIN, P0, N2
  *
  * @par Reference
- *   Lafferty et al., J. Quant. Spectrosc. Radiat. Transf., 68, 473–479 (2001)
+ *   Lafferty et al., Appl. Opt., 35, 5911--5917 (1996).
  *
  * @author Lars Hoffmann
  */
@@ -2282,15 +2300,15 @@ double ctmn2(
  *
  * @return O₂ absorption coefficient [km⁻¹].
  *
- * @note Valid for approximately 1360–1800 cm⁻¹ (∼ 7.4–5.5 µm),
- *       corresponding to the O₂ CIA band. Returns zero outside the
- *       tabulated range.
+ * @note The coefficients cover 1360--1805 cm^-1. The end points at 1360 and
+ *       1805 cm^-1 were added with zero absorption to taper the tabulation
+ *       smoothly to zero. The implementation assumes a fixed O2 volume
+ *       mixing ratio of 0.20946.
  *
  * @see locate_reg, LIN, P0, O2
  *
- * @par References
- *   Greenblatt et al., J. Quant. Spectrosc. Radiat. Transf., 33, 127–140 (1985)
- *   Smith and Newnham, Appl. Opt., 39, 318–326 (2000)
+ * @par Reference
+ *   Thibault et al., Appl. Opt., 36, 563--567 (1997).
  *
  * @author Lars Hoffmann
  */
