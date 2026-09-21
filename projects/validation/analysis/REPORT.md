@@ -5,7 +5,8 @@ files in this validation project. No values below are entered manually.
 
 ## Configuration
 
-- JURASSIC commit: `98ea98c949a283fa5ffa7c7eb4961af7e538ed89`
+- JURASSIC EGA/CGA commit: `9a4bcfc14bbfaa39aa572cec525ca7f489d1eec9`
+- RFM reference commit: `9a4bcfc14bbfaa39aa572cec525ca7f489d1eec9`
 - Spectral grid: 500–2999 cm⁻¹ at 1 cm⁻¹ sampling
 - Atmospheric composition: mid-latitude climatology with 36 gases
 - Geometries: limb at 5, 10, 20, 50 km geometric tangent height; one nadir and one zenith ray
@@ -76,12 +77,12 @@ References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807);
 ## Reviewer-facing summary
 
 For this 2500-channel, 36-gas mid-latitude test, the four limb cases have median
-absolute relative radiance differences of 0.128–1.269% for EGA and
-0.245–1.206% for CGA. The corresponding 95th percentiles are
-1.151–4.534% and 2.368–4.523%. Nadir and zenith RMS brightness-temperature
-differences are 0.464–0.574 K for EGA and 0.589–0.590 K for CGA.
+absolute relative radiance differences of 0.125–1.151% for EGA and
+0.246–1.112% for CGA. The corresponding 95th percentiles are
+1.147–4.260% and 2.368–4.496%. Nadir and zenith RMS brightness-temperature
+differences are 0.406–0.411 K for EGA and 0.452–0.561 K for CGA.
 On the recorded Intel Core i7-1365U run, RFM/EGA speed-ups range from
-103× to 839× and RFM/CGA speed-ups from 196× to 1338×. These ratios compare
+102× to 793× and RFM/CGA speed-ups from 173× to 1287×. These ratios compare
 total model time: limb is one joint four-ray calculation, while nadir and
 zenith contain one ray each. Accuracy and runtime results apply to this
 atmosphere, channel responses, model settings,
@@ -100,14 +101,14 @@ provenance are provided in `projects/validation`.
 
 | Height | Method | RMS [%] | Median [%] | 95th percentile [%] | Maximum [%] |
 |---:|:---|---:|---:|---:|---:|
-| 5 km geometric | EGA | 2.390 | 1.269 | 4.534 | 17.391 |
-| 10 km geometric | EGA | 1.856 | 0.816 | 3.699 | 17.908 |
-| 20 km geometric | EGA | 1.782 | 0.882 | 3.793 | 16.000 |
-| 50 km geometric | EGA | 0.608 | 0.128 | 1.151 | 10.704 |
-| 5 km geometric | CGA | 2.322 | 1.206 | 4.504 | 16.814 |
-| 10 km geometric | CGA | 2.086 | 0.854 | 4.523 | 19.069 |
-| 20 km geometric | CGA | 1.775 | 0.723 | 3.786 | 15.901 |
-| 50 km geometric | CGA | 1.055 | 0.245 | 2.368 | 8.883 |
+| 5 km geometric | EGA | 2.199 | 1.151 | 4.260 | 17.479 |
+| 10 km geometric | EGA | 1.762 | 0.713 | 3.395 | 17.910 |
+| 20 km geometric | EGA | 1.773 | 0.850 | 3.802 | 15.995 |
+| 50 km geometric | EGA | 0.607 | 0.125 | 1.147 | 10.704 |
+| 5 km geometric | CGA | 2.116 | 1.112 | 4.207 | 16.899 |
+| 10 km geometric | CGA | 2.009 | 0.750 | 4.496 | 19.071 |
+| 20 km geometric | CGA | 1.742 | 0.672 | 3.881 | 15.895 |
+| 50 km geometric | CGA | 1.056 | 0.246 | 2.368 | 8.883 |
 
 The maximum percentages are retained for completeness. Their radiance context
 is listed below; the absolute difference is not suppressed when the reference
@@ -117,14 +118,14 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 
 | Height | Method | Channel [cm⁻¹] | RFM radiance [W m⁻² sr⁻¹ cm] | Absolute difference [W m⁻² sr⁻¹ cm] |
 |---:|:---|---:|---:|---:|
-| 5 km geometric | EGA | 2980 | 4.171396e-06 | 7.254287e-07 |
-| 10 km geometric | EGA | 2756 | 1.591986e-06 | 2.850872e-07 |
-| 20 km geometric | EGA | 1923 | 9.082896e-05 | 1.453303e-05 |
-| 50 km geometric | EGA | 2197 | 3.058876e-06 | 3.274089e-07 |
-| 5 km geometric | CGA | 2980 | 4.171396e-06 | 7.013632e-07 |
-| 10 km geometric | CGA | 2756 | 1.591986e-06 | 3.035723e-07 |
-| 20 km geometric | CGA | 1923 | 9.082896e-05 | 1.444232e-05 |
-| 50 km geometric | CGA | 2197 | 3.058876e-06 | 2.717154e-07 |
+| 5 km geometric | EGA | 2980 | 4.171396e-06 | 7.290976e-07 |
+| 10 km geometric | EGA | 2756 | 1.591986e-06 | 2.851214e-07 |
+| 20 km geometric | EGA | 1923 | 9.082896e-05 | 1.452847e-05 |
+| 50 km geometric | EGA | 2197 | 3.058876e-06 | 3.274091e-07 |
+| 5 km geometric | CGA | 2980 | 4.171396e-06 | 7.049242e-07 |
+| 10 km geometric | CGA | 2756 | 1.591986e-06 | 3.036099e-07 |
+| 20 km geometric | CGA | 1923 | 9.082896e-05 | 1.443728e-05 |
+| 50 km geometric | CGA | 2197 | 3.058876e-06 | 2.717155e-07 |
 
 ## Nadir and zenith brightness temperature
 
@@ -138,10 +139,10 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 
 | Geometry | Method | RMS [K] | Median [K] | 95th percentile [K] | Maximum [K] |
 |:---|:---|---:|---:|---:|---:|
-| Nadir | EGA | 0.464 | 0.142 | 0.879 | 3.926 |
-| Zenith | EGA | 0.574 | 0.152 | 1.311 | 4.865 |
-| Nadir | CGA | 0.590 | 0.111 | 1.028 | 4.169 |
-| Zenith | CGA | 0.589 | 0.166 | 1.275 | 4.873 |
+| Nadir | EGA | 0.411 | 0.113 | 0.780 | 3.906 |
+| Zenith | EGA | 0.406 | 0.071 | 0.877 | 4.501 |
+| Nadir | CGA | 0.561 | 0.102 | 1.030 | 4.171 |
+| Zenith | CGA | 0.452 | 0.065 | 0.874 | 4.191 |
 
 ## Runtime
 
@@ -151,7 +152,7 @@ Reference timing hardware and execution:
 
 - Processor: 13th Gen Intel(R) Core(TM) i7-1365U
 - CPU topology: 10 physical cores, 12 logical CPUs
-- Execution: 2 concurrent single-thread processes restricted to logical CPUs 0, 2
+- Execution: one single-thread process restricted to logical CPU 0
 
 The model times exclude validation input generation, plotting, and final output
 writing. JURASSIC time is `TIMER_FORMOD`. RFM time is its measured path plus
@@ -163,9 +164,9 @@ Lookup-table reading and preparation are not included.
 
 | Geometry | EGA [s] | CGA [s] | RFM [s] | RFM/EGA | RFM/CGA |
 |:---|---:|---:|---:|---:|---:|
-| Limb (4 rays) | 129.80 | 68.45 | 13409.89 | 103× | 196× |
-| Nadir (1 ray) | 16.27 | 10.79 | 13647.73 | 839× | 1265× |
-| Zenith (1 ray) | 25.86 | 10.03 | 13412.67 | 519× | 1338× |
+| Limb (4 rays) | 112.03 | 65.66 | 11375.76 | 102× | 173× |
+| Nadir (1 ray) | 14.50 | 8.93 | 11495.12 | 793× | 1287× |
+| Zenith (1 ray) | 22.99 | 10.91 | 11285.60 | 491× | 1034× |
 
 These timings describe this recorded run and machine; they are not portable
 performance guarantees. Accuracy statistics are computed from the complete

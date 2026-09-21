@@ -9,11 +9,11 @@ export RFM_BIN="${RFM_BIN:-$HOME/wrk/rfm/v521_timings/rfm}"
 export RFM_HIT="${RFM_HIT:-$HOME/wrk/rfm/hitbin20/hitran2020_mir.bin}"
 export RFM_XSC_DIR="${RFM_XSC_DIR:-$HOME/wrk/rfm/xsc20}"
 
-# Each forward model remains single threaded.  Two independent 128-channel
-# chunks can run concurrently on the reference notebook's performance cores.
+# Run every forward model and spectral chunk sequentially on one logical CPU
+# so that the recorded JURASSIC and RFM model times are directly comparable.
 export OMP_NUM_THREADS=1
-export VALIDATION_JOBS="${VALIDATION_JOBS:-2}"
-export VALIDATION_CPUSET="${VALIDATION_CPUSET:-0,2}"
+export VALIDATION_JOBS="${VALIDATION_JOBS:-1}"
+export VALIDATION_CPUSET="${VALIDATION_CPUSET:-0}"
 
 root=$(cd "$(dirname "$0")/../.." && pwd)
 

@@ -103,11 +103,11 @@ from this validation.
 ## Reviewer-facing summary
 
 For this 2500-channel, 36-gas mid-latitude test, median absolute relative limb
-radiance differences are 0.128–1.269% for EGA and 0.245–1.206% for CGA across the four
-tangent heights. The corresponding 95th percentiles are 1.151–4.534% and
-2.368–4.523%. Nadir and zenith RMS brightness-temperature differences are
-0.464–0.574 K for EGA and 0.589–0.590 K for CGA. On the recorded Intel Core
-i7-1365U run, the observed speed-ups are 103–839× for RFM/EGA and 196–1338×
+radiance differences are 0.125–1.151% for EGA and 0.246–1.112% for CGA across
+four tangent heights. The corresponding 95th percentiles are 1.147–4.260% and
+2.368–4.496%. Nadir and zenith RMS brightness-temperature differences are
+0.406–0.411 K for EGA and 0.452–0.561 K for CGA. On the recorded Intel Core
+i7-1365U run, the observed speed-ups are 102–793× for RFM/EGA and 173–1287×
 for RFM/CGA. These ratios compare total model time for each validation case:
 limb is one joint four-ray calculation, while nadir and zenith contain one ray
 each. The results are specific to this atmosphere, spectral responses, model
@@ -150,8 +150,8 @@ python3 projects/validation/run_cga.py --force
 python3 projects/validation/analyze.py
 ```
 
-Each calculation uses one model thread. By default two independent spectral
-chunks run concurrently and are restricted to logical CPUs 0 and 2 on the
+Each calculation uses one model thread. By default the spectral chunks run
+sequentially, with the model process restricted to logical CPU 0 on the
 reference notebook. Set `VALIDATION_JOBS` and `VALIDATION_CPUSET` for another
 machine; an empty `VALIDATION_CPUSET` disables affinity. Existing compact
 results are replaced only with `--force`, and only after the new calculation
@@ -182,8 +182,8 @@ model times.
 Each result manifest records the CPU model, physical and logical CPU counts,
 and the logical CPUs made available to the model processes. The supplied
 reference timings were measured on a 13th Gen Intel Core i7-1365U with 10
-physical cores and 12 logical CPUs. Two single-thread processes ran
-concurrently, restricted to logical CPUs 0 and 2.
+physical cores and 12 logical CPUs. One single-thread process ran at a time,
+restricted to logical CPU 0.
 
 `READ_TBL` includes reading and preparing the lookup tables. RFM timing keeps
 its HITRAN initialization and binary-read measurements separately. Hardware,

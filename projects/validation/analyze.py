@@ -269,10 +269,23 @@ def write_report(root, metrics, output):
     """Write a self-contained Markdown overview of the current results."""
     with (root / "rfm_reference" / "manifest.json").open() as stream:
         manifest = json.load(stream)
+    with (root / "test_ega" / "manifest.json").open() as stream:
+        ega_manifest = json.load(stream)
+    with (root / "test_cga" / "manifest.json").open() as stream:
+        cga_manifest = json.load(stream)
+    if ega_manifest["git_commit"] != cga_manifest["git_commit"]:
+        raise ValueError("EGA and CGA results were generated from different commits")
 
     hardware = manifest.get("hardware", {})
     affinity = hardware.get("process_affinity_logical_cpus", [])
     affinity_text = ", ".join(str(cpu) for cpu in affinity) if affinity else "not recorded"
+    parallel_jobs = manifest.get("parallel_jobs")
+    if parallel_jobs == 1:
+        execution_text = (f"- Execution: one single-thread process restricted to logical "
+                          f"CPU {affinity_text}")
+    else:
+        execution_text = (f"- Execution: {parallel_jobs or 'unknown'} concurrent "
+                          f"single-thread processes restricted to logical CPUs {affinity_text}")
 
     timings = {}
     for method, directory in (("EGA", "test_ega"), ("CGA", "test_cga"),
@@ -306,7 +319,8 @@ def write_report(root, metrics, output):
         "",
         "## Configuration",
         "",
-        f"- JURASSIC commit: `{manifest['git_commit']}`",
+        f"- JURASSIC EGA/CGA commit: `{ega_manifest['git_commit']}`",
+        f"- RFM reference commit: `{manifest['git_commit']}`",
         f"- Spectral grid: {manifest['nu_start']}–{manifest['nu_end']} cm⁻¹ at 1 cm⁻¹ sampling",
         f"- Atmospheric composition: mid-latitude climatology with {len(manifest['gases'])} gases",
         f"- Geometries: limb at {', '.join(map(str, manifest['limb_geometric_tangent_heights_km']))} km geometric tangent height; one nadir and one zenith ray",
@@ -458,8 +472,7 @@ def write_report(root, metrics, output):
         f"- Processor: {hardware.get('cpu_model', 'not recorded')}",
         f"- CPU topology: {hardware.get('physical_cores', 'unknown')} physical cores, "
         f"{hardware.get('logical_cpus', 'unknown')} logical CPUs",
-        f"- Execution: {manifest.get('parallel_jobs', 'unknown')} concurrent single-thread "
-        f"processes restricted to logical CPUs {affinity_text}",
+        execution_text,
         "",
         "The model times exclude validation input generation, plotting, and final output",
         "writing. JURASSIC time is `TIMER_FORMOD`. RFM time is its measured path plus",

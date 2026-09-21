@@ -43,9 +43,9 @@ def add_common_arguments(parser):
                         help="directory containing the external tria_<gas>.nc lookup tables")
     parser.add_argument("--bin-dir", type=Path, default=ROOT / "src",
                         help="directory containing the JURASSIC executables")
-    parser.add_argument("--jobs", type=int, default=int(os.environ.get("VALIDATION_JOBS", "2")),
+    parser.add_argument("--jobs", type=int, default=int(os.environ.get("VALIDATION_JOBS", "1")),
                         help="independent spectral chunks calculated concurrently")
-    parser.add_argument("--cpuset", default=os.environ.get("VALIDATION_CPUSET", "0,2"),
+    parser.add_argument("--cpuset", default=os.environ.get("VALIDATION_CPUSET", "0"),
                         help="taskset CPU list; use an empty value to disable CPU affinity")
     parser.add_argument("--force", action="store_true",
                         help="replace an existing completed result after the new run succeeds")

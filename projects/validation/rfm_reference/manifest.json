@@ -1,5 +1,227 @@
 {
-  "git_commit": "98ea98c949a283fa5ffa7c7eb4961af7e538ed89",
+  "git_commit": "9a4bcfc14bbfaa39aa572cec525ca7f489d1eec9",
+  "lookup_tables": {
+    "format": 3,
+    "directory_option": "JURASSIC_TBL_DIR or --tbl-dir",
+    "files": {
+      "CO2": {
+        "filename": "tria_CO2.nc",
+        "size_bytes": 3770467181,
+        "sha256": "3f89a2a132d89a23d1f3586d3d5d19e725bfacb56809999f55df917f0ace754c",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "H2O": {
+        "filename": "tria_H2O.nc",
+        "size_bytes": 4052166273,
+        "sha256": "e08b63f1c3b532338638d281b218897abfb5ad1032697f1e25a30f553159e0bf",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "N2": {
+        "filename": "tria_N2.nc",
+        "size_bytes": 312552720,
+        "sha256": "7c5c3a18d57677e6b954aa45579c0bc16c83d050d0c58e387fffb702577082c5",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "O2": {
+        "filename": "tria_O2.nc",
+        "size_bytes": 265830876,
+        "sha256": "7341e82b482f08c6c0c2e9e033f72564e92562ace581d6d4069525f9103b93d7",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "O3": {
+        "filename": "tria_O3.nc",
+        "size_bytes": 3665536692,
+        "sha256": "7cc56eb7b273747f4dff2e688d13291c074142ac55c5322b727c4c7475b24a02",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "C2H2": {
+        "filename": "tria_C2H2.nc",
+        "size_bytes": 2808752522,
+        "sha256": "2bd9a9f318b9393b934bfe1cdefc4c2cf36bf24533b454a822cfab73cf57147a",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "C2H6": {
+        "filename": "tria_C2H6.nc",
+        "size_bytes": 1221035066,
+        "sha256": "a5139e0a88dd1c5d20c8b51f3dfc2745038cbf3d3d38a484bdc8722a53c21430",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "CCl4": {
+        "filename": "tria_CCl4.nc",
+        "size_bytes": 61486490,
+        "sha256": "ffc1befe602602200d194f1b556b5b8db152653e8c6c4ad56a7996fe25ab531b",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "CH4": {
+        "filename": "tria_CH4.nc",
+        "size_bytes": 3681643101,
+        "sha256": "2ab6c8e20fc3cfc287795c23cca78510412b93e93aa2064340e46f160ab5b07e",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "ClO": {
+        "filename": "tria_ClO.nc",
+        "size_bytes": 533316109,
+        "sha256": "3b4fc53e3062685bae59746fdba467c4718cf2b7852f03be81ac0f52112fd924",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "ClONO2": {
+        "filename": "tria_ClONO2.nc",
+        "size_bytes": 333033556,
+        "sha256": "dfe31f9c195b2072cbeb5698793ab71f6ec4277bcd4ee8f4adb4799e13e05879",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "CO": {
+        "filename": "tria_CO.nc",
+        "size_bytes": 665905988,
+        "sha256": "4ee80c0fb791fff2947a3ac2ccc4b168744db8452f6ad9d55b4b289ec4f9952b",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "COF2": {
+        "filename": "tria_COF2.nc",
+        "size_bytes": 859136782,
+        "sha256": "e198e4a03cbf38379bc2f71786578a1d43f8b51eb7e09b99fa6d79bdd74669b7",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "F11": {
+        "filename": "tria_F11.nc",
+        "size_bytes": 159137097,
+        "sha256": "645057e934ead00e9e11c63a1189f086e1e41cc6f0c257878e02153532f85766",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "F12": {
+        "filename": "tria_F12.nc",
+        "size_bytes": 289288425,
+        "sha256": "c1ef6a6a30c1de8f0af93139e8224aa8759ec362b585e09d07c5ca6f63da2bf9",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "F14": {
+        "filename": "tria_F14.nc",
+        "size_bytes": 48980377,
+        "sha256": "464d83652e766523e36aed3ac664df7502b044317a06b4a4e790ce2e5ec08553",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "F22": {
+        "filename": "tria_F22.nc",
+        "size_bytes": 399016805,
+        "sha256": "8ec1cba9c9ff46506db0652c542027a92a1c9d69c492bc67c66781bc82ed71e6",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "H2O2": {
+        "filename": "tria_H2O2.nc",
+        "size_bytes": 1954638126,
+        "sha256": "fc10c7abe917d5375288110dda143e90de3c48e88a8032dcb763c4598120f45d",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "HCN": {
+        "filename": "tria_HCN.nc",
+        "size_bytes": 3142014223,
+        "sha256": "b1d4ec57cc4db44fb92ce3e59cdb9c2dad0d54d050da638657a2440903e44933",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "HNO3": {
+        "filename": "tria_HNO3.nc",
+        "size_bytes": 1250613334,
+        "sha256": "d537f2d5fb47f8bb6c82cb3bee1eea660d956d9a00dce02bb7ee61ce2c0fbebe",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "HNO4": {
+        "filename": "tria_HNO4.nc",
+        "size_bytes": 64580666,
+        "sha256": "dc96159e06aadb6431178a66a93b38c29508ff6373537feecf2899b5025360fe",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "N2O": {
+        "filename": "tria_N2O.nc",
+        "size_bytes": 3715085597,
+        "sha256": "50477219ca1f55043de07d55a8b02a1817f36410dd644878a9687b4aeab5c38b",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "N2O5": {
+        "filename": "tria_N2O5.nc",
+        "size_bytes": 234673418,
+        "sha256": "95019ea7d416f6be6914516955e433eb35143cbac68dc9269a25d3972e2277c8",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "NH3": {
+        "filename": "tria_NH3.nc",
+        "size_bytes": 4094620185,
+        "sha256": "c3f93bd13a6a6081298ddfdfd17f244be8fe4123ef33c0019ec7a70c88810690",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "NO": {
+        "filename": "tria_NO.nc",
+        "size_bytes": 986395104,
+        "sha256": "a99261d1680580c37c9d6da72b84967514ee05ecf8863ca9fdd717cd781c5a10",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "NO2": {
+        "filename": "tria_NO2.nc",
+        "size_bytes": 3584852162,
+        "sha256": "eb5213ca3689cfe71bb0051c009f33bd286b7d2b0395e85a0bb08499d0caa683",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "OCS": {
+        "filename": "tria_OCS.nc",
+        "size_bytes": 1755652305,
+        "sha256": "997120ceb9654e8ae2b1c039b20c5857f213cc874b5b51aa00a0eeeb66d21b33",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "SF6": {
+        "filename": "tria_SF6.nc",
+        "size_bytes": 36316341,
+        "sha256": "becd5120d58f30c6661b7d57bcd15e14e793eb42cb8c62f08ab33b26760ffd68",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "SO2": {
+        "filename": "tria_SO2.nc",
+        "size_bytes": 3574165861,
+        "sha256": "b6dd06bfe82b780945fa35c400a407721ca595724f16d5423874105275f00edb",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "F113": {
+        "filename": "tria_F113.nc",
+        "size_bytes": 427384994,
+        "sha256": "f9814753426a75c9f9b5b5d34281b5341ee4d82b01c66b39826532af19344d4d",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "F114": {
+        "filename": "tria_F114.nc",
+        "size_bytes": 353641866,
+        "sha256": "5a23ba7c7f31ad464b1a45d18e33622206949880fa7c0792a7af04bc84b53d70",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "HF": {
+        "filename": "tria_HF.nc",
+        "size_bytes": 540277616,
+        "sha256": "459b3ff19af9997740d7983f36886e5d8ada7ce2c69b7221a0bc978f29566278",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "HCl": {
+        "filename": "tria_HCl.nc",
+        "size_bytes": 1257117041,
+        "sha256": "942eeb5829d5d8c3ad69ed972176c87a7d68aa20c26bd9a82cbcd6dcdf7c76d9",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "HBr": {
+        "filename": "tria_HBr.nc",
+        "size_bytes": 1214382993,
+        "sha256": "4ce29d8a012d5c91d331736483706c31204c2bb295e36c07f2c22b8b91f57f58",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "HOCl": {
+        "filename": "tria_HOCl.nc",
+        "size_bytes": 268383506,
+        "sha256": "f1f95d9a86995f07bd5252e46979110988ce96882d7ec4cfee63d555a312c2c9",
+        "role": "JURASSIC emissivity lookup table"
+      },
+      "H2CO": {
+        "filename": "tria_H2CO.nc",
+        "size_bytes": 1078262866,
+        "sha256": "3deb6bfee716053ea3dce43e30035e64c196fd912071e0693069e44bb63964bc",
+        "role": "JURASSIC emissivity lookup table"
+      }
+    }
+  },
   "gases": [
     "CO2",
     "H2O",
@@ -41,80 +263,84 @@
   "cross_sections": {
     "CCl4": {
       "filename": "CCl4.xsc",
+      "size_bytes": 2018175,
       "sha256": "2d392770f7d959f83a3c5e83b522b958620d3747f7dafe8645ddd951ea5d9265",
-      "role": "RFM absorption cross section",
-      "size_bytes": 2018175
+      "role": "RFM absorption cross section"
     },
     "ClONO2": {
       "filename": "ClONO2.xsc",
+      "size_bytes": 272340,
       "sha256": "dd261324db25d1d1e8d4447339bfc2ef7d1817309b84bb5992698a778541fff7",
-      "role": "RFM absorption cross section",
-      "size_bytes": 272340
+      "role": "RFM absorption cross section"
     },
     "F11": {
       "filename": "CFC-11.xsc",
+      "size_bytes": 16717448,
       "sha256": "289e96a5269a759fc706423a6219eb9b64c2619bb5a073891a7310d23d34f5e8",
-      "role": "RFM absorption cross section",
-      "size_bytes": 16717448
+      "role": "RFM absorption cross section"
     },
     "F12": {
       "filename": "CFC-12.xsc",
+      "size_bytes": 21401118,
       "sha256": "4437787384344ad28636d9f479f32926a332b612d62d3db42fa90e493a972d1a",
-      "role": "RFM absorption cross section",
-      "size_bytes": 21401118
+      "role": "RFM absorption cross section"
     },
     "F14": {
       "filename": "CFC-14.xsc",
+      "size_bytes": 3898920,
       "sha256": "a2d2b53436dd83d47747901bc0e1feb9c751b4fc0b7f5a52c89bebec6106f67d",
-      "role": "RFM absorption cross section",
-      "size_bytes": 3898920
+      "role": "RFM absorption cross section"
     },
     "F22": {
       "filename": "HCFC-22.xsc",
+      "size_bytes": 13926811,
       "sha256": "b36d4cd0e02d761e38fc27c34eae923a0fed3840f62048fedc2f74a81f5a8ef7",
-      "role": "RFM absorption cross section",
-      "size_bytes": 13926811
+      "role": "RFM absorption cross section"
     },
     "HNO4": {
       "filename": "HNO4.xsc",
+      "size_bytes": 55998,
       "sha256": "388f17a3d5fc26d26b68463ae28ff2b855f0a465369363fe1702db63c4eb0325",
-      "role": "RFM absorption cross section",
-      "size_bytes": 55998
+      "role": "RFM absorption cross section"
     },
     "N2O5": {
       "filename": "N2O5.xsc",
+      "size_bytes": 22848,
       "sha256": "d7c049c3db3d4b43fc6a1dcb2ff84d2631bfe30c292ddab127649cc1708d9315",
-      "role": "RFM absorption cross section",
-      "size_bytes": 22848
+      "role": "RFM absorption cross section"
     },
     "SF6": {
       "filename": "SF6.xsc",
+      "size_bytes": 1328960,
       "sha256": "42beb6002f85ead343747fe2b9e11b7703f5bb0ef9fe1aad14dbd34686a687e9",
-      "role": "RFM absorption cross section",
-      "size_bytes": 1328960
+      "role": "RFM absorption cross section"
     },
     "F113": {
       "filename": "CFC-113.xsc",
+      "size_bytes": 55692,
       "sha256": "158638478fe30beb152e3c77b8e5ff0063a728a8d4128c6be13c08df23998fff",
-      "role": "RFM absorption cross section",
-      "size_bytes": 55692
+      "role": "RFM absorption cross section"
     },
     "F114": {
       "filename": "CFC-114.xsc",
+      "size_bytes": 1496952,
       "sha256": "624b88b439a80b10d36c0a6fda8e5acd35bbd7fbaf0e8678c3a2c4a6ad942b8f",
-      "role": "RFM absorption cross section",
-      "size_bytes": 1496952
+      "role": "RFM absorption cross section"
     }
   },
   "nu_start": 500,
   "nu_end": 2999,
+  "channel_count": 2500,
+  "rfm_spectral_step_cm-1": 0.0005,
   "chunk_size": 128,
-  "parallel_jobs": 2,
+  "spectral_chunk_count": 20,
+  "parallel_jobs": 1,
   "geometries": [
     "limb",
     "nadir",
     "zenith"
   ],
+  "refraction_enabled": true,
   "limb_geometric_tangent_heights_km": [
     5,
     10,
@@ -123,18 +349,26 @@
   ],
   "rfm_binary": {
     "filename": "rfm",
+    "size_bytes": 2569040,
     "sha256": "22cd9925fa67ed23a630de9e595043f12ebd14eab4f7669f1ac6250a477ab9ce",
-    "role": "instrumented RFM executable",
-    "size_bytes": 2569040
+    "role": "instrumented RFM executable"
   },
   "rfm_hitran": {
     "filename": "hitran2020_mir.bin",
+    "size_bytes": 451782408,
     "sha256": "4b2027f995f1fd4a5ced3f6d193aec09a4e456541bd163540859334196fe386d",
-    "role": "RFM HITRAN line database",
-    "size_bytes": 451782408
+    "role": "RFM HITRAN line database"
   },
   "rfm_source_timers_required": true,
   "omp_num_threads": "1",
+  "hardware": {
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-1365U",
+    "physical_cores": 10,
+    "logical_cpus": 12,
+    "process_affinity_logical_cpus": [
+      0
+    ]
+  },
   "timing_definition": "sum of per-chunk formod wall and named timer sections; excludes input generation and plots; chunks may run concurrently",
   "model_time_definition": {
     "jurassic": "sum of TIMER_FORMOD across chunks",
@@ -144,12 +378,12 @@
   },
   "rfm_forward_section_includes_internal_io": true,
   "status": "complete",
-  "execution_wall_s": 21749.602547668,
+  "execution_wall_s": 36594.32317909,
   "method": "rfm",
   "generation_command": [
     "taskset",
     "-c",
-    "0,2",
+    "0",
     "python3",
     "projects/validation/common.py",
     "--method",
@@ -159,7 +393,7 @@
     "--bin-dir",
     "src",
     "--jobs",
-    "2",
+    "1",
     "--output",
     "projects/validation/work/rfm",
     "--rfm-bin",
@@ -174,240 +408,5 @@
   "input_sha256": {
     "atmosphere.tab": "7796080b7bcbfb20b2ae80dbc1b2cfcb1b49a04c436abc93fd85b9d1bf6dc2c4",
     "geometry.csv": "4a176198b72f253ecf2125cfc24286d87ce4ee89c43a9ddfc139806c72cf8879"
-  },
-  "hardware": {
-    "cpu_model": "13th Gen Intel(R) Core(TM) i7-1365U",
-    "physical_cores": 10,
-    "logical_cpus": 12,
-    "process_affinity_logical_cpus": [
-      0,
-      2
-    ]
-  },
-  "lookup_tables": {
-    "format": 3,
-    "directory_option": "JURASSIC_TBL_DIR or --tbl-dir",
-    "files": {
-      "CO2": {
-        "filename": "tria_CO2.nc",
-        "size_bytes": 3770467181,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "3f89a2a132d89a23d1f3586d3d5d19e725bfacb56809999f55df917f0ace754c"
-      },
-      "H2O": {
-        "filename": "tria_H2O.nc",
-        "size_bytes": 4044040849,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "9300c3e1f13479f25bbd98800db5fe8fb77917eb6c418548eacdd9eec1c5f75d"
-      },
-      "N2": {
-        "filename": "tria_N2.nc",
-        "size_bytes": 312552720,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "7c5c3a18d57677e6b954aa45579c0bc16c83d050d0c58e387fffb702577082c5"
-      },
-      "O2": {
-        "filename": "tria_O2.nc",
-        "size_bytes": 265830876,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "7341e82b482f08c6c0c2e9e033f72564e92562ace581d6d4069525f9103b93d7"
-      },
-      "O3": {
-        "filename": "tria_O3.nc",
-        "size_bytes": 3665536692,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "7cc56eb7b273747f4dff2e688d13291c074142ac55c5322b727c4c7475b24a02"
-      },
-      "C2H2": {
-        "filename": "tria_C2H2.nc",
-        "size_bytes": 2808752522,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "2bd9a9f318b9393b934bfe1cdefc4c2cf36bf24533b454a822cfab73cf57147a"
-      },
-      "C2H6": {
-        "filename": "tria_C2H6.nc",
-        "size_bytes": 1221035066,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "a5139e0a88dd1c5d20c8b51f3dfc2745038cbf3d3d38a484bdc8722a53c21430"
-      },
-      "CCl4": {
-        "filename": "tria_CCl4.nc",
-        "size_bytes": 61486490,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "ffc1befe602602200d194f1b556b5b8db152653e8c6c4ad56a7996fe25ab531b"
-      },
-      "CH4": {
-        "filename": "tria_CH4.nc",
-        "size_bytes": 3681643101,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "2ab6c8e20fc3cfc287795c23cca78510412b93e93aa2064340e46f160ab5b07e"
-      },
-      "ClO": {
-        "filename": "tria_ClO.nc",
-        "size_bytes": 533316109,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "3b4fc53e3062685bae59746fdba467c4718cf2b7852f03be81ac0f52112fd924"
-      },
-      "ClONO2": {
-        "filename": "tria_ClONO2.nc",
-        "size_bytes": 333033556,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "dfe31f9c195b2072cbeb5698793ab71f6ec4277bcd4ee8f4adb4799e13e05879"
-      },
-      "CO": {
-        "filename": "tria_CO.nc",
-        "size_bytes": 665905988,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "4ee80c0fb791fff2947a3ac2ccc4b168744db8452f6ad9d55b4b289ec4f9952b"
-      },
-      "COF2": {
-        "filename": "tria_COF2.nc",
-        "size_bytes": 859136782,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "e198e4a03cbf38379bc2f71786578a1d43f8b51eb7e09b99fa6d79bdd74669b7"
-      },
-      "F11": {
-        "filename": "tria_F11.nc",
-        "size_bytes": 159137097,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "645057e934ead00e9e11c63a1189f086e1e41cc6f0c257878e02153532f85766"
-      },
-      "F12": {
-        "filename": "tria_F12.nc",
-        "size_bytes": 289288425,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "c1ef6a6a30c1de8f0af93139e8224aa8759ec362b585e09d07c5ca6f63da2bf9"
-      },
-      "F14": {
-        "filename": "tria_F14.nc",
-        "size_bytes": 48980377,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "464d83652e766523e36aed3ac664df7502b044317a06b4a4e790ce2e5ec08553"
-      },
-      "F22": {
-        "filename": "tria_F22.nc",
-        "size_bytes": 399016805,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "8ec1cba9c9ff46506db0652c542027a92a1c9d69c492bc67c66781bc82ed71e6"
-      },
-      "H2O2": {
-        "filename": "tria_H2O2.nc",
-        "size_bytes": 1954638126,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "fc10c7abe917d5375288110dda143e90de3c48e88a8032dcb763c4598120f45d"
-      },
-      "HCN": {
-        "filename": "tria_HCN.nc",
-        "size_bytes": 3142014223,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "b1d4ec57cc4db44fb92ce3e59cdb9c2dad0d54d050da638657a2440903e44933"
-      },
-      "HNO3": {
-        "filename": "tria_HNO3.nc",
-        "size_bytes": 1250613334,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "d537f2d5fb47f8bb6c82cb3bee1eea660d956d9a00dce02bb7ee61ce2c0fbebe"
-      },
-      "HNO4": {
-        "filename": "tria_HNO4.nc",
-        "size_bytes": 64580666,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "dc96159e06aadb6431178a66a93b38c29508ff6373537feecf2899b5025360fe"
-      },
-      "N2O": {
-        "filename": "tria_N2O.nc",
-        "size_bytes": 3715085597,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "50477219ca1f55043de07d55a8b02a1817f36410dd644878a9687b4aeab5c38b"
-      },
-      "N2O5": {
-        "filename": "tria_N2O5.nc",
-        "size_bytes": 234673418,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "95019ea7d416f6be6914516955e433eb35143cbac68dc9269a25d3972e2277c8"
-      },
-      "NH3": {
-        "filename": "tria_NH3.nc",
-        "size_bytes": 4094620185,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "c3f93bd13a6a6081298ddfdfd17f244be8fe4123ef33c0019ec7a70c88810690"
-      },
-      "NO": {
-        "filename": "tria_NO.nc",
-        "size_bytes": 986395104,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "a99261d1680580c37c9d6da72b84967514ee05ecf8863ca9fdd717cd781c5a10"
-      },
-      "NO2": {
-        "filename": "tria_NO2.nc",
-        "size_bytes": 3584852162,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "eb5213ca3689cfe71bb0051c009f33bd286b7d2b0395e85a0bb08499d0caa683"
-      },
-      "OCS": {
-        "filename": "tria_OCS.nc",
-        "size_bytes": 1755652305,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "997120ceb9654e8ae2b1c039b20c5857f213cc874b5b51aa00a0eeeb66d21b33"
-      },
-      "SF6": {
-        "filename": "tria_SF6.nc",
-        "size_bytes": 36316341,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "becd5120d58f30c6661b7d57bcd15e14e793eb42cb8c62f08ab33b26760ffd68"
-      },
-      "SO2": {
-        "filename": "tria_SO2.nc",
-        "size_bytes": 3574165861,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "b6dd06bfe82b780945fa35c400a407721ca595724f16d5423874105275f00edb"
-      },
-      "F113": {
-        "filename": "tria_F113.nc",
-        "size_bytes": 427384994,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "f9814753426a75c9f9b5b5d34281b5341ee4d82b01c66b39826532af19344d4d"
-      },
-      "F114": {
-        "filename": "tria_F114.nc",
-        "size_bytes": 353641866,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "5a23ba7c7f31ad464b1a45d18e33622206949880fa7c0792a7af04bc84b53d70"
-      },
-      "HF": {
-        "filename": "tria_HF.nc",
-        "size_bytes": 540277616,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "459b3ff19af9997740d7983f36886e5d8ada7ce2c69b7221a0bc978f29566278"
-      },
-      "HCl": {
-        "filename": "tria_HCl.nc",
-        "size_bytes": 1257117041,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "942eeb5829d5d8c3ad69ed972176c87a7d68aa20c26bd9a82cbcd6dcdf7c76d9"
-      },
-      "HBr": {
-        "filename": "tria_HBr.nc",
-        "size_bytes": 1214382993,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "4ce29d8a012d5c91d331736483706c31204c2bb295e36c07f2c22b8b91f57f58"
-      },
-      "HOCl": {
-        "filename": "tria_HOCl.nc",
-        "size_bytes": 268383506,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "f1f95d9a86995f07bd5252e46979110988ce96882d7ec4cfee63d555a312c2c9"
-      },
-      "H2CO": {
-        "filename": "tria_H2CO.nc",
-        "size_bytes": 1078262866,
-        "role": "JURASSIC emissivity lookup table",
-        "sha256": "3deb6bfee716053ea3dce43e30035e64c196fd912071e0693069e44bb63964bc"
-      }
-    }
-  },
-  "rfm_spectral_step_cm-1": 0.0005,
-  "channel_count": 2500,
-  "spectral_chunk_count": 20,
-  "refraction_enabled": true
+  }
 }
