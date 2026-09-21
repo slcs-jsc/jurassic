@@ -431,7 +431,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a092636f1592a6e34378a13f3e03e2f87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the normalized quadratic cost function for optimal estimation.  <a href="jurassic_8h.html#a092636f1592a6e34378a13f3e03e2f87">More...</a><br /></td></tr>
 <tr class="separator:a092636f1592a6e34378a13f3e03e2f87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a962bab37658297e87de9631c67707b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#a9a962bab37658297e87de9631c67707b">ctmco2</a> (const double nu, const double p, const double t, const double u)</td></tr>
-<tr class="memdesc:a9a962bab37658297e87de9631c67707b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute carbon dioxide continuum (optical depth).  <a href="jurassic_8h.html#a9a962bab37658297e87de9631c67707b">More...</a><br /></td></tr>
+<tr class="memdesc:a9a962bab37658297e87de9631c67707b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute carbon dioxide continuum optical depth.  <a href="jurassic_8h.html#a9a962bab37658297e87de9631c67707b">More...</a><br /></td></tr>
 <tr class="separator:a9a962bab37658297e87de9631c67707b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b99f6f4581181857d4b89b27e8c2f87"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#a5b99f6f4581181857d4b89b27e8c2f87">ctmh2o</a> (const double nu, const double p, const double t, const double q, const double u)</td></tr>
 <tr class="memdesc:a5b99f6f4581181857d4b89b27e8c2f87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the MT_CKD 4.1 water vapor continuum (optical depth).  <a href="jurassic_8h.html#a5b99f6f4581181857d4b89b27e8c2f87">More...</a><br /></td></tr>
@@ -5520,7 +5520,20 @@ J = \frac{1}{m} \left[ (\mathbf{y} - \mathbf{y_a})^T
       </table>
 </div><div class="memdoc">
 
-<p>Compute carbon dioxide continuum (optical depth). </p>
+<p>Compute carbon dioxide continuum optical depth. </p>
+<p >Uses the RFM CO2 continuum coefficients tabulated from 0 to 4000 cm^-1 at 230, 260, and 296 K. The coefficients represent residual CO2 line-wing absorption outside the +/-25 cm^-1 line-calculation interval.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">nu</td><td>Wavenumber [cm^-1]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>Pressure [hPa]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>Temperature [K]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>CO2 column density [molecules cm^-2].</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>CO2 continuum optical depth.</dd></dl>
+<dl class="section user"><dt>References</dt><dd>Clough et al., Proc. SPIE 277, 152&ndash;166 (1981).</dd></dl>
+<p>Clough et al., Current Issues in Atmospheric Transparency, CUEN (1987).</p>
 <dl class="section author"><dt>Author</dt><dd>Lars Hoffmann </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="jurassic_8c_source.html#l01224">1224</a> of file <a class="el" href="jurassic_8c_source.html">jurassic.c</a>.</p>
@@ -7368,9 +7381,9 @@ J = \frac{1}{m} \left[ (\mathbf{y} - \mathbf{y_a})^T
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>N₂ absorption coefficient [km⁻¹].</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Valid for approximately 2120–2600 cm⁻¹ (4.0–4.7 µm) where N₂–N₂ and N₂–O₂ CIA dominates. Returns zero outside the tabulated range.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The coefficients cover 2120&ndash;2605 cm^-1. The end points at 2120 and 2605 cm^-1 were added with zero absorption to taper the tabulation smoothly to zero. The implementation assumes a fixed N2 volume mixing ratio of 0.78084 and the remaining gas to have the RFM O2 foreign-broadening efficiency.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="jurassic_8h.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid.">locate_reg</a>, <a class="el" href="jurassic_8h.html#aebaef4a0f8136be064bf1d29ce1ced83" title="Compute linear interpolation.">LIN</a>, <a class="el" href="jurassic_8h.html#a1583b00a62bc1138f99bbfcd8ef81a6a" title="Standard pressure [hPa].">P0</a>, <a class="el" href="jurassic_8h.html#acd864640121c7df2c19f61f7baa507e4" title="Nitrogen concentration.">N2</a></dd></dl>
-<dl class="section user"><dt>Reference</dt><dd>Lafferty et al., J. Quant. Spectrosc. Radiat. Transf., 68, 473–479 (2001)</dd></dl>
+<dl class="section user"><dt>Reference</dt><dd>Lafferty et al., Appl. Opt., 35, 5911&ndash;5917 (1996).</dd></dl>
 <dl class="section author"><dt>Author</dt><dd>Lars Hoffmann </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="jurassic_8c_source.html#l02983">2983</a> of file <a class="el" href="jurassic_8c_source.html">jurassic.c</a>.</p>
@@ -7493,9 +7506,9 @@ Here is the call graph for this function:</div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>O₂ absorption coefficient [km⁻¹].</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Valid for approximately 1360–1800 cm⁻¹ (∼ 7.4–5.5 µm), corresponding to the O₂ CIA band. Returns zero outside the tabulated range.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The coefficients cover 1360&ndash;1805 cm^-1. The end points at 1360 and 1805 cm^-1 were added with zero absorption to taper the tabulation smoothly to zero. The implementation assumes a fixed O2 volume mixing ratio of 0.20946.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="jurassic_8h.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid.">locate_reg</a>, <a class="el" href="jurassic_8h.html#aebaef4a0f8136be064bf1d29ce1ced83" title="Compute linear interpolation.">LIN</a>, <a class="el" href="jurassic_8h.html#a1583b00a62bc1138f99bbfcd8ef81a6a" title="Standard pressure [hPa].">P0</a>, <a class="el" href="jurassic_8h.html#a31412dbd7c9b5771f1e7a5ff85d20ab9" title="Oxygen concentration.">O2</a></dd></dl>
-<dl class="section user"><dt>References</dt><dd>Greenblatt et al., J. Quant. Spectrosc. Radiat. Transf., 33, 127–140 (1985) Smith and Newnham, Appl. Opt., 39, 318–326 (2000)</dd></dl>
+<dl class="section user"><dt>Reference</dt><dd>Thibault et al., Appl. Opt., 36, 563&ndash;567 (1997).</dd></dl>
 <dl class="section author"><dt>Author</dt><dd>Lars Hoffmann </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="jurassic_8c_source.html#l03052">3052</a> of file <a class="el" href="jurassic_8c_source.html">jurassic.c</a>.</p>
@@ -8120,7 +8133,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" href="jurassic_8c.html#a5e22cd63c35ef6e2c9b9023e2c3945d8" title="Interpolate emissivities and transmittances using the Curtis–Godson approximation (CGA)." alt="" coords="433,259,536,285"/>
 <area shape="rect" href="jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="433,309,536,336"/>
 <area shape="rect" href="jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="292,512,360,539"/>
-<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="452,107,517,133"/>
+<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum optical depth." alt="" coords="452,107,517,133"/>
 <area shape="rect" href="jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth)." alt="" coords="452,157,517,184"/>
 <area shape="rect" href="jurassic_8c.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision&#45;induced absorption coefficient." alt="" coords="455,56,514,83"/>
 <area shape="rect" href="jurassic_8c.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="455,5,514,32"/>
@@ -8188,7 +8201,7 @@ Here is the call graph for this function:</div>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Each continuum component is added only if its corresponding control flag (e.g., <a class="el" href="structctl__t.html#a417bdd14462698d3ced23bc954fa48a0">ctl_t::ctm_co2</a>, <a class="el" href="structctl__t.html#a73f4f8e915d10ba9048b798580f7dddb">ctl_t::ctm_h2o</a>) is enabled and the gas index is valid.</dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="structctl__t.html" title="Control parameters.">ctl_t</a>, <a class="el" href="structlos__t.html" title="Line-of-sight data.">los_t</a>, <a class="el" href="jurassic_8h.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth).">ctmco2</a>, <a class="el" href="jurassic_8h.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth).">ctmh2o</a>, <a class="el" href="jurassic_8h.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision-induced absorption coefficient.">ctmn2</a>, <a class="el" href="jurassic_8h.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision-induced absorption coefficient.">ctmo2</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="structctl__t.html" title="Control parameters.">ctl_t</a>, <a class="el" href="structlos__t.html" title="Line-of-sight data.">los_t</a>, <a class="el" href="jurassic_8h.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum optical depth.">ctmco2</a>, <a class="el" href="jurassic_8h.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth).">ctmh2o</a>, <a class="el" href="jurassic_8h.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision-induced absorption coefficient.">ctmn2</a>, <a class="el" href="jurassic_8h.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision-induced absorption coefficient.">ctmo2</a></dd></dl>
 <dl class="section author"><dt>Author</dt><dd>Lars Hoffmann </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="jurassic_8c_source.html#l03314">3314</a> of file <a class="el" href="jurassic_8c_source.html">jurassic.c</a>.</p>
@@ -8223,7 +8236,7 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno"> 3346</span>}</div>
 <div class="ttc" id="ajurassic_8c_html_a2d55d073ef8855381487a486970152f5"><div class="ttname"><a href="jurassic_8c.html#a2d55d073ef8855381487a486970152f5">ctmo2</a></div><div class="ttdeci">double ctmo2(const double nu, const double p, const double t)</div><div class="ttdoc">Compute O₂ collision-induced absorption coefficient.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l03052">jurassic.c:3052</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a5b99f6f4581181857d4b89b27e8c2f87"><div class="ttname"><a href="jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87">ctmh2o</a></div><div class="ttdeci">double ctmh2o(const double nu, const double p, const double t, const double q, const double u)</div><div class="ttdoc">Compute the MT_CKD 4.1 water vapor continuum (optical depth).</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l02087">jurassic.c:2087</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_a9a962bab37658297e87de9631c67707b"><div class="ttname"><a href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b">ctmco2</a></div><div class="ttdeci">double ctmco2(const double nu, const double p, const double t, const double u)</div><div class="ttdoc">Compute carbon dioxide continuum (optical depth).</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01224">jurassic.c:1224</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a9a962bab37658297e87de9631c67707b"><div class="ttname"><a href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b">ctmco2</a></div><div class="ttdeci">double ctmco2(const double nu, const double p, const double t, const double u)</div><div class="ttdoc">Compute carbon dioxide continuum optical depth.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01224">jurassic.c:1224</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_ad788eb8a3a6df141d82f28adbd610668"><div class="ttname"><a href="jurassic_8c.html#ad788eb8a3a6df141d82f28adbd610668">ctmn2</a></div><div class="ttdeci">double ctmn2(const double nu, const double p, const double t)</div><div class="ttdoc">Compute N₂ collision-induced absorption coefficient.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l02983">jurassic.c:2983</a></div></div>
 <div class="ttc" id="astructctl__t_html_a417bdd14462698d3ced23bc954fa48a0"><div class="ttname"><a href="structctl__t.html#a417bdd14462698d3ced23bc954fa48a0">ctl_t::ctm_co2</a></div><div class="ttdeci">int ctm_co2</div><div class="ttdoc">Compute CO2 continuum (0=no, 1=yes).</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01520">jurassic.h:1520</a></div></div>
 <div class="ttc" id="astructctl__t_html_a5b53512f37127a12ef73a85dc8ccee4c"><div class="ttname"><a href="structctl__t.html#a5b53512f37127a12ef73a85dc8ccee4c">ctl_t::ctm_n2</a></div><div class="ttdeci">int ctm_n2</div><div class="ttdoc">Compute N2 continuum (0=no, 1=yes).</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01526">jurassic.h:1526</a></div></div>
@@ -8242,7 +8255,7 @@ Here is the call graph for this function:</div>
 <div class="center"><img src="jurassic_8h_a363f5205cd58d7a22133f704f1137181_cgraph.png" border="0" usemap="#ajurassic_8h_a363f5205cd58d7a22133f704f1137181_cgraph" alt=""/></div>
 <map name="ajurassic_8h_a363f5205cd58d7a22133f704f1137181_cgraph" id="ajurassic_8h_a363f5205cd58d7a22133f704f1137181_cgraph">
 <area shape="rect" title="Compute total extinction including gaseous continua." alt="" coords="5,81,124,108"/>
-<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="172,5,237,32"/>
+<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum optical depth." alt="" coords="172,5,237,32"/>
 <area shape="rect" href="jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth)." alt="" coords="172,56,237,83"/>
 <area shape="rect" href="jurassic_8c.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision&#45;induced absorption coefficient." alt="" coords="175,107,234,133"/>
 <area shape="rect" href="jurassic_8c.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="175,157,234,184"/>
@@ -8605,7 +8618,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" href="jurassic_8c.html#a5e22cd63c35ef6e2c9b9023e2c3945d8" title="Interpolate emissivities and transmittances using the Curtis–Godson approximation (CGA)." alt="" coords="323,234,425,261"/>
 <area shape="rect" href="jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="323,285,425,312"/>
 <area shape="rect" href="jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="181,462,249,489"/>
-<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="341,133,407,160"/>
+<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum optical depth." alt="" coords="341,133,407,160"/>
 <area shape="rect" href="jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth)." alt="" coords="341,184,407,210"/>
 <area shape="rect" href="jurassic_8c.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision&#45;induced absorption coefficient." alt="" coords="345,82,403,109"/>
 <area shape="rect" href="jurassic_8c.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="345,32,403,58"/>
@@ -10387,7 +10400,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" href="jurassic_8c.html#a5e22cd63c35ef6e2c9b9023e2c3945d8" title="Interpolate emissivities and transmittances using the Curtis–Godson approximation (CGA)." alt="" coords="555,259,657,285"/>
 <area shape="rect" href="jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="555,309,657,336"/>
 <area shape="rect" href="jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="413,512,481,539"/>
-<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="573,157,639,184"/>
+<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum optical depth." alt="" coords="573,157,639,184"/>
 <area shape="rect" href="jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth)." alt="" coords="573,5,639,32"/>
 <area shape="rect" href="jurassic_8c.html#ad788eb8a3a6df141d82f28adbd610668" title="Compute N₂ collision&#45;induced absorption coefficient." alt="" coords="577,56,635,83"/>
 <area shape="rect" href="jurassic_8c.html#a2d55d073ef8855381487a486970152f5" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="577,107,635,133"/>
@@ -11396,7 +11409,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" href="jurassic_8c.html#a5e22cd63c35ef6e2c9b9023e2c3945d8" title="Interpolate emissivities and transmittances using the Curtis–Godson approximation (CGA)." alt="" coords="727,233,829,260"/>
 <area shape="rect" href="jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="727,81,829,108"/>
 <area shape="rect" href="jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="744,335,812,361"/>
-<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum (optical depth)." alt="" coords="890,5,955,32"/>
+<area shape="rect" href="jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum optical depth." alt="" coords="890,5,955,32"/>
 <area shape="rect" href="jurassic_8c.html#a5b99f6f4581181857d4b89b27e8c2f87" title="Compute the MT_CKD 4.1 water vapor continuum (optical depth)." alt="" coords="890,56,955,83"/>
 <area shape="rect" href="jurassic_8c.html#a675d14cbd1ae26f72e86f828d8367240" title="Write atmospheric profile in RFM&#45;compatible format." alt="" coords="725,436,831,463"/>
 <area shape="rect" href="jurassic_8c.html#aaeed7544a87d85474e33d05fe0adc992" title="Helper function to extract a single value from the retrieval state vector." alt="" coords="573,436,661,463"/>
