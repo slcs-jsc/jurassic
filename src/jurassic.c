@@ -6784,6 +6784,7 @@ void read_shape(
 }
 
 /*****************************************************************************/
+#if defined(_FLAT_ARRAYS)
 static void tbl_flatten(
   const ctl_t *ctl,
   tbl_t *tbl) {
@@ -6834,6 +6835,7 @@ static void tbl_flatten(
 }
 fflush(stdout);
 }
+#endif
 
 tbl_t *read_tbl(
   const ctl_t *ctl) {
@@ -6899,7 +6901,9 @@ tbl_t *read_tbl(
   }
 
   if (ctl->tblfmt == 1) {
+    #if defined(_FLAT_ARRAYS)
     tbl_flatten(ctl, tbl);
+    #endif
   }
 
   /* Calculate log-pressure... */
