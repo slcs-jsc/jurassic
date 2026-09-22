@@ -34,9 +34,9 @@ fi
 source "$jr_scripts_dir/base.sh"
  
 reps=${REPS:-3}
-threads=${THREADS:-24}
+threads=${THREADS:-48}
 batch=${BATCH_SIZE:-240}
-groups=${LIKWID_GROUPS:-"FLOPS_DP MEM_DP"}
+groups=${LIKWID_GROUPS:-"FLOPS_DP MEM_DP CACHE"}
  
 # Cases to sweep -- defaults to all three geometries.
 # Override with e.g. CASE_LIST="zenith_baseline" for a single case.
@@ -52,16 +52,31 @@ for case_name in $case_list; do
     bench_validate
     bench_check_groups "$groups"
  
+    # Measure roofline ceilings via likwid-bench
     cores="$(cpus_all_phys "$threads")"
     ceilings_file="$JR_RUN_DIR/ceilings.txt"
- 
-    echo "=== measuring compute ceiling (peakflops_avx_fma, threads=$threads, cores=$cores) ==="
-    peak_flops=$(likwid-bench -t peakflops_avx_fma -w "S0:1GB:${threads}" 2>&1 \
+    bench_ws=${BENCH_WORKING_SET:-2GB}
+    flops_bench=${FLOPS_BENCH:-peakflops}  # Set peakflops_avx_fma if needed
+    bw_bench=${BW_BENCH:-stream_mem}
+
+    # Build one -w workgroup per socket, splitting threads evenly across sockets. 
+    sockets_needed=$(( (threads + JR_PHYS_PER_SOCKET - 1) / JR_PHYS_PER_SOCKET ))
+    [ "$sockets_needed" -gt "$JR_N_SOCKETS" ] && sockets_needed=$JR_N_SOCKETS
+    remaining=$threads
+    workgroup_args=()
+    for (( s=0; s<sockets_needed; s++ )); do
+      take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
+      workgroup_args+=( -w "S${s}:${bench_ws}:${take}" )
+      remaining=$(( remaining - take ))
+    done
+
+    echo "=== measuring compute ceiling ($flops_bench, threads=$threads, workgroups=${workgroup_args[*]}) ==="
+    peak_flops=$(likwid-bench -t "$flops_bench" "${workgroup_args[@]}" 2>&1 \
       | tee "$JR_RUN_DIR/likwid_bench_flops.txt" \
       | awk '/MFlops\/s:/ { print $2; exit }')
- 
-    echo "=== measuring bandwidth ceiling (stream_mem_avx, threads=$threads, cores=$cores) ==="
-    stream_bw=$(likwid-bench -t stream_mem_avx -w "S0:1GB:${threads}" 2>&1 \
+
+    echo "=== measuring bandwidth ceiling ($bw_bench, threads=$threads, workgroups=${workgroup_args[*]}) ==="
+    stream_bw=$(likwid-bench -t "$bw_bench" "${workgroup_args[@]}" 2>&1 \
       | tee "$JR_RUN_DIR/likwid_bench_bw.txt" \
       | awk '/MByte\/s:/ { print $2; exit }')
  
