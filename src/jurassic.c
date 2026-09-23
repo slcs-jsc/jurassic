@@ -23,6 +23,7 @@
 */
 
 #include "jurassic.h"
+int jurassic_marker_ref = 0;
 
 /*****************************************************************************/
 
@@ -3307,6 +3308,40 @@ void formod(
 
   /* Free... */
   free(mask);
+}
+
+/*****************************************************************************/
+
+void formod_batch(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  atm_t *atm,
+  obs_t *obs,
+  const int nbatch) {
+
+  if (nbatch <= 0)
+    return;
+
+  /* The RFM interface uses fixed temporary filenames and is therefore
+     not thread-safe in the current implementation. */
+  if (ctl->formod == 2) {
+    for (int ib = 0; ib < nbatch; ib++)
+      formod(ctl, tbl, &atm[ib], &obs[ib]);
+    return;
+  }
+
+  const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
+#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,marker_region)
+  for (int ib = 0; ib < nbatch; ib++) {
+
+    #ifdef LIKWID_PERFMON
+    LIKWID_MARKER_START(marker_region);
+    #endif
+    formod(ctl, tbl, &atm[ib], &obs[ib]);
+    #ifdef LIKWID_PERFMON
+    LIKWID_MARKER_STOP(marker_region);
+    #endif
+  }
 }
 
 /*****************************************************************************/
