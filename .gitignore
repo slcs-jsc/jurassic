@@ -22,6 +22,8 @@ projects/hermes/*
 !projects/hermes/scripts/
 !projects/hermes/scripts/**
 projects/hermes/scripts/*.yaml
+!projects/dataracebench/
+projects/dataracebench/runs/
 src/*.o
 src/atmfmt
 src/brightness
