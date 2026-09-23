@@ -16,7 +16,7 @@ from plot_results import plot_agent_progress, plot_metrics
 
 from run_agent import AIAgent
 
-with open(Path(os.environ.get("HERMES_OPT_CONFIG", Path(__file__).parent / "config.yaml"))) as f: 
+with open(Path(os.environ.get("HERMES_OPT_CONFIG", Path(__file__).parent / "config_dataracebench.yaml"))) as f: 
     cfg = yaml.safe_load(f)
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -105,7 +105,7 @@ def build_prompt(benchmark_summary: str, diff: str, last_res: str) -> str:
     prompt.append("Propose and apply the next optimization.")
     return "\n".join(prompt)
 
-def optimize(args: argparse.Namespace, dry_run=False):
+def optimize(args: argparse.Namespace, dry_run=False, plot=False):
     checkpoints = CheckpointManager(
         repo_dir=Path(cfg["repo_dir"]), 
         worktree_dir=Path(cfg["worktree_dir"]), 
@@ -162,7 +162,8 @@ def optimize(args: argparse.Namespace, dry_run=False):
     best_configs = baseline_configs
     best_summary = summarize(baseline_configs)
 
-    plot_metrics(baseline_configs, res_dir)
+    if plot:
+        plot_metrics(baseline_configs, res_dir)
 
     print(f"Baseline score (TIMER_GROUP_ANALYSIS @ {cfg['thread_count_for_scoring']} threads): {best_score}")
 
@@ -237,9 +238,11 @@ def optimize(args: argparse.Namespace, dry_run=False):
             log_experiment(Experiment(i, experiment_id, False, new_score, last_res, diff, agent_response))
 
         last_diff = diff
-        plot_metrics(new_configs, res_dir)
+        if plot:
+            plot_metrics(new_configs, res_dir)
 
-    plot_agent_progress(RESULTS_FILE, res_dir)
+    if plot:
+        plot_agent_progress(RESULTS_FILE, res_dir)
     print(f"\nFinished. Best score: {best_score}")
 
 

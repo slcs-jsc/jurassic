@@ -22,7 +22,7 @@ class Executor():
         self.ssh_key_path = ssh_key_path
         self.remote_work_dir = remote_work_dir.rstrip("/")
         self.local_work_dir = Path(local_work_dir)
-        self.benchmark_dir = benchmark_dir.strip("/")
+        self.benchmark_dir = benchmark_dir.rstrip("/")
         self.script = script
         self.sync_excludes = sync_excludes
 
@@ -71,7 +71,7 @@ class Executor():
     def submit_job(self, experiment_id: str, env: dict) -> str:
         export_vars = {"RUN_ID": experiment_id, **env}
         export_str = "ALL," + ",".join(f"{k}={v}" for k, v in export_vars.items())
-        remote_scripts_dir = f"{self.remote_work_dir}/{self.benchmark_dir}/scripts"
+        remote_scripts_dir = f"{self.remote_work_dir}/{self.benchmark_dir}/src"   # TODO: scripts for jurassic
         remote_cmd = (
             f"cd {shlex.quote(remote_scripts_dir)} && "
             f"sbatch --export={shlex.quote(export_str)} {shlex.quote(self.script)}"
