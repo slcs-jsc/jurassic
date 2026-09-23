@@ -22,15 +22,31 @@ JR_TOPO_MAP="$JR_RUN_DIR/cpu_topology.csv"
   } | tee "$JR_RUN_DIR/topology.txt"
 }
 
+find_repo_root() {
+    local dir="$1"
+    while [ "$dir" != "/" ] && [ -n "$dir" ]; do
+        if [ -f "$dir/projects/benchmark/configs/baseline_cases.tsv" ]; then
+            printf '%s\n' "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}
+
 bench_init() {
 
     if [ -n "${JR_SCRIPTS_DIR_OVERRIDE:-}" ] && [ -f "$JR_SCRIPTS_DIR_OVERRIDE/base.sh" ]; then
-        JR_SCRIPT_DIR="$JR_SCRIPTS_DIR_OVERRIDE"
+      JR_SCRIPT_DIR="$JR_SCRIPTS_DIR_OVERRIDE"
     else
         local script_source=${BASH_SOURCE[1]:-$0}
         JR_SCRIPT_DIR=$(cd "$(dirname "$script_source")" && pwd)
     fi
-    JR_REPO_ROOT=$(cd "$JR_SCRIPT_DIR/../../.." && pwd)
+
+    JR_REPO_ROOT=$(find_repo_root "$JR_SCRIPT_DIR") || {
+        echo "Could not locate repo root (no projects/benchmark/configs/baseline_cases.tsv found above $JR_SCRIPT_DIR)" >&2
+        exit 1
+    }
 
     if [ ! -f "$JR_REPO_ROOT/projects/benchmark/configs/baseline_cases.tsv" ] \
         && [ -n "${SLURM_SUBMIT_DIR:-}" ]; then
