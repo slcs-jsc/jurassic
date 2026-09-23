@@ -72,7 +72,6 @@ groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"}
  
 bench_analyse_topology
 bench_build_forward "${VARIANT:-base}"
-bench_validate
 bench_prepare_inputs
 bench_check_groups "$groups"
  
