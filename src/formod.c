@@ -64,6 +64,17 @@ int main(
   int argc,
   char *argv[]) {
 
+  #ifdef LIKWID_PERFMON
+  LIKWID_MARKER_INIT;
+
+  #pragma omp parallel
+  {
+    LIKWID_MARKER_THREADINIT;
+    LIKWID_MARKER_REGISTER("formod");
+    LIKWID_MARKER_REGISTER("formod_ref");
+  }
+  #endif
+
   static ctl_t ctl;
 
   /* Print usage information... */
@@ -154,6 +165,10 @@ int main(
   SELECT_TIMER("FINALIZE", "OVERHEAD");
   tbl_free(&ctl, tbl);
   PRINT_TIMERS;
+
+  #ifdef LIKWID_PERFMON
+  LIKWID_MARKER_CLOSE;
+  #endif
 
   return EXIT_SUCCESS;
 }

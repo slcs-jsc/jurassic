@@ -56,6 +56,13 @@ UNIDIR = ../../jurassic-unified
 # Use JURASSIC-UNIFIED library...
 UNIFIED ?= 0
 
+# Perform LIKWID-Profiling
+LIKWID ?= 0
+
+# Set march=native
+MARCH_NATIVE ?= 0
+
+
 # -----------------------------------------------------------------------------
 # Set compiler flags...
 # -----------------------------------------------------------------------------
@@ -151,6 +158,16 @@ ifeq ($(STATIC),1)
     $(error Static compilation does not work for JURASSIC-UNIFIED)
   endif
   CFLAGS += -static
+endif
+
+# Compile with LIKWID marker...
+ifeq ($(LIKWID), 1)
+  CFLAGS += -DLIKWID_PERFMON
+  LDFLAGS += -llikwid
+endif
+
+ifeq ($(MARCH_NATIVE), 1)
+  CFLAGS += -O3 -march=native
 endif
 
 # -----------------------------------------------------------------------------
