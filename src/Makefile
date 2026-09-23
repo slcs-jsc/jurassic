@@ -185,9 +185,12 @@ ifeq ($(LIKWID), 1)
   LDFLAGS += -llikwid
 endif
 
-FLAT_ARRAYS ?= 0
+MARCH_NATIVE ?= 0
+ifeq ($(MARCH_NATIVE), 1)
+  CFLAGS += -O3 -march=native
+endif
 
-# If enabled, append the compiler flag
+FLAT_ARRAYS ?= 0
 ifeq ($(FLAT_ARRAYS), 1)
     CFLAGS += -D_FLAT_ARRAYS
 endif
