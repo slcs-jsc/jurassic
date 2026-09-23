@@ -57,7 +57,7 @@ fi
 
 # Strong scaling: batch elements per thread, Weak scaling: size for single-thread
 SCALING_MODE=${SCALING_MODE:-"strong"}
-batch=${BATCH_SIZE:-64}    
+BATCH=${BATCH_SIZE:-64}    
 
 export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
 source "$jr_scripts_dir/base.sh"
