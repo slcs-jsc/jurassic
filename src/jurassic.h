@@ -172,6 +172,10 @@
 
 extern int jurassic_marker_ref;
 
+enum {
+  FORMOD_STATUS_OK = 0
+};
+
 /* ------------------------------------------------------------
    Constants...
    ------------------------------------------------------------ */
@@ -2496,18 +2500,14 @@ int find_emitter(
  * 
  * @author Lars Hoffmann
  */
-void formod(
-  const ctl_t * ctl,
-  const tbl_t * tbl,
-  atm_t * atm,
-  obs_t * obs);
+void formod_core(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm, obs_t *obs);
 
-void formod_batch(
-  const ctl_t *ctl,
-  const tbl_t *tbl,
-  atm_t *atm,
-  obs_t *obs,
-  const int nbatch);
+int formod(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm, obs_t *obs,
+           los_t *los_scratch, obs_t *obs_scratch);
+           
+void formod_batch(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm,
+                  obs_t *obs, const int nbatch, int *status,
+                  los_t *los_scratch, obs_t *obs_scratch);
 
 /**
  * @brief Compute total extinction including gaseous continua.

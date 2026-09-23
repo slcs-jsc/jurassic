@@ -3263,7 +3263,7 @@ int find_emitter(
 
 /*****************************************************************************/
 
-void formod(
+void formod_core(
   const ctl_t *ctl,
   const tbl_t *tbl,
   atm_t *atm,
@@ -3312,35 +3312,67 @@ void formod(
 
 /*****************************************************************************/
 
+int formod(
+  const ctl_t *ctl,
+  const tbl_t *tbl,
+  atm_t *atm,
+  obs_t *obs,
+  los_t *los_scratch,
+  obs_t *obs_scratch) {
+
+  (void) los_scratch;
+  (void) obs_scratch;
+
+  formod_core(ctl, tbl, atm, obs);
+  return FORMOD_STATUS_OK;
+}
+
 void formod_batch(
   const ctl_t *ctl,
   const tbl_t *tbl,
   atm_t *atm,
   obs_t *obs,
-  const int nbatch) {
+  const int nbatch,
+  int *status,
+  los_t *los_scratch,
+  obs_t *obs_scratch) {
 
   if (nbatch <= 0)
     return;
 
+  if (los_scratch == NULL || obs_scratch == NULL)
+    ERRMSG("formod_batch requires scratch arrays for los and obs_scratch!");
+
   /* The RFM interface uses fixed temporary filenames and is therefore
      not thread-safe in the current implementation. */
   if (ctl->formod == 2) {
-    for (int ib = 0; ib < nbatch; ib++)
-      formod(ctl, tbl, &atm[ib], &obs[ib]);
+    for (int ib = 0; ib < nbatch; ib++) {
+      const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
+                                   &los_scratch[ib], &obs_scratch[ib]);
+      if (status)
+        status[ib] = ib_status;
+      else if (ib_status != FORMOD_STATUS_OK)
+        ERRMSG("Forward model failed with status code %d!", ib_status);
+    }
     return;
   }
 
   const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
-#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,marker_region)
+#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
   for (int ib = 0; ib < nbatch; ib++) {
 
     #ifdef LIKWID_PERFMON
     LIKWID_MARKER_START(marker_region);
     #endif
-    formod(ctl, tbl, &atm[ib], &obs[ib]);
+    const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
+                                 &los_scratch[ib], &obs_scratch[ib]);
     #ifdef LIKWID_PERFMON
     LIKWID_MARKER_STOP(marker_region);
     #endif
+    if (status)
+      status[ib] = ib_status;
+    else if (ib_status != FORMOD_STATUS_OK)
+      ERRMSG("Forward model failed with status code %d!", ib_status);
   }
 }
 
@@ -4370,7 +4402,7 @@ void kernel(
 	N);
 
   /* Compute radiance for undisturbed atmospheric data... */
-  formod(ctl, tbl, atm, obs);
+  formod_core(ctl, tbl, atm, obs);
 
   /* Compose vectors... */
   atm2x(ctl, atm, x0, iqa, NULL);
@@ -4420,7 +4452,7 @@ void kernel(
     x2atm(ctl, x1, atm1);
 
     /* Compute radiance for disturbed atmospheric data... */
-    formod(ctl, tbl, atm1, obs1);
+    formod_core(ctl, tbl, atm1, obs1);
 
     /* Compose measurement vector for disturbed radiance data... */
     obs2y(ctl, obs1, yy1, NULL, NULL);
@@ -4675,7 +4707,7 @@ void optimal_estimation(
   /* Set initial state... */
   copy_atm(ctl, atm_i, atm_apr, 0);
   copy_obs(ctl, obs_i, obs_meas, 0);
-  formod(ctl, tbl, atm_i, obs_i);
+  formod_core(ctl, tbl, atm_i, obs_i);
 
   /* Set state vectors and observation vectors... */
   atm2x(ctl, atm_apr, x_a, NULL, NULL);
@@ -4778,7 +4810,7 @@ void optimal_estimation(
 	atm_i->sfeps[isf] = CLAMP(atm_i->sfeps[isf], 0, 1);
 
       /* Forward calculation... */
-      formod(ctl, tbl, atm_i, obs_i);
+      formod_core(ctl, tbl, atm_i, obs_i);
       obs2y(ctl, obs_i, y_i, NULL, NULL);
 
       /* Determine dx = x_i - x_a and dy = y - F(x_i) ... */
