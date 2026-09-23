@@ -183,6 +183,11 @@ def optimize(args: argparse.Namespace, dry_run=False, plot=False):
             task_id=experiment_id
         )
 
+        trace_dir = RESULTS_DIR.parent / "traces"
+        trace_dir.mkdir(parents=True, exist_ok=True)
+        with open(trace_dir / f"{experiment_id}.json", "w") as f:
+            json.dump(result, f, indent=2, default=str)
+
         print("RAW RESULT:", json.dumps(result, indent=2, default=str))
 
         conversation_history = result["messages"]

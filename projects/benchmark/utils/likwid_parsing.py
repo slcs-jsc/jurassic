@@ -245,7 +245,6 @@ def get_metric(entry: dict, region: str, metric: str, stat: bool = False):
             return numeric[0] if len(numeric) == 1 else sum(numeric)
     return None
 
-# TODO: CAS_COUNT_RD/_WR need to be normalized using marker runtime
 def normalize(raw, metric, entry, call_count):
     m = metric.lower()
     if "bandwidth" in m or "mflop/s" in m: 
