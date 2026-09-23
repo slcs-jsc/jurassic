@@ -1,4 +1,43 @@
-# CPU/OpenMP benchmark
+# CPU/OpenMP Benchmark
+
+This directory contains scripts to profile and evaluate the performance of JURASSIC's forward model ('formod').
+
+The framework is divided into two distinct analysis runs:
+1. **`run_roofline`**: Determines if the algorithm is compute-bound or memory-bound.
+2. **`run_scaling`**: Measures multi-core scalability, SMT overhead, and cross-socket NUMA impact.
+
+## Prerequisites
+
+The framework relies on **LIKWID** for performance counter collection and thread/memory pinning.
+
+* **Affinity Control**: Standard OpenMP variables (`OMP_PLACES`, `OMP_PROC_BIND`) are explicitly unset in `base.sh`. LIKWID handles explicit core placement via hardware expressions (`E:S<socket>:<count>`).
+* **Memory Placement**: Control memory allocations via LIKWID-native flags (`-m` for local NUMA binding, `-i` for striated interleave).
+* **Compiler Flags**: Ensure JURASSIC is compiled with vectorization enabled (`-O3 -march=native` or `-march=znver2`) to allow the application to utilize the AVX2 and FMA3 hardware pipelines monitored by the `FLOPS_DP` counters.
+
+## Scaling ('run_scaling_*')
+
+### Evaluation Axes
+1. **Intra-Socket Scaling**: Scale across the physical cores of a single socket
+    * **Strong Scaling (`strong`)**: `BATCH_SIZE` is fixed. Runtime plots directly scale as "Time-to-Solution".
+    * **Weak Scaling (`weak`)**: `BATCH_SIZE` scales linearly with the thread count (\(BASE\_BATCH \times t\))
+2. **SMT (Hyperthreading)**: Runs using logical hardware threads on Socket 0 to measure pipeline occupancy stalls and cache behavior
+3. **Inter-Socket / Numa Layout**: 
+   * **`inter_compact`**: All 64 threads loaded onto Socket 0 (`E:S0:64`, memory allocation restricted locally via `-m`)
+   * **`inter_spread`**: Threads split evenly across both physical processors (`E:S0:32@E:S1:32`, memory allocation striped via `-i`
+
+### Execution
+Submit the job to Slurm, specifying the scaling mode:
+```bash
+sbatch --export=SCALING_MODE=strong run_roofline_jureca.sh
+sbatch --export=SCALING_MODE=weak run_roofline_jureca.sh
+```
+
+### Parsing & Visualization
+The evaluation script parses the structured output labels (`intra_socket_strong`, `inter_spread_weak`, etc.) 
+and plots normalized speedup, efficiency (\(E = \frac{T_1}{T_n}\) for weak scaling), and memory bandwidth behavior:
+```python
+python evaluate_scaling.py /path/to/run_dir --stream-bw <measured_stream_ceiling>
+```
 
 This workflow times the current `master` forward model for the checked-in limb,
 nadir, and zenith example inputs. It uses `formod TASK t`, whose reported time
