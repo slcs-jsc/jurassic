@@ -187,7 +187,7 @@ bench_build_forward() {
         *) echo "Unknown build variant: $variant" >&2; return 1 ;;
     esac
     
-    echo "=== building variant '$variant' (EXTRA_CFLAGS='$extra') ==="
+    echo "Building variant '$variant' (EXTRA_CFLAGS='$extra')"
 
     if [ -n "$extra" ]; then
     ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
@@ -279,25 +279,23 @@ bench_check_groups() {
 }
 
 bench_run_forward() {
-  local label=$1 threads=$2 group=$3 batch=$4 rep=$5
-  local cores=${6:-$(cpus_all_phys_socket_qualified "$threads")}
+  local label=$1 threads=$2 group=$3 batch=$4 rep=$5 cores=$6 numa_flag=$7
+
+  if [ -z "$cores" ]; then
+    echo "ERROR: bench_run_forward: core expression/list (arg 6) is required" >&2
+    return 1
+  fi
+
   local tag="${label}.t${threads}.${group}.b${batch}.rep${rep}"
   local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
   local tab="/tmp/jurassic_${JR_RUN_ID}_${tag}.tab"
   mkdir -p "$JR_WORK_DIR/out"
 
-  # Optional NUMA memory policy independent of LIKWID's CPU pinning above. 
-  # NUMA_POLICY=interleave=all 
-  local numa_wrap=()
-  if [ -n "${NUMA_POLICY:-}" ] && command -v numactl >/dev/null 2>&1; then
-    numa_wrap=(numactl "--${NUMA_POLICY}")
-  fi
-
   echo "--- $tag (cores=$cores${NUMA_POLICY:+, numa=$NUMA_POLICY}) ---"
 
   set +e
-  OMP_NUM_THREADS=$threads likwid-perfctr -C "$cores" -g "$group" -m \
+  OMP_NUM_THREADS=$threads likwid-perfctr -C "$cores" $numa_flag -g "$group" -m \
     -o "$csv" \
     "${numa_wrap[@]}" "$JR_SRC_DIR/formod" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
     JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$batch" \
