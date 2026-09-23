@@ -166,7 +166,7 @@ int main(
 	  && atm.np > 0) {
 
 	/* Call forward model... */
-	formod(&ctl, tbl, &atm, &obs);
+	formod_core(&ctl, tbl, &atm, &obs);
 	const double obs_sim = obs.rad[0][0] - obs.rad[1][0];
 
 	/* Get time index... */
