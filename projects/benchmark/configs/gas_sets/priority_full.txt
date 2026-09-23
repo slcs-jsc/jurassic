@@ -1,0 +1,39 @@
+# Ordered candidate list for full-priority benchmark cases.
+# Final benchmark gas sets should filter this list by actual LUT availability
+# and, if needed, by trivial/zero-table detection in the selected band.
+H2O
+CO2
+O3
+N2O
+CH4
+O2
+N2
+CO
+NO
+NO2
+HNO3
+NH3
+HCl
+HF
+OCS
+ClONO2
+CCl4
+SO2
+HCN
+C2H2
+C2H6
+H2CO
+H2O2
+HNO4
+HOCl
+ClO
+COF2
+HBr
+N2O5
+SF6
+F11
+F12
+F14
+F22
+F113
+F114

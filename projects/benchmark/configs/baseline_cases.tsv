@@ -1,0 +1,4 @@
+case_name	geometry	ctl	nr	ng	nd	tblbase	channels	emitters
+zenith_baseline	zenith	projects/benchmark/cases/zenith_baseline.ctl	64	7	32	BENCH_TBLBASE	0900_1500_32	H2O,CO2,O3,N2O,CH4,O2,N2
+nadir_baseline	nadir	projects/benchmark/cases/nadir_baseline.ctl	8	7	32	BENCH_TBLBASE	0900_1500_32	H2O,CO2,O3,N2O,CH4,O2,N2
+limb_baseline	limb	projects/benchmark/cases/limb_baseline.ctl	64	7	32	BENCH_TBLBASE	0900_1500_32	H2O,CO2,O3,N2O,CH4,O2,N2
