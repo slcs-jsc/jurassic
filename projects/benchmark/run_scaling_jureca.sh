@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=slmet
-#SBATCH --partition=batch
+#SBATCH --partition=dc-cpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
@@ -59,6 +59,7 @@ fi
 SCALING_MODE=${SCALING_MODE:-"strong"}
 batch=${BATCH_SIZE:-64}    
 
+export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
 source "$jr_scripts_dir/base.sh"
  
 bench_init

@@ -59,6 +59,7 @@ fi
 SCALING_MODE=${SCALING_MODE:-"strong"}
 batch=${BATCH_SIZE:-24}    
 
+export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
 source "$jr_scripts_dir/base.sh"
  
 bench_init

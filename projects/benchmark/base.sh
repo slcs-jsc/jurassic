@@ -23,8 +23,13 @@ JR_TOPO_MAP="$JR_RUN_DIR/cpu_topology.csv"
 }
 
 bench_init() {
-    local script_source=${BASH_SOURCE[1]:-$0}
-    JR_SCRIPT_DIR=$(cd "$(dirname "$script_source")" && pwd)
+
+    if [ -n "${JR_SCRIPTS_DIR_OVERRIDE:-}" ] && [ -f "$JR_SCRIPTS_DIR_OVERRIDE/base.sh" ]; then
+        JR_SCRIPT_DIR="$JR_SCRIPTS_DIR_OVERRIDE"
+    else
+        local script_source=${BASH_SOURCE[1]:-$0}
+        JR_SCRIPT_DIR=$(cd "$(dirname "$script_source")" && pwd)
+    fi
     JR_REPO_ROOT=$(cd "$JR_SCRIPT_DIR/../../.." && pwd)
 
     if [ ! -f "$JR_REPO_ROOT/projects/benchmark/configs/baseline_cases.tsv" ] \
