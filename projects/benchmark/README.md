@@ -505,9 +505,16 @@ base: LIKWID_MARKER_START/STOP("formod") located in formod_batch() (jurassic.c:3
 | run_tma.sh | compare single thread vs max physical thread count (24) | TMA, Cache volume + miss ratio | Perform Top-down Microarchitecture Analysis |
 | run_compare_ab.sh | varies code, single thread, same job + same node | Write-/Call-/Read- volume, Runtime | Compare efficiency of two code versions |
 
-### Results - CPU verion 
+### Results - Forward Model (CPU version)
 
 #### Noise 
+
+   label  thr    group  batch | runtime/call [s] | Memory data volume | Memory bandwidth
+--------------------------------------------------------------------------------------------------------
+   noise    1   MEM_DP     48 | 4.696, 4.686, stdev=0.03716, cv=0.8% | 1.465, 1.467, stdev=0.01842, cv=1.3% | 6.368, 6.357, stdev=0.06141, cv=1.0%
+Largest observed coefficient of variation: 1.3%  (config=('noise', 1, 'MEM_DP', 48), metric='Memory data volume [GBytes]')
+
+Recommended significance threshold for further comparisons: differences below ~1.3% of the median are not distinguishable from measurement noise at this repetition count.
 
 #### Parallel efficiency
 How does performance scale with computational resources?
@@ -515,6 +522,8 @@ How does performance scale with computational resources?
 [Thread Count vs. Runtime](results/baseline/e2_wallclock_scaling.png)
 [Thread Count vs. Speedup](results/baseline/e2_wallclock_speedup.png)
 [Thread Count vs. Memory bandwith](results/baseline/e2_memory_bandwidth_scaling.png)
+
+SMT gives no Speedup and produces 3x higher DRAM read traffic. 
 
 ##### Resource contention
 Does one core's TMA profile change when 23 other cores are active and sharing the same memory, versus running alone?
