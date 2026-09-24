@@ -131,7 +131,7 @@ for rep in $(seq 1 "$reps"); do
     done
 
     for group in "${JR_GROUPS[@]}"; do
-        bench_run_forward "inter_spread_${SCALING_MODE}" "$target_threads" "$group" "$current_batch" "$rep" "$cores_spread"
+        bench_run_forward "inter_spread_${SCALING_MODE}" "$target_threads" "$group" "$current_batch" "$rep" "$cores_spread" "-i
     done
   else
     echo "WARNING: target_threads ($target_threads) ist kleiner als die Anzahl der Sockets ($JR_N_SOCKETS). Full Spread wird übersprungen." >&2
