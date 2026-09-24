@@ -259,6 +259,7 @@ bench_run_forward() {
   local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
   local tab="/tmp/jurassic_${JR_RUN_ID}_${tag}.tab"
+  local formod_bin="${JR_FORMOD_BIN:-$JR_SRC_DIR/formod}"
   mkdir -p "$JR_WORK_DIR/out"
 
   echo "--- $tag (cores=$cores${NUMA_POLICY:+, numa=$NUMA_POLICY}) ---"
@@ -266,7 +267,7 @@ bench_run_forward() {
   set +e
   OMP_NUM_THREADS=$threads likwid-perfctr -C "$cores" $numa_flag -g "$group" -m \
     -o "$csv" \
-    "${numa_wrap[@]}" "$JR_SRC_DIR/formod" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
+    "${numa_wrap[@]}" "$formod_bin" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
     JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$batch" \
     > "$txt" 2>&1
   local rc=$?
