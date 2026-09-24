@@ -71,18 +71,6 @@ void exec_formod_single(
 
 /*! Execute a batch throughput benchmark with perturbed atmospheric cases and
   return the first result in @p obs. */
-void exec_formod_batch_repeat(
-  const ctl_t * ctl,
-  const tbl_t * tbl,
-  const atm_t * atm,
-  obs_t * obs,
-  int batch_size, 
-  atm_t *atm_batch,
-  obs_t *obs_batch,
-  los_t *los_batch, 
-  obs_t *obs_scratch_batch,
-  int *status
-);
 
 void exec_formod_batch_setup(
   const ctl_t *ctl, 
@@ -465,64 +453,6 @@ void exec_formod_single(
 
 /*****************************************************************************/
 
-void exec_formod_batch_repeat(
-  const ctl_t *ctl,
-  const tbl_t *tbl,
-  const atm_t *atm,
-  obs_t *obs,
-  int batch_size, 
-  atm_t *atm_batch,
-  obs_t *obs_batch,
-  los_t *los_batch,
-  obs_t *obs_scratch_batch,
-  int *status) {
-
-  gsl_rng *rng;
-
-  if (batch_size < 1)
-    ERRMSG("BATCH_SIZE must be positive!");
-
-  gsl_rng_env_setup();
-  rng = gsl_rng_alloc(gsl_rng_default);
-  gsl_rng_set(rng, 0UL);
-
-  for (int ib = 0; ib < batch_size; ib++) {
-    atm_batch[ib] = *atm;
-    obs_batch[ib] = *obs;
-
-    if (ib == 0)
-      continue;
-
-    const double dtemp = 40.0 * (gsl_rng_uniform(rng) - 0.5);
-    const double dpress = 1.0 - 0.1 * gsl_rng_uniform(rng);
-    double dq[NG];
-    for (int ig = 0; ig < ctl->ng; ig++)
-      dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
-    for (int ip = 0; ip < atm_batch[ib].np; ip++) {
-      atm_batch[ib].t[ip] += dtemp;
-      atm_batch[ib].p[ip] *= dpress;
-      for (int ig = 0; ig < ctl->ng; ig++)
-	atm_batch[ib].q[ig][ip] *= dq[ig];
-    }
-  }
-
-  formod_batch(ctl, tbl, atm_batch, obs_batch, batch_size, status,
-	       los_batch, obs_scratch_batch);
-
-  if (status[0] != FORMOD_STATUS_OK)
-    ERRMSG("Forward model failed with status code %d!", status[0]);
-  for (int ib = 1; ib < batch_size; ib++)
-    if (status[ib] != FORMOD_STATUS_OK)
-      ERRMSG("Batch benchmark failed with status code %d at element %d!",
-	     status[ib], ib);
-
-  *obs = obs_batch[0];
-
-  gsl_rng_free(rng);
-}
-
-/*****************************************************************************/
-
 void exec_formod_default(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -750,6 +680,11 @@ void exec_formod_benchmark(
     ALLOC(los_batch, los_t, batch_size);
     ALLOC(obs_scratch_batch, obs_t, batch_size);
     ALLOC(status, int, batch_size);
+
+	SELECT_TIMER("BENCHMARK_SETUP", "OVERHEAD");
+    exec_formod_batch_setup(ctl, atm, obs, batch_size, atm_batch, obs_batch);
+    formod_batch(ctl, tbl, atm_batch, obs_batch, batch_size, status,
+                 los_batch, obs_scratch_batch);
   }
 
   const char* env_max_iter = getenv("JURASSIC_MAX_ITER");
@@ -773,6 +708,19 @@ void exec_formod_benchmark(
                 status[ib], ib);
     }
     else {
+	  copy_atm(ctl, atm_scratch, atm, 0);
+      const double dtemp = 40. * (gsl_rng_uniform(rng) - 0.5);
+      const double dpress = 1. - 0.1 * gsl_rng_uniform(rng);
+      double dq[NG];
+      for (int ig = 0; ig < ctl->ng; ig++)
+        dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
+      for (int ip = 0; ip < atm_scratch->np; ip++) {
+        atm_scratch->t[ip] += dtemp;
+        atm_scratch->p[ip] *= dpress;
+        for (int ig = 0; ig < ctl->ng; ig++)
+          atm_scratch->q[ig][ip] *= dq[ig];
+      }
+		
       double t0 = omp_get_wtime();
       exec_formod_single(ctl, tbl, atm_scratch, obs, los_scratch,
 			 obs_scratch, formod_scalar);
