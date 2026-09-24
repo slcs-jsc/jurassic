@@ -32,8 +32,8 @@ source "$jr_scripts_dir/base.sh"
  
 reps=${REPS:-5}
 threads=${THREADS:-64}
-batch=${BATCH_SIZE:-240}
-groups=${LIKWID_GROUPS:-"FLOPS_DP MEM_DP"}
+batch=${BATCH_SIZE:-1024}
+groups=${LIKWID_GROUPS:-"MEM_DP"}
  
 case_list=${CASE_LIST:-"zenith_baseline nadir_baseline limb_baseline"}
  
