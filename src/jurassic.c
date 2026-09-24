@@ -3358,7 +3358,7 @@ void formod_batch(
   }
 
   const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
-#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
+#pragma omp parallel for schedule(static) default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
   for (int ib = 0; ib < nbatch; ib++) {
 
     #ifdef LIKWID_PERFMON

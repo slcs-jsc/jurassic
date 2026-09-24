@@ -192,7 +192,6 @@ int main(
     LIKWID_MARKER_THREADINIT;
     LIKWID_MARKER_REGISTER("formod");
     LIKWID_MARKER_REGISTER("formod_ref");
-    LIKWID_MARKER_REGISTER("batch_alloc");
   }
   #endif
 
@@ -672,6 +671,44 @@ void exec_formod_contributions(
 
 /*****************************************************************************/
 
+/*! Build the perturbed batch. */
+void exec_formod_batch_setup(
+  const ctl_t *ctl, const atm_t *atm, const obs_t *obs,
+  int batch_size, atm_t *atm_batch, obs_t *obs_batch) {
+
+  double *dtemp, *dpress, *dq;
+  ALLOC(dtemp, double, batch_size);
+  ALLOC(dpress, double, batch_size);
+  ALLOC(dq, double, batch_size * NG);
+
+  gsl_rng_env_setup();
+  gsl_rng *rng = gsl_rng_alloc(gsl_rng_default);
+  gsl_rng_set(rng, 0UL);
+  for (int ib = 0; ib < batch_size; ib++) {
+    dtemp[ib] = 0; dpress[ib] = 1;
+    for (int ig = 0; ig < ctl->ng; ig++) dq[ib * NG + ig] = 1;
+    if (ib == 0) continue;
+    dtemp[ib] = 40.0 * (gsl_rng_uniform(rng) - 0.5);
+    dpress[ib] = 1.0 - 0.1 * gsl_rng_uniform(rng);
+    for (int ig = 0; ig < ctl->ng; ig++)
+      dq[ib * NG + ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
+  }
+  gsl_rng_free(rng);
+
+#pragma omp parallel for schedule(static)
+  for (int ib = 0; ib < batch_size; ib++) {
+    atm_batch[ib] = *atm;
+    obs_batch[ib] = *obs;
+    for (int ip = 0; ip < atm_batch[ib].np; ip++) {
+      atm_batch[ib].t[ip] += dtemp[ib];
+      atm_batch[ib].p[ip] *= dpress[ib];
+      for (int ig = 0; ig < ctl->ng; ig++)
+        atm_batch[ib].q[ig][ip] *= dq[ib * NG + ig];
+    }
+  }
+  free(dtemp); free(dpress); free(dq);
+}
+
 void exec_formod_benchmark(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -697,10 +734,6 @@ void exec_formod_benchmark(
   int *status = NULL;
   los_t *los_batch = NULL;
   obs_t *obs_scratch_batch = NULL;
-
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_START("batch_alloc");
-  #endif
   
   if (batch_size > 1) {
     ALLOC(atm_batch, atm_t, batch_size);
@@ -710,10 +743,6 @@ void exec_formod_benchmark(
     ALLOC(status, int, batch_size);
   }
 
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_STOP("batch_alloc");
-  #endif
-
   const char* env_max_iter = getenv("JURASSIC_MAX_ITER");
   const int max_iter = env_max_iter ? atoi(env_max_iter) : INT_MAX;
 
@@ -722,31 +751,24 @@ void exec_formod_benchmark(
 
   do {
     SELECT_TIMER("BENCHMARK_SAMPLE", "ANALYSIS");
-    double t0 = omp_get_wtime();
+    double dt;
 
-    if (batch_size > 1)
-      exec_formod_batch_repeat(ctl, tbl, atm, obs, batch_size,
-                              atm_batch, obs_batch, los_batch, 
-                              obs_scratch_batch, status);
+    if (batch_size > 1) {
+      double t0 = omp_get_wtime();
+      formod_batch(ctl, tbl, atm_batch, obs_batch, batch_size, status,
+                 los_batch, obs_scratch_batch);
+      dt = omp_get_wtime() - t0;
+      for (int ib = 0; ib < batch_size; ib++)
+        if (status[ib] != FORMOD_STATUS_OK)
+          ERRMSG("Batch benchmark failed with status %d at element %d!",
+                status[ib], ib);
+    }
     else {
-      copy_atm(ctl, atm_scratch, atm, 0);
-      double dtemp = 40. * (gsl_rng_uniform(rng) - 0.5);
-      double dpress = 1. - 0.1 * gsl_rng_uniform(rng);
-      double dq[NG];
-      for (int ig = 0; ig < ctl->ng; ig++)
-	      dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
-      for (int ip = 0; ip < atm_scratch->np; ip++) {
-        atm_scratch->t[ip] += dtemp;
-        atm_scratch->p[ip] *= dpress;
-        for (int ig = 0; ig < ctl->ng; ig++)
-          atm_scratch->q[ig][ip] *= dq[ig];
-      }
-
+      double t0 = omp_get_wtime();
       exec_formod_single(ctl, tbl, atm_scratch, obs, los_scratch,
 			 obs_scratch, formod_scalar);
+       dt = omp_get_wtime() - t0;
     }
-
-    double dt = omp_get_wtime() - t0;
 
     t_mean += dt;
     t_sd += POW2(dt);
@@ -767,10 +789,12 @@ void exec_formod_benchmark(
   }
   t_mean /= (double) n;
   t_sd = sqrt(t_sd / (double) n - POW2(t_mean));
-  printf("RUNTIME: execution= %s | batch_size= %d | mean= %g s"
-	 " | stddev= %g s | min= %g s | max= %g s\n",
-	 formod_scalar ? "scalar" : "batch", batch_size, t_mean, t_sd, t_min,
-	 t_max);
+  printf("RUNTIME: execution= %s | threads= %d | batch_size= %d | mean= %g s"
+       " | stddev= %g s | min= %g s | max= %g s | per_model= %g s"
+       " | throughput= %g models/s | samples= %d\n",
+       formod_scalar ? "scalar" : "batch", omp_get_max_threads(),
+       batch_size, t_mean, t_sd, t_min, t_max,
+       t_mean / batch_size, batch_size / t_mean, n);
 
   gsl_rng_free(rng);
 }
