@@ -52,6 +52,7 @@ for case_name in $case_list; do
     ceilings_file="$JR_RUN_DIR/ceilings.txt"
 
     bench_ws=${BENCH_WORKING_SET:-4GB}
+    flops_ws=${FLOPS_WORKING_SET:-32kB} 
     flops_bench=${FLOPS_BENCH:-peakflops_avx_fma} 
     bw_bench=${BW_BENCH:-stream_mem}
 
@@ -59,10 +60,12 @@ for case_name in $case_list; do
     sockets_needed=$(( (threads + JR_PHYS_PER_SOCKET - 1) / JR_PHYS_PER_SOCKET ))
     [ "$sockets_needed" -gt "$JR_N_SOCKETS" ] && sockets_needed=$JR_N_SOCKETS
     remaining=$threads
-    workgroup_args=()
+
+    flops_workgroup_args=()
+    remaining=$threads
     for (( s=0; s<sockets_needed; s++ )); do
       take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
-      workgroup_args+=( -w "S${s}:${bench_ws}:${take}" )
+      flops_workgroup_args+=( -w "S${s}:${flops_ws}:${take}" )
       remaining=$(( remaining - take ))
     done
 
@@ -73,14 +76,14 @@ for case_name in $case_list; do
     fi
 
     echo "Measuring compute ceiling ($flops_bench, threads=$threads, workgroups=${workgroup_args[*]})"
-    peak_flops=$(likwid-bench -t "$flops_bench" "${workgroup_args[@]}" 2>&1 \
-      | tee "$JR_RUN_DIR/likwid_bench_flops.txt" \
-      | awk '/MFlops\/s:/ { print $2; exit }')
+    peak_flops=$(likwid-bench -t "$flops_bench" "${flops_workgroup_args[@]}" 2>&1 \
+  | tee "$JR_RUN_DIR/likwid_bench_flops.txt" \
+  | awk '/MFlops\/s:/ { print $2; exit }')
 
     echo "Measuring bandwidth ceiling ($bw_bench, threads=$threads, workgroups=${workgroup_args[*]})"
     stream_bw=$(likwid-bench -t "$bw_bench" "${workgroup_args[@]}" 2>&1 \
-      | tee "$JR_RUN_DIR/likwid_bench_bw.txt" \
-      | awk '/MByte\/s:/ { print $2; exit }')
+  | tee "$JR_RUN_DIR/likwid_bench_bw.txt" \
+  | awk '/MByte\/s:/ { print $2; exit }')
  
     echo "peak_flops_mflops=${peak_flops}" | tee "$ceilings_file"
     echo "stream_bw_mbytes=${stream_bw}"   | tee -a "$ceilings_file"
