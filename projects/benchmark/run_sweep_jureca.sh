@@ -8,25 +8,39 @@
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e3_sweep
+
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/base.sh"
+JR_EXPERIMENT=e3_sweep
+RUN_ID=${RUN_ID:-e3_sweep_${SLURM_JOB_ID:-manual}}
 
-bench_init "problem_size"
+if [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/base.sh" ]; then
+  jr_scripts_dir="$SLURM_SUBMIT_DIR"
+else
+  jr_scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+
+BATCH_SIZE=${BATCH_SIZE:-1024}
+
+export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
+source "$jr_scripts_dir/base.sh"
+
+SCRIPT_DIR="$jr_scripts_dir"
+
+bench_init
 bench_analyse_topology
 
 CHANNEL_COUNTS_FILE="${JR_CONFIG_DIR}/channel_counts.txt"
 GAS_SETS_DIR="${JR_CONFIG_DIR}/gas_sets"
 
-THREADS="${THREADS:-${JR_PHYS_PER_SOCKET}}"
+THREADS="${THREADS:-64}}"
 CORES="${CORES:-E:S0:${THREADS}}"
 REP="${REP:-3}"
-BATCH_SIZE="${BATCH_SIZE:-$(get_batch_size 2>/dev/null || echo 1)}"
 
-# ND/NG are compile-time array bounds 
+# ND/NG are compile-time array bounds (see src/jurassic.h)
 BIN_CACHE_DIR="${JR_BENCH_DIR}/bin_cache"
-mkdir -p "${BIN_CACHE_DIR}"
+BUILD_SCRATCH_DIR="${JR_BENCH_DIR}/bin_cache/_build"
+mkdir -p "${BIN_CACHE_DIR}" "${BUILD_SCRATCH_DIR}"
 
 # build_or_reuse ND NG
 # Echoes the path to a formod binary compiled with -DND=<nd> -DNG=<ng>,
@@ -43,14 +57,47 @@ build_or_reuse() {
         return
     fi
 
-    echo "[e3] building ND=${nd} NG=${ng} -> ${variant_dir}" >&2
-    mkdir -p "${variant_dir}"
+    local lock_dir="${BUILD_SCRATCH_DIR}/${key}.lock"
+    local waited=0
+    while ! mkdir "${lock_dir}" 2>/dev/null; do
+        sleep 5
+        waited=$((waited + 5))
+        if [[ -x "${variant_bin}" ]]; then
+            # another process finished building this variant while we waited
+            echo "[e3] variant ND=${nd} NG=${ng} built by another process" >&2
+            echo "${variant_bin}"
+            return
+        fi
+        if (( waited > 1800 )); then
+            echo "[e3] ERROR: timed out waiting for lock ${lock_dir}" >&2
+            exit 1
+        fi
+    done
+    # release the lock on normal return AND on a build failure that trips
+    # `set -e` and exits the script, so a failed build doesn't leave a
+    # stale lock behind for the next run.
+    trap 'rmdir "'"${lock_dir}"'" 2>/dev/null' RETURN EXIT
+
+    # re-check after acquiring the lock in case we raced another process
+    if [[ -x "${variant_bin}" ]]; then
+        echo "[e3] reusing cached build for ND=${nd} NG=${ng}" >&2
+        echo "${variant_bin}"
+        return
+    fi
+
+    local build_dir="${BUILD_SCRATCH_DIR}/${key}"
+    echo "[e3] building ND=${nd} NG=${ng} in private copy -> ${build_dir}" >&2
+    rm -rf "${build_dir}"
+    cp -r "${JR_REPO_ROOT}/src" "${build_dir}"
     (
-        cd "${JR_REPO_ROOT}/src"
+        cd "${build_dir}"
         make clean
         make DEFINES="-DND=${nd} -DNG=${ng}"
     ) 1>&2
-    cp "${JR_REPO_ROOT}/src/formod" "${variant_bin}"
+
+    mkdir -p "${variant_dir}"
+    cp "${build_dir}/formod" "${variant_bin}"
+    rm -rf "${build_dir}"
 
     echo "${variant_bin}"
 }
@@ -77,6 +124,7 @@ run_point() {
     bench_run_forward "${label}" "${THREADS}" "FLOPS_DP" "${BATCH_SIZE}" "${REP}" "${CORES}" ""
     bench_run_forward "${label}" "${THREADS}" "MEM_DP"   "${BATCH_SIZE}" "${REP}" "${CORES}" ""
 }
+
 
 JR_ACTIVE_CTL_BASE="${JR_ACTIVE_CTL}"
 
