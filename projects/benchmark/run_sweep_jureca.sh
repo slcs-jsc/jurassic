@@ -109,11 +109,11 @@ run_point() {
     local ctl_out="$JR_WORK_DIR/ctl/${label}.ctl"
     mkdir -p "$(dirname "$ctl_out")"
 
-    local gen_args=(--in "$JR_ACTIVE_CTL_BASE" --out "$ctl_out" --nd "$nd")
+    local gen_args=(--nd "$nd")
     if [[ -n "$gas_file" ]]; then
         gen_args+=(--gas-file "$gas_file")
     fi
-    python3 "$SCRIPT_DIR/generate_ctl.py" "${gen_args[@]}"
+    python3 "$SCRIPT_DIR/generate_ctl.py" "${gen_args[@]}" "$JR_ACTIVE_CTL_BASE" "$ctl_out"
 
     JR_ACTIVE_CTL="$ctl_out"
     JR_FORMOD_BIN="$(build_or_reuse "$nd" "$ng")"
@@ -127,7 +127,7 @@ run_point() {
 JR_ACTIVE_CTL_BASE="$JR_ACTIVE_CTL"
 
 # NG held fixed at the selected baseline case's gas count while ND varies;
-# ND held fixed at the baseline channel count while NG varies. 
+# ND held fixed at the baseline channel count while NG varies.
 BASELINE_ND="${BASELINE_ND:-32}"
 BASELINE_NG="${BASELINE_NG:-7}"
 
