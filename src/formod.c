@@ -84,6 +84,15 @@ void exec_formod_batch_repeat(
   int *status
 );
 
+void exec_formod_batch_setup(
+  const ctl_t *ctl, 
+  const atm_t *atm, 
+  const obs_t *obs,
+  int batch_size, 
+  atm_t *atm_batch, 
+  obs_t *obs_batch
+);
+
 /*! Calculate relative errors. */
 void compute_rel_errors(
   const ctl_t * ctl,
