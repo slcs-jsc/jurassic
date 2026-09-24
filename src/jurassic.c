@@ -3636,7 +3636,13 @@ void formod_batch(
 #pragma acc update self(obs[0:nbatch],status[0:nbatch])
 #else
   const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
-#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,marker_region)
+  /* Use dynamic scheduling: per-case cost of formod() varies strongly with
+     ray geometry (e.g. limb tangent height), and observation arrays are
+     typically ordered by scan sequence, so a static contiguous split can
+     hand systematically more expensive cases to some threads than others.
+     Dynamic scheduling lets idle threads pick up the next unclaimed case
+     instead of stalling on a fixed chunk. */
+#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,marker_region) schedule(dynamic)
   for (int ib = 0; ib < nbatch; ib++) {
 
     #ifdef LIKWID_PERFMON
@@ -5498,6 +5504,15 @@ int raytrace(
     }
   }
 
+  /* Precompute cloud spectral lookup indices once. They only depend on
+     ctl->clnu and ctl->nu[id], which are fixed for the whole ray, so
+     re-running the binary search for every LOS point (as before) was
+     redundant work in the innermost loop. */
+  int icl_id[ND];
+  if (ctl->ncl > 0 && atm->cldz > 0)
+    for (int id = 0; id < ctl->nd; id++)
+      icl_id[id] = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
+
   /* Ray-tracing... */
   while (1) {
 
@@ -5554,7 +5569,7 @@ int raytrace(
     if (ctl->ncl > 0 && atm->cldz > 0) {
       const double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (int id = 0; id < ctl->nd; id++) {
-	const int icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
+	const int icl = icl_id[id];
 	los->k[los->np][id]
 	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
 		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
