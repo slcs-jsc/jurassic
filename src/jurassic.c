@@ -3636,13 +3636,8 @@ void formod_batch(
 #pragma acc update self(obs[0:nbatch],status[0:nbatch])
 #else
   const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
-  /* Use dynamic scheduling: per-case cost of formod() varies strongly with
-     ray geometry (e.g. limb tangent height), and observation arrays are
-     typically ordered by scan sequence, so a static contiguous split can
-     hand systematically more expensive cases to some threads than others.
-     Dynamic scheduling lets idle threads pick up the next unclaimed case
-     instead of stalling on a fixed chunk. */
-#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,marker_region) schedule(dynamic)
+  
+#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,marker_region)
   for (int ib = 0; ib < nbatch; ib++) {
 
     #ifdef LIKWID_PERFMON
