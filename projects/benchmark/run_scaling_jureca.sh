@@ -4,10 +4,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
-#SBATCH --time=01:00:00
+#SBATCH --time=03:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
-#SBATCH --job-name=e2_scaling
+#SBATCH --job-name=e1_scaling
 
 # Benchmarking Script for JURASSIC (CPU-version)
 # Target: JURECA DC -> AMD EPYC 7742 (2× 64 cores, 2.25 GHz)    
@@ -57,7 +57,7 @@ fi
 
 # Strong scaling: batch elements per thread, Weak scaling: size for single-thread
 SCALING_MODE=${SCALING_MODE:-"strong"}
-BATCH_SIZE=${BATCH_SIZE:-64}    
+BATCH_SIZE=${BATCH_SIZE:-1024}    
 
 export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
 source "$jr_scripts_dir/base.sh"
