@@ -3339,36 +3339,21 @@ void formod_batch(
   }
 
   const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
-  (void) marker_region;
+#pragma omp parallel for schedule(static) default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
+  for (int ib = 0; ib < nbatch; ib++) {
 
-  /* Only threads that receive iterations may open the LIKWID region;
-     regions touched by idle threads yield unevaluable metrics. */
-#pragma omp parallel default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
-  {
-#ifdef LIKWID_PERFMON
-    int marker_started = 0;
-#endif
-
-#pragma omp for schedule(static) nowait
-    for (int ib = 0; ib < nbatch; ib++) {
-#ifdef LIKWID_PERFMON
-      if (!marker_started) {
-	LIKWID_MARKER_START(marker_region);
-	marker_started = 1;
-      }
-#endif
-      const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
-				   &los_scratch[ib], &obs_scratch[ib]);
-      if (status)
-	status[ib] = ib_status;
-      else if (ib_status != FORMOD_STATUS_OK)
-	ERRMSG("Forward model failed with status code %d!", ib_status);
-    }
-
-#ifdef LIKWID_PERFMON
-    if (marker_started)
-      LIKWID_MARKER_STOP(marker_region);
-#endif
+    #ifdef LIKWID_PERFMON
+    LIKWID_MARKER_START(marker_region);
+    #endif
+    const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
+                                 &los_scratch[ib], &obs_scratch[ib]);
+    #ifdef LIKWID_PERFMON
+    LIKWID_MARKER_STOP(marker_region);
+    #endif
+    if (status)
+      status[ib] = ib_status;
+    else if (ib_status != FORMOD_STATUS_OK)
+      ERRMSG("Forward model failed with status code %d!", ib_status);
   }
 }
 
