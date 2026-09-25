@@ -3,7 +3,7 @@
 #SBATCH --partition=dc-cpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=128
 #SBATCH --time=04:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
