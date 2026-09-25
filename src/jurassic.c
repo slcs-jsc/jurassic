@@ -3341,16 +3341,22 @@ void formod_batch(
   const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
   (void) marker_region;
 
-  /* Every thread must start/stop the LIKWID region, even if it gets no
-     iterations; otherwise LIKWID cannot evaluate its derived metrics. */
+  /* Only threads that receive iterations may open the LIKWID region;
+     regions touched by idle threads yield unevaluable metrics. */
 #pragma omp parallel default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
   {
 #ifdef LIKWID_PERFMON
-    LIKWID_MARKER_START(marker_region);
+    int marker_started = 0;
 #endif
 
 #pragma omp for schedule(static) nowait
     for (int ib = 0; ib < nbatch; ib++) {
+#ifdef LIKWID_PERFMON
+      if (!marker_started) {
+	LIKWID_MARKER_START(marker_region);
+	marker_started = 1;
+      }
+#endif
       const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
 				   &los_scratch[ib], &obs_scratch[ib]);
       if (status)
@@ -3360,7 +3366,8 @@ void formod_batch(
     }
 
 #ifdef LIKWID_PERFMON
-    LIKWID_MARKER_STOP(marker_region);
+    if (marker_started)
+      LIKWID_MARKER_STOP(marker_region);
 #endif
   }
 }
