@@ -111,14 +111,30 @@ ncu_output="$nvidia_profile_output/formod_batch${nvidia_profile_batch}"
 ncu_log="$run_dir/ncu.log"
 out="/tmp/jurassic_ncu_${run_id}_b${nvidia_profile_batch}.tab"
 
-srun -n1 -N1 ncu \
+# Profile one warm formod_batch launch only. Launch 1 is the reference call
+# (one-element batch) and launch 2 is the first timed benchmark iteration.
+# The benchmark reads JURASSIC_MAX_ITER via getenv, so it must be an env var.
+ncu_launch_skip=${NCU_LAUNCH_SKIP:-2}
+ncu_launch_count=${NCU_LAUNCH_COUNT:-1}
+ncu_max_iter=${NCU_MAX_ITER:-$((ncu_launch_skip))}
+
+# DP FLOPs = dadd + dmul + 2*dfma; bytes = DRAM read + write.
+ncu_metrics=gpu__time_duration.sum
+ncu_metrics+=,smsp__sass_thread_inst_executed_op_dadd_pred_on.sum
+ncu_metrics+=,smsp__sass_thread_inst_executed_op_dmul_pred_on.sum
+ncu_metrics+=,smsp__sass_thread_inst_executed_op_dfma_pred_on.sum
+ncu_metrics+=,dram__bytes_read.sum,dram__bytes_write.sum
+
+JURASSIC_MAX_ITER=$ncu_max_iter srun -n1 -N1 ncu \
   --target-processes all \
-  --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed,dram__throughput.avg.pct_of_peak_sustained_elapsed,sm__warps_active.avg.pct_of_peak_sustained_active \
   --kernel-name-base function \
+  -k regex:formod_batch \
+  --launch-skip "$ncu_launch_skip" --launch-count "$ncu_launch_count" \
+  --metrics "$ncu_metrics" \
   --force-overwrite \
   --export "$ncu_output" \
   "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$nvidia_profile_batch" \
   2>&1 | tee "$ncu_log"
 
 echo "Done."
-echo "Nsight Systems report: ${nsys_output}.nsys-rep"
+echo "Nsight Compute report: ${ncu_output}.ncu-rep"

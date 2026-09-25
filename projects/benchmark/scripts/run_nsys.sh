@@ -125,7 +125,7 @@ echo "Running Nsight Systems"
 
 nsys_output="$run_dir/nsys_report"
 
-srun -n1 -N1 nsys profile \
+JURASSIC_MAX_ITER=1 srun -n1 -N1 nsys profile \
     --trace=cuda,openacc,mpi,nvtx \
     --sample=cpu \
     --backtrace=dwarf \
@@ -137,7 +137,7 @@ srun -n1 -N1 nsys profile \
     data/obs.tab \
     data/atm.tab \
     "$out" \
-    JURASSIC_MAX_ITER=1 TASK time BATCH_SIZE "$nvidia_profile_batch" \
+    TASK time BATCH_SIZE "$nvidia_profile_batch" \
     2>&1 | tee "$run_dir/nsys.log"
 
 echo "Done."
