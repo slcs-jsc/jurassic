@@ -188,7 +188,6 @@ int main(
   {
     LIKWID_MARKER_THREADINIT;
     LIKWID_MARKER_REGISTER("formod");
-    LIKWID_MARKER_REGISTER("formod_ref");
   }
   #endif
 
