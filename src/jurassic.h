@@ -173,7 +173,8 @@
 extern int jurassic_marker_ref;
 
 enum {
-  FORMOD_STATUS_OK = 0
+  FORMOD_STATUS_OK = 0,
+  FORMOD_STATUS_FOV_DATA_MISSING = 1
 };
 
 /* ------------------------------------------------------------
@@ -1739,6 +1740,9 @@ typedef struct {
   /*! Radiance [W/(m^2 sr cm^-1)]. */
   double rad[ND][NR];
 
+  /*! Internal observation mask used by the forward model. */
+  int mask[ND][NR];
+
 } obs_t;
 
 /**
@@ -2488,26 +2492,62 @@ int find_emitter(
  * @param[in]  tbl  Emissivity and source-function lookup tables.
  * @param[in,out] atm  Atmospheric profile; may be adjusted for hydrostatic balance.
  * @param[in,out] obs  Observation geometry and radiance data; populated with model output.
+ * @param[out] los_scratch  Caller-provided scratch line-of-sight buffer
+ *                          (one element; must not be shared between concurrent calls).
+ * @param[out] obs_scratch  Caller-provided scratch observation buffer used by
+ *                          the field-of-view convolution (one element; must not
+ *                          be shared between concurrent calls).
+ *
+ * @return Forward-model status code, e.g. @ref FORMOD_STATUS_OK.
  *
  * @note The model type is selected via @ref ctl_t::formod:
  *       - 0 or 1 → pencil-beam models (@ref formod_pencil)  
  *       - 2 → RFM line-by-line model (@ref formod_rfm)
  *
  * @note The function preserves @p obs->rad elements marked as invalid
- *       (NaN) by applying an internal observation mask.
+ *       (NaN) by applying an internal observation mask stored in @p obs->mask.
+ *
+ * @note No memory is allocated inside this function.
  *
  * @see ctl_t, atm_t, obs_t, tbl_t, formod_pencil, formod_rfm, formod_fov, hydrostatic
  * 
  * @author Lars Hoffmann
  */
-void formod_core(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm, obs_t *obs);
+int formod(
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  atm_t * atm,
+  obs_t * obs,
+  los_t * los_scratch,
+  obs_t * obs_scratch);
 
-int formod(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm, obs_t *obs,
-           los_t *los_scratch, obs_t *obs_scratch);
-           
-void formod_batch(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm,
-                  obs_t *obs, const int nbatch, int *status,
-                  los_t *los_scratch, obs_t *obs_scratch);
+/**
+ * @brief Execute the forward model for a batch of independent cases.
+ *
+ * Calls @ref formod for each element of @p atm / @p obs, in parallel with
+ * OpenMP (serially for the RFM model).
+ *
+ * @param[in]  ctl  Control structure.
+ * @param[in]  tbl  Lookup tables.
+ * @param[in,out] atm  Array of @p nbatch atmospheres.
+ * @param[in,out] obs  Array of @p nbatch observation sets.
+ * @param[in]  nbatch  Number of batch elements.
+ * @param[out] status  Optional array of @p nbatch status codes; if NULL,
+ *                     any failure aborts with an error message.
+ * @param[out] los_scratch  Array of @p nbatch scratch line-of-sight buffers.
+ * @param[out] obs_scratch  Array of @p nbatch scratch observation buffers.
+ *
+ * @author Lars Hoffmann
+ */
+void formod_batch(
+  const ctl_t * ctl,
+  const tbl_t * tbl,
+  atm_t * atm,
+  obs_t * obs,
+  const int nbatch,
+  int *status,
+  los_t * los_scratch,
+  obs_t * obs_scratch);
 
 /**
  * @brief Compute total extinction including gaseous continua.
@@ -2552,18 +2592,21 @@ void formod_continua(
  *                  (offsets @ref ctl_t::fov_dz and weights @ref ctl_t::fov_w).
  * @param[in,out] obs  Observation structure; input pencil-beam data are replaced
  *                     with FOV-convolved radiances and transmittances.
+ * @param[out] obs_scratch  Scratch observation buffer (overwritten).
+ *
+ * @return @ref FORMOD_STATUS_OK, or @ref FORMOD_STATUS_FOV_DATA_MISSING if
+ *         fewer than two altitude samples exist for a time step.
  *
  * @note The convolution is skipped if @ref ctl_t::fov starts with '-'
  *       (indicating no FOV correction). Requires at least two valid
  *       altitude samples per time step.
  *
- * @throws ERRMSG if insufficient data are available for convolution.
- *
  * @author Lars Hoffmann
  */
-void formod_fov(
+int formod_fov(
   const ctl_t * ctl,
-  obs_t * obs);
+  obs_t * obs,
+  obs_t * obs_scratch);
 
 /**
  * @brief Compute line-of-sight radiances using the pencil-beam forward model.
@@ -2581,6 +2624,7 @@ void formod_fov(
  * @param[in,out] obs  Observation data; updated with modeled radiances and
  *                     transmittances for the specified ray path.
  * @param[in]  ir   Index of the current ray path in @p obs.
+ * @param[out] los  Scratch line-of-sight buffer (zeroed and overwritten).
  *
  * @note Depending on @ref ctl_t::formod, this function calls either
  *       @ref intpol_tbl_cga() (CGA) or @ref intpol_tbl_ega() (EGA)
@@ -2599,7 +2643,8 @@ void formod_pencil(
   const tbl_t * tbl,
   const atm_t * atm,
   obs_t * obs,
-  const int ir);
+  const int ir,
+  los_t * los);
 
 /**
  * @brief Forward-model radiance and transmittance with the Reference Forward Model (RFM).
