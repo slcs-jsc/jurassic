@@ -8,7 +8,6 @@ from typing import Callable, Iterable, Sequence
 
 import numpy as np
 
-
 def default_focus_score(agent_response_text: str, target_functions: Sequence[str]) -> float:
     if not target_functions:
         return 0.0
@@ -40,7 +39,7 @@ def diff_aware_focus_score(agent_response_text: str, target_functions: Sequence[
 
 
 def make_single_shot_agent_call(
-    agent,
+    build_agent_fn: Callable[[], object],
     base_instructions: str,
 ) -> Callable[[str], str]:
     call_counter = {"n": 0}
@@ -49,6 +48,7 @@ def make_single_shot_agent_call(
         call_counter["n"] += 1
         task_id = f"lime_probe_{call_counter['n']:04d}"
 
+        agent = build_agent_fn()
         result = agent.run_conversation(
             user_message=prompt_text,
             conversation_history=[],
@@ -58,6 +58,7 @@ def make_single_shot_agent_call(
         if not response:
             print(f"[lime_explain] WARNING: empty/failed response for {task_id}")
             return ""
+        print(response)
         return response
 
     return call
@@ -141,6 +142,7 @@ def explain_baseline_profile(
         class_names=["ignored", "focused"],
         split_expression=lambda x: x.split("\n"),
         bow=False,
+        mask_string=""
     )
 
     print(f"[lime_explain] explaining baseline profile ({n_rows} rows), "

@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
+import threading
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from lime_test import explain_baseline_profile, make_single_shot_agent_call  # noqa: E402
-
+from lime_test import explain_baseline_profile, make_single_shot_agent_call  
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
@@ -17,9 +18,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--instructions-file", required=True, type=Path)
     p.add_argument("--out-dir", required=True, type=Path)
     p.add_argument("--model", required=True)
-    p.add_argument("--max-agent-iterations", type=int, default=1)
+    p.add_argument("--max-agent-iterations", type=int, default=2)
     p.add_argument("--num-samples", type=int, default=200)
-    p.add_argument("--num-workers", type=int, default=8)
+    p.add_argument("--num-workers", type=int, default=1)
+    p.add_argument("--min-delay-s", type=float, default=1.0)
     p.add_argument("--dry-run", action="store_true")
     return p.parse_args()
 
@@ -44,6 +46,19 @@ def build_prompt(instructions_text: str, profile_text: str) -> str:
         "If you would change the code, name the exact function(s) you would edit."
     )
 
+def throttle(fn, min_delay_s: float):
+    lock = threading.Lock()
+    last_call = {"t": 0.0}
+ 
+    def wrapped(*args, **kwargs):
+        with lock:
+            wait = last_call["t"] + min_delay_s - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            last_call["t"] = time.monotonic()
+        return fn(*args, **kwargs)
+ 
+    return wrapped
 
 def main() -> None:
     args = parse_args()
@@ -66,8 +81,9 @@ def main() -> None:
         print(build_prompt(instructions_text, example_perturbed))
         return
 
-    agent = build_agent(instructions_text, args.model, args.max_agent_iterations)
-    agent_call_fn = make_single_shot_agent_call(agent=agent, base_instructions=instructions_text)
+    build_agent_fn = lambda: build_agent(instructions_text, args.model, args.max_agent_iterations)
+    agent_call_fn = make_single_shot_agent_call(build_agent_fn=build_agent_fn, base_instructions=instructions_text)
+    agent_call_fn = throttle(agent_call_fn, args.min_delay_s)
 
     def build_prompt_fn(perturbed_profile_text: str) -> str:
         return build_prompt(instructions_text, perturbed_profile_text)
