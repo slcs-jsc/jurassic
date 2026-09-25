@@ -248,10 +248,10 @@ if [ "$run_profiling" = 1 ]; then
   
       echo "Running LIKWID group=$group OMP_NUM_THREADS=$omp ..."
   
-      OMP_NUM_THREADS=$omp likwid-perfctr -C "$core_list" -g "$group" -m \
+      OMP_NUM_THREADS=$omp JURASSIC_TIME_BUDGET=60 likwid-perfctr -C "$core_list" -g "$group" -m \
         -o "$log_csv" \
         "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
-        JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$cpu_batch_size" \
+        TASK time BATCH_SIZE "$cpu_batch_size" \
         > "$log_txt" 2>&1
   
       printf 'OMP_NUM_THREADS=%s\nLIKWID_GROUP=%s\nCPU_BATCH_SIZE=%s\nCORE_LIST=%s\n' \
@@ -279,12 +279,12 @@ if [ "$run_profiling" = 1 ] && [ "$perf_topdown_available" -eq 1 ]; then
 
     set +e
 
-    OMP_NUM_THREADS=$omp \
+    OMP_NUM_THREADS=$omp JURASSIC_TIME_BUDGET=60 \
       taskset -c "$cpu_range" \
       perf stat \
         --topdown \
         "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
-        JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$cpu_batch_size" \
+        TASK time BATCH_SIZE "$cpu_batch_size" \
         > "$perf_stdout" \
         2> "$perf_txt"
 

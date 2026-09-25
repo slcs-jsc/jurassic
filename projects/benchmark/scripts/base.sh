@@ -295,10 +295,10 @@ bench_run_forward() {
   echo "--- $tag (cores=$cores${NUMA_POLICY:+, numa=$NUMA_POLICY}) ---"
 
   set +e
-  OMP_NUM_THREADS=$threads likwid-perfctr -C "$cores" $numa_flag -g "$group" -m \
+  OMP_NUM_THREADS=$threads JURASSIC_TIME_BUDGET=60 likwid-perfctr -C "$cores" $numa_flag -g "$group" -m \
     -o "$csv" \
     "${numa_wrap[@]}" "$JR_SRC_DIR/formod" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
-    JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$batch" \
+    TASK time BATCH_SIZE "$batch" \
     > "$txt" 2>&1
   local rc=$?
   set -e
