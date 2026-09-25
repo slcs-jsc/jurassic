@@ -3635,17 +3635,21 @@ void formod_batch(
 			obs_scratch + ib);
 #pragma acc update self(obs[0:nbatch],status[0:nbatch])
 #else
-  const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
-#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,marker_region)
+  /* The single-threaded reference run is not measured; LIKWID would report
+     empty regions for all other threads. */
+  const int measure = !jurassic_marker_ref;
+#pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,measure)
   for (int ib = 0; ib < nbatch; ib++) {
 
     #ifdef LIKWID_PERFMON
-    LIKWID_MARKER_START(marker_region);
+    if (measure)
+      LIKWID_MARKER_START("formod");
     #endif
     const int ib_status =
       formod(ctl, tbl, &atm[ib], &obs[ib], &los[ib], &obs_scratch[ib]);
     #ifdef LIKWID_PERFMON
-    LIKWID_MARKER_STOP(marker_region);
+    if (measure)
+      LIKWID_MARKER_STOP("formod");
     #endif
     if (status)
       status[ib] = ib_status;

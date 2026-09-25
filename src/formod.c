@@ -191,8 +191,6 @@ int main(
   {
     LIKWID_MARKER_THREADINIT;
     LIKWID_MARKER_REGISTER("formod");
-    LIKWID_MARKER_REGISTER("formod_ref");
-    LIKWID_MARKER_REGISTER("batch_alloc");
     // TODO: add marker around free() calls?
   }
   #endif
@@ -705,10 +703,6 @@ void exec_formod_benchmark(
   los_t *los_batch = NULL;
   obs_t *obs_scratch_batch = NULL;
 
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_START("batch_alloc");
-  #endif
-  
   if (batch_size > 1) {
     ALLOC(atm_batch, atm_t, batch_size);
     ALLOC(obs_batch, obs_t, batch_size);
@@ -716,10 +710,6 @@ void exec_formod_benchmark(
     ALLOC(obs_scratch_batch, obs_t, batch_size);
     ALLOC(status, int, batch_size);
   }
-
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_STOP("batch_alloc");
-  #endif
 
   const char* env_max_iter = getenv("JURASSIC_MAX_ITER");
   const int max_iter = env_max_iter ? atoi(env_max_iter) : INT_MAX;
