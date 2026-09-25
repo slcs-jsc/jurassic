@@ -4,13 +4,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=02:00:00
+#SBATCH --time=01:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e1_roofline
-
-# TODO: single core (cores own bandwith) vs node-level roofline (full memory bandwith ceiling with all cores active)
-# cache aware roofline (separate L1/L2/L3/DRAM ceilings?)
 
 # Performs LIKWID profiling (FLOPS_DP, MEM_DP) to measure operational intensity 
 # i.e. the ratio of computational work to data movement: 
@@ -38,8 +35,6 @@ threads=${THREADS:-24}
 batch=${BATCH_SIZE:-240}
 groups=${LIKWID_GROUPS:-"FLOPS_DP MEM_DP"}
  
-# Cases to sweep -- defaults to all three geometries.
-# Override with e.g. CASE_LIST="zenith_baseline" for a single case.
 case_list=${CASE_LIST:-"zenith_baseline nadir_baseline limb_baseline"}
  
 first=1
@@ -52,16 +47,38 @@ for case_name in $case_list; do
     bench_validate
     bench_check_groups "$groups"
  
+    # Measure roofline ceilings via likwid-bench
     cores="$(cpus_all_phys "$threads")"
     ceilings_file="$JR_RUN_DIR/ceilings.txt"
- 
-    echo "=== measuring compute ceiling (peakflops_avx_fma, threads=$threads, cores=$cores) ==="
-    peak_flops=$(likwid-bench -t peakflops_avx_fma -w "S0:1GB:${threads}" 2>&1 \
+
+    bench_ws=${BENCH_WORKING_SET:-4GB}
+    flops_bench=${FLOPS_BENCH:-peakflops_avx_fma} 
+    bw_bench=${BW_BENCH:-stream_mem}
+
+    # Build one -w workgroup per socket, splitting threads evenly across sockets. 
+    sockets_needed=$(( (threads + JR_PHYS_PER_SOCKET - 1) / JR_PHYS_PER_SOCKET ))
+    [ "$sockets_needed" -gt "$JR_N_SOCKETS" ] && sockets_needed=$JR_N_SOCKETS
+    remaining=$threads
+    workgroup_args=()
+    for (( s=0; s<sockets_needed; s++ )); do
+      take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
+      workgroup_args+=( -w "S${s}:${bench_ws}:${take}" )
+      remaining=$(( remaining - take ))
+    done
+
+    cores_expression="E:S0:${threads}"
+    if [ "$sockets_needed" -gt 1 ]; then
+       threads_per_sock=$(( threads / JR_N_SOCKETS ))
+       cores_expression="E:S0:${threads_per_sock}@E:S1:${threads_per_sock}"
+    fi
+
+    echo "Measuring compute ceiling ($flops_bench, threads=$threads, workgroups=${workgroup_args[*]})"
+    peak_flops=$(likwid-bench -t "$flops_bench" "${workgroup_args[@]}" 2>&1 \
       | tee "$JR_RUN_DIR/likwid_bench_flops.txt" \
       | awk '/MFlops\/s:/ { print $2; exit }')
- 
-    echo "=== measuring bandwidth ceiling (stream_mem_avx, threads=$threads, cores=$cores) ==="
-    stream_bw=$(likwid-bench -t stream_mem_avx -w "S0:1GB:${threads}" 2>&1 \
+
+    echo "Measuring bandwidth ceiling ($bw_bench, threads=$threads, workgroups=${workgroup_args[*]})"
+    stream_bw=$(likwid-bench -t "$bw_bench" "${workgroup_args[@]}" 2>&1 \
       | tee "$JR_RUN_DIR/likwid_bench_bw.txt" \
       | awk '/MByte\/s:/ { print $2; exit }')
  
@@ -75,7 +92,7 @@ for case_name in $case_list; do
  
   for rep in $(seq 1 "$reps"); do
     for group in "${JR_GROUPS[@]}"; do
-      bench_run_forward "$case_name" "$threads" "$group" "$batch" "$rep"
+      bench_run_forward "$case_name" "$threads" "$group" "$batch" "$rep" "$cores_expression" "-m"
     done
   done
 done

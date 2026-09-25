@@ -46,6 +46,34 @@ cpus_spread() {
     | head -n "$1" | paste -sd,
 }
 
+cpus_all_phys_socket_qualified() {
+  local n=$1
+  local remaining=$n
+  local parts=()
+  local sock
+  for sock in $(awk -F, '{print $3}' "$JR_TOPO_MAP" | sort -un); do
+    [ "$remaining" -le 0 ] && break
+ 
+    local sock_phys_count
+    sock_phys_count=$(awk -F, -v s="$sock" \
+      '$3 == s { if (!($2 in seen)) { seen[$2]=1; c++ } } END { print c+0 }' \
+      "$JR_TOPO_MAP")
+ 
+    local take=$remaining
+    [ "$take" -gt "$sock_phys_count" ] && take=$sock_phys_count
+    [ "$take" -le 0 ] && continue
+
+    local idx_list
+    idx_list=$(seq 0 $((take - 1)) | paste -sd,)
+ 
+    parts+=("S${sock}:${idx_list}")
+    remaining=$(( remaining - take ))
+  done
+  local IFS='@'
+  echo "${parts[*]}"
+}
+
+
 bench_init() {
     local script_source=${BASH_SOURCE[1]:-$0}
     JR_SCRIPT_DIR=$(cd "$(dirname "$script_source")" && pwd)
@@ -159,7 +187,7 @@ bench_build_forward() {
         *) echo "Unknown build variant: $variant" >&2; return 1 ;;
     esac
     
-    echo "=== building variant '$variant' (EXTRA_CFLAGS='$extra') ==="
+    echo "Building variant '$variant' (EXTRA_CFLAGS='$extra')"
 
     if [ -n "$extra" ]; then
     ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
@@ -249,27 +277,32 @@ bench_check_groups() {
   fi
   return 0
 }
- 
+
 bench_run_forward() {
-  local label=$1 threads=$2 group=$3 batch=$4 rep=$5
-  local cores=${6:-$(cpus_all_phys "$threads")}
+  local label=$1 threads=$2 group=$3 batch=$4 rep=$5 cores=$6 numa_flag=$7
+
+  if [ -z "$cores" ]; then
+    echo "ERROR: bench_run_forward: core expression/list (arg 6) is required" >&2
+    return 1
+  fi
+
   local tag="${label}.t${threads}.${group}.b${batch}.rep${rep}"
   local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
   local tab="/tmp/jurassic_${JR_RUN_ID}_${tag}.tab"
   mkdir -p "$JR_WORK_DIR/out"
- 
-  echo "--- $tag (cores=$cores) ---"
- 
+
+  echo "--- $tag (cores=$cores${NUMA_POLICY:+, numa=$NUMA_POLICY}) ---"
+
   set +e
-  OMP_NUM_THREADS=$threads likwid-perfctr -C "$cores" -g "$group" -m \
+  OMP_NUM_THREADS=$threads likwid-perfctr -C "$cores" $numa_flag -g "$group" -m \
     -o "$csv" \
-    "$JR_SRC_DIR/formod" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
+    "${numa_wrap[@]}" "$JR_SRC_DIR/formod" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
     JURASSIC_TIME_BUDGET=60 TASK time BATCH_SIZE "$batch" \
     > "$txt" 2>&1
   local rc=$?
   set -e
- 
+
   {
     echo "label=$label"
     echo "threads=$threads"
@@ -285,6 +318,7 @@ bench_run_forward() {
   return 0
 }
 
+  
 bench_run_retrieval() {
   local label=$1 ranks=$2 threads=$3 group=$4 rep=$5 cores=$6
   # core setup needs to be explicitly defined in order to set up MPI ranks

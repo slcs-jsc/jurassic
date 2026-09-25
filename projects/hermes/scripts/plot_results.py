@@ -10,6 +10,7 @@ import json
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use("Agg")
 
 def plot_agent_progress(source_file: Path, res_dir: Path) -> None:
 

@@ -5502,6 +5502,15 @@ int raytrace(
     }
   }
 
+  /* Precompute cloud spectral lookup indices once. They only depend on
+     ctl->clnu and ctl->nu[id], which are fixed for the whole ray, so
+     re-running the binary search for every LOS point (as before) was
+     redundant work in the innermost loop. */
+  int icl_id[ND];
+  if (ctl->ncl > 0 && atm->cldz > 0)
+    for (int id = 0; id < ctl->nd; id++)
+      icl_id[id] = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
+
   /* Ray-tracing... */
   while (1) {
 
@@ -5558,7 +5567,7 @@ int raytrace(
     if (ctl->ncl > 0 && atm->cldz > 0) {
       const double aux = exp(-0.5 * POW2((z - atm->clz) / atm->cldz));
       for (int id = 0; id < ctl->nd; id++) {
-	const int icl = locate_irr(ctl->clnu, ctl->ncl, ctl->nu[id]);
+	const int icl = icl_id[id];
 	los->k[los->np][id]
 	  += aux * LIN(ctl->clnu[icl], atm->clk[icl],
 		       ctl->clnu[icl + 1], atm->clk[icl + 1], ctl->nu[id]);
@@ -6788,6 +6797,7 @@ void read_shape(
 }
 
 /*****************************************************************************/
+#if defined(_FLAT_ARRAYS)
 static void tbl_flatten(
   const ctl_t *ctl,
   tbl_t *tbl) {
@@ -6838,6 +6848,7 @@ static void tbl_flatten(
 }
 fflush(stdout);
 }
+#endif
 
 tbl_t *read_tbl(
   const ctl_t *ctl) {
@@ -6903,7 +6914,9 @@ tbl_t *read_tbl(
   }
 
   if (ctl->tblfmt == 1) {
+    #if defined(_FLAT_ARRAYS)
     tbl_flatten(ctl, tbl);
+    #endif
   }
 
   /* Calculate log-pressure... */

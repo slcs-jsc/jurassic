@@ -127,7 +127,6 @@ def parse_formod_log(path: Path) -> dict:
  
     return {"permission_errors": permission_errors, "batch": batch, "timers": timers}
  
- 
 def parse_run_dir(run_dir: Path) -> list:
     """
     Parse every <label>.t<N>.<group>.b<N>.rep<N>.csv in run_dir/out/
@@ -140,16 +139,13 @@ def parse_run_dir(run_dir: Path) -> list:
     """
     run_dir = Path(run_dir)
     out_dir = run_dir / "out"
-    if not out_dir.is_dir():
-        out_dir = run_dir  # fall back for older, flat layouts
+    search_dir = out_dir if out_dir.is_dir() else run_dir
  
     available_groups_file = run_dir / "likwid_available_groups.txt"
-    available_groups = (
-        available_groups_file.read_text() if available_groups_file.exists() else ""
-    )
+    available_groups = available_groups_file.read_text() if available_groups_file.exists() else ""
  
     configs = []
-    for csv_path in sorted(out_dir.glob("*.csv")):
+    for csv_path in sorted(search_dir.glob("*.csv")):
         match = RUN_FILE_RE.match(csv_path.name)
         if not match:
             continue
@@ -157,19 +153,17 @@ def parse_run_dir(run_dir: Path) -> list:
         label = match.group("label")
         threads = int(match.group("threads"))
         group = match.group("group")
-        batch = int(match.group("batch"))
+        batch_size = int(match.group("batch"))
         rep = int(match.group("rep"))
- 
         txt_path = csv_path.with_suffix(".txt")
+ 
         csv_data = parse_likwid_profile(csv_path)
  
         entry = {
             "label": label,
             "threads": threads,
             "group": group,
-            "batch_size": batch,  # NOTE: not "batch" -- parse_formod_log's
-                                   # own "batch" key (the parsed RUNTIME:
-                                   # line) would silently overwrite it below.
+            "batch_size": batch_size,
             "rep": rep,
             "group_recognized": bool(
                 re.search(rf"^\s*{re.escape(group)}\b", available_groups, re.MULTILINE)
@@ -251,7 +245,6 @@ def get_metric(entry: dict, region: str, metric: str, stat: bool = False):
             return numeric[0] if len(numeric) == 1 else sum(numeric)
     return None
 
-# TODO: CAS_COUNT_RD/_WR need to be normalized using marker runtime
 def normalize(raw, metric, entry, call_count):
     m = metric.lower()
     if "bandwidth" in m or "mflop/s" in m: 
@@ -287,7 +280,6 @@ def get_call_count(entry: dict, region: str):
             return sum(v for v in vals if isinstance(v, (int, float)))
     return None
  
- 
 def get_region_runtime(entry: dict, region: str):
     """Total RDTSC runtime recorded for `region` (summed across threads)."""
     info = entry.get("regions", {}).get(region, {}).get("region_info", {})
@@ -320,6 +312,22 @@ def collect_runtime(entries, warmup):
         b = e.get("batch")
         if b:
             vals.append(b["mean_s"])
+    if not vals:
+        return None, None, None, float("nan"), 0, []
+    return *get_stats(vals), len(vals), vals
+
+def collect_intensity(entries, region, warmup):
+    """
+    Median + CV of arithmetic intensity across reps
+    computed as (summed DP flops) / (summed memory bandwidth)
+    """
+    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
+    vals = []
+    for e in entries:
+        flops = get_value(e, region, "DP [MFLOP/s]")
+        bw = get_value(e, region, "Memory bandwidth [MBytes/s]")
+        if flops is not None and bw:
+            vals.append(flops / bw)
     if not vals:
         return None, None, None, float("nan"), 0, []
     return *get_stats(vals), len(vals), vals

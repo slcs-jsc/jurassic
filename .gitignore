@@ -10,6 +10,7 @@ projects/benchmark/runs/
 !projects/benchmark/scripts/
 projects/benchmark/scripts/__pycache__/
 !projects/benchmark/utils/
+projects/benchmark/utils/__pycache__/
 !projects/benchmark/results/
 projects/benchmark/results/*
 !projects/benchmark/results/baseline/
@@ -21,7 +22,9 @@ projects/benchmark/results/*
 projects/hermes/*
 !projects/hermes/scripts/
 !projects/hermes/scripts/**
+projects/hermes/scripts/__pycache__/
 projects/hermes/scripts/*.yaml
+projects/hermes/scripts/.hermes_optimization/
 src/*.o
 src/atmfmt
 src/brightness

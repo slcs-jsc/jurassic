@@ -16,7 +16,7 @@ from plot_results import plot_agent_progress, plot_metrics
 
 from run_agent import AIAgent
 
-with open(Path(os.environ.get("HERMES_OPT_CONFIG", Path(__file__).parent / "config.yaml"))) as f: 
+with open(Path(os.environ.get("HERMES_OPT_CONFIG", Path(__file__).parent / "config_dataracebench.yaml"))) as f: 
     cfg = yaml.safe_load(f)
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -37,6 +37,11 @@ class Experiment:
 def run_command( command: list[str], *, timeout: int = 3600) -> subprocess.CompletedProcess[str]: 
     print(f"\n$ {' '.join(command)}") 
     return subprocess.run(command, text=True, capture_output=True, timeout=timeout)
+
+AGENT_FAILURE_MARKERS = ("API call failed", "connect: connection refused")
+
+def agent_call_failed(response: str) -> bool:
+    return any(marker in response for marker in AGENT_FAILURE_MARKERS)
 
 def check_validation(res_dir: Path, dry_run=False) -> tuple[bool, str]:
     if dry_run:
@@ -91,7 +96,6 @@ def is_improvement(
     z = (baseline_mean - candidate_mean) / standard_error # lower is better
     return z >= z_threshold
 
-
 def log_experiment(experiment: Experiment) -> None: 
     RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(RESULTS_FILE, "a") as f:
@@ -105,7 +109,7 @@ def build_prompt(benchmark_summary: str, diff: str, last_res: str) -> str:
     prompt.append("Propose and apply the next optimization.")
     return "\n".join(prompt)
 
-def optimize(args: argparse.Namespace, dry_run=False):
+def optimize(args: argparse.Namespace, dry_run=False, plot=False):
     checkpoints = CheckpointManager(
         repo_dir=Path(cfg["repo_dir"]), 
         worktree_dir=Path(cfg["worktree_dir"]), 
@@ -143,7 +147,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
         model=cfg["model_name"],
         quiet_mode=True,        # set False for debugging
         ephemeral_system_prompt=cfg["instructions"] + cwd_notice,
-        disabled_toolsets=["terminal", "computer_use"], 
+        disabled_toolsets=["terminal", "computer_use", "execute_code"], 
         skip_memory=True, 
         max_iterations=cfg["max_agent_iterations"]
     )
@@ -162,7 +166,8 @@ def optimize(args: argparse.Namespace, dry_run=False):
     best_configs = baseline_configs
     best_summary = summarize(baseline_configs)
 
-    plot_metrics(baseline_configs, res_dir)
+    if plot:
+        plot_metrics(baseline_configs, res_dir)
 
     print(f"Baseline score (TIMER_GROUP_ANALYSIS @ {cfg['thread_count_for_scoring']} threads): {best_score}")
 
@@ -178,10 +183,22 @@ def optimize(args: argparse.Namespace, dry_run=False):
             task_id=experiment_id
         )
 
+        trace_dir = RESULTS_DIR.parent / "traces"
+        trace_dir.mkdir(parents=True, exist_ok=True)
+        with open(trace_dir / f"{experiment_id}.json", "w") as f:
+            json.dump(result, f, indent=2, default=str)
+
         print("RAW RESULT:", json.dumps(result, indent=2, default=str))
 
         conversation_history = result["messages"]
         agent_response = result["final_response"]
+
+        if agent_call_failed(agent_response):
+            checkpoints.discard()  
+            last_res = f"Agent API call failed mid-iteration. Partial edits discarded. Error: {agent_response}"
+            last_diff = ""
+            log_experiment(Experiment(i, experiment_id, False, None, last_res, last_diff, agent_response))
+            continue
     
         diff = checkpoints.diff_last_good()
         if not diff.strip():
@@ -226,7 +243,7 @@ def optimize(args: argparse.Namespace, dry_run=False):
         # else rollback changes 
         if new_score is not None and best_score is not None and is_improvement(best_score, best_sd, best_n, new_score, new_sd, new_n):
             checkpoints.commit(i, {"score": new_score})
-            last_res = f"Accepted. Score improved from {best_score:.3f}s to {new_score:.3f}s"
+            last_res = f"Accepted. Score improved from {best_score:.9f}s to {new_score:.9f}s"
             best_score = new_score
             best_configs = new_configs
             best_summary = summarize(new_configs)
@@ -237,9 +254,11 @@ def optimize(args: argparse.Namespace, dry_run=False):
             log_experiment(Experiment(i, experiment_id, False, new_score, last_res, diff, agent_response))
 
         last_diff = diff
-        plot_metrics(new_configs, res_dir)
+        if plot:
+            plot_metrics(new_configs, res_dir)
 
-    plot_agent_progress(RESULTS_FILE, res_dir)
+    if plot:
+        plot_agent_progress(RESULTS_FILE, res_dir)
     print(f"\nFinished. Best score: {best_score}")
 
 

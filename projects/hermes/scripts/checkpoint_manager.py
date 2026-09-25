@@ -16,14 +16,16 @@ class CheckpointManager:
 
     def setup(self) -> None:
         branch_exists = self.cmd("branch", "--list", self.branch, cwd=self.repo_dir).stdout
-
         if not branch_exists.strip():
             self.cmd("branch", self.branch, cwd=self.repo_dir)
+            print(f"Created new branch: {self.branch}")
+
         if not self.worktree_dir.exists():
             self.cmd("worktree", "add", str(self.worktree_dir), self.branch, cwd=self.repo_dir)
-            head = self.cmd("rev-parse", "HEAD").stdout.strip()
-            self.cmd("tag", "-f", "last_good", head)
-            print(f"Created new branch: {self.branch}")
+            print(f"Created worktree at {self.worktree_dir}")
+
+        head = self.cmd("rev-parse", "HEAD").stdout.strip()
+        self.cmd("tag", "-f", "last_good", head)
 
     def commit(self, iteration: int, profile:dict) -> str:
 
