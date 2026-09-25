@@ -39,7 +39,7 @@ bench_init
 CONFIG_DIR="$JR_REPO_ROOT/projects/benchmark/configs"
 CHANNEL_COUNTS_FILE="$CONFIG_DIR/channel_counts.txt"
 GAS_SETS_DIR="$CONFIG_DIR/gas_sets"
-
+ 
 THREADS="${THREADS:-${JR_PHYS_PER_SOCKET}}"
 CORES="${CORES:-E:S0:${THREADS}}"
 REP="${REP:-3}"
@@ -55,13 +55,13 @@ build_or_reuse() {
     local key="nd${nd}_ng${ng}"
     local variant_dir="$BIN_CACHE_DIR/${key}"
     local variant_bin="$variant_dir/formod"
-
+ 
     if [[ -x "$variant_bin" ]]; then
         echo "[e3] reusing cached build for ND=${nd} NG=${ng}" >&2
         echo "$variant_bin"
         return
     fi
-
+ 
     local lock_dir="$BUILD_SCRATCH_DIR/${key}.lock"
     local waited=0
     while ! mkdir "$lock_dir" 2>/dev/null; do
@@ -78,30 +78,41 @@ build_or_reuse() {
         fi
     done
     trap 'rmdir "'"$lock_dir"'" 2>/dev/null' RETURN EXIT
-
+ 
     if [[ -x "$variant_bin" ]]; then
         echo "[e3] reusing cached build for ND=${nd} NG=${ng}" >&2
         echo "$variant_bin"
         return
     fi
-
-    local build_dir="$BUILD_SCRATCH_DIR/${key}"
+ 
+    local root_dir="$BUILD_SCRATCH_DIR/${key}"
+    local build_dir="$root_dir/src"
     echo "[e3] building ND=${nd} NG=${ng} in private copy -> $build_dir" >&2
-    rm -rf "$build_dir"
-    cp -r "$JR_SRC_DIR" "$build_dir"
+    rm -rf "$root_dir"
+    mkdir -p "$root_dir"
+    for entry in "$JR_REPO_ROOT"/*; do
+        local base
+        base="$(basename "$entry")"
+        if [[ "$base" == "src" ]]; then
+            cp -r "$entry" "$root_dir/src"
+        else
+            ln -s "$entry" "$root_dir/$base"
+        fi
+    done
     (
         cd "$build_dir"
         make clean
         make -j MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
             GPU=0 LIKWID=1 DEFINES="-DND=${nd} -DNG=${ng}"
     ) 1>&2
-
+ 
     mkdir -p "$variant_dir"
     cp "$build_dir/formod" "$variant_bin"
-    rm -rf "$build_dir"
-
+    rm -rf "$root_dir"
+ 
     echo "$variant_bin"
 }
+
 
 run_point() {
     local label="$1" nd="$2" ng="$3" gas_file="$4"
