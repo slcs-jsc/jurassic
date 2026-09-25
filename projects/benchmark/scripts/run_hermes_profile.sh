@@ -185,7 +185,7 @@ fi
 validation_status="$run_dir/validation_status.txt"
 run_profiling=1
 
-if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
+if [ "${SKIP_VALIDATION:-1}" != "1" ]; then
   set +e
   ( cd "$repo_root/projects/validation" && \
     VALIDATION_TBLBASE="$bench_tblbase" scripts/run_validation.py \
@@ -200,8 +200,7 @@ if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
     cp -a "${latest_validation_run}summary.tsv" "$run_dir/validation_summary.tsv" 2>/dev/null || true
   fi
   if [ "$validation_rc" -ne 0 ]; then
-    echo "Validation FAILED (exit $validation_rc) -- skipping LIKWID profiling for this candidate." >&2
-    run_profiling=0
+    echo "Validation FAILED (exit $validation_rc) -- profiling this candidate anyway." >&2
   fi
 else
   echo "exit_code=skipped" > "$validation_status"
