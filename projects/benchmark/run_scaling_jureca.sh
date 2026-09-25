@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
-#SBATCH --time=03:00:00
+#SBATCH --time=04:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e1_scaling
@@ -34,14 +34,21 @@
 
 get_batch_size() {
   local threads=$1
+  local batch
   if [ "$SCALING_MODE" = "strong" ]; then
-    echo "$BATCH_SIZE"
+    batch="$BATCH_SIZE"
   elif [ "$SCALING_MODE" = "weak" ]; then
-    echo $(( BATCH_SIZE * threads ))
+    batch=$(( BATCH_SIZE * threads ))
   else
     echo "Error: Unknown SCALING_MODE '$SCALING_MODE'" >&2
     exit 1
   fi
+  
+  if [ "$batch" -lt "$threads" ]; then
+    batch="$threads"
+  fi
+
+  echo "$batch"
 }
 
 set -euo pipefail
@@ -57,7 +64,7 @@ fi
 
 # Strong scaling: batch elements per thread, Weak scaling: size for single-thread
 SCALING_MODE=${SCALING_MODE:-"strong"}
-BATCH_SIZE=${BATCH_SIZE:-1024}    
+BATCH_SIZE=${BATCH_SIZE:-64}    
 
 export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
 source "$jr_scripts_dir/base.sh"
@@ -68,7 +75,7 @@ target_threads=${JR_PHYS_PER_SOCKET:-64}
 reps=${REPS:-5}
 thread_list=${THREAD_LIST:-"1 2 4 8 16 32 64"}
 smt_threads=${SMT_THREADS:-128}
-groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"}
+groups=${LIKWID_GROUPS:-"MEM_DP"}
  
 bench_analyse_topology
 bench_build_forward "${VARIANT:-base}"

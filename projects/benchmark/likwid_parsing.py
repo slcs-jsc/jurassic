@@ -17,9 +17,13 @@ RUN_FILE_RE = re.compile(
 PERMISSION_RE = re.compile(r"Setup of event (\S+) on CPU \d+ failed: Permission denied")
 TIMER_RE = re.compile(r"^(TIMER_\w+)\s*=\s*([\d.eE+-]+)\s*s", re.MULTILINE)
 RUNTIME_RE = re.compile(
-    r"RUNTIME:\s*execution=\s*(\S+)\s*\|\s*batch_size=\s*(\d+)\s*\|\s*"
-    r"mean=\s*([\d.eE+-]+)\s*s\s*\|\s*stddev=\s*([\d.eE+-]+)\s*s\s*\|\s*"
-    r"min=\s*([\d.eE+-]+)\s*s\s*\|\s*max=\s*([\d.eE+-]+)\s*s"
+    r"RUNTIME:\s*execution=\s*(?P<execution>\S+)\s*\|\s*"
+    r"(?:threads=\s*(?P<threads>\d+)\s*\|\s*)?"
+    r"batch_size=\s*(?P<batch_size>\d+)\s*\|\s*"
+    r"mean=\s*(?P<mean>[\d.eE+-]+)\s*s\s*\|\s*"
+    r"stddev=\s*(?P<stddev>[\d.eE+-]+)\s*s\s*\|\s*"
+    r"min=\s*(?P<min>[\d.eE+-]+)\s*s\s*\|\s*"
+    r"max=\s*(?P<max>[\d.eE+-]+)\s*s"
 )
 
 def _to_number(s: str):
@@ -113,18 +117,23 @@ def parse_likwid_profile(path: Path) -> dict:
 def parse_formod_log(path: Path) -> dict:
     text = Path(path).read_text()
     permission_errors = sorted(set(PERMISSION_RE.findall(text)))
- 
+
     batch = None
     m = RUNTIME_RE.search(text)
     if m:
         batch = {
-            "execution": m.group(1), "batch_size": int(m.group(2)),
-            "mean_s": float(m.group(3)), "stddev_s": float(m.group(4)),
-            "min_s": float(m.group(5)), "max_s": float(m.group(6)),
+            "execution": m.group("execution"),
+            "batch_size": int(m.group("batch_size")),
+            "mean_s": float(m.group("mean")),
+            "stddev_s": float(m.group("stddev")),
+            "min_s": float(m.group("min")),
+            "max_s": float(m.group("max")),
         }
- 
+        if m.group("threads"):
+            batch["threads"] = int(m.group("threads"))
+
     timers = {name: float(val) for name, val in TIMER_RE.findall(text)}
- 
+
     return {"permission_errors": permission_errors, "batch": batch, "timers": timers}
  
 def parse_run_dir(run_dir: Path) -> list:
