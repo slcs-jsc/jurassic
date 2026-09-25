@@ -3345,7 +3345,9 @@ void formod_batch(
      iterations; otherwise LIKWID cannot evaluate its derived metrics. */
 #pragma omp parallel default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
   {
+#ifdef LIKWID_PERFMON
     LIKWID_MARKER_START(marker_region);
+#endif
 
 #pragma omp for schedule(static) nowait
     for (int ib = 0; ib < nbatch; ib++) {
@@ -3357,7 +3359,9 @@ void formod_batch(
 	ERRMSG("Forward model failed with status code %d!", ib_status);
     }
 
+#ifdef LIKWID_PERFMON
     LIKWID_MARKER_STOP(marker_region);
+#endif
   }
 }
 
