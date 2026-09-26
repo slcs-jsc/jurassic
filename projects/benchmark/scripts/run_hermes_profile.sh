@@ -270,3 +270,10 @@ echo "LIKWID run directory: $run_dir"
 echo "Raw per-config output: $run_dir/log.omp<N>.<GROUP>.txt and .csv"
 echo "Available groups on this node: $run_dir/likwid_available_groups.txt"
 echo "Code provenance: $run_dir/git_info.txt"
+
+# Fail the job itself when the candidate didn't validate, so sacct/sbatch surface it as
+# FAILED instead of looking identical to a run that actually collected LIKWID data.
+if [ "${validation_rc:-0}" -ne 0 ]; then
+  echo "Exiting non-zero: validation failed for this candidate (see $validation_status)." >&2
+  exit 3
+fi
