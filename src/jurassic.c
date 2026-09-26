@@ -3479,6 +3479,7 @@ void formod_batch(
   /* The single-threaded reference run is not measured; LIKWID would report
      empty regions for all other threads. */
   const int measure = !jurassic_marker_ref;
+  (void) measure;               /* only used with LIKWID_PERFMON */
 #pragma omp parallel for default(none) shared(ctl,tbl,atm,obs,nbatch,status,los,obs_scratch,measure)
   for (int ib = 0; ib < nbatch; ib++) {
 
