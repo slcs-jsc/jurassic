@@ -11,14 +11,14 @@
     "ray_set": "medium"
   },
   "channels": 125,
-  "created_utc": "2026-08-26T15:16:23.180205+00:00",
+  "created_utc": "2026-09-26T19:18:45.481755+00:00",
   "files": {
     "atm.tab": "1a2ed01ee157a583098be286a181fc85ee532972cca3994415689a411e2f175a",
     "case.ctl": "30fd27582e20382adef18ad04767ff688e7f41288713ee5187c32b57be671f27",
-    "obs.nc": "acacf75fc9cf03cc9cfbe9198d5d65aa7bae9f038ae8d1467ebf46fe2657b0f3",
-    "rad.nc": "9c4df81f566b0596feaea771b9b5212c95015ff6e7d17bc55d4c8786bb6c76f2"
+    "obs.nc": "64a34bfff2ad9a82b44192f76862f3a491bd7dc2344f29528e39f587d4b0fae1",
+    "rad.nc": "825e59c1e0c7673fab763982d92d8462407c02ed11edafa0c4e1344211ca144a"
   },
-  "reference_git_commit": "bf9b2d4ce7f001f95f4859cfc21f11d63888c3f2",
+  "reference_git_commit": "57ff71e2c3bb99c09a89877f8394798625415af3",
   "reference_worktree_dirty": false,
-  "tblbase_at_generation": "/home/lars/wrk/jurassic/tab/tria_1cm/nc_1e-6/tria"
+  "tblbase_at_generation": "/p/data1/slmet/model_data/jurassic/tab/tria_1cm/nc_1e-6/tria"
 }
