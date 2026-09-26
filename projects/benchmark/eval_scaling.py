@@ -20,13 +20,13 @@ def metric_plot_style(metric_name: str):
     lower = metric_name.lower()
     safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
     if "volume" in lower or "energy" in lower:
-        return "constant", True, False, safe, f"{metric_name} (socket-wide / batch-size)", "#3ab9dc"
+        return "constant", True, False, safe, f"{metric_name} (socket-wide / batch-size)", "#2a78d6"
     if "bandwidth" in lower or "mflop/s" in lower:
-        return None, True, True, safe, f"{metric_name} (socket-wide)", "#c76ce0"
+        return None, True, True, safe, f"{metric_name} (socket-wide)", "#2a78d6"
     if metric_name.startswith("CAS_COUNT"):
-        color = "#c0392b" if metric_name.endswith("_RD") else "#2980b9"
+        color = "#eb6834" if metric_name.endswith("_RD") else "#2a78d6"
         return "constant", False, False, metric_name.lower(), f"{metric_name} [GBytes-equiv] (socket-wide / batch-size)", color
-    return "linear", True, False, safe, f"{metric_name}/call", "#7d8f69"
+    return "linear", True, False, safe, f"{metric_name}/call", "#2a78d6"
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -161,6 +161,7 @@ def main():
             print(f"{'intra_socket':>15} {t:>8} {t_time:>14.4g} {speedup:>9.2f} {efficiency:>10.1%}")
 
         extra_speedup_points = []   # (threads, speedup, tag)
+        extra_efficiency_points = []  # (threads, efficiency, tag)
         extra_wall_points = []      # (threads, wall_time_s, tag)
         for lbl, tag in ((lbl_smt, "SMT"), (lbl_compact, "inter (compact)"), (lbl_spread, "inter (spread)")):
             t_target = next((t for (l, t) in medians["wall_time"] if l == lbl), None)
@@ -170,6 +171,7 @@ def main():
             speedup, efficiency = speedup_and_efficiency(t_time, t_target)
             print(f"{lbl:>15} {t_target:>8} {t_time:>14.4g} {speedup:>9.2f} {efficiency:>10.1%}")
             extra_speedup_points.append((t_target, speedup, tag))
+            extra_efficiency_points.append((t_target, efficiency, tag))
             extra_wall_points.append((t_target, t_time, tag))
 
         intra_t_arr = np.asarray(intra_threads)
@@ -178,17 +180,26 @@ def main():
             plot_scaling(
                 intra_t_arr,
                 np.asarray([intra_speedups[t] for t in intra_threads]),
-                "Wall-clock speedup (strong scaling)", "#efb239", res_dir,
+                "Wall-clock speedup (strong scaling)", "#2a78d6", res_dir,
                 f"e2_{mode}_speedup.png", ideal="linear", higher_is_better=True,
                 smt_points=extra_speedup_points or None,
+            )
+            plot_scaling(
+                intra_t_arr,
+                np.asarray([intra_efficiency[t] for t in intra_threads]),
+                "Parallel efficiency (strong scaling, T1/(n*Tn))", "#2a78d6", res_dir,
+                f"e2_{mode}_efficiency.png", ideal="constant", higher_is_better=True,
+                smt_points=extra_efficiency_points or None,
+                yscale="linear", percent=True, ylim=(0, 1.1),
             )
         else:
             plot_scaling(
                 intra_t_arr,
                 np.asarray([intra_efficiency[t] for t in intra_threads]),
-                "Parallel efficiency (weak scaling, T1/Tn)", "#efb239", res_dir,
+                "Parallel efficiency (weak scaling, T1/Tn)", "#2a78d6", res_dir,
                 f"e2_{mode}_efficiency.png", ideal="constant", higher_is_better=True,
                 smt_points=extra_speedup_points or None,
+                yscale="linear", percent=True, ylim=(0, 1.1),
             )
 
         for metric in ["wall_time"] + metrics:
@@ -201,7 +212,7 @@ def main():
                 b0 = batch_size_dict.get((lbl_intra, intra_threads[0]), "?")
                 plot_scaling(
                     intra_t_arr, np.asarray(metric_medians, dtype=float),
-                    f"Wall-clock time [s] ({b0} scenes, {mode})", "#efb239", res_dir,
+                    f"Wall-clock time [s] ({b0} scenes, {mode})", "#2a78d6", res_dir,
                     f"e2_{mode}_wallclock_scaling.png", ideal="linear", higher_is_better=False,
                     smt_points=extra_wall_points or None,
                 )

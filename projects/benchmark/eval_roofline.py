@@ -30,6 +30,10 @@ from matplotlib.ticker import FuncFormatter, LogLocator
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from likwid_parsing import parse_run_dir, collect, collect_intensity
+from plot_style import (INK, INK_2, INK_MUTED, PALETTE, SURFACE, apply_style,
+                        save_figure)
+
+apply_style()
 
 def load_ceilings(run_dir: Path) -> dict:
     """Parse ceilings.txt written by likwid-bench in the run script."""
@@ -220,7 +224,7 @@ def main():
     y_lo = min(ys) / 3
     y_hi = peak * 2
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(9, 5.6))
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlim(x_lo, x_hi)
@@ -238,28 +242,30 @@ def main():
     for name, bw in all_bw.items():
         knee = peak / bw
         main = name == "DRAM"
-        color = "#4a4945" if main else "#898781"
-        ax.plot([x_lo, knee], [bw * x_lo, peak], "-" if main else "--",
-                color=color, linewidth=1.8 if main else 1.2, zorder=2)
+        color = INK if main else INK_MUTED
+        ax.plot([x_lo, knee], [bw * x_lo, peak],
+                linestyle="-" if main else (0, (5, 3)),
+                color=color, linewidth=1.8 if main else 1.3, zorder=2)
         # label along the slope, kept inside the visible area
         xt = min(max(x_lo * 1.3, y_lo * 1.5 / bw), knee / 1.5)
-        ax.text(xt, bw * xt * 1.12, f"{name} {bw:.0f} GB/s", fontsize=8, color=color,
+        ax.text(xt, bw * xt * 1.12, f"{name} {bw:.0f} GB/s", fontsize=9, color=INK_2,
                 rotation=slope_deg(bw), rotation_mode="anchor", ha="left", va="bottom")
     # compute roof and optional lower compute ceilings
-    ax.plot([ridge, x_hi], [peak, peak], "-", color="#4a4945", linewidth=1.8, zorder=2)
-    ax.text(x_hi / 1.1, peak * 1.06, f"peak {peak:.0f} GFLOP/s", fontsize=8,
-            color="#4a4945", ha="right", va="bottom")
+    ax.plot([ridge, x_hi], [peak, peak], "-", color=INK, linewidth=1.8, zorder=2)
+    ax.text(x_hi / 1.1, peak * 1.06, f"peak {peak:.0f} GFLOP/s", fontsize=9,
+            color=INK_2, ha="right", va="bottom")
     for name, cp in compute_roofs.items():
         cp /= G
-        ax.plot([cp / bw_main, x_hi], [cp, cp], "--", color="#898781", linewidth=1.2, zorder=2)
-        ax.text(x_hi / 1.1, cp * 1.06, f"{name} {cp:.0f} GFLOP/s", fontsize=8,
-                color="#898781", ha="right", va="bottom")
+        ax.plot([cp / bw_main, x_hi], [cp, cp], linestyle=(0, (5, 3)), color=INK_MUTED,
+                linewidth=1.3, zorder=2)
+        ax.text(x_hi / 1.1, cp * 1.06, f"{name} {cp:.0f} GFLOP/s", fontsize=9,
+                color=INK_2, ha="right", va="bottom")
 
-    ax.axvline(ridge, color="#898781", linewidth=0.6, linestyle=":", zorder=1)
-    ax.text(ridge * 1.04, y_lo * 1.15, f"ridge {ridge:.2f} FLOP/B", fontsize=7,
-            color="#898781", rotation=90, va="bottom")
+    ax.axvline(ridge, color=INK_MUTED, linewidth=0.9, linestyle=(0, (1, 2)), zorder=1)
+    ax.text(ridge * 1.04, y_lo * 1.15, f"ridge {ridge:.2f} FLOP/B", fontsize=8,
+            color=INK_2, rotation=90, va="bottom")
 
-    palette = ["#2a78d6", "#c76ce0", "#efb239", "#3ab9dc", "#89dd29", "#e05c2a"]
+    palette = PALETTE
     # labels fan out (left / below / right) in order of intensity to avoid overlaps
     offsets = [(-14, -30, "right"), (0, -48, "center"), (14, 10, "left")]
     by_intensity = sorted(range(len(points)), key=lambda k: points[k][2])
@@ -267,36 +273,35 @@ def main():
     for i, (label, threads, intensity, mflops, icv, pcv) in enumerate(points):
         color = palette[i % len(palette)]
         perf = mflops / G
-        ax.errorbar([intensity], [perf], fmt="o", color=color, markersize=7, zorder=4,
+        ax.errorbar([intensity], [perf], fmt="o", color=color, markersize=8, zorder=4,
+                    markeredgecolor=SURFACE, markeredgewidth=1.2,
                     xerr=[[intensity * icv]] if icv else None,
                     yerr=[[perf * pcv]] if pcv else None,
-                    capsize=2, elinewidth=1)
+                    capsize=2, elinewidth=1.2)
         # thin guide up to the DRAM/compute roof directly above the point
         roof_here = min(peak, bw_main * intensity)
-        ax.plot([intensity, intensity], [perf, roof_here], ":", color=color,
-                linewidth=0.8, zorder=1)
+        ax.plot([intensity, intensity], [perf, roof_here], linestyle=(0, (1, 2)),
+                color=color, linewidth=1.0, zorder=1)
         name = f"{label} [{threads}T]" if multi_threads else label
         dx, dy, ha = offsets[label_slot[i] % len(offsets)]
         ax.annotate(f"{name}\n{perf / roof_here:.0%} of roof", (intensity, perf),
-                    textcoords="offset points", xytext=(dx, dy), fontsize=8, color=color,
-                    ha=ha, arrowprops=dict(arrowstyle="-", color=color, linewidth=0.6))
+                    textcoords="offset points", xytext=(dx, dy), fontsize=9, color=INK_2,
+                    ha=ha, arrowprops=dict(arrowstyle="-", color=color, linewidth=0.8))
 
     # readable ticks: plain numbers, with 2 and 5 labeled between the decades
     for axis in (ax.xaxis, ax.yaxis):
         axis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
         axis.set_minor_locator(LogLocator(base=10, subs=(2, 5)))
         axis.set_minor_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
-    ax.tick_params(axis="both", which="minor", labelsize=7)
-    ax.grid(True, which="major", color="#e4e2dc", linewidth=0.6, zorder=0)
+    ax.tick_params(axis="both", which="minor", labelsize=7.5)
+    ax.grid(True, which="major", axis="both")
     ax.set_xlabel("Operational intensity [FLOP/Byte]")
     ax.set_ylabel("Performance [GFLOP/s]")
     suffix = f"  ({bench_threads} threads)" if bench_threads != "unknown" else ""
-    ax.set_title(f"JURASSIC forward model — Roofline{suffix}")
-    fig.tight_layout()
+    ax.set_title(f"JURASSIC forward model \u2013 roofline{suffix}")
 
     outpath = res_dir / "e1_roofline.png"
-    fig.savefig(outpath, dpi=150, bbox_inches="tight")
-    plt.close(fig)
+    save_figure(fig, outpath)
     print(f"\nwrote {outpath}")
 
 if __name__ == "__main__":
