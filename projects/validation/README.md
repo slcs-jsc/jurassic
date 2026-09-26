@@ -86,6 +86,10 @@ emitters, for example with `DEFINES=-DNG=40`. The validation scripts intentional
 do not manage or inspect this compile-time setting. Smoke validation continues to
 use the seven-gas `core` set and works with the default `NG=8` build.
 
+The `VALIDATION_TBLBASE` lookup-table directory must contain `tria_<gas>.nc` for
+all gases recorded in the manifests. Its H2O table must have been generated with
+RFM `H2O(sub)` for consistency with JURASSIC's MT_CKD 4.1 continuum.
+
 Use `--formod` to test a separately built executable, `--execution` to select its
 scalar or batch path, and `--formod-method cga` to compare the Curtis-Godson
 approximation against the frozen default EGA references. `OBSFMT = 3` keeps reference and candidate results as NetCDF

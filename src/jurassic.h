@@ -2285,7 +2285,7 @@ double ctmco2(
   const double u);
 
 /**
- * @brief Compute water vapor continuum (optical depth).
+ * @brief Compute the MT_CKD 4.1 water vapor continuum (optical depth).
  *
  * @author Lars Hoffmann
  */

@@ -29,7 +29,9 @@ hardware-dependent, often scheduler-dependent, and are not intended to be part o
 Benchmark runs assume NetCDF `tria` lookup tables and do not use the shipped
 small example LUT directories. The baseline CTLs are configured for `TBLFMT = 3`,
 and the benchmark runners resolve `TBLBASE` from `BENCH_TBLBASE` and write a
-temporary active CTL into the run directory.
+temporary active CTL into the run directory. The H2O table must have been
+generated with RFM `H2O(sub)` for consistency with JURASSIC's MT_CKD 4.1
+continuum.
 
 Current local default:
 
