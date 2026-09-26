@@ -247,6 +247,57 @@ bench_check_groups() {
   return 0
 }
 
+bench_cache_level() {
+  local d size n
+  for d in /sys/devices/system/cpu/cpu0/cache/index*; do
+    [ -r "$d/level" ] && [ "$(cat "$d/level")" = "$1" ] || continue
+    [ "$(cat "$d/type")" = "Instruction" ] && continue
+    size=$(cat "$d/size")
+    case "$size" in
+      *K) size=${size%K} ;;
+      *M) size=$(( ${size%M} * 1024 )) ;;
+    esac
+    n=$(awk -v l="$(cat "$d/shared_cpu_list")" 'BEGIN {
+          c = 0; m = split(l, a, ",")
+          for (i = 1; i <= m; i++) { k = split(a[i], b, "-"); c += (k == 2) ? b[2] - b[1] + 1 : 1 }
+          print c }')
+    echo "$size $n"
+    return 0
+  done
+  return 1
+}
+
+bench_cache_workingsets() {
+  local l1_kb l2_kb l2_cpus l3_kb l3_cpus
+  read -r l1_kb _ <<< "$(bench_cache_level 1)" || return 1
+  read -r l2_kb l2_cpus <<< "$(bench_cache_level 2)" || return 1
+  read -r l3_kb l3_cpus <<< "$(bench_cache_level 3)" || return 1
+  JR_L1_WS_KB=${L1_WS_KB:-$(( l1_kb / 2 ))}
+  JR_L2_WS_KB=${L2_WS_KB:-$(( l2_kb / 2 ))}
+  JR_L3_WS_KB=${L3_WS_KB:-$(( l2_kb + l3_kb / (l3_cpus / l2_cpus) / 2 ))}
+}
+
+# Run one likwid-bench kernel with <threads> threads spread over the sockets and print
+# the metric value. The working set is given per thread (likwid-bench takes the total per
+# workgroup). Prints nothing if the kernel is unavailable or fails.
+# usage: bench_likwid_measure <kernel> <ws_per_thread_kb> <threads> <metric-regex> <logfile>
+bench_likwid_measure() {
+  local kernel=$1 ws_kb=$2 threads=$3 metric=$4 logfile=$5
+  local sockets_needed remaining take s
+  local wargs=()
+  sockets_needed=$(( (threads + JR_PHYS_PER_SOCKET - 1) / JR_PHYS_PER_SOCKET ))
+  [ "$sockets_needed" -gt "$JR_N_SOCKETS" ] && sockets_needed=$JR_N_SOCKETS
+  remaining=$threads
+  for (( s=0; s<sockets_needed; s++ )); do
+    take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
+    wargs+=( -w "S${s}:$(( ws_kb * take ))kB:${take}" )
+    remaining=$(( remaining - take ))
+  done
+  { likwid-bench -t "$kernel" "${wargs[@]}" 2>&1 || true; } \
+    | tee "$logfile" \
+    | awk -v m="$metric" '$0 ~ m { print $2; exit }'
+}
+
 bench_run_forward() {
   local label=$1 threads=$2 group=$3 batch=$4 rep=$5 cores=$6 numa_flag=$7
 
