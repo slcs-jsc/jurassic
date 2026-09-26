@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=slmet
-#SBATCH --partition=booster
+#SBATCH --partition=batch
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
@@ -27,7 +27,7 @@ if [ ! -f "$repo_root/projects/benchmark/configs/baseline_cases.tsv" ] && [ -n "
 fi
 src_dir="$repo_root/src"
 runs_root="$repo_root/projects/benchmark/runs"
-run_id=${RUN_ID:-juwels_booster_likwid_${SLURM_JOB_ID:-manual}}
+run_id=${RUN_ID:-hermes_profile_report_${SLURM_JOB_ID:-manual}}
 run_dir="$runs_root/$run_id"
 work_dir="$run_dir/work"
 
