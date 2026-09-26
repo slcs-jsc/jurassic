@@ -186,12 +186,18 @@ validation_status="$run_dir/validation_status.txt"
 run_profiling=1
 
 if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
+  # A non-zero exit here is expected and handled right below (see validation_rc),
+  # so suspend the ERR trap for this call -- otherwise it fires on every failing
+  # validation and prints a misleading "FAILED at line ..." even though the script
+  # is not aborting.
+  trap - ERR
   set +e
   ( cd "$repo_root/projects/validation" && \
     VALIDATION_TBLBASE="$bench_tblbase" scripts/run_validation.py \
       > "$run_dir/validation.log" 2>&1 )
   validation_rc=$?
   set -e
+  trap 'echo "FAILED at line $LINENO: $BASH_COMMAND" >&2' ERR
 
   echo "exit_code=$validation_rc" > "$validation_status"
 
