@@ -174,7 +174,10 @@ extern int jurassic_marker_ref;
 
 enum {
   FORMOD_STATUS_OK = 0,
-  FORMOD_STATUS_FOV_DATA_MISSING = 1
+  FORMOD_STATUS_RFM_UNSUPPORTED = 1,
+  FORMOD_STATUS_FOV_DATA_MISSING = 2,
+  FORMOD_STATUS_OBSERVER_BELOW_SURFACE = 3,
+  FORMOD_STATUS_TOO_MANY_LOS_POINTS = 4
 };
 
 /* ------------------------------------------------------------
@@ -2626,6 +2629,8 @@ int formod_fov(
  * @param[in]  ir   Index of the current ray path in @p obs.
  * @param[out] los  Scratch line-of-sight buffer (zeroed and overwritten).
  *
+ * @return @ref FORMOD_STATUS_OK, or the error status returned by @ref raytrace.
+ *
  * @note Depending on @ref ctl_t::formod, this function calls either
  *       @ref intpol_tbl_cga() (CGA) or @ref intpol_tbl_ega() (EGA)
  *       for gas absorption interpolation.  
@@ -2638,7 +2643,7 @@ int formod_fov(
  *
  * @author Lars Hoffmann
  */
-void formod_pencil(
+int formod_pencil(
   const ctl_t * ctl,
   const tbl_t * tbl,
   const atm_t * atm,
@@ -3425,6 +3430,11 @@ void optimal_estimation(
  * @param[out] los  Line-of-sight structure to be populated with sampled quantities.
  * @param[in]  ir   Index of the current ray path in the observation set.
  *
+ * @return @ref FORMOD_STATUS_OK on success,
+ *         @ref FORMOD_STATUS_OBSERVER_BELOW_SURFACE if the observer lies below
+ *         the surface, or @ref FORMOD_STATUS_TOO_MANY_LOS_POINTS if the number
+ *         of LOS points would exceed `NLOS`.
+ *
  * @details
  * - Integrates along the viewing ray starting at the observer position.
  * - Performs stepwise propagation with step length `ds` determined by
@@ -3445,13 +3455,14 @@ void optimal_estimation(
  * @see intpol_atm, tangent_point, formod_pencil, hydrostatic
  *
  * @warning
- * - Fails if the observer is below the surface or the atmosphere lacks z = 0.
- * - Aborts if the number of LOS points exceeds `NLOS`.
+ * - Returns an error status if the observer is below the surface or the
+ *   number of LOS points exceeds `NLOS`.
+ * - Requires that the atmosphere includes z = 0.
  * - Assumes monotonic altitude ordering in atmospheric data.
  *
  * @author Lars Hoffmann
  */
-void raytrace(
+int raytrace(
   const ctl_t * ctl,
   const atm_t * atm,
   obs_t * obs,

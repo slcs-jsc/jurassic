@@ -3280,18 +3280,22 @@ int formod(
   hydrostatic(ctl, atm);
 
   /* CGA or EGA forward model... */
-  if (ctl->formod == 0 || ctl->formod == 1)
-    for (int ir = 0; ir < obs->nr; ir++)
-      formod_pencil(ctl, tbl, atm, obs, ir, los_scratch);
+  if (ctl->formod == 0 || ctl->formod == 1) {
+    for (int ir = 0; ir < obs->nr; ir++) {
+      const int status = formod_pencil(ctl, tbl, atm, obs, ir, los_scratch);
+      if (status != FORMOD_STATUS_OK)
+	return status;
+    }
+  }
 
   /* Call RFM... */
   else if (ctl->formod == 2)
     formod_rfm(ctl, tbl, atm, obs);
 
   /* Apply field-of-view convolution... */
-  const int status = formod_fov(ctl, obs, obs_scratch);
-  if (status != FORMOD_STATUS_OK)
-    return status;
+  const int fov_status = formod_fov(ctl, obs, obs_scratch);
+  if (fov_status != FORMOD_STATUS_OK)
+    return fov_status;
 
   /* Convert radiance to brightness temperature... */
   if (ctl->write_bbt)
@@ -3462,7 +3466,7 @@ int formod_fov(
 
 /*****************************************************************************/
 
-void formod_pencil(
+int formod_pencil(
   const ctl_t *ctl,
   const tbl_t *tbl,
   const atm_t *atm,
@@ -3484,7 +3488,11 @@ void formod_pencil(
   }
 
   /* Raytracing... */
-  raytrace(ctl, atm, obs, los, ir);
+  {
+    const int status = raytrace(ctl, atm, obs, los, ir);
+    if (status != FORMOD_STATUS_OK)
+      return status;
+  }
 
   /* Loop over LOS points... */
   for (int ip = 0; ip < los->np; ip++) {
@@ -3593,6 +3601,8 @@ void formod_pencil(
     obs->rad[id][ir] = rad[id];
     obs->tau[id][ir] = tau[id];
   }
+
+  return FORMOD_STATUS_OK;
 }
 
 /*****************************************************************************/
@@ -3686,7 +3696,8 @@ void formod_rfm(
   for (int ir = 0; ir < obs->nr; ir++) {
 
     /* Raytracing... */
-    raytrace(ctl, atm, obs, los, ir);
+    if (raytrace(ctl, atm, obs, los, ir) != FORMOD_STATUS_OK)
+      ERRMSG("Ray tracing failed!");
 
     /* Nadir or zenith? (air mass factor / secant of zenith angle) */
     if (obs->tpz[ir] <= zmin) {
@@ -4968,7 +4979,7 @@ void optimal_estimation(
 
 /*****************************************************************************/
 
-void raytrace(
+int raytrace(
   const ctl_t *ctl,
   const atm_t *atm,
   obs_t *obs,
@@ -4994,7 +5005,7 @@ void raytrace(
 
   /* Check observer altitude... */
   if (obs->obsz[ir] < zmin)
-    ERRMSG("Observer below surface!");
+    return FORMOD_STATUS_OBSERVER_BELOW_SURFACE;
 
   /* Determine Cartesian coordinates for observer and view point... */
   geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xobs);
@@ -5066,7 +5077,7 @@ void raytrace(
     
     /* Abort before writing beyond the fixed LOS scratch buffers... */
     if (los->np >= NLOS)
-      ERRMSG("Too many LOS points!");
+      return FORMOD_STATUS_TOO_MANY_LOS_POINTS;
     
     /* Save data... */
     los->lon[los->np] = lon;
@@ -5195,6 +5206,8 @@ void raytrace(
 	los->cgp[ip][ig] /= los->cgu[ip][ig];
 	los->cgt[ip][ig] /= los->cgu[ip][ig];
       }
+
+  return FORMOD_STATUS_OK;
 }
 
 /*****************************************************************************/
