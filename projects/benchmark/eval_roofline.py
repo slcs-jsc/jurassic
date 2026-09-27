@@ -17,6 +17,9 @@ scalar_flops_mflops=80000 (compute) to ceilings.txt, or pass them on the command
 (repeatable), e.g.:
     python eval_roofline.py <run_dir> --bw-ceiling L2=900000 --bw-ceiling L3=400000 \\
         --compute-ceiling scalar=80000
+
+Leave a roof out of the plot even if ceilings.txt has it (repeatable):
+    python eval_roofline.py <run_dir> --skip-ceiling L2 --skip-ceiling L3
 """
 import argparse
 import sys
@@ -91,6 +94,12 @@ def main():
              "from ceilings.txt keys '<name>_flops_mflops' (except peak_flops_mflops)"
     )
     parser.add_argument(
+        "--skip-ceiling", action="append", default=[], metavar="NAME",
+        help="leave a named roof out of the plot (repeatable), e.g. --skip-ceiling L2 "
+             "--skip-ceiling L3. Matches names from ceilings.txt or --bw-ceiling/"
+             "--compute-ceiling; unmatched names are ignored"
+    )
+    parser.add_argument(
         "--out", type=Path, default=None,
         help="output directory (default: <run_dir>/plots)"
     )
@@ -133,6 +142,9 @@ def main():
     bw_roofs.update(dict(args.bw_ceiling))
     compute_roofs = extra_ceilings("_flops_mflops", "peak_flops_mflops")
     compute_roofs.update(dict(args.compute_ceiling))
+    for name in args.skip_ceiling:
+        bw_roofs.pop(name, None)
+        compute_roofs.pop(name, None)
 
     ridge_x = peak_flops / stream_bw
     bench_threads = int(ceilings.get("threads", 0)) or "unknown"
