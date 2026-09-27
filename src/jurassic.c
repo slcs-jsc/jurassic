@@ -2956,6 +2956,10 @@ static const double tcoslf_table[2001] =
   10.16, 10.19, 10.22, 10.26, 10.29, 10.32
 };
 
+#if defined(_OPENACC)
+#pragma acc declare copyin(h2oslf, h2ofrn, tcoslf_table)
+#endif
+
 /*****************************************************************************/
 
 double ctmh2o(
