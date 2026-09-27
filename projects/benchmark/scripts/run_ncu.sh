@@ -53,8 +53,9 @@ mpi=${MPI:-0}
 gpu_pin=${GPU_PIN:-1}
 gpu_target=${GPU_TARGET:-gpu}
 info=${INFO:-0}
+flat_arrays=${FLAT_ARRAYS:-1}
 
-# Einzelne Test-Batchgröße für Nsight Compute festlegen
+# Batch size for the profiled formod run
 nvidia_profile_batch=${PROFILE_BATCH:-256}
 nvidia_profile_output="$run_dir/ncu"
 
@@ -99,7 +100,7 @@ awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblba
 
 cd "$src_dir"
 make clean
-make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_TARGET="$gpu_target" GPU_PIN="$gpu_pin" INFO="$info"
+make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_TARGET="$gpu_target" GPU_PIN="$gpu_pin" INFO="$info" FLAT_ARRAYS="$flat_arrays"
 cd "$work_dir"
 
 rm -rf data

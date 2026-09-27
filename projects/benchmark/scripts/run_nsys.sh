@@ -26,7 +26,7 @@ fi
 
 src_dir="$repo_root/src"
 runs_root="$repo_root/projects/benchmark/runs"
-run_id=${RUN_ID:-juwels_ncu_test_${SLURM_JOB_ID:-manual}}
+run_id=${RUN_ID:-juwels_nsys_test_${SLURM_JOB_ID:-manual}}
 run_dir="$runs_root/$run_id"
 work_dir="$run_dir/work"
 out="$run_dir/formod.tab"
@@ -53,13 +53,12 @@ mpi=${MPI:-0}
 gpu_pin=${GPU_PIN:-1}
 gpu_target=${GPU_TARGET:-gpu}
 info=${INFO:-0}
+flat_arrays=${FLAT_ARRAYS:-1}
 
-# Einzelne Test-Batchgröße für Nsight Compute festlegen
+# Batch size for the profiled formod run
 nvidia_profile_batch=${PROFILE_BATCH:-256}
-nvidia_profile_output="$run_dir/ncu"
 
 mkdir -p "$work_dir"
-mkdir -p "$nvidia_profile_output"
 
 if [ ! -f "$ctl_template" ]; then
   echo "Control file not found: $ctl_template" >&2
@@ -84,42 +83,27 @@ if command -v ml >/dev/null 2>&1; then
   ml CMake/4.0.3
   ml ecBuild
   ml nvidia-compilers ParaStationMPI
-  ml Nsight-Compute/2025.3.1
   ml Nsight-Systems/2025.5.1
 fi
 
-echo "=== Nsight Compute ==="
-command -v ncu
-ncu --version
+echo "=== Nsight Systems ==="
+command -v nsys
+nsys --version
 
 export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${LD_LIBRARY_PATH:-}"
-
 
 active_ctl="$work_dir/${case_name}.ctl"
 awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
 
 cd "$src_dir"
 make clean
-make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_TARGET="$gpu_target" GPU_PIN="$gpu_pin" INFO="$info"
+make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_TARGET="$gpu_target" GPU_PIN="$gpu_pin" INFO="$info" FLAT_ARRAYS="$flat_arrays"
 cd "$work_dir"
 
 rm -rf data
 mkdir -p data
 "$src_dir/climatology" "$active_ctl" data/atm.tab
 "$src_dir/$geometry" "$active_ctl" data/obs.tab
-
-#ncu_output="$nvidia_profile_output/formod_batch${nvidia_profile_batch}"
-#ncu_log="$run_dir/ncu.log"
-#out="/tmp/jurassic_ncu_${run_id}_b${nvidia_profile_batch}.tab"
-
-#srun -n1 -N1 ncu \
-#  --target-processes all \
-#  --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed,dram__throughput.avg.pct_of_peak_sustained_elapsed,sm__warps_active.avg.pct_of_peak_sustained_active \
-#  --kernel-name-base function \
-#  --force-overwrite \
-#  --export "$ncu_output" \
-#  "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out" TASK time BATCH_SIZE "$nvidia_profile_batch" \
-#  2>&1 | tee "$ncu_log"
 
 echo "Running Nsight Systems"
 
