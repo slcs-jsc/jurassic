@@ -260,7 +260,12 @@ else
   echo "exit_code=skipped" > "$validation_status"
 fi
 
+# "ncu" here is the local work directory for this run's data/atm.tab and
+# data/obs.tab (created via prepare_inputs below); "$run_dir/ncu" is the
+# separate, persistent directory the --export/.ncu-rep paths below actually
+# point at and must exist independently of it.
 mkdir -p ncu
+mkdir -p "$run_dir/ncu"
 cd ncu
 prepare_inputs
 
@@ -303,6 +308,12 @@ if [ "$run_profiling" = 1 ]; then
 
     echo "Running Nsight Compute BATCH_SIZE=$batch ..."
 
+    # A non-zero exit here (e.g. a GPU permission error, or a batch size that
+    # doesn't fit in device memory) is expected and handled right below, so
+    # suspend the ERR trap for this call -- otherwise it fires on every
+    # failing point and prints a misleading "FAILED at line ..." even though
+    # the sweep is not aborting (mirrors the validation call above).
+    trap - ERR
     set +e
     JURASSIC_MAX_ITER=$ncu_max_iter srun -n1 -N1 ncu \
       --target-processes all \
@@ -317,6 +328,7 @@ if [ "$run_profiling" = 1 ]; then
       > "$log_txt" 2>&1
     ncu_rc=$?
     set -e
+    trap 'echo "FAILED at line $LINENO: $BASH_COMMAND" >&2' ERR
 
     printf 'BATCH_SIZE=%s\nLAUNCH_SKIP=%s\nLAUNCH_COUNT=%s\nEXIT_CODE=%s\n' \
       "$batch" "$ncu_launch_skip" "$ncu_launch_count" "$ncu_rc" >> "$log_txt"
@@ -333,10 +345,12 @@ if [ "$run_profiling" = 1 ]; then
     csv_out="log.batch${batch}.csv"
     ncu_rep="${ncu_output}.ncu-rep"
     if [ -f "$ncu_rep" ]; then
+      trap - ERR
       set +e
       ncu --import "$ncu_rep" --csv --page raw > "$csv_out" 2>"log.batch${batch}.decode_err.txt"
       decode_rc=$?
       set -e
+      trap 'echo "FAILED at line $LINENO: $BASH_COMMAND" >&2' ERR
       if [ "$decode_rc" -ne 0 ]; then
         echo "WARNING: 'ncu --import' failed for BATCH_SIZE=$batch (exit $decode_rc)," \
              "see log.batch${batch}.decode_err.txt -- $csv_out will be missing/incomplete." >&2
