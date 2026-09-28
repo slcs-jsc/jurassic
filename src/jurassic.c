@@ -4812,25 +4812,29 @@ int locate_irr(
   const int n,
   const double x) {
 
+  /* Same branchless bisection as locate_tbl, with the ascending/descending
+     direction folded into a single XOR: for an ascending table the ihi/ilo
+     select condition is (xx[i] > x), for a descending table it is
+     !(xx[i] > x), so XOR-ing the comparison with the "descending" flag
+     reproduces both original loops with one select pair. Trip count depends
+     only on ilo/ihi, so the returned bracket index is identical for every
+     input. The direction probe uses the same mid element as before and is
+     skipped only when the loop would not run at all (n < 2), where the
+     original fell through returning 0 as well. */
   int ilo = 0;
   int ihi = n - 1;
-  int i = (ihi + ilo) >> 1;
 
-  if (xx[i] < xx[i + 1])
+  if (ihi > 1) {
+    const int i0 = (ihi + ilo) >> 1;
+    const int flip = (xx[i0] < xx[i0 + 1]) ? 0 : 1;
+
     while (ihi > ilo + 1) {
-      i = (ihi + ilo) >> 1;
-      if (xx[i] > x)
-	ihi = i;
-      else
-	ilo = i;
-  } else
-    while (ihi > ilo + 1) {
-      i = (ihi + ilo) >> 1;
-      if (xx[i] <= x)
-	ihi = i;
-      else
-	ilo = i;
+      const int i = (ihi + ilo) >> 1;
+      const int gt = (xx[i] > x) ^ flip;
+      ihi = gt ? i : ihi;
+      ilo = gt ? ilo : i;
     }
+  }
 
   return ilo;
 }
