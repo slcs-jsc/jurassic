@@ -3621,10 +3621,27 @@ int formod_pencil(
   double cgp[NG], cgp_sum[NG], cgt[NG], cgt_sum[NG], cgu[NG], rad[ND],
     tau[ND], tau_path[ND][NG], u[NG];
 
-  /* Preserve the previous calloc-based semantics for scratch LOS data. */
+  /* Preserve the previous calloc-based semantics for scratch LOS data.
+
+     Only the header prefix needs clearing. sizeof(los_t) is ~8.5 MB because
+     the struct is statically sized (NLOS = 4096, with eps and k both
+     [NLOS][ND] = 4 MB each), and zeroing the whole thing once per ray path
+     is pure dead store traffic -- it is what pins the operational intensity
+     at 0.1 FLOP/Byte with a 0.12 % vectorization ratio. Every per-point
+     entry is written before it is read:
+       - raytrace() stores np, sft and z/lon/lat/p/t/q[..ng]/k[..nd]/ds for
+         every point it appends, plus sfeps[..nd] in its stop branch,
+       - the radiance loop stores eps[ip][id] for all ip in [0, np) and id in
+         [0, nd) (intpol_tbl_cga/ega only ever return tau_gas >= 0, since it
+         is a product of CLAMP(eps, 0, 1) terms, so that branch always runs),
+       - every consumer (formod_continua, intpol_tbl_ega, the reflection
+         loop, tangent_point) is bounded by los->np or ctl->nd.
+     Keeping the prefix through z preserves the one pre-existing edge case
+     bit-identically: raytrace can read los->z[los->np - 1] while np == 0,
+     which lands in the padding ahead of z. */
 
   #ifndef NO_LOS_MEMSET
-    memset(los, 0, sizeof(*los));
+    memset(los, 0, (size_t) ((char *) &los->lon[0] - (char *) los));
   #endif
 
   /* Initialize... */
