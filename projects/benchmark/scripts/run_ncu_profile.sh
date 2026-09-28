@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12
 #SBATCH --gpus-per-task=1
-#SBATCH --time=04:00:00
+#SBATCH --time=01:00:00
 #SBATCH --exclusive
 #SBATCH --disable-dcgm
 #SBATCH --disable-perfparanoid
@@ -199,12 +199,20 @@ printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase
   "$ncu_launch_count" \
   > "$run_dir/config.txt"
 
-# Rebuild a GPU binary when the run requests it.
+# Rebuild a GPU binary when the run requests it. Skips `make clean` when the same
+# build flags were used for the last build in this workspace -- see build_cpu()'s
+# CPU-side counterpart in run_hermes_profile.sh for why this is safe.
 build_gpu() {
   cd "$src_dir" || return 1
-  make clean || return 1
+  local flags_fingerprint="MPI=$mpi MPICC=$mpicc COMPILER=$compiler_gpu GPU=1 GPU_TARGET=$gpu_target GPU_PIN=$gpu_pin INFO=$info FLAT_ARRAYS=$flat_arrays LIKWID=0"
+  local stamp_file=".build_flags.gpu"
+  if [ ! -f "$stamp_file" ] || [ "$(cat "$stamp_file" 2>/dev/null)" != "$flags_fingerprint" ]; then
+    echo "Build flags changed (or first build in this workspace) -- running 'make clean' first."
+    make clean || return 1
+  fi
   make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_TARGET="$gpu_target" \
     GPU_PIN="$gpu_pin" INFO="$info" FLAT_ARRAYS="$flat_arrays" LIKWID=0 || return 1
+  echo "$flags_fingerprint" > "$stamp_file"
   # Return to work_dir (may have been entered via Slurm's temporary launch dir)
   cd "$work_dir" 2>/dev/null || true
   return 0
