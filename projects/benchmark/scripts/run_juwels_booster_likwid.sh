@@ -258,8 +258,8 @@ if [ "$run_profiling" = 1 ]; then
         "$omp" "$group" "$cpu_batch_size" "$core_list" >> "$log_txt"
     done
   done
-else 
-  echo "Skipped LIKWID sweep -- validation failed for this candidate, or no requested LIKWID groups were available on this node." > skipped_likwid.txt
+else
+  echo "Skipped LIKWID sweep -- validation failed for this candidate, or no requested LIKWID groups were available on this node." > "$run_dir/skipped_profiling.txt"
 fi
 
 # perf profiling

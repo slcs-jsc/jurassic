@@ -15,29 +15,7 @@
 # shape -- validate the build first, then profile a matrix of configurations,
 # writing one .ncu-rep + one log per point, with git/hardware provenance
 # alongside.
-#
-# Read this before a big sweep:
-# - Each profiled point re-runs the whole `formod` binary once (JURASSIC_MAX_ITER
-#   caps it), then Nsight Compute replays *only* the one targeted kernel launch
-#   to collect the requested metrics. At BATCH_SIZE=256 with EXECUTION=batch,
-#   a single formod_batch launch has been observed to take several minutes on
-#   an A100 (see projects/benchmark/results/juwels_ncu_test_*/ncu.log) -- the
-#   current OpenACC port parallelizes only across the batch dimension, so GPU
-#   occupancy at small/medium batch sizes is poor and per-launch time is high.
-#   Multiply that by however many replay passes your NCU_METRICS need
-#   (typically 1-3) and by the number of points in NCU_BATCH_SIZES: a sweep
-#   across several batch sizes can plausibly take hours. Start with a short
-#   NCU_BATCH_SIZES list and a conservative --time before scheduling the full
-#   matrix.
-# - los_t (the dominant per-batch-element scratch struct) is sized to the
-#   *compile-time* maxima NLOS=4096 and ND=128 (see src/jurassic.h), not to
-#   this case's actual channel count or ray length. Each batch element costs
-#   roughly 10 MB of device memory (~8.5 MB from los_t's k[NLOS][ND] and
-#   eps[NLOS][ND] arrays alone, plus atm_t/obs_t/obs_scratch). That is a hard
-#   ceiling on how large NCU_BATCH_SIZES can go before formod_batch's
-#   `acc enter data create` runs out of device memory -- this script prints a
-#   rough estimate against free GPU memory before each point, but does not
-#   enforce it; watch for CUDA out-of-memory errors in the per-point log.
+
 
 set -euo pipefail
 set -x
@@ -339,18 +317,41 @@ if [ "$run_profiling" = 1 ]; then
       echo "WARNING: ncu run failed for BATCH_SIZE=$batch (exit $ncu_rc), see $log_txt" >&2
     fi
 
+    # Decode the binary .ncu-rep into the same kind of flat, greppable CSV
+    # LIKWID already writes for the CPU sweep (log.omp<N>.<GROUP>.csv), so
+    # parsing.py can read GPU and CPU results the same way. --page raw
+    # gives one row per (kernel launch, metric); with --launch-count 1
+    # there is exactly one kernel launch per file.
+    csv_out="log.batch${batch}.csv"
+    ncu_rep="${ncu_output}.ncu-rep"
+    if [ -f "$ncu_rep" ]; then
+      set +e
+      ncu --import "$ncu_rep" --csv --page raw > "$csv_out" 2>"log.batch${batch}.decode_err.txt"
+      decode_rc=$?
+      set -e
+      if [ "$decode_rc" -ne 0 ]; then
+        echo "WARNING: 'ncu --import' failed for BATCH_SIZE=$batch (exit $decode_rc)," \
+             "see log.batch${batch}.decode_err.txt -- $csv_out will be missing/incomplete." >&2
+      elif [ ! -s "$csv_out" ]; then
+        echo "WARNING: 'ncu --import' produced an empty $csv_out for BATCH_SIZE=$batch." >&2
+      fi
+    else
+      echo "WARNING: expected $ncu_rep not found, skipping CSV decode for BATCH_SIZE=$batch." >&2
+    fi
+
     rm -f "$out_tab"
   done
 else
-  echo "Skipped Nsight Compute sweep -- validation failed for this candidate, or ncu is unavailable on this node." > skipped_ncu.txt
+  echo "Skipped Nsight Compute sweep -- validation failed for this candidate, or ncu is unavailable on this node." > "$run_dir/skipped_profiling.txt"
 fi
 
 cp -a data "$run_dir/data.ncu"
 cp -a log.batch*.txt "$run_dir/" 2>/dev/null || true
+cp -a log.batch*.csv "$run_dir/" 2>/dev/null || true
 cp -a "$active_ctl" "$run_dir/"
 
 echo "Nsight Compute run directory: $run_dir"
-echo "Raw per-config output: $run_dir/log.batch<N>.txt and $run_dir/ncu/formod_batch<N>.ncu-rep"
+echo "Raw per-config output: $run_dir/log.batch<N>.txt, $run_dir/log.batch<N>.csv (decoded metrics), and $run_dir/ncu/formod_batch<N>.ncu-rep"
 echo "Available metrics on this node: $run_dir/ncu_available_metrics.txt"
 echo "GPU info: $run_dir/gpu_info.csv, $run_dir/gpu_topology.txt"
 echo "Code provenance: $run_dir/git_info.txt"

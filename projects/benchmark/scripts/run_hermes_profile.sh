@@ -259,7 +259,7 @@ if [ "$run_profiling" = 1 ]; then
     done
   done
 else
-  echo "Skipped LIKWID sweep -- validation failed for this candidate, or no requested LIKWID groups were available on this node." > skipped_likwid.txt
+  echo "Skipped LIKWID sweep -- validation failed for this candidate, or no requested LIKWID groups were available on this node." > "$run_dir/skipped_profiling.txt"
 fi
 
 cp -a data "$run_dir/data.likwid"
