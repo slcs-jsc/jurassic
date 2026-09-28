@@ -4861,16 +4861,22 @@ inline int locate_tbl(
   const int n,
   const double x) {
 
+  /* Branchless bisection. The loop trip count depends only on ilo/ihi, and
+     the two assignments below are the same updates the original if/else made,
+     so the returned bracket index is identical for every input. Written as
+     selects so the compiler emits conditional moves: this search runs
+     thousands of times per LOS point (four log-u / log-eps corner lookups per
+     channel and emitter, twice over) and its key versus table position is
+     effectively unpredictable, so the misprediction penalty -- not the load
+     latency -- dominated. */
   int ilo = 0;
   int ihi = n - 1;
-  int i = (ihi + ilo) >> 1;
 
   while (ihi > ilo + 1) {
-    i = (ihi + ilo) >> 1;
-    if (xx[i] > x)
-      ihi = i;
-    else
-      ilo = i;
+    const int i = (ihi + ilo) >> 1;
+    const int gt = (xx[i] > x);
+    ihi = gt ? i : ihi;
+    ilo = gt ? ilo : i;
   }
 
   return ilo;
