@@ -3640,7 +3640,7 @@ int formod_pencil(
      bit-identically: raytrace can read los->z[los->np - 1] while np == 0,
      which lands in the padding ahead of z. */
 
-  #ifndef NO_LOS_MEMSET
+  #if !defined(_OPENACC) && !defined(NO_LOS_MEMSET)
     memset(los, 0, (size_t) ((char *) &los->lon[0] - (char *) los));
   #endif
 
@@ -3718,6 +3718,14 @@ int formod_pencil(
 	/* Compute path transmittance... */
 	tau[id] *= (1 - los->eps[ip][id]);
       }
+#if defined(_OPENACC)
+      /* Segment skipped. Establish the zero the full-structure fill used to
+	 leave behind: the surface-reflection loop below reads
+	 los->eps[ip][id] unconditionally for ip in [0, np) and id in
+	 [0, nd), so this region must not be left uninitialised. */
+      else
+	los->eps[ip][id] = 0;
+#endif
   }
 
   /* Check whether LOS hit the ground... */
