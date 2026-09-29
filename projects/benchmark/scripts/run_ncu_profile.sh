@@ -11,10 +11,7 @@
 #SBATCH --disable-perfparanoid
 
 # GPU counterpart of run_hermes_profile.sh: sweeps Nsight Compute (ncu) over
-# BATCH_SIZE instead of sweeping LIKWID over OMP_NUM_THREADS. Same overall
-# shape -- validate the build first, then profile a matrix of configurations,
-# writing one .ncu-rep + one log per point, with git/hardware provenance
-# alongside.
+# BATCH_SIZE instead of sweeping LIKWID over OMP_NUM_THREADS. 
 
 
 set -euo pipefail
@@ -61,30 +58,17 @@ info=${INFO:-0}
 flat_arrays=${FLAT_ARRAYS:-1}
 rebuild=${REBUILD:-1}
 
-# GPU sweep setup. Batch sizes span "clearly GPU-underutilized" (1, 8, 32) up
-# through the current benchmark default (256) to points that start to probe
-# the los_t memory ceiling (1024, 2048). Override with a smaller list for a
-# quick check, e.g. NCU_BATCH_SIZES="1 256".
-ncu_batch_sizes=${NCU_BATCH_SIZES:-"1 8 32 128 256 1024 2048"}
+ncu_batch_sizes=${NCU_BATCH_SIZES:-"8 32 128 256 1024 2048"}
 
-# DP FLOPs = dadd + dmul + 2*dfma; bytes = DRAM read + write. Kept small on
-# purpose to limit replay passes per point; add sections (e.g.
-# "sm__warps_active.avg.pct_of_peak_sustained_active" for occupancy) once the
-# basic sweep works end to end.
-ncu_metrics=${NCU_METRICS:-"gpu__time_duration.sum,smsp__sass_thread_inst_executed_op_dadd_pred_on.sum,smsp__sass_thread_inst_executed_op_dmul_pred_on.sum,smsp__sass_thread_inst_executed_op_dfma_pred_on.sum,dram__bytes_read.sum,dram__bytes_write.sum"}
+# DP FLOPs = dadd + dmul + 2*dfma; bytes = DRAM read + write; occupancy,
+# compute/memory throughput %, and L1/L2 cache traffic + hit rate 
+ncu_metrics=${NCU_METRICS:-"gpu__time_duration.sum,smsp__sass_thread_inst_executed_op_dadd_pred_on.sum,smsp__sass_thread_inst_executed_op_dmul_pred_on.sum,smsp__sass_thread_inst_executed_op_dfma_pred_on.sum,dram__bytes_read.sum,dram__bytes_write.sum,sm__warps_active.avg.pct_of_peak_sustained_active,sm__throughput.avg.pct_of_peak_sustained_elapsed,dram__throughput.avg.pct_of_peak_sustained_elapsed,l1tex__t_bytes.sum,l1tex__t_sector_hit_rate.pct,lts__t_bytes.sum,lts__t_sector_hit_rate.pct"}
 
 # Launch 1 of formod_batch is always the one-element reference call; launch 2
-# is the first (and, per the JURASSIC_TIME_BUDGET default, often only) timed
-# benchmark iteration. See run_ncu.sh for the reasoning.
+# is the first timed benchmark iteration.
 ncu_launch_skip=${NCU_LAUNCH_SKIP:-1}
 ncu_launch_count=${NCU_LAUNCH_COUNT:-1}
 ncu_max_iter=$((ncu_launch_skip + ncu_launch_count))
-
-# Rough per-batch-element device memory cost, dominated by los_t's
-# k[NLOS][ND] and eps[NLOS][ND] arrays (NLOS=4096, ND=128, both compile-time
-# maxima independent of this case's actual channel count). Used only for the
-# advisory warning below.
-bytes_per_batch_element=$((10 * 1024 * 1024))
 
 mkdir -p "$work_dir"
 
@@ -137,11 +121,9 @@ ncu --query-metrics > "$run_dir/ncu_available_metrics.txt" 2>&1 || true
 
 export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${LD_LIBRARY_PATH:-}"
 
-# Materialize a run-local control file with the chosen LUT base name.
 active_ctl="$work_dir/${case_name}.ctl"
 awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
 
-# Record the effective benchmark configuration for later inspection.
 collect_hardware_info() {
   if command -v lscpu >/dev/null 2>&1; then
     lscpu > "$run_dir/lscpu.txt"
@@ -158,8 +140,6 @@ collect_hardware_info() {
 
 collect_hardware_info
 
-# Record the exact code state this run measured, so results stay traceable
-# back to a branch/commit (baseline vs. an injected-bug branch) after the fact.
 record_git_info() {
   local git_info="$run_dir/git_info.txt"
   if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -199,9 +179,6 @@ printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase
   "$ncu_launch_count" \
   > "$run_dir/config.txt"
 
-# Rebuild a GPU binary when the run requests it. Always starts from a clean
-# tree -- see build_cpu()'s CPU-side counterpart in run_hermes_profile.sh for
-# why an incremental build isn't worth the risk here.
 build_gpu() {
   cd "$src_dir" || return 1
   make clean || return 1
@@ -224,9 +201,6 @@ if [ "$rebuild" = 1 ]; then
   build_gpu
 fi
 
-# Perform validation before profiling, same discipline as run_hermes_profile.sh:
-# a numerically broken GPU build should not silently get profiled as if it
-# were a valid data point.
 validation_status="$run_dir/validation_status.txt"
 run_profiling=1
 
@@ -254,10 +228,6 @@ else
   echo "exit_code=skipped" > "$validation_status"
 fi
 
-# "ncu" here is the local work directory for this run's data/atm.tab and
-# data/obs.tab (created via prepare_inputs below); "$run_dir/ncu" is the
-# separate, persistent directory the --export/.ncu-rep paths below actually
-# point at and must exist independently of it.
 mkdir -p ncu
 mkdir -p "$run_dir/ncu"
 cd ncu
@@ -281,32 +251,13 @@ if [ "$run_profiling" = 1 ]; then
 fi
 
 if [ "$run_profiling" = 1 ]; then
-  free_mib=""
-  if command -v nvidia-smi >/dev/null 2>&1; then
-    free_mib=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | head -n1)
-  fi
-
   for batch in $ncu_batch_sizes; do
-    if [ -n "$free_mib" ]; then
-      est_mib=$((batch * bytes_per_batch_element / 1024 / 1024))
-      if [ "$est_mib" -gt "$((free_mib * 8 / 10))" ]; then
-        echo "WARNING: BATCH_SIZE=$batch is estimated at ~${est_mib} MiB of device scratch (los_t/obs_t/atm_t)," \
-             "which is more than 80% of the ${free_mib} MiB currently free. Watch this point's log for a CUDA" \
-             "out-of-memory error." >&2
-      fi
-    fi
-
     ncu_output="$run_dir/ncu/formod_batch${batch}"
     log_txt="log.batch${batch}.txt"
     out_tab="/tmp/jurassic_ncu_${run_id}_b${batch}.tab"
 
     echo "Running Nsight Compute BATCH_SIZE=$batch ..."
 
-    # A non-zero exit here (e.g. a GPU permission error, or a batch size that
-    # doesn't fit in device memory) is expected and handled right below, so
-    # suspend the ERR trap for this call -- otherwise it fires on every
-    # failing point and prints a misleading "FAILED at line ..." even though
-    # the sweep is not aborting (mirrors the validation call above).
     trap - ERR
     set +e
     JURASSIC_MAX_ITER=$ncu_max_iter srun -n1 -N1 ncu \
@@ -331,11 +282,6 @@ if [ "$run_profiling" = 1 ]; then
       echo "WARNING: ncu run failed for BATCH_SIZE=$batch (exit $ncu_rc), see $log_txt" >&2
     fi
 
-    # Decode the binary .ncu-rep into the same kind of flat, greppable CSV
-    # LIKWID already writes for the CPU sweep (log.omp<N>.<GROUP>.csv), so
-    # parsing.py can read GPU and CPU results the same way. --page raw
-    # gives one row per (kernel launch, metric); with --launch-count 1
-    # there is exactly one kernel launch per file.
     csv_out="log.batch${batch}.csv"
     ncu_rep="${ncu_output}.ncu-rep"
     if [ -f "$ncu_rep" ]; then
@@ -372,8 +318,7 @@ echo "Available metrics on this node: $run_dir/ncu_available_metrics.txt"
 echo "GPU info: $run_dir/gpu_info.csv, $run_dir/gpu_topology.txt"
 echo "Code provenance: $run_dir/git_info.txt"
 
-# Fail the job itself when the candidate didn't validate, so sacct/sbatch surface it as
-# FAILED instead of looking identical to a run that actually collected Nsight Compute data.
+# Fail the job itself when the candidate didn't validate
 if [ "${validation_rc:-0}" -ne 0 ]; then
   echo "Exiting non-zero: validation failed for this candidate (see $validation_status)." >&2
   exit 3
