@@ -159,24 +159,14 @@ printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase
   > "$run_dir/config.txt"
 
 
-# Rebuild a CPU-only binary when the run requests it. Skips `make clean` when the
-# same build flags were used for the last build in this workspace -- the previous
-# iteration's .o/binaries are still there (execution.py's rsync no longer deletes
-# them), so make's own mtime-based dependency tracking only rebuilds what the
-# latest rsync actually changed, instead of recompiling everything from scratch
-# every iteration. Any flag change (or a first build here) still forces a full
-# clean rebuild, since a stale object built with different flags won't be
-# detected as stale by mtime alone.
+# Rebuild a CPU-only binary when the run requests it. Always starts from a clean
+# tree -- a profiling point already takes minutes to hours, so a full rebuild
+# (tens of seconds) is noise by comparison, and it's not worth the risk of a
+# stale .o silently surviving an incremental build.
 build_cpu() {
   cd "$src_dir" || return 1
-  local flags_fingerprint="MPI=$mpi MPICC=$mpicc COMPILER=$compiler_cpu GPU=0 LIKWID=1"
-  local stamp_file=".build_flags.cpu"
-  if [ ! -f "$stamp_file" ] || [ "$(cat "$stamp_file" 2>/dev/null)" != "$flags_fingerprint" ]; then
-    echo "Build flags changed (or first build in this workspace) -- running 'make clean' first."
-    make clean || return 1
-  fi
+  make clean || return 1
   make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1 || return 1
-  echo "$flags_fingerprint" > "$stamp_file"
   # Return to work_dir (may have been entered via Slurm's temporary launch dir)
   cd "$work_dir" 2>/dev/null || true
   return 0

@@ -26,7 +26,6 @@ projects/hermes/scripts/__pycache__/
 projects/hermes/scripts/*.yaml
 projects/hermes/scripts/.hermes_optimization/
 src/*.o
-src/.build_flags.*
 src/atmfmt
 src/brightness
 src/climatology
