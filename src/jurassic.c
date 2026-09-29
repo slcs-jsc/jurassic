@@ -3720,9 +3720,19 @@ int formod_pencil(
       }
 #if defined(_OPENACC)
       /* Segment skipped. Establish the zero the full-structure fill used to
-	 leave behind: the surface-reflection loop below reads
+	 leave behind, because the surface-reflection loop below reads
 	 los->eps[ip][id] unconditionally for ip in [0, np) and id in
-	 [0, nd), so this region must not be left uninitialised. */
+	 [0, nd), so that region must not be left uninitialised.
+
+	 Only do so when the reflection term can actually execute. That loop
+	 is reached solely through `if (refl)`, and refl can only be set when
+	 ctl->sftype >= 2 (see the reflectivity test below); it is the only
+	 reader of los->eps. With sftype < 2 the zero would be a pure device
+	 store that nothing ever reads, and because los_t is row-strided by
+	 the compile-time ND = 128 rather than the run-time channel count,
+	 each such store dirties a fresh L2 line that is later evicted as a
+	 16-bytes-dirty line. Skipping it removes that write traffic outright
+	 while leaving every value any reader can observe unchanged. */
       else
 	los->eps[ip][id] = 0;
 #endif
