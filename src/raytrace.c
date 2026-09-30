@@ -101,7 +101,8 @@ int main(
   for (int ir = 0; ir < obs.nr; ir++) {
 
     /* Raytracing... */
-    raytrace(&ctl, &atm, &obs, &los, ir);
+    if (raytrace(&ctl, &atm, &obs, &los, ir) != FORMOD_STATUS_OK)
+      ERRMSG("Ray tracing failed!");
 
     /* Set filename data... */
     sprintf(filename, "%s.%d.tab", losbase, ir);

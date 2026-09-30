@@ -3263,36 +3263,39 @@ int find_emitter(
 
 /*****************************************************************************/
 
-void formod_core(
+int formod(
   const ctl_t *ctl,
   const tbl_t *tbl,
   atm_t *atm,
-  obs_t *obs) {
-
-  /* Allocate... */
-  int *mask;
-  ALLOC(mask, int,
-	ND * NR);
+  obs_t *obs,
+  los_t *los_scratch,
+  obs_t *obs_scratch) {
 
   /* Save observation mask... */
   for (int id = 0; id < ctl->nd; id++)
     for (int ir = 0; ir < obs->nr; ir++)
-      mask[id * NR + ir] = !isfinite(obs->rad[id][ir]);
+      obs->mask[id][ir] = !isfinite(obs->rad[id][ir]);
 
   /* Hydrostatic equilibrium... */
   hydrostatic(ctl, atm);
 
   /* CGA or EGA forward model... */
-  if (ctl->formod == 0 || ctl->formod == 1)
-    for (int ir = 0; ir < obs->nr; ir++)
-      formod_pencil(ctl, tbl, atm, obs, ir);
+  if (ctl->formod == 0 || ctl->formod == 1) {
+    for (int ir = 0; ir < obs->nr; ir++) {
+      const int status = formod_pencil(ctl, tbl, atm, obs, ir, los_scratch);
+      if (status != FORMOD_STATUS_OK)
+	return status;
+    }
+  }
 
   /* Call RFM... */
   else if (ctl->formod == 2)
     formod_rfm(ctl, tbl, atm, obs);
 
   /* Apply field-of-view convolution... */
-  formod_fov(ctl, obs);
+  const int fov_status = formod_fov(ctl, obs, obs_scratch);
+  if (fov_status != FORMOD_STATUS_OK)
+    return fov_status;
 
   /* Convert radiance to brightness temperature... */
   if (ctl->write_bbt)
@@ -3303,27 +3306,9 @@ void formod_core(
   /* Apply observation mask... */
   for (int id = 0; id < ctl->nd; id++)
     for (int ir = 0; ir < obs->nr; ir++)
-      if (mask[id * NR + ir])
+      if (obs->mask[id][ir])
 	obs->rad[id][ir] = NAN;
 
-  /* Free... */
-  free(mask);
-}
-
-/*****************************************************************************/
-
-int formod(
-  const ctl_t *ctl,
-  const tbl_t *tbl,
-  atm_t *atm,
-  obs_t *obs,
-  los_t *los_scratch,
-  obs_t *obs_scratch) {
-
-  (void) los_scratch;
-  (void) obs_scratch;
-
-  formod_core(ctl, tbl, atm, obs);
   return FORMOD_STATUS_OK;
 }
 
@@ -3357,17 +3342,22 @@ void formod_batch(
     return;
   }
 
-  const char *marker_region = jurassic_marker_ref ? "formod_ref" : "formod";
-#pragma omp parallel for schedule(static) default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,marker_region)
+  /* The single-threaded reference run is not measured; LIKWID would report
+     empty regions for all other threads. */
+  const int measure = !jurassic_marker_ref;
+  (void) measure;
+#pragma omp parallel for schedule(static) default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,measure)
   for (int ib = 0; ib < nbatch; ib++) {
 
     #ifdef LIKWID_PERFMON
-    LIKWID_MARKER_START(marker_region);
+    if (measure)
+      LIKWID_MARKER_START("formod");
     #endif
     const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
                                  &los_scratch[ib], &obs_scratch[ib]);
     #ifdef LIKWID_PERFMON
-    LIKWID_MARKER_STOP(marker_region);
+    if (measure)
+      LIKWID_MARKER_STOP("formod");
     #endif
     if (status)
       status[ib] = ib_status;
@@ -3414,40 +3404,35 @@ void formod_continua(
 
 /*****************************************************************************/
 
-void formod_fov(
+int formod_fov(
   const ctl_t *ctl,
-  obs_t *obs) {
+  obs_t *obs,
+  obs_t *obs_scratch) {
 
-  double rad[ND][NR], tau[ND][NR], z[NR];
+  int rays[2 * NFOV + 1];
+  double z[2 * NFOV + 1];
 
   /* Do not take into account FOV... */
   if (ctl->fov[0] == '-')
-    return;
-
-  /* Allocate... */
-  obs_t *obs2;
-  ALLOC(obs2, obs_t, 1);
+    return FORMOD_STATUS_OK;
 
   /* Copy observation data... */
-  copy_obs(ctl, obs2, obs, 0);
+  copy_obs(ctl, obs_scratch, obs, 0);
 
   /* Loop over ray paths... */
   for (int ir = 0; ir < obs->nr; ir++) {
 
-    /* Get radiance and transmittance profiles... */
+    /* Collect neighbouring ray paths for the same time step... */
     int nz = 0;
     for (int ir2 = MAX(ir - NFOV, 0);
 	 ir2 < MIN(ir + 1 + NFOV, obs->nr); ir2++)
       if (obs->time[ir2] == obs->time[ir]) {
-	z[nz] = obs2->vpz[ir2];
-	for (int id = 0; id < ctl->nd; id++) {
-	  rad[id][nz] = obs2->rad[id][ir2];
-	  tau[id][nz] = obs2->tau[id][ir2];
-	}
+	rays[nz] = ir2;
+	z[nz] = obs_scratch->vpz[ir2];
 	nz++;
       }
     if (nz < 2)
-      ERRMSG("Cannot apply FOV convolution!");
+      return FORMOD_STATUS_FOV_DATA_MISSING;
 
     /* Convolute profiles with FOV... */
     double wsum = 0;
@@ -3458,11 +3443,15 @@ void formod_fov(
     for (int i = 0; i < ctl->fov_n; i++) {
       const double zfov = obs->vpz[ir] + ctl->fov_dz[i];
       const int idx = locate_irr(z, nz, zfov);
+      const int ir0 = rays[idx];
+      const int ir1 = rays[idx + 1];
       for (int id = 0; id < ctl->nd; id++) {
 	obs->rad[id][ir] += ctl->fov_w[i]
-	  * LIN(z[idx], rad[id][idx], z[idx + 1], rad[id][idx + 1], zfov);
+	  * LIN(z[idx], obs_scratch->rad[id][ir0],
+		z[idx + 1], obs_scratch->rad[id][ir1], zfov);
 	obs->tau[id][ir] += ctl->fov_w[i]
-	  * LIN(z[idx], tau[id][idx], z[idx + 1], tau[id][idx + 1], zfov);
+	  * LIN(z[idx], obs_scratch->tau[id][ir0],
+		z[idx + 1], obs_scratch->tau[id][ir1], zfov);
       }
       wsum += ctl->fov_w[i];
     }
@@ -3472,24 +3461,23 @@ void formod_fov(
     }
   }
 
-  /* Free... */
-  free(obs2);
+  return FORMOD_STATUS_OK;
 }
 
 /*****************************************************************************/
 
-void formod_pencil(
+int formod_pencil(
   const ctl_t *ctl,
   const tbl_t *tbl,
   const atm_t *atm,
   obs_t *obs,
-  const int ir) {
+  const int ir,
+  los_t *los) {
 
   double rad[ND], tau[ND], tau_path[ND][NG];
 
-  /* Allocate... */
-  los_t *los;
-  ALLOC(los, los_t, 1);
+  /* Reset scratch LOS data (raytrace relies on zero-initialized fields)... */
+  memset(los, 0, sizeof(*los));
 
   /* Initialize... */
   for (int id = 0; id < ctl->nd; id++) {
@@ -3500,7 +3488,11 @@ void formod_pencil(
   }
 
   /* Raytracing... */
-  raytrace(ctl, atm, obs, los, ir);
+  {
+    const int status = raytrace(ctl, atm, obs, los, ir);
+    if (status != FORMOD_STATUS_OK)
+      return status;
+  }
 
   /* Loop over LOS points... */
   for (int ip = 0; ip < los->np; ip++) {
@@ -3610,8 +3602,7 @@ void formod_pencil(
     obs->tau[id][ir] = tau[id];
   }
 
-  /* Free... */
-  free(los);
+  return FORMOD_STATUS_OK;
 }
 
 /*****************************************************************************/
@@ -3705,7 +3696,8 @@ void formod_rfm(
   for (int ir = 0; ir < obs->nr; ir++) {
 
     /* Raytracing... */
-    raytrace(ctl, atm, obs, los, ir);
+    if (raytrace(ctl, atm, obs, los, ir) != FORMOD_STATUS_OK)
+      ERRMSG("Ray tracing failed!");
 
     /* Nadir or zenith? (air mass factor / secant of zenith angle) */
     if (obs->tpz[ir] <= zmin) {
@@ -4400,9 +4392,16 @@ void kernel(
   int *iqa;
   ALLOC(iqa, int,
 	N);
+  los_t *los0;
+  obs_t *obs_scratch0;
+  ALLOC(los0, los_t, 1);
+  ALLOC(obs_scratch0, obs_t, 1);
 
   /* Compute radiance for undisturbed atmospheric data... */
-  formod_core(ctl, tbl, atm, obs);
+  if (formod(ctl, tbl, atm, obs, los0, obs_scratch0) != FORMOD_STATUS_OK)
+    ERRMSG("Forward model failed!");
+  free(los0);
+  free(obs_scratch0);
 
   /* Compose vectors... */
   atm2x(ctl, atm, x0, iqa, NULL);
@@ -4417,9 +4416,12 @@ void kernel(
 
     /* Allocate... */
     atm_t *atm1;
-    obs_t *obs1;
+    obs_t *obs1, *obs_scratch1;
+    los_t *los1;
     ALLOC(atm1, atm_t, 1);
     ALLOC(obs1, obs_t, 1);
+    ALLOC(obs_scratch1, obs_t, 1);
+    ALLOC(los1, los_t, 1);
     gsl_vector *x1 = gsl_vector_alloc(n);
     gsl_vector *yy1 = gsl_vector_alloc(m);
 
@@ -4452,7 +4454,8 @@ void kernel(
     x2atm(ctl, x1, atm1);
 
     /* Compute radiance for disturbed atmospheric data... */
-    formod_core(ctl, tbl, atm1, obs1);
+    if (formod(ctl, tbl, atm1, obs1, los1, obs_scratch1) != FORMOD_STATUS_OK)
+      ERRMSG("Forward model failed!");
 
     /* Compose measurement vector for disturbed radiance data... */
     obs2y(ctl, obs1, yy1, NULL, NULL);
@@ -4467,6 +4470,8 @@ void kernel(
     gsl_vector_free(yy1);
     free(atm1);
     free(obs1);
+    free(obs_scratch1);
+    free(los1);
   }
 
   /* Free... */
@@ -4701,13 +4706,20 @@ void optimal_estimation(
   gsl_vector *y_i = gsl_vector_alloc(m);
   gsl_vector *y_m = gsl_vector_alloc(m);
 
+  los_t *los_scratch;
+  obs_t *obs_scratch;
+  ALLOC(los_scratch, los_t, 1);
+  ALLOC(obs_scratch, obs_t, 1);
+
   /* Set timer... */
   SELECT_TIMER("RET_SETUP", "RETRIEVAL");
 
   /* Set initial state... */
   copy_atm(ctl, atm_i, atm_apr, 0);
   copy_obs(ctl, obs_i, obs_meas, 0);
-  formod_core(ctl, tbl, atm_i, obs_i);
+  if (formod(ctl, tbl, atm_i, obs_i, los_scratch, obs_scratch)
+      != FORMOD_STATUS_OK)
+    ERRMSG("Forward model failed!");
 
   /* Set state vectors and observation vectors... */
   atm2x(ctl, atm_apr, x_a, NULL, NULL);
@@ -4810,7 +4822,9 @@ void optimal_estimation(
 	atm_i->sfeps[isf] = CLAMP(atm_i->sfeps[isf], 0, 1);
 
       /* Forward calculation... */
-      formod_core(ctl, tbl, atm_i, obs_i);
+      if (formod(ctl, tbl, atm_i, obs_i, los_scratch, obs_scratch)
+	  != FORMOD_STATUS_OK)
+	ERRMSG("Forward model failed!");
       obs2y(ctl, obs_i, y_i, NULL, NULL);
 
       /* Determine dx = x_i - x_a and dy = y - F(x_i) ... */
@@ -4956,6 +4970,8 @@ void optimal_estimation(
   gsl_vector_free(y_aux);
   gsl_vector_free(y_i);
   gsl_vector_free(y_m);
+  free(los_scratch);
+  free(obs_scratch);
 
   free(ipa);
   free(iqa);
@@ -4963,7 +4979,7 @@ void optimal_estimation(
 
 /*****************************************************************************/
 
-void raytrace(
+int raytrace(
   const ctl_t *ctl,
   const atm_t *atm,
   obs_t *obs,
@@ -4989,7 +5005,7 @@ void raytrace(
 
   /* Check observer altitude... */
   if (obs->obsz[ir] < zmin)
-    ERRMSG("Observer below surface!");
+    return FORMOD_STATUS_OBSERVER_BELOW_SURFACE;
 
   /* Determine Cartesian coordinates for observer and view point... */
   geo2cart(obs->obsz[ir], obs->obslon[ir], obs->obslat[ir], xobs);
@@ -5061,7 +5077,7 @@ void raytrace(
     
     /* Abort before writing beyond the fixed LOS scratch buffers... */
     if (los->np >= NLOS)
-      ERRMSG("Too many LOS points!");
+      return FORMOD_STATUS_TOO_MANY_LOS_POINTS;
     
     /* Save data... */
     los->lon[los->np] = lon;
@@ -5190,6 +5206,8 @@ void raytrace(
 	los->cgp[ip][ig] /= los->cgu[ip][ig];
 	los->cgt[ip][ig] /= los->cgu[ip][ig];
       }
+
+  return FORMOD_STATUS_OK;
 }
 
 /*****************************************************************************/

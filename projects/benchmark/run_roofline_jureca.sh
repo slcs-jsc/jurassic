@@ -3,7 +3,7 @@
 #SBATCH --partition=dc-cpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=128
 #SBATCH --time=04:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
@@ -34,7 +34,7 @@ source "$jr_scripts_dir/base.sh"
 reps=${REPS:-4}
 threads=${THREADS:-64}
 batch=${BATCH_SIZE:-1024}
-groups=${LIKWID_GROUPS:-"MEM_DP"}
+groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"}
  
 case_list=${CASE_LIST:-"zenith_baseline nadir_baseline limb_baseline"}
  
@@ -93,10 +93,42 @@ for case_name in $case_list; do
     echo "peak_flops_mflops=${peak_flops}" | tee "$ceilings_file"
     echo "stream_bw_mbytes=${stream_bw}"   | tee -a "$ceilings_file"
     echo "threads=${threads}"              | tee -a "$ceilings_file"
- 
-    echo "peak_flops_mflops=${peak_flops}" | tee "$ceilings_file"
-    echo "stream_bw_mbytes=${stream_bw}"   | tee -a "$ceilings_file"
-    echo "threads=${threads}"              | tee -a "$ceilings_file"
+
+    # Additional roofs, read by eval_roofline.py from ceilings.txt:
+    #   <name>_flops_mflops  lower compute ceilings (name=kernel pairs, EXTRA_FLOPS_BENCHES)
+    #   <level>_bw_mbytes    cache bandwidths (load kernel on per-thread working sets that
+    #                        fit into L1/L2/L3, CACHE_BENCH)
+    extra_flops_benches=${EXTRA_FLOPS_BENCHES:-"scalar=peakflops avx=peakflops_avx"}
+    cache_bench=${CACHE_BENCH:-load_avx}
+
+    for pair in $extra_flops_benches; do
+      name=${pair%%=*}
+      kernel=${pair#*=}
+      echo "Measuring extra compute ceiling '$name' ($kernel, threads=$threads)"
+      value=$(bench_likwid_measure "$kernel" 1 "$threads" 'MFlops/s:' \
+                "$JR_RUN_DIR/likwid_bench_flops_${name}.txt")
+      if [ -n "$value" ]; then
+        echo "${name}_flops_mflops=${value}" | tee -a "$ceilings_file"
+      else
+        echo "WARNING: $kernel gave no result -> skipping '$name' ceiling." >&2
+      fi
+    done
+
+    if bench_cache_workingsets; then
+      for level in L1 L2 L3; do
+        ws_var=JR_${level}_WS_KB
+        echo "Measuring $level bandwidth ($cache_bench, threads=$threads, ${!ws_var} kB/thread)"
+        value=$(bench_likwid_measure "$cache_bench" "${!ws_var}" "$threads" 'MByte/s:' \
+                  "$JR_RUN_DIR/likwid_bench_bw_${level}.txt")
+        if [ -n "$value" ]; then
+          echo "${level}_bw_mbytes=${value}" | tee -a "$ceilings_file"
+        else
+          echo "WARNING: $cache_bench gave no result -> skipping $level bandwidth." >&2
+        fi
+      done
+    else
+      echo "WARNING: cache sizes not readable from sysfs -> skipping cache bandwidths." >&2
+    fi
  
     first=0
   fi
