@@ -3670,6 +3670,36 @@ int formod_pencil(
       return status;
   }
 
+#if defined(_OPENACC)
+  /* Does anything ever read los->eps for this ray?
+     ==================================================
+     The down-welling loop at the bottom of this function is the ONLY reader of
+     los->eps, and it is reachable solely through `if (refl)`. refl can only be
+     set when ctl->sftype >= 2, the ray hit the surface (los->sft > 0) and
+     los->sfeps[id] < 1 for at least one channel. All three are established by
+     raytrace() and are invariant over the LOS-point loop below, so the answer
+     is known here, once, before a single emissivity is computed.
+
+     When it is false, every los->eps store in the point loop is dead device
+     traffic. That is not a negligible amount: los->eps is row-strided by the
+     compile-time ND = 128 rather than the run-time channel count, so each
+     per-point store dirties a fresh L2 line whose remaining 120 doubles are
+     never touched, and that line is later evicted as a partly-dirty line --
+     once per LOS point per ray, i.e. np * nbatch * nr times per batch. With
+     nsf = 0 (the default, and this benchmark case, where zenith.ctl sets no
+     NSF) raytrace() leaves los->sfeps[id] = 1.0 for every channel, so the
+     surface is a perfect absorber, refl is never set, and all of it is
+     thrown away. Note los->sft is tested before sfeps is dereferenced:
+     raytrace() only writes sfeps on the branch that also sets sft. */
+  int need_eps = 0;
+  if (ctl->sftype >= 2 && los->sft > 0)
+    for (int id = 0; id < ctl->nd; id++)
+      if (los->sfeps[id] < 1) {
+        need_eps = 1;
+        break;
+      }
+#endif
+
   /* Loop over LOS points... */
 #if defined(_OPENACC)
 #pragma acc loop seq
@@ -3710,13 +3740,23 @@ int formod_pencil(
 
 	/* Get segment emissivity. An exactly zero transmittance represents
 	   a fully opaque segment and must contribute with emissivity one. */
-	los->eps[ip][id] = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
+	const double eps = 1 - tau_gas[id] * exp(-beta_ctm[id] * los->ds[ip]);
+
+	/* Spill to the LOS scratch only if the down-welling loop can read it
+	   back; otherwise the two loads below are the sole consumers of this
+	   value and a register/local suffices. Arithmetically identical. */
+#if defined(_OPENACC)
+	if (need_eps)
+	  los->eps[ip][id] = eps;
+#else
+	los->eps[ip][id] = eps;
+#endif
 
 	/* Compute radiance... */
-	rad[id] += src_ip[id] * los->eps[ip][id] * tau[id];
+	rad[id] += src_ip[id] * eps * tau[id];
 
 	/* Compute path transmittance... */
-	tau[id] *= (1 - los->eps[ip][id]);
+	tau[id] *= (1 - eps);
       }
 #if defined(_OPENACC)
       /* Segment skipped. Establish the zero the full-structure fill used to
@@ -3732,8 +3772,12 @@ int formod_pencil(
 	 the compile-time ND = 128 rather than the run-time channel count,
 	 each such store dirties a fresh L2 line that is later evicted as a
 	 16-bytes-dirty line. Skipping it removes that write traffic outright
-	 while leaving every value any reader can observe unchanged. */
-      else
+	 while leaving every value any reader can observe unchanged.
+
+	 The test below is the sharper version of that argument: need_eps is
+	 computed before the point loop and is false whenever the reflection
+	 term cannot execute at all -- which, for nsf = 0, is every ray. */
+      else if (need_eps)
 	los->eps[ip][id] = 0;
 #endif
   }
@@ -3756,7 +3800,10 @@ int formod_pencil(
 	  break;
 	}
 
-    /* Calculate reflection... */
+    /* Calculate reflection... 
+       Invariant: refl can only be set under exactly the condition that
+       raised need_eps before the point loop, so every los->eps read here
+       was established by the store guarded on need_eps above. */
     if (refl) {
 
       /* Initialize... */
