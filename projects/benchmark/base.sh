@@ -333,4 +333,56 @@ bench_finish() {
   echo "Run directory: $JR_RUN_DIR"
   echo "Raw output:    $JR_RUN_DIR/out/<label>.t<N>.<GROUP>.b<N>.rep<N>.{csv,txt}"
 }
+
+# N physical cores on socket $2 (default socket 0)
+cpus_phys() {
+  local n=$1 sock=${2:-0}
+  awk -F, -v s="$sock" '$3 == s { if (!($2 in c)) { c[$2]=1; print $1 } }' "$JR_TOPO_MAP" \
+    | sort -n | head -n "$n" | paste -sd,
+}
+
+# All N physical cores across all sockets
+cpus_all_phys() {
+  awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; print $1 } }' "$JR_TOPO_MAP" \
+    | sort -n | head -n "$1" | paste -sd,
+}
+
+# N logical CPUs on socket 0: physical cores first, then SMT
+cpus_smt() {
+  awk -F, '$3 == 0 {print $1}' "$JR_TOPO_MAP" | sort -n | head -n "$1" | paste -sd,
+}
+
+# N physical cores spread across all sockets
+cpus_spread() {
+  awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; i[$3]++; print i[$3], $3, $1 } }' \
+    "$JR_TOPO_MAP" | sort -k1,1n -k2,2n | awk '{print $3}' \
+    | head -n "$1" | paste -sd,
+}
+
+cpus_all_phys_socket_qualified() {
+  local n=$1
+  local remaining=$n
+  local parts=()
+  local sock
+  for sock in $(awk -F, '{print $3}' "$JR_TOPO_MAP" | sort -un); do
+    [ "$remaining" -le 0 ] && break
+ 
+    local sock_phys_count
+    sock_phys_count=$(awk -F, -v s="$sock" \
+      '$3 == s { if (!($2 in seen)) { seen[$2]=1; c++ } } END { print c+0 }' \
+      "$JR_TOPO_MAP")
+ 
+    local take=$remaining
+    [ "$take" -gt "$sock_phys_count" ] && take=$sock_phys_count
+    [ "$take" -le 0 ] && continue
+
+    local idx_list
+    idx_list=$(seq 0 $((take - 1)) | paste -sd,)
+ 
+    parts+=("S${sock}:${idx_list}")
+    remaining=$(( remaining - take ))
+  done
+  local IFS='@'
+  echo "${parts[*]}"
+}
  
