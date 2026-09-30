@@ -145,6 +145,42 @@ bench_init() {
     } > "$JR_RUN_DIR/config.txt"
 }
 
+# Build in a private copy of src/
+# (so two concurrent jobs on the same repo checkout never race on $JR_SRC_DIR's object files ) 
+bench_build_isolated() {
+    local build_root="$JR_WORK_DIR/build_src"
+    local build_dir="$build_root/src"
+
+    rm -rf "$build_root"
+    mkdir -p "$build_root"
+    local entry base
+    for entry in "$JR_REPO_ROOT"/*; do
+        base="$(basename "$entry")"
+        if [[ "$base" == "src" ]]; then
+            cp -r "$entry" "$build_dir"
+        else
+            ln -s "$entry" "$build_root/$base"
+        fi
+    done
+
+    if ! ( cd "$build_dir" && make clean && make -j "$@" ) 1>&2; then
+        echo "ERROR: isolated build failed -> $build_dir" >&2
+        rm -rf "$build_root"
+        return 1
+    fi
+
+    mkdir -p "$JR_WORK_DIR/bin"
+    rm -f "$JR_WORK_DIR/bin"/*
+    local bin
+    while IFS= read -r -d '' bin; do
+        cp "$bin" "$JR_WORK_DIR/bin/"
+    done < <(find "$build_dir" -maxdepth 1 -type f -executable -print0)
+
+    rm -rf "$build_root"
+
+    JR_BIN_DIR="$JR_WORK_DIR/bin"
+}
+
 # build CPU binaries
 # nomemset: exclude  memset(los, 0, sizeof(*los)) in jurassic.c
 bench_build_forward() {
@@ -152,18 +188,18 @@ bench_build_forward() {
     local extra=""
     case "$variant" in
         base)     extra="" ;;
-        flat_array)  extra="FLAT_ARRAYS=1" ;;                        
+        flat_array)  extra="FLAT_ARRAYS=1" ;;
         *) echo "Unknown build variant: $variant" >&2; return 1 ;;
     esac
-    
+
     echo "Building variant '$variant' (EXTRA_CFLAGS='$extra')"
 
     if [ -n "$extra" ]; then
-    ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
-        COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra ) || return 1
+        bench_build_isolated MPI="$JR_MPI" MPICC="$JR_MPICC" \
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra || return 1
     else
-        ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
-            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 ) || return 1
+        bench_build_isolated MPI="$JR_MPI" MPICC="$JR_MPICC" \
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 || return 1
     fi
 
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
@@ -182,11 +218,11 @@ bench_build_retrieval() {
     echo "=== building retrieval variant '$variant' (EXTRA_CFLAGS='$extra') ==="
 
     if [ -n "$extra" ]; then
-    ( cd "$JR_SRC_DIR" && make clean && make -j MPI=1 MPICC="$JR_MPICC" \
-        COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra ) || return 1
+        bench_build_isolated MPI=1 MPICC="$JR_MPICC" \
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra || return 1
     else
-        ( cd "$JR_SRC_DIR" && make clean && make -j MPI=1 MPICC="$JR_MPICC" \
-            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 ) || return 1
+        bench_build_isolated MPI=1 MPICC="$JR_MPICC" \
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 || return 1
     fi
 
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
@@ -197,8 +233,9 @@ bench_build_retrieval() {
 bench_prepare_inputs() {
   cd "$JR_WORK_DIR"
   rm -rf data && mkdir -p data
-  "$JR_SRC_DIR/climatology" "$JR_ACTIVE_CTL" data/atm.tab
-  "$JR_SRC_DIR/$JR_GEOMETRY" "$JR_ACTIVE_CTL" data/obs.tab
+  local bin_dir="${JR_BIN_DIR:-$JR_SRC_DIR}"
+  "$bin_dir/climatology" "$JR_ACTIVE_CTL" data/atm.tab
+  "$bin_dir/$JR_GEOMETRY" "$JR_ACTIVE_CTL" data/obs.tab
   cp -a data "$JR_RUN_DIR/data" 2>/dev/null || true
 }
 
@@ -277,10 +314,7 @@ bench_cache_workingsets() {
   JR_L3_WS_KB=${L3_WS_KB:-$(( l2_kb + l3_kb / (l3_cpus / l2_cpus) / 2 ))}
 }
 
-# Run one likwid-bench kernel with <threads> threads spread over the sockets and print
-# the metric value. The working set is given per thread (likwid-bench takes the total per
-# workgroup). Prints nothing if the kernel is unavailable or fails.
-# usage: bench_likwid_measure <kernel> <ws_per_thread_kb> <threads> <metric-regex> <logfile>
+# Run one likwid-bench kernel with <threads> threads spread over the sockets and print the metric value. 
 bench_likwid_measure() {
   local kernel=$1 ws_kb=$2 threads=$3 metric=$4 logfile=$5
   local sockets_needed remaining take s
@@ -310,7 +344,7 @@ bench_run_forward() {
   local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
   local tab="/tmp/jurassic_${JR_RUN_ID}_${tag}.tab"
-  local formod_bin="${JR_FORMOD_BIN:-$JR_SRC_DIR/formod}"
+  local formod_bin="${JR_FORMOD_BIN:-${JR_BIN_DIR:-$JR_SRC_DIR}/formod}"
   mkdir -p "$JR_WORK_DIR/out"
 
   echo "--- $tag (cores=$cores${NUMA_POLICY:+, numa=$NUMA_POLICY}) ---"
@@ -356,7 +390,7 @@ bench_run_retrieval() {
   set +e
   OMP_NUM_THREADS=$threads mpirun -np "$ranks" \
     likwid-perfctr -C "$cores" -g "$group" -m -o  "$csv" \
-    "$JR_SRC_DIR/retrieval" "$JR_ACTIVE_CTL" "$JR_RET_DIRLIST" \
+    "${JR_BIN_DIR:-$JR_SRC_DIR}/retrieval" "$JR_ACTIVE_CTL" "$JR_RET_DIRLIST" \
     > "$txt" 2>&1
   local rc=$?
   set -e
