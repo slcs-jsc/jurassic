@@ -41,7 +41,7 @@ CHANNEL_COUNTS_FILE="$CONFIG_DIR/channel_counts.txt"
 GAS_SETS_DIR="$CONFIG_DIR/gas_sets"
  
 THREADS="${THREADS:-${JR_PHYS_PER_SOCKET}}"
-CORES="${CORES:-E:S0:${THREADS}}"
+CORES="${CORES:-$(cpus_phys "$THREADS")}"
 REP="${REP:-3}"
 
 # ND/NG are compile-time array bounds (see src/jurassic.h)

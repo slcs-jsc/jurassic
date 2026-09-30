@@ -27,9 +27,6 @@
 #   - Measure Runtime -> compute Speedup & Efficiency
 #   - Analyze memory volume/bandwidth (MEM_DP)
 #
-# Thread pinning is handled via LIKWID hardware expressions (E:S0:...)
-# Memory affinity is dynamically set via Membind (-m) or Interleave (-i)
-#
 # Output: out/<category>_<strong/weak>.t<threads>.<GROUP>.b<batch>.rep<rep>.csv
 
 get_batch_size() {
@@ -89,20 +86,19 @@ spread_threads=${SPREAD_THREADS:-"$(( JR_PHYS_PER_SOCKET + 4 )) $(( JR_PHYS_PER_
 
 for rep in $(seq 1 "$reps"); do
 
-  # Intra-Socket 
-  numa_flag="-m" 
+  # Intra-Socket
+  numa_flag="-m"
   for t in $thread_list; do
     current_batch=$(get_batch_size "$t")
-    likwid_cores="E:S0:${t}"
+    likwid_cores=$(cpus_phys "$t")
 
     for group in "${JR_GROUPS[@]}"; do
       bench_run_forward "intra_socket_${SCALING_MODE}" "$t" "$group" "$current_batch" "$rep" "$likwid_cores" "$numa_flag"
     done
   done
- 
-  # SMT (Hyperthreading)
+
   current_batch=$(get_batch_size "$smt_threads")
-  likwid_cores="E:S0:${smt_threads}"
+  likwid_cores=$(cpus_smt "$smt_threads")
 
   for group in "${JR_GROUPS[@]}"; do
     bench_run_forward smt_socket_${SCALING_MODE} "$smt_threads" "$group" "$current_batch" "$rep" "$likwid_cores" "-m"
@@ -112,23 +108,17 @@ for rep in $(seq 1 "$reps"); do
   current_batch=$(get_batch_size "$target_threads")
 
   # 1. All Threads on Socket 0
-  cores_compact="E:S0:${target_threads}"
+  cores_compact=$(cpus_phys "$target_threads")
   for group in "${JR_GROUPS[@]}"; do
     bench_run_forward "inter_compact_${SCALING_MODE}" "$target_threads" "$group" "$current_batch" "$rep" "$cores_compact" "-i"
   done
 
-  # 2. Spread threads evenly across sockets
+  # 2. Spread threads evenly across sockets (cpus_spread round-robins
+  # distinct physical cores across sockets, so no even-division check needed)
   threads_per_sock=$(( target_threads / JR_N_SOCKETS ))
 
   if [ "$threads_per_sock" -gt 0 ]; then
-    cores_spread=""
-    for (( s=0; s<JR_N_SOCKETS; s++ )); do
-      if [ -z "$cores_spread" ]; then
-        cores_spread="E:S${s}:${threads_per_sock}"
-      else
-        cores_spread="${cores_spread}@E:S${s}:${threads_per_sock}"
-      fi
-    done
+    cores_spread=$(cpus_spread "$target_threads")
 
     for group in "${JR_GROUPS[@]}"; do
         bench_run_forward "inter_spread_${SCALING_MODE}" "$target_threads" "$group" "$current_batch" "$rep" "$cores_spread" "-i"

@@ -63,7 +63,7 @@ for case_name in $case_list; do
     remaining=$threads
     for (( s=0; s<sockets_needed; s++ )); do
       take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
-      flops_workgroup_args+=( -w "S${s}:${flops_ws}:${take}" )
+      flops_workgroup_args+=( -w "$(cpus_phys "$take" "$s"):${flops_ws}:${take}" )
       remaining=$(( remaining - take ))
     done
 
@@ -71,14 +71,13 @@ for case_name in $case_list; do
     remaining=$threads
     for (( s=0; s<sockets_needed; s++ )); do
       take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
-      bw_workgroup_args+=( -w "S${s}:${bench_ws}:${take}" )
+      bw_workgroup_args+=( -w "$(cpus_phys "$take" "$s"):${bench_ws}:${take}" )
       remaining=$(( remaining - take ))
     done
 
-    cores_expression="E:S0:${threads}"
+    cores_expression=$(cpus_phys "$threads")
     if [ "$sockets_needed" -gt 1 ]; then
-       threads_per_sock=$(( threads / JR_N_SOCKETS ))
-       cores_expression="E:S0:${threads_per_sock}@E:S1:${threads_per_sock}"
+       cores_expression=$(cpus_spread "$threads")
     fi
 
     echo "Measuring compute ceiling ($flops_bench, threads=$threads, workgroups=${flops_workgroup_args[*]})"
