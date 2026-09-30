@@ -9,6 +9,7 @@
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e1_sweep
 set -euo pipefail
+shopt -s inherit_errexit
 
 JR_EXPERIMENT=e3_sweep
 RUN_ID=${RUN_ID:-e3_sweep_${SLURM_JOB_ID:-manual}}
@@ -99,17 +100,26 @@ build_or_reuse() {
             ln -s "$entry" "$root_dir/$base"
         fi
     done
-    (
-        cd "$build_dir"
-        make clean
-        make -j MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
-            GPU=0 LIKWID=1 DEFINES="-DND=${nd} -DNG=${ng}"
-    ) 1>&2
- 
+
+    if ! ( cd "$build_dir" \
+        && make clean \
+        && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
+             GPU=0 LIKWID=1 DEFINES="-DND=${nd} -DNG=${ng}" ) 1>&2; then
+        echo "[e3] ERROR: build failed for ND=${nd} NG=${ng} -> $build_dir" >&2
+        rm -rf "$root_dir"
+        exit 1
+    fi
+
+    if [[ ! -x "$build_dir/formod" ]]; then
+        echo "[e3] ERROR: build for ND=${nd} NG=${ng} did not produce $build_dir/formod" >&2
+        rm -rf "$root_dir"
+        exit 1
+    fi
+
     mkdir -p "$variant_dir"
     cp "$build_dir/formod" "$variant_bin"
     rm -rf "$root_dir"
- 
+
     echo "$variant_bin"
 }
 
@@ -141,6 +151,19 @@ JR_ACTIVE_CTL_BASE="$JR_ACTIVE_CTL"
 # ND held fixed at the baseline channel count while NG varies.
 BASELINE_ND="${BASELINE_ND:-32}"
 BASELINE_NG="${BASELINE_NG:-7}"
+
+echo "=== pre-building formod for all ND/NG variants ==="
+while read -r nd; do
+    [[ -z "$nd" ]] && continue
+    build_or_reuse "$nd" "$BASELINE_NG" >/dev/null
+done < "$CHANNEL_COUNTS_FILE"
+
+for gas_file in "$GAS_SETS_DIR"/*.txt; do
+    [[ -e "$gas_file" ]] || continue
+    ng="$(grep -c . "$gas_file")"
+    build_or_reuse "$BASELINE_ND" "$ng" >/dev/null
+done
+echo "=== pre-build complete ==="
 
 echo "=== channel scaling ==="
 while read -r nd; do
