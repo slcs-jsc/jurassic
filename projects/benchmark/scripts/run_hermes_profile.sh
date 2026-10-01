@@ -54,7 +54,7 @@ rebuild=${REBUILD:-1}
 
 # LIKWID Setup
 likwid_threads=${LIKWID_THREADS:-"1 2 4 8 12 16 24"}
-likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP CACHE"} # performance groups to collect
+likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"} # performance groups to collect
 likwid_socket=${LIKWID_SOCKET:-0}
 
 mkdir -p "$work_dir"
