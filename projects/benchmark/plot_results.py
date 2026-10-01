@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter, PercentFormatter, ScalarFormatter
+from matplotlib.ticker import FuncFormatter, LogFormatter, PercentFormatter, ScalarFormatter
 
 from plot_style import (BLUE, INK, INK_2, INK_MUTED, ORANGE, SURFACE,
                         apply_style, line_marker_kwargs, save_figure, wrap)
@@ -144,6 +144,8 @@ def plot_scaling(
         ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
     else:
         ax.yaxis.set_major_formatter(FuncFormatter(_plain_number))
+        if yscale == "log":
+            ax.yaxis.set_minor_formatter(LogFormatter(base=10))
     if ylim is not None:
         ax.set_ylim(*ylim)
     elif yscale == "linear":

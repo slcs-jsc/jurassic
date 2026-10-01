@@ -146,13 +146,17 @@ def main():
             bw_like = metric != "wall_time" and is_bandwidth_like(metric)
             ylabel = "Wall-clock time [s] per call" if metric == "wall_time" else metric
             fname = f"e3_{prefix}{'wallclock' if metric == 'wall_time' else safe_name(metric)}.png"
-            ideal = None if bw_like else "linear"
             stream_ceiling = args.stream_bw if bw_like else None
 
+            # No "ideal" reference line: channel/gas count isn't a uniform
+            # work unit here (gases differ widely in table size/line count,
+            # channels in which tables they hit), so there's no growth curve
+            # to assert as ideal -- only the measured values are plotted.
             plot_scaling(
                 x, np.asarray(metric_medians, dtype=float),
                 f"{ylabel} ({prefix.rstrip('_')})", "#2a78d6", res_dir, fname,
-                ideal=ideal, higher_is_better=True, stream_ceiling=stream_ceiling, xlabel=xlabel,
+                ideal=None, stream_ceiling=stream_ceiling, xlabel=xlabel,
+                yscale="linear" if bw_like else "log",
             )
 
     plot_axis(nd_by_label, "channels_", "Channels (ND)")
