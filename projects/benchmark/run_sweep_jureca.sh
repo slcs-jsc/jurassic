@@ -38,19 +38,18 @@ fi
 bench_init
 
 # bench_prepare_inputs() (base.sh) generates atm/obs tables via
-# "${JR_BIN_DIR:-$JR_SRC_DIR}/climatology" and the geometry binary. This
-# sweep's own build_or_reuse() below only ever builds per-(ND,NG) `formod`
-# variants into $BIN_CACHE_DIR -- it never builds climatology/zenith/nadir/
-# limb. Without this call, JR_BIN_DIR stays unset and that fallback resolves
-# to $JR_SRC_DIR, i.e. whatever happens to currently be sitting in the
-# shared repo checkout's src/ -- which can be (and has been) a GPU/OpenACC
-# build left behind by an unrelated run_ncu_profile*.sh job, missing CPU-job
-# modules like nvidia-compilers and failing with "libacchost.so: cannot open
-# shared object file". Building our own isolated CPU copy here and pointing
-# JR_BIN_DIR at it guarantees climatology/geometry binaries are always a
-# fresh, CPU-only (GPU=0) build, independent of whatever else last touched
-# the shared src/ directory.
-bench_build_forward base || exit 1
+# "${JR_BIN_DIR:-$JR_SRC_DIR}/climatology" and the geometry binary. Without
+# JR_BIN_DIR being set, that falls back to $JR_SRC_DIR -- i.e. whatever
+# happens to currently be sitting in the shared repo checkout's src/, which
+# can be (and has been) a GPU/OpenACC build left behind by an unrelated
+# run_ncu_profile*.sh job (missing CPU-job modules like nvidia-compilers,
+# failing with "libacchost.so: cannot open shared object file"), or a build
+# compiled for a different ND/NG than this sweep point needs (failing in
+# read_ctl() with "Set 0 <= ND <= MAX!"). build_or_reuse() below builds
+# climatology/geometry alongside formod, per (ND,NG), precisely to avoid
+# both failure modes -- see run_point(), which sets JR_BIN_DIR per point.
+# No one-time build is needed here: every point sets its own JR_BIN_DIR
+# before bench_prepare_inputs runs.
 
 CONFIG_DIR="$JR_REPO_ROOT/projects/benchmark/configs"
 CHANNEL_COUNTS_FILE="$CONFIG_DIR/channel_counts.txt"
@@ -66,24 +65,35 @@ BUILD_SCRATCH_DIR="$BIN_CACHE_DIR/_build"
 mkdir -p "$BIN_CACHE_DIR" "$BUILD_SCRATCH_DIR"
 
 # build_or_reuse ND NG
+# formod's statically-sized arrays (los_t/atm_t etc., see src/jurassic.h) are
+# bounded by the compile-time ND/NG macros, so climatology and the geometry
+# binary (zenith/nadir/limb) need the SAME per-point -DND/-DNG as formod --
+# not just formod itself. Building only formod here (as this used to) while
+# leaving climatology/geometry at whatever ND/NG they were last compiled with
+# means any sweep point past that bound fails in read_ctl() with
+# "Set 0 <= ND <= MAX!" as soon as the .ctl's runtime ND exceeds the binary's
+# compiled-in array size. All three binaries are cached together per (nd,ng)
+# key below so every sweep point is internally consistent.
 build_or_reuse() {
     local nd="$1" ng="$2"
     local key="nd${nd}_ng${ng}"
     local variant_dir="$BIN_CACHE_DIR/${key}"
     local variant_bin="$variant_dir/formod"
- 
-    if [[ -x "$variant_bin" ]]; then
+    local variant_climatology="$variant_dir/climatology"
+    local variant_geom="$variant_dir/$JR_GEOMETRY"
+
+    if [[ -x "$variant_bin" && -x "$variant_climatology" && -x "$variant_geom" ]]; then
         echo "[e3] reusing cached build for ND=${nd} NG=${ng}" >&2
         echo "$variant_bin"
         return
     fi
- 
+
     local lock_dir="$BUILD_SCRATCH_DIR/${key}.lock"
     local waited=0
     while ! mkdir "$lock_dir" 2>/dev/null; do
         sleep 5
         waited=$((waited + 5))
-        if [[ -x "$variant_bin" ]]; then
+        if [[ -x "$variant_bin" && -x "$variant_climatology" && -x "$variant_geom" ]]; then
             echo "[e3] variant ND=${nd} NG=${ng} built by another process" >&2
             echo "$variant_bin"
             return
@@ -94,16 +104,16 @@ build_or_reuse() {
         fi
     done
     trap 'rmdir "'"$lock_dir"'" 2>/dev/null' RETURN EXIT
- 
-    if [[ -x "$variant_bin" ]]; then
+
+    if [[ -x "$variant_bin" && -x "$variant_climatology" && -x "$variant_geom" ]]; then
         echo "[e3] reusing cached build for ND=${nd} NG=${ng}" >&2
         echo "$variant_bin"
         return
     fi
- 
+
     local root_dir="$BUILD_SCRATCH_DIR/${key}"
     local build_dir="$root_dir/src"
-    echo "[e3] building ND=${nd} NG=${ng} in private copy -> $build_dir" >&2
+    echo "[e3] building ND=${nd} NG=${ng} (formod, climatology, $JR_GEOMETRY) in private copy -> $build_dir" >&2
     rm -rf "$root_dir"
     mkdir -p "$root_dir"
     for entry in "$JR_REPO_ROOT"/*; do
@@ -118,21 +128,23 @@ build_or_reuse() {
 
     if ! ( cd "$build_dir" \
         && make clean \
-        && make -j formod MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
+        && make -j formod climatology "$JR_GEOMETRY" MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
              GPU=0 LIKWID=1 DEFINES="-DND=${nd} -DNG=${ng}" ) 1>&2; then
         echo "[e3] ERROR: build failed for ND=${nd} NG=${ng} -> $build_dir" >&2
         rm -rf "$root_dir"
         exit 1
     fi
 
-    if [[ ! -x "$build_dir/formod" ]]; then
-        echo "[e3] ERROR: build for ND=${nd} NG=${ng} did not produce $build_dir/formod" >&2
+    if [[ ! -x "$build_dir/formod" || ! -x "$build_dir/climatology" || ! -x "$build_dir/$JR_GEOMETRY" ]]; then
+        echo "[e3] ERROR: build for ND=${nd} NG=${ng} did not produce formod/climatology/$JR_GEOMETRY -> $build_dir" >&2
         rm -rf "$root_dir"
         exit 1
     fi
 
     mkdir -p "$variant_dir"
     cp "$build_dir/formod" "$variant_bin"
+    cp "$build_dir/climatology" "$variant_climatology"
+    cp "$build_dir/$JR_GEOMETRY" "$variant_geom"
     rm -rf "$root_dir"
 
     echo "$variant_bin"
@@ -154,6 +166,11 @@ run_point() {
     JR_ACTIVE_CTL="$ctl_out"
     JR_FORMOD_BIN="$(build_or_reuse "$nd" "$ng")"
     export JR_FORMOD_BIN
+    # bench_prepare_inputs() (base.sh) falls back to "${JR_BIN_DIR:-$JR_SRC_DIR}"
+    # for climatology/geometry; point it at this point's own ND/NG-sized
+    # build so it never reaches for the shared, uncontrolled $JR_SRC_DIR.
+    JR_BIN_DIR="$(dirname "$JR_FORMOD_BIN")"
+    export JR_BIN_DIR
 
     bench_prepare_inputs
     bench_run_forward "$label" "$THREADS" "FLOPS_DP" "$BATCH_SIZE" "$REP" "$CORES" ""
