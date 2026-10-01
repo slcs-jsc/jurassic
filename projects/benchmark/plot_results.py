@@ -30,12 +30,12 @@ def _value_text(v: float) -> str:
     return f"{v:,.0f}" if abs(v) >= 100 else f"{v:.1f}"
 
 
-def _thread_axis(ax, ticks) -> None:
+def _thread_axis(ax, ticks, xlabel: str = "Threads (physical cores)") -> None:
     ax.set_xscale("log", base=2)
     ax.set_xticks(ticks)
     ax.xaxis.set_major_formatter(ScalarFormatter())
     ax.xaxis.set_minor_formatter(FuncFormatter(lambda *_: ""))
-    ax.set_xlabel("Threads (physical cores)")
+    ax.set_xlabel(xlabel)
 
 
 def boxplot(
@@ -46,6 +46,7 @@ def boxplot(
     filename: str,
     show_outliers: bool = False,
     color: str = BLUE,
+    xlabel: str = "Threads (physical cores)",
 ) -> None:
     res_dir.mkdir(parents=True, exist_ok=True)
     threads = np.asarray(threads, dtype=float)
@@ -63,7 +64,7 @@ def boxplot(
     )
     ax.set_xticks(range(len(threads)))
     ax.set_xticklabels([str(int(t)) for t in threads])
-    ax.set_xlabel("Threads (physical cores)")
+    ax.set_xlabel(xlabel)
     ax.set_ylabel(wrap(label, 40))
     ax.yaxis.set_major_formatter(FuncFormatter(_plain_number))
     save_figure(fig, res_dir / filename)
@@ -84,6 +85,7 @@ def plot_scaling(
     percent: bool = False,
     ylim: tuple | None = None,
     title: str | None = None,
+    xlabel: str = "Threads (physical cores)",
 ) -> None:
     """
     ideal: "linear" | "constant" | None
@@ -136,7 +138,7 @@ def plot_scaling(
                     zorder=4, label=l)
 
     ax.set_yscale(yscale)
-    _thread_axis(ax, list(threads) + ([smt_points[0][0]] if smt_points else []))
+    _thread_axis(ax, list(threads) + ([smt_points[0][0]] if smt_points else []), xlabel=xlabel)
     ax.set_ylabel(wrap(label, 40))
     if percent:
         ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
