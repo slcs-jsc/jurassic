@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
-#SBATCH --time=04:00:00
+#SBATCH --time=02:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=e1_roofline
@@ -19,7 +19,9 @@
 # Output: out/size_<case>.t1.<GROUP>.b<N>.rep<N>.csv
 
 set -euo pipefail
- 
+set -x
+trap 'echo "FAILED at line $LINENO: $BASH_COMMAND" >&2' ERR
+
 JR_EXPERIMENT=e1_roofline
 RUN_ID=${RUN_ID:-e1_roofline_${SLURM_JOB_ID:-manual}}
  
@@ -63,7 +65,8 @@ for case_name in $case_list; do
     remaining=$threads
     for (( s=0; s<sockets_needed; s++ )); do
       take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
-      flops_workgroup_args+=( -w "$(cpus_phys "$take" "$s"):${flops_ws}:${take}" )
+      cpus_phys "$take" "$s" >/dev/null
+      flops_workgroup_args+=( -w "S${s}:${flops_ws}:${take}" )
       remaining=$(( remaining - take ))
     done
 
@@ -71,7 +74,8 @@ for case_name in $case_list; do
     remaining=$threads
     for (( s=0; s<sockets_needed; s++ )); do
       take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
-      bw_workgroup_args+=( -w "$(cpus_phys "$take" "$s"):${bench_ws}:${take}" )
+      cpus_phys "$take" "$s" >/dev/null
+      bw_workgroup_args+=( -w "S${s}:${bench_ws}:${take}" )
       remaining=$(( remaining - take ))
     done
 

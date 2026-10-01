@@ -278,8 +278,12 @@ bench_check_groups() {
     fi
   done
   if [ ${#JR_GROUPS[@]} -eq 0 ]; then
-    echo "No requested LIKWID groups available. See likwid_available_groups.txt" >&2
-    return 1
+    # No caller checks this function's return value -- they all rely on `set -e`
+    # to stop the script. Exit here, loudly and immediately, instead of letting
+    # that happen silently several frames up.
+    echo "FATAL: none of the requested LIKWID groups ($1) are available on this node." >&2
+    echo "       See $JR_RUN_DIR/likwid_available_groups.txt for what this node supports." >&2
+    exit 1
   fi
   return 0
 }
@@ -314,7 +318,7 @@ bench_cache_workingsets() {
   JR_L3_WS_KB=${L3_WS_KB:-$(( l2_kb + l3_kb / (l3_cpus / l2_cpus) / 2 ))}
 }
 
-# Run one likwid-bench kernel with <threads> threads spread over the sockets and print the metric value. 
+# Run one likwid-bench kernel with <threads> threads spread over the sockets and print the metric value.
 bench_likwid_measure() {
   local kernel=$1 ws_kb=$2 threads=$3 metric=$4 logfile=$5
   local sockets_needed remaining take s
@@ -324,7 +328,8 @@ bench_likwid_measure() {
   remaining=$threads
   for (( s=0; s<sockets_needed; s++ )); do
     take=$(( remaining < JR_PHYS_PER_SOCKET ? remaining : JR_PHYS_PER_SOCKET ))
-    wargs+=( -w "$(cpus_phys "$take" "$s"):$(( ws_kb * take ))kB:${take}" )
+    cpus_phys "$take" "$s" >/dev/null
+    wargs+=( -w "S${s}:$(( ws_kb * take ))kB:${take}" )
     remaining=$(( remaining - take ))
   done
   { likwid-bench -t "$kernel" "${wargs[@]}" 2>&1 || true; } \
@@ -419,29 +424,49 @@ bench_finish() {
   echo "Raw output:    $JR_RUN_DIR/out/<label>.t<N>.<GROUP>.b<N>.rep<N>.{csv,txt}"
 }
 
+_cpus_require_count() {
+  local wanted=$1 got_list=$2 who=$3
+  local got=0
+  [ -n "$got_list" ] && got=$(($(grep -o , <<< "$got_list" | wc -l) + 1))
+  if [ "$got" -ne "$wanted" ]; then
+    echo "FATAL: $who asked for $wanted CPUs but found only $got on this node" \
+         "(topology: $JR_TOPO_MAP)." >&2
+    exit 1
+  fi
+  printf '%s' "$got_list"
+}
+
 # N physical cores on socket $2 (default socket 0)
 cpus_phys() {
   local n=$1 sock=${2:-0}
-  awk -F, -v s="$sock" '$3 == s { if (!($2 in c)) { c[$2]=1; print $1 } }' "$JR_TOPO_MAP" \
-    | sort -n | head -n "$n" | paste -sd,
+  local list
+  list=$(awk -F, -v s="$sock" '$3 == s { if (!($2 in c)) { c[$2]=1; print $1 } }' "$JR_TOPO_MAP" \
+    | sort -n | head -n "$n" | paste -sd,)
+  _cpus_require_count "$n" "$list" "cpus_phys $n $sock"
 }
 
 # All N physical cores across all sockets
 cpus_all_phys() {
-  awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; print $1 } }' "$JR_TOPO_MAP" \
-    | sort -n | head -n "$1" | paste -sd,
+  local list
+  list=$(awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; print $1 } }' "$JR_TOPO_MAP" \
+    | sort -n | head -n "$1" | paste -sd,)
+  _cpus_require_count "$1" "$list" "cpus_all_phys $1"
 }
 
 # N logical CPUs on socket 0: physical cores first, then SMT
 cpus_smt() {
-  awk -F, '$3 == 0 {print $1}' "$JR_TOPO_MAP" | sort -n | head -n "$1" | paste -sd,
+  local list
+  list=$(awk -F, '$3 == 0 {print $1}' "$JR_TOPO_MAP" | sort -n | head -n "$1" | paste -sd,)
+  _cpus_require_count "$1" "$list" "cpus_smt $1"
 }
 
 # N physical cores spread across all sockets
 cpus_spread() {
-  awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; i[$3]++; print i[$3], $3, $1 } }' \
+  local list
+  list=$(awk -F, '{ k=$3"-"$2; if (!(k in s)) { s[k]=1; i[$3]++; print i[$3], $3, $1 } }' \
     "$JR_TOPO_MAP" | sort -k1,1n -k2,2n | awk '{print $3}' \
-    | head -n "$1" | paste -sd,
+    | head -n "$1" | paste -sd,)
+  _cpus_require_count "$1" "$list" "cpus_spread $1"
 }
 
 cpus_all_phys_socket_qualified() {
