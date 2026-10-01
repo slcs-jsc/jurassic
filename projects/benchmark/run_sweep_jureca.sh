@@ -4,10 +4,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
-#SBATCH --time=03:00:00
+#SBATCH --time=02:00:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
-#SBATCH --job-name=e1_sweep
+#SBATCH --job-name=e3_sweep
 set -euo pipefail
 shopt -s inherit_errexit
 
@@ -20,7 +20,7 @@ else
   jr_scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
 
-BATCH_SIZE=${BATCH_SIZE:-1024}
+BATCH_SIZE=${BATCH_SIZE:-64}
 
 export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
 source "$jr_scripts_dir/base.sh"
@@ -36,6 +36,21 @@ if ! grep -q 'JR_FORMOD_BIN' "$jr_scripts_dir/base.sh"; then
 fi
 
 bench_init
+
+# bench_prepare_inputs() (base.sh) generates atm/obs tables via
+# "${JR_BIN_DIR:-$JR_SRC_DIR}/climatology" and the geometry binary. This
+# sweep's own build_or_reuse() below only ever builds per-(ND,NG) `formod`
+# variants into $BIN_CACHE_DIR -- it never builds climatology/zenith/nadir/
+# limb. Without this call, JR_BIN_DIR stays unset and that fallback resolves
+# to $JR_SRC_DIR, i.e. whatever happens to currently be sitting in the
+# shared repo checkout's src/ -- which can be (and has been) a GPU/OpenACC
+# build left behind by an unrelated run_ncu_profile*.sh job, missing CPU-job
+# modules like nvidia-compilers and failing with "libacchost.so: cannot open
+# shared object file". Building our own isolated CPU copy here and pointing
+# JR_BIN_DIR at it guarantees climatology/geometry binaries are always a
+# fresh, CPU-only (GPU=0) build, independent of whatever else last touched
+# the shared src/ directory.
+bench_build_forward base || exit 1
 
 CONFIG_DIR="$JR_REPO_ROOT/projects/benchmark/configs"
 CHANNEL_COUNTS_FILE="$CONFIG_DIR/channel_counts.txt"
@@ -103,7 +118,7 @@ build_or_reuse() {
 
     if ! ( cd "$build_dir" \
         && make clean \
-        && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
+        && make -j formod MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
              GPU=0 LIKWID=1 DEFINES="-DND=${nd} -DNG=${ng}" ) 1>&2; then
         echo "[e3] ERROR: build failed for ND=${nd} NG=${ng} -> $build_dir" >&2
         rm -rf "$root_dir"
