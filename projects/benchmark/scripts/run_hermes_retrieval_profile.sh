@@ -92,6 +92,10 @@ export LC_ALL=C
 if command -v ml >/dev/null 2>&1; then
   ml Stages/2026 GCC/14.3.0
   ml likwid/5.4.1
+  ml CMake/4.0.3
+  ml ecBuild
+  ml SciPy-bundle/2025.07
+  ml netcdf4-python/1.7.2
 fi
 if ! command -v likwid-perfctr >/dev/null 2>&1; then
   echo "likwid-perfctr not found on PATH after 'ml likwid'." >&2
@@ -122,6 +126,26 @@ printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase
   "$case_name" "$geometry" "$ctl_template" "$active_ctl" "$bench_tblbase" \
   "$ret_cases" "${ret_args[*]}" "$ret_dt_apr" "$likwid_threads" "$likwid_groups" \
   > "$run_dir/config.txt"
+
+# libs/build (GSL, netCDF, HDF5, ...) is excluded from the optimization loop's
+# rsync, so a fresh remote work dir has none. Seed it from LIBS_BUILD_DIR (an
+# existing libs/build, e.g. another worktree's); rsync leaves the excluded copy
+# alone afterwards. Building the bundled libs (with their test suites) is the
+# slow last resort.
+ensure_libs() {
+  local libs_dir="$repo_root/libs/build"
+  [ -f "$libs_dir/include/gsl/gsl_math.h" ] && return 0
+  if [ -n "${LIBS_BUILD_DIR:-}" ] && [ -f "$LIBS_BUILD_DIR/include/gsl/gsl_math.h" ]; then
+    echo "Seeding $libs_dir from LIBS_BUILD_DIR=$LIBS_BUILD_DIR"
+    mkdir -p "$libs_dir"
+    cp -a "$LIBS_BUILD_DIR/." "$libs_dir/"
+  else
+    echo "No compiled libs in $libs_dir and LIBS_BUILD_DIR='${LIBS_BUILD_DIR:-}' has none either -- building bundled libs (slow)." >&2
+    ( cd "$repo_root/libs" && bash build.sh > "$run_dir/libs_build.log" 2>&1 )
+  fi
+}
+
+ensure_libs
 
 if [ "$rebuild" = 1 ]; then
   ( cd "$src_dir" && make clean && make -j MPI=0 COMPILER="$compiler_cpu" GPU=0 LIKWID=1 )
