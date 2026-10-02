@@ -54,7 +54,8 @@ for case_name in $case_list; do
 
     bench_ws=${BENCH_WORKING_SET:-4GB}
     flops_ws=${FLOPS_WORKING_SET:-32kB}
-    flops_bench=${FLOPS_BENCH:-peakflops_avx_fma}
+    # Xeon Platinum 8168 has AVX-512 (2 FMA units), so the AVX-512 FMA kernel is the roof
+    flops_bench=${FLOPS_BENCH:-peakflops_avx512_fma}
     bw_bench=${BW_BENCH:-stream_mem}
 
     # Build one -w workgroup per socket, splitting threads evenly across sockets.
@@ -102,7 +103,7 @@ for case_name in $case_list; do
     #   <name>_flops_mflops  lower compute ceilings (name=kernel pairs, EXTRA_FLOPS_BENCHES)
     #   <level>_bw_mbytes    cache bandwidths (load kernel on per-thread working sets that
     #                        fit into L1/L2/L3, CACHE_BENCH)
-    extra_flops_benches=${EXTRA_FLOPS_BENCHES:-"scalar=peakflops avx=peakflops_avx"}
+    extra_flops_benches=${EXTRA_FLOPS_BENCHES:-"scalar=peakflops avx=peakflops_avx avx_fma=peakflops_avx_fma"}
     cache_bench=${CACHE_BENCH:-load_avx}
 
     for pair in $extra_flops_benches; do

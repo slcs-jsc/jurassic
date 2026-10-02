@@ -76,7 +76,7 @@ mkdir -p "$BIN_CACHE_DIR" "$BUILD_SCRATCH_DIR"
 # key below so every sweep point is internally consistent.
 build_or_reuse() {
     local nd="$1" ng="$2"
-    local key="nd${nd}_ng${ng}"
+    local key="nd${nd}_ng${ng}_${JR_MARCH_TAG}"
     local variant_dir="$BIN_CACHE_DIR/${key}"
     local variant_bin="$variant_dir/formod"
     local variant_climatology="$variant_dir/climatology"
@@ -128,7 +128,7 @@ build_or_reuse() {
 
     if ! ( cd "$build_dir" \
         && make clean \
-        && make -j formod climatology "$JR_GEOMETRY" MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
+        && make -j formod climatology "$JR_GEOMETRY" MARCH_NATIVE="$JR_MARCH_NATIVE" MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
              GPU=0 LIKWID=1 DEFINES="-DND=${nd} -DNG=${ng}" ) 1>&2; then
         echo "[e3] ERROR: build failed for ND=${nd} NG=${ng} -> $build_dir" >&2
         rm -rf "$root_dir"

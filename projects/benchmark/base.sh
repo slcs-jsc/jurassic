@@ -91,6 +91,7 @@ bench_init() {
         echo "Benchmark LUT directory not found: $(dirname "$JR_TBLBASE")" >&2; exit 1; }
     
     JR_COMPILER=${COMPILER_CPU:-gcc}
+    JR_MARCH_NATIVE=${MARCH_NATIVE:-1}
     JR_MPI=${MPI:-0}
     JR_MPICC=${MPICC:-mpicc}
 
@@ -140,6 +141,7 @@ bench_init() {
         echo "ctl_template=$JR_CTL_TEMPLATE"
         echo "tblbase=$JR_TBLBASE"
         echo "compiler=$JR_COMPILER"
+        echo "march_native=$JR_MARCH_NATIVE"
         echo "partition=${SLURM_JOB_PARTITION:-unknown}"
         echo "nodelist=${SLURM_JOB_NODELIST:-unknown}"
     } > "$JR_RUN_DIR/config.txt"
@@ -163,7 +165,7 @@ bench_build_isolated() {
         fi
     done
 
-    if ! ( cd "$build_dir" && make clean && make -j "$@" ) 1>&2; then
+    if ! ( cd "$build_dir" && make clean && make -j MARCH_NATIVE="$JR_MARCH_NATIVE" "$@" ) 1>&2; then
         echo "ERROR: isolated build failed -> $build_dir" >&2
         rm -rf "$build_root"
         return 1

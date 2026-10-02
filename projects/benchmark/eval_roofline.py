@@ -12,14 +12,19 @@ Usage:
 Override ceilings if needed (skips ceilings.txt):
     python eval_roofline.py <run_dir> --peak-flops 546000 --stream-bw 110000
 
-Optional extra roofs: add lines like L2_bw_mbytes=900000 (bandwidth) or
-scalar_flops_mflops=80000 (compute) to ceilings.txt, or pass them on the command line
-(repeatable), e.g.:
-    python eval_roofline.py <run_dir> --bw-ceiling L2=900000 --bw-ceiling L3=400000 \\
-        --compute-ceiling scalar=80000
+Roofs vs. ceilings: the DRAM bandwidth and peak compute (AVX+FMA) lines are the
+hardware roofs; compute ceilings like scalar_flops_mflops / avx_flops_mflops in
+ceilings.txt (or --compute-ceiling) are drawn dashed below the peak. The ridge
+is where the two roofs meet. --ceiling picks the compute ceiling that applies to
+the measured binary, used for "% of attainable" (default: peak for a
+march_native=1 build per config.txt, else scalar).
 
-Leave a roof out of the plot even if ceilings.txt has it (repeatable):
-    python eval_roofline.py <run_dir> --skip-ceiling L2 --skip-ceiling L3
+Cache bandwidths (<level>_bw_mbytes in ceilings.txt) are not plotted: the
+points' intensity is FLOPs per DRAM byte (MEM_DP), so only the DRAM roof is
+comparable to them. --bw-ceiling still adds a bandwidth line explicitly.
+
+Leave a ceiling out of the plot (repeatable):
+    python eval_roofline.py <run_dir> --skip-ceiling avx
 """
 import argparse
 import sys
@@ -84,8 +89,8 @@ def main():
     parser.add_argument(
         "--bw-ceiling", action="append", default=[], metavar="NAME=MBYTES_S",
         type=parse_named_value,
-        help="additional bandwidth roof, e.g. L2=800000 (repeatable). Also read from "
-             "ceilings.txt keys '<name>_bw_mbytes' (except stream_bw_mbytes)"
+        help="additional bandwidth line, e.g. L2=800000 (repeatable). Only meaningful if "
+             "the points' intensity is measured against that level's traffic"
     )
     parser.add_argument(
         "--compute-ceiling", action="append", default=[], metavar="NAME=MFLOPS",
@@ -100,12 +105,11 @@ def main():
              "--compute-ceiling; unmatched names are ignored"
     )
     parser.add_argument(
-        "--primary-ceiling", default=None, metavar="NAME",
-        help="compute ceiling to compare points against for '%% of roof' and the ridge "
-             "point (default: 'avx' if present, else 'peak'). 'peak' is usually "
-             "AVX+FMA and often unreachable by code that doesn't emit FMA, making it "
-             "an unfair comparison; 'peak' and any other named ceilings are still "
-             "drawn for context either way"
+        "--ceiling", default=None, metavar="NAME",
+        help="compute ceiling that applies to the measured binary, used for '%% of "
+             "attainable' = performance / min(ceiling, DRAM bandwidth * intensity). "
+             "Default: 'peak' if the run's config.txt says march_native=1, else 'scalar' "
+             "(without -march, gcc emits no AVX/FMA)"
     )
     parser.add_argument(
         "--out", type=Path, default=None,
@@ -146,8 +150,7 @@ def main():
                     pass
         return found
 
-    bw_roofs = extra_ceilings("_bw_mbytes", "stream_bw_mbytes")
-    bw_roofs.update(dict(args.bw_ceiling))
+    bw_roofs = dict(args.bw_ceiling)
     compute_roofs = extra_ceilings("_flops_mflops", "peak_flops_mflops")
     compute_roofs.update(dict(args.compute_ceiling))
     for name in args.skip_ceiling:
@@ -155,26 +158,31 @@ def main():
         compute_roofs.pop(name, None)
 
     all_compute_mflops = {"peak": peak_flops, **compute_roofs}
-    primary_name = args.primary_ceiling or ("avx" if "avx" in compute_roofs else "peak")
-    if primary_name not in all_compute_mflops:
-        print(f"WARNING: --primary-ceiling '{primary_name}' not in {sorted(all_compute_mflops)}, "
+    config_path = args.run_dir / "config.txt"
+    march_native = "march_native=1" in config_path.read_text() if config_path.is_file() else False
+    # a -march=native build may use AVX2+FMA, so only the roof bounds it; without
+    # it gcc emits SSE2 at most, so the scalar ceiling applies
+    default_ceiling = "peak" if march_native or "scalar" not in compute_roofs else "scalar"
+    ceiling_name = args.ceiling or default_ceiling
+    if ceiling_name not in all_compute_mflops:
+        print(f"WARNING: --ceiling '{ceiling_name}' not in {sorted(all_compute_mflops)}, "
               f"falling back to 'peak'.", file=sys.stderr)
-        primary_name = "peak"
-    primary_mflops = all_compute_mflops[primary_name]
+        ceiling_name = "peak"
+    ceiling_mflops = all_compute_mflops[ceiling_name]
 
-    ridge_x = primary_mflops / stream_bw
+    ridge_x = peak_flops / stream_bw
     bench_threads = int(ceilings.get("threads", 0)) or "unknown"
 
-    print("\n=== Roofline ceilings ===")
-    print(f"  compute ceiling:   {peak_flops:.0f} MFLOP/s")
-    print(f"  bandwidth ceiling: {stream_bw:.0f} MBytes/s")
-    print(f"  primary ceiling:   {primary_name} ({primary_mflops:.0f} MFLOP/s) -- used for % of roof / ridge")
-    print(f"  ridge point:       {ridge_x:.3f} FLOP/Byte")
-    for name, bw in bw_roofs.items():
-        print(f"  {name + ' bandwidth:':<18} {bw:.0f} MBytes/s (ridge {primary_mflops / bw:.3f} FLOP/Byte)")
+    print("\n=== Roofline ===")
+    print(f"  compute roof (peak):  {peak_flops:.0f} MFLOP/s")
+    print(f"  bandwidth roof (DRAM): {stream_bw:.0f} MBytes/s")
+    print(f"  ridge point:          {ridge_x:.3f} FLOP/Byte")
     for name, cp in compute_roofs.items():
-        print(f"  {name + ' compute:':<18} {cp:.0f} MFLOP/s")
-    print(f"  measured at:       {bench_threads} threads\n")
+        print(f"  {name + ' ceiling:':<21} {cp:.0f} MFLOP/s (ridge {cp / stream_bw:.3f} FLOP/Byte)")
+    for name, bw in bw_roofs.items():
+        print(f"  {name + ' bandwidth:':<21} {bw:.0f} MBytes/s")
+    print(f"  applicable ceiling:   {ceiling_name} ({ceiling_mflops:.0f} MFLOP/s) -- used for % of attainable")
+    print(f"  measured at:          {bench_threads} threads\n")
 
     # --- Parse LIKWID profiling data ---
     configs = parse_run_dir(args.run_dir)
@@ -191,7 +199,7 @@ def main():
     points = []  # (label, threads, intensity, mflops, intensity_cv, mflops_cv)
 
     header = (f"{'case':>20} {'threads':>8} | "
-              f"{'FLOP/Byte':>12} | {'DP MFLOP/s':>12} | {'% of roof':>9} | {'cv (AI/perf)':>14}")
+              f"{'FLOP/Byte':>12} | {'DP MFLOP/s':>12} | {'% attain.':>9} | {'cv (AI/perf)':>14}")
     print(header)
     print("-" * len(header))
 
@@ -227,7 +235,7 @@ def main():
  
         cv_str = (f"{intensity_cv:.1%}/{mflops_cv:.1%}"
                   if intensity_cv is not None and mflops_cv is not None else "n/a")
-        roof_here = min(primary_mflops, stream_bw * intensity_med)
+        roof_here = min(ceiling_mflops, stream_bw * intensity_med)
         print(f"{label:>20} {threads:>8} | {intensity_med:>12.4g} | {mflops_med:>12.4g} | "
               f"{mflops_med / roof_here:>9.1%} | {cv_str:>14}")
         if bench_threads != "unknown" and threads != bench_threads:
@@ -244,8 +252,8 @@ def main():
     bw_main = stream_bw / G
     all_bw = {"DRAM": bw_main, **{n: b / G for n, b in bw_roofs.items()}}
     all_compute = {n: v / G for n, v in all_compute_mflops.items()}
-    primary = all_compute[primary_name]
-    ridge = primary / bw_main
+    applicable = all_compute[ceiling_name]
+    ridge = peak / bw_main
     multi_threads = len({p[1] for p in points}) > 1
 
     xs = [p[2] for p in points]
@@ -269,7 +277,7 @@ def main():
         px_per_y = box.height / math.log10(y_hi / y_lo)
         return math.degrees(math.atan2(px_per_y, px_per_x))
 
-    # bandwidth roofs (DRAM solid, cache levels dashed); each ends at the compute peak
+    # DRAM roof solid (plus any explicit --bw-ceiling lines dashed), up to the compute roof
     for name, bw in all_bw.items():
         knee = peak / bw
         main = name == "DRAM"
@@ -281,7 +289,7 @@ def main():
         xt = min(max(x_lo * 1.3, y_lo * 1.5 / bw), knee / 1.5)
         ax.text(xt, bw * xt * 1.12, f"{name} {bw:.0f} GB/s", fontsize=9, color=INK_2,
                 rotation=slope_deg(bw), rotation_mode="anchor", ha="left", va="bottom")
-    # compute roof and optional lower compute ceilings
+    # compute roof, and the lower compute ceilings dashed beneath it
     ax.plot([ridge, x_hi], [peak, peak], "-", color=INK, linewidth=1.8, zorder=2)
     ax.text(x_hi / 1.1, peak * 1.06, f"peak {peak:.0f} GFLOP/s", fontsize=9,
             color=INK_2, ha="right", va="bottom")
@@ -289,10 +297,11 @@ def main():
         cp /= G
         ax.plot([cp / bw_main, x_hi], [cp, cp], linestyle=(0, (5, 3)), color=INK_MUTED,
                 linewidth=1.3, zorder=2)
-        # below the line (unlike "peak" above): these ceilings sit close enough to
-        # peak that a label above would overlap it
-        ax.text(x_hi / 1.1, cp * 0.94, f"{name} {cp:.0f} GFLOP/s", fontsize=9,
-                color=INK_2, ha="right", va="top")
+        # below the line: a label above can collide with the peak label
+        tag = " (applies)" if name == ceiling_name else ""
+        ax.text(x_hi / 1.1, cp * 0.94, f"{name} {cp:.0f} GFLOP/s{tag}", fontsize=9,
+                color=INK_2, ha="right", va="top", zorder=3,
+                bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1))
 
     ax.axvline(ridge, color=INK_MUTED, linewidth=0.9, linestyle=(0, (1, 2)), zorder=1)
     ax.text(ridge * 1.04, y_lo * 1.15, f"ridge {ridge:.2f} FLOP/B", fontsize=8,
@@ -308,13 +317,13 @@ def main():
         perf = mflops / G
         ax.plot([intensity], [perf], "o", color=color, markersize=8, zorder=4,
                 markeredgecolor=SURFACE, markeredgewidth=1.2)
-        # thin guide up to the DRAM/compute roof directly above the point
-        roof_here = min(primary, bw_main * intensity)
+        # thin guide up to the attainable bound directly above the point
+        roof_here = min(applicable, bw_main * intensity)
         ax.plot([intensity, intensity], [perf, roof_here], linestyle=(0, (1, 2)),
                 color=color, linewidth=1.0, zorder=1)
         name = f"{label} [{threads}T]" if multi_threads else label
         dx, dy, ha = offsets[label_slot[i] % len(offsets)]
-        ax.annotate(f"{name}\n{perf / roof_here:.0%} of roof", (intensity, perf),
+        ax.annotate(f"{name}\n{perf / roof_here:.0%} of attainable", (intensity, perf),
                     textcoords="offset points", xytext=(dx, dy), fontsize=9, color=INK_2,
                     ha=ha, arrowprops=dict(arrowstyle="-", color=color, linewidth=0.8))
 
