@@ -92,6 +92,14 @@ bench_init() {
     
     JR_COMPILER=${COMPILER_CPU:-gcc}
     JR_MARCH_NATIVE=${MARCH_NATIVE:-1}
+    # CPU target gcc resolves -march=native to (e.g. znver2, skylake-avx512);
+    # native binaries only run on that CPU, so caches must be keyed by it
+    JR_MARCH_TAG=generic
+    if [ "$JR_MARCH_NATIVE" = 1 ]; then
+        JR_MARCH_TAG=$("${JR_COMPILER}" -march=native -Q --help=target 2>/dev/null \
+            | awk '$1 == "-march=" { print $2; exit }')
+        JR_MARCH_TAG=${JR_MARCH_TAG:-native}
+    fi
     JR_MPI=${MPI:-0}
     JR_MPICC=${MPICC:-mpicc}
 
@@ -142,6 +150,7 @@ bench_init() {
         echo "tblbase=$JR_TBLBASE"
         echo "compiler=$JR_COMPILER"
         echo "march_native=$JR_MARCH_NATIVE"
+        echo "march=$JR_MARCH_TAG"
         echo "partition=${SLURM_JOB_PARTITION:-unknown}"
         echo "nodelist=${SLURM_JOB_NODELIST:-unknown}"
     } > "$JR_RUN_DIR/config.txt"
