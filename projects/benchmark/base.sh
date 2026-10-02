@@ -96,8 +96,9 @@ bench_init() {
     # native binaries only run on that CPU, so caches must be keyed by it
     JR_MARCH_TAG=generic
     if [ "$JR_MARCH_NATIVE" = 1 ]; then
+        # awk must read all input: exiting early SIGPIPEs gcc, which fails under pipefail
         JR_MARCH_TAG=$("${JR_COMPILER}" -march=native -Q --help=target 2>/dev/null \
-            | awk '$1 == "-march=" { print $2; exit }')
+            | awk '$1 == "-march=" && t == "" { t = $2 } END { print t }') || true
         JR_MARCH_TAG=${JR_MARCH_TAG:-native}
     fi
     JR_MPI=${MPI:-0}
