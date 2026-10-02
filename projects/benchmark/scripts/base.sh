@@ -233,6 +233,32 @@ bench_prepare_inputs() {
   cp -a data "$JR_RUN_DIR/data" 2>/dev/null || true
 }
 
+# generate retrieval inputs with a fixed amount of work (see
+# run_hermes_retrieval_profile.sh): measurements simulated from the
+# climatology, a priori = truth with temperature shifted by RET_DT_APR K,
+# $1 identical cases; sets JR_RET_DIRLIST and JR_RET_ARGS
+bench_prepare_retrieval_inputs() {
+  local ncases=${1:-${RET_CASES:-3}}
+  cd "$JR_WORK_DIR"
+  rm -rf ret_data && mkdir -p ret_data
+  "$JR_SRC_DIR/climatology" "$JR_ACTIVE_CTL" ret_data/atm_true.tab
+  "$JR_SRC_DIR/$JR_GEOMETRY" "$JR_ACTIVE_CTL" ret_data/obs.tab
+  "$JR_SRC_DIR/formod" "$JR_ACTIVE_CTL" ret_data/obs.tab ret_data/atm_true.tab \
+    ret_data/obs_meas.tab
+  awk -v dt="${RET_DT_APR:-3}" '/^#/ || NF == 0 { print; next } { $6 = $6 + dt; print }' \
+    ret_data/atm_true.tab > ret_data/atm_apr.tab
+  : > ret_data/dirlist.txt
+  local ic
+  for ic in $(seq 1 "$ncases"); do
+    mkdir -p "ret_data/case$ic"
+    cp ret_data/atm_apr.tab ret_data/obs_meas.tab "ret_data/case$ic/"
+    echo "$JR_WORK_DIR/ret_data/case$ic" >> ret_data/dirlist.txt
+  done
+  JR_RET_DIRLIST="$JR_WORK_DIR/ret_data/dirlist.txt"
+  JR_RET_ARGS=(CONV_ITMAX "${RET_CONV_ITMAX:-3}" KERNEL_RECOMP "${RET_KERNEL_RECOMP:-3}"
+               CONV_DMIN 0 ERR_ANA "${RET_ERR_ANA:-1}" WRITE_MATRIX 0)
+}
+
 # run validation
 bench_validate() {
   JR_VALIDATION_OK=1
@@ -319,35 +345,39 @@ bench_run_forward() {
 }
 
   
+# run the retrieval with $ranks MPI ranks x $threads OpenMP threads. Rank r is
+# pinned to physical cores [r*threads, (r+1)*threads) of the node domain
+# (LIKWID's N: lists physical cores first) and writes its own
+# <tag>.rank<r>.csv -- passing one -C list / -o file to every rank would make
+# all ranks share the same cores and overwrite each other's output.
 bench_run_retrieval() {
-  local label=$1 ranks=$2 threads=$3 group=$4 rep=$5 cores=$6
-  # core setup needs to be explicitly defined in order to set up MPI ranks
-  if [ -z "$cores" ]; then
-    echo "bench_run_retrieval: core list (arg 6) is required" >&2
-    return 1
-  fi
+  local label=$1 ranks=$2 threads=$3 group=$4 rep=$5
   local tag="${label}.r${ranks}.t${threads}.${group}.rep${rep}"
-  local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
   mkdir -p "$JR_WORK_DIR/out"
- 
-  echo "--- $tag (cores=$cores) ---"
+
+  echo "--- $tag ---"
 
   set +e
-  OMP_NUM_THREADS=$threads mpirun -np "$ranks" \
-    likwid-perfctr -C "$cores" -g "$group" -m -o  "$csv" \
-    "$JR_SRC_DIR/retrieval" "$JR_ACTIVE_CTL" "$JR_RET_DIRLIST" \
+  OMP_NUM_THREADS=$threads BR_THREADS=$threads BR_GROUP=$group \
+  BR_CSV="$JR_WORK_DIR/out/${tag}" \
+    mpirun -np "$ranks" bash -c '
+      r=${PMI_RANK:-${OMPI_COMM_WORLD_RANK:-${SLURM_PROCID:-0}}}
+      first=$(( r * BR_THREADS )); last=$(( first + BR_THREADS - 1 ))
+      exec likwid-perfctr -C "N:$first-$last" -g "$BR_GROUP" -m \
+        -o "$BR_CSV.rank$r.csv" "$@"' _ \
+    "$JR_SRC_DIR/retrieval" "$JR_ACTIVE_CTL" "$JR_RET_DIRLIST" "${JR_RET_ARGS[@]}" \
     > "$txt" 2>&1
   local rc=$?
   set -e
- 
+
   {
     echo "label=$label"
     echo "ranks=$ranks"
     echo "threads=$threads"
     echo "group=$group"
     echo "rep=$rep"
-    echo "core_list=$cores"
+    echo "core_list=N:<rank*$threads>-<rank*$threads+$((threads - 1))>"
     echo "exit_code=$rc"
   } >> "$txt"
 

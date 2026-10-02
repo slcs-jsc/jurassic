@@ -29,7 +29,9 @@ source "$jr_scripts_dir/base.sh"
 reps=${REPS:-3}
 groups=${LIKWID_GROUPS:-"MEM_DP TMA"}
 cores=${TOTAL_CORES:-48}
-JR_RET_DIRLIST=${RET_DIRLIST:-"$JR_REPO_ROOT/projects/validation/dirlist.txt"}
+# Total retrieval cases per run, shared out over the ranks. Defaults to the
+# core count so every rank count below gets an equal number of cases.
+ret_cases=${RET_CASES:-$cores}
 
 # ranks * threads = cores: the divisor pairs of $cores
 # yields configs: (1,48), (2,24), (4,12), (6,8), (8,6), (12,4), (16,3), (24,2), (48,1)
@@ -45,6 +47,7 @@ bench_init
 bench_build_retrieval "${VARIANT:-base}"
 bench_validate
 bench_check_groups "$groups"
+bench_prepare_retrieval_inputs "$ret_cases"
 
 for rep in $(seq 1 "$reps"); do
   for pair in $pairs; do
@@ -59,9 +62,8 @@ done
 bench_finish
 cat <<'EOF'
 
-Next step: for each (ranks,threads) pair, take the median wall-clock time
-(PRINT_TIMERS TIMER_RET_KERNEL_INIT for the whole run, or wrap the retrieval
-call in the shell with `time` if that timer isn't granular enough) and find
-the minimum across the swept pairs -- that is the "best config" from E2's
-question 3, now for the real production parallelization mechanism.
+Next step: for each (ranks,threads) pair, take the wall-clock time of the
+whole run (TIMER_TOTAL; each rank also prints a per-case RUNTIME: line) and
+find the minimum across the swept pairs -- that is the "best config" from
+E2's question 3, now for the real production parallelization mechanism.
 EOF
