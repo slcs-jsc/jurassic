@@ -256,7 +256,12 @@ bench_prepare_retrieval_inputs() {
   done
   JR_RET_DIRLIST="$JR_WORK_DIR/ret_data/dirlist.txt"
   JR_RET_ARGS=(CONV_ITMAX "${RET_CONV_ITMAX:-3}" KERNEL_RECOMP "${RET_KERNEL_RECOMP:-3}"
-               CONV_DMIN 0 ERR_ANA "${RET_ERR_ANA:-1}" WRITE_MATRIX 0)
+               CONV_DMIN 0 ERR_ANA "${RET_ERR_ANA:-1}" WRITE_MATRIX 0
+               ERR_PRESS 10 ERR_PRESS_CZ 5 ERR_PRESS_CH 200
+               ERR_TEMP 5 ERR_TEMP_CZ 5 ERR_TEMP_CH 200
+               "ERR_Q[*]" 50 "ERR_Q_CZ[*]" 5 "ERR_Q_CH[*]" 200
+               "ERR_K[*]" 1e-3 "ERR_K_CZ[*]" 5 "ERR_K_CH[*]" 200
+               "ERR_NOISE[*]" 1e-5 "ERR_FORMOD[*]" 1)
 }
 
 # run validation

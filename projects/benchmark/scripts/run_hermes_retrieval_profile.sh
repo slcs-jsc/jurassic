@@ -108,9 +108,16 @@ export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${
 active_ctl="$work_dir/${case_name}_retrieval.ctl"
 awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
 
-# Fixed-work retrieval settings, passed as KEY VALUE overrides.
+# Fixed-work retrieval settings, passed as KEY VALUE overrides. The case ctl
+# files only define the retrieval targets (RET*_ZMIN/ZMAX); all a priori and
+# measurement errors default to 0, which optimal_estimation() rejects.
 ret_args=(CONV_ITMAX "$ret_conv_itmax" KERNEL_RECOMP "$ret_kernel_recomp"
-          CONV_DMIN 0 ERR_ANA "$ret_err_ana" WRITE_MATRIX 0)
+          CONV_DMIN 0 ERR_ANA "$ret_err_ana" WRITE_MATRIX 0
+          ERR_PRESS 10 ERR_PRESS_CZ 5 ERR_PRESS_CH 200
+          ERR_TEMP 5 ERR_TEMP_CZ 5 ERR_TEMP_CH 200
+          "ERR_Q[*]" 50 "ERR_Q_CZ[*]" 5 "ERR_Q_CH[*]" 200
+          "ERR_K[*]" 1e-3 "ERR_K_CZ[*]" 5 "ERR_K_CH[*]" 200
+          "ERR_NOISE[*]" 1e-5 "ERR_FORMOD[*]" 1)
 
 lscpu > "$run_dir/lscpu.txt" 2>/dev/null || true
 numactl --hardware > "$run_dir/numactl_hardware.txt" 2>/dev/null || true
