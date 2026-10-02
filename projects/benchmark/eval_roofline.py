@@ -100,6 +100,14 @@ def main():
              "--compute-ceiling; unmatched names are ignored"
     )
     parser.add_argument(
+        "--primary-ceiling", default=None, metavar="NAME",
+        help="compute ceiling to compare points against for '%% of roof' and the ridge "
+             "point (default: 'avx' if present, else 'peak'). 'peak' is usually "
+             "AVX+FMA and often unreachable by code that doesn't emit FMA, making it "
+             "an unfair comparison; 'peak' and any other named ceilings are still "
+             "drawn for context either way"
+    )
+    parser.add_argument(
         "--out", type=Path, default=None,
         help="output directory (default: <run_dir>/plots)"
     )
@@ -146,15 +154,24 @@ def main():
         bw_roofs.pop(name, None)
         compute_roofs.pop(name, None)
 
-    ridge_x = peak_flops / stream_bw
+    all_compute_mflops = {"peak": peak_flops, **compute_roofs}
+    primary_name = args.primary_ceiling or ("avx" if "avx" in compute_roofs else "peak")
+    if primary_name not in all_compute_mflops:
+        print(f"WARNING: --primary-ceiling '{primary_name}' not in {sorted(all_compute_mflops)}, "
+              f"falling back to 'peak'.", file=sys.stderr)
+        primary_name = "peak"
+    primary_mflops = all_compute_mflops[primary_name]
+
+    ridge_x = primary_mflops / stream_bw
     bench_threads = int(ceilings.get("threads", 0)) or "unknown"
 
     print("\n=== Roofline ceilings ===")
     print(f"  compute ceiling:   {peak_flops:.0f} MFLOP/s")
     print(f"  bandwidth ceiling: {stream_bw:.0f} MBytes/s")
+    print(f"  primary ceiling:   {primary_name} ({primary_mflops:.0f} MFLOP/s) -- used for % of roof / ridge")
     print(f"  ridge point:       {ridge_x:.3f} FLOP/Byte")
     for name, bw in bw_roofs.items():
-        print(f"  {name + ' bandwidth:':<18} {bw:.0f} MBytes/s (ridge {peak_flops / bw:.3f} FLOP/Byte)")
+        print(f"  {name + ' bandwidth:':<18} {bw:.0f} MBytes/s (ridge {primary_mflops / bw:.3f} FLOP/Byte)")
     for name, cp in compute_roofs.items():
         print(f"  {name + ' compute:':<18} {cp:.0f} MFLOP/s")
     print(f"  measured at:       {bench_threads} threads\n")
@@ -210,7 +227,7 @@ def main():
  
         cv_str = (f"{intensity_cv:.1%}/{mflops_cv:.1%}"
                   if intensity_cv is not None and mflops_cv is not None else "n/a")
-        roof_here = min(peak_flops, stream_bw * intensity_med)
+        roof_here = min(primary_mflops, stream_bw * intensity_med)
         print(f"{label:>20} {threads:>8} | {intensity_med:>12.4g} | {mflops_med:>12.4g} | "
               f"{mflops_med / roof_here:>9.1%} | {cv_str:>14}")
         if bench_threads != "unknown" and threads != bench_threads:
@@ -226,7 +243,9 @@ def main():
     peak = peak_flops / G
     bw_main = stream_bw / G
     all_bw = {"DRAM": bw_main, **{n: b / G for n, b in bw_roofs.items()}}
-    ridge = peak / bw_main
+    all_compute = {n: v / G for n, v in all_compute_mflops.items()}
+    primary = all_compute[primary_name]
+    ridge = primary / bw_main
     multi_threads = len({p[1] for p in points}) > 1
 
     xs = [p[2] for p in points]
@@ -234,7 +253,7 @@ def main():
     x_lo = min(min(xs), peak / max(all_bw.values())) / 2
     x_hi = max(ridge, max(xs)) * 3
     y_lo = min(ys) / 3
-    y_hi = peak * 2
+    y_hi = max(all_compute.values()) * 2
 
     fig, ax = plt.subplots(figsize=(9, 5.6))
     ax.set_xscale("log")
@@ -270,8 +289,10 @@ def main():
         cp /= G
         ax.plot([cp / bw_main, x_hi], [cp, cp], linestyle=(0, (5, 3)), color=INK_MUTED,
                 linewidth=1.3, zorder=2)
-        ax.text(x_hi / 1.1, cp * 1.06, f"{name} {cp:.0f} GFLOP/s", fontsize=9,
-                color=INK_2, ha="right", va="bottom")
+        # below the line (unlike "peak" above): these ceilings sit close enough to
+        # peak that a label above would overlap it
+        ax.text(x_hi / 1.1, cp * 0.94, f"{name} {cp:.0f} GFLOP/s", fontsize=9,
+                color=INK_2, ha="right", va="top")
 
     ax.axvline(ridge, color=INK_MUTED, linewidth=0.9, linestyle=(0, (1, 2)), zorder=1)
     ax.text(ridge * 1.04, y_lo * 1.15, f"ridge {ridge:.2f} FLOP/B", fontsize=8,
@@ -282,16 +303,13 @@ def main():
     offsets = [(-14, -30, "right"), (0, -48, "center"), (14, 10, "left")]
     by_intensity = sorted(range(len(points)), key=lambda k: points[k][2])
     label_slot = {k: r for r, k in enumerate(by_intensity)}
-    for i, (label, threads, intensity, mflops, icv, pcv) in enumerate(points):
+    for i, (label, threads, intensity, mflops, _, _) in enumerate(points):
         color = palette[i % len(palette)]
         perf = mflops / G
-        ax.errorbar([intensity], [perf], fmt="o", color=color, markersize=8, zorder=4,
-                    markeredgecolor=SURFACE, markeredgewidth=1.2,
-                    xerr=[[intensity * icv]] if icv else None,
-                    yerr=[[perf * pcv]] if pcv else None,
-                    capsize=2, elinewidth=1.2)
+        ax.plot([intensity], [perf], "o", color=color, markersize=8, zorder=4,
+                markeredgecolor=SURFACE, markeredgewidth=1.2)
         # thin guide up to the DRAM/compute roof directly above the point
-        roof_here = min(peak, bw_main * intensity)
+        roof_here = min(primary, bw_main * intensity)
         ax.plot([intensity, intensity], [perf, roof_here], linestyle=(0, (1, 2)),
                 color=color, linewidth=1.0, zorder=1)
         name = f"{label} [{threads}T]" if multi_threads else label
