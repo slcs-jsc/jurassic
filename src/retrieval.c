@@ -52,6 +52,10 @@ int main(
   FILE *dirlist;
   FILE *proflist = NULL;
 
+  /* Retrieval time statistics... */
+  double t_sum = 0, t_sum2 = 0, t_min = 0, t_max = 0;
+  int ncase = 0;
+
   /* MPI task distribution (optional)... */
   int ntask = -1;
   int rank = 0;
@@ -175,8 +179,27 @@ int main(
 
     /* Run retrieval... */
     double chisq;
+    const double t0 = omp_get_wtime();
     optimal_estimation(&ret, &ctl, tbl, &obs_meas, &obs_i, &atm_apr, &atm_i,
 		       &chisq);
+    const double dt = omp_get_wtime() - t0;
+    t_sum += dt;
+    t_sum2 += POW2(dt);
+    t_min = (ncase == 0) ? dt : MIN(t_min, dt);
+    t_max = (ncase == 0) ? dt : MAX(t_max, dt);
+    ncase++;
+    LOG(1, "Retrieval time: %g s (chi^2/m= %g)", dt, chisq);
+  }
+
+  /* Per-case retrieval time statistics, in the format of formod's
+     TASK=time benchmark... */
+  if (ncase > 0) {
+    const double t_mean = t_sum / ncase;
+    const double t_sd = sqrt(MAX(t_sum2 / ncase - POW2(t_mean), 0.0));
+    printf("RUNTIME: execution= retrieval | threads= %d | batch_size= 1"
+	   " | mean= %g s | stddev= %g s | min= %g s | max= %g s"
+	   " | samples= %d\n", omp_get_max_threads(), t_mean, t_sd, t_min,
+	   t_max, ncase);
   }
 
   /* Write info... */
