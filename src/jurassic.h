@@ -167,6 +167,14 @@
 #pragma GCC diagnostic ignored "-Wredundant-decls"
 #include <likwid-marker.h>
 #pragma GCC diagnostic pop
+/* Start/stop a region on every OpenMP thread. LIKWID only counts the
+   hardware thread that calls START/STOP, so a region started from serial
+   code would report the master core (and its socket's uncore) only, even
+   if the region spawns parallel work. */
+#define LIKWID_MARKER_START_ALL(r)			\
+  do { _Pragma("omp parallel") LIKWID_MARKER_START(r); } while (0)
+#define LIKWID_MARKER_STOP_ALL(r)			\
+  do { _Pragma("omp parallel") LIKWID_MARKER_STOP(r); } while (0)
 #else
 #define LIKWID_MARKER_INIT
 #define LIKWID_MARKER_THREADINIT
@@ -174,6 +182,8 @@
 #define LIKWID_MARKER_START(r)
 #define LIKWID_MARKER_STOP(r)
 #define LIKWID_MARKER_CLOSE
+#define LIKWID_MARKER_START_ALL(r) do { } while (0)
+#define LIKWID_MARKER_STOP_ALL(r) do { } while (0)
 #endif
 
 extern int jurassic_marker_ref;

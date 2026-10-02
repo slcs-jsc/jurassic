@@ -68,7 +68,12 @@ int main(
   #pragma omp parallel
   {
     LIKWID_MARKER_THREADINIT;
+    LIKWID_MARKER_REGISTER("retrieval");
     LIKWID_MARKER_REGISTER("kernel_jacobian");
+    LIKWID_MARKER_REGISTER("formod");
+    LIKWID_MARKER_REGISTER("ret_lm_formod");
+    LIKWID_MARKER_REGISTER("ret_linalg");
+    LIKWID_MARKER_REGISTER("ret_err_ana");
   }
   #endif
 

@@ -4995,6 +4995,8 @@ void optimal_estimation(
     return;
   }
 
+  LIKWID_MARKER_START_ALL("retrieval");
+
   /* Allocate... */
   gsl_matrix *a = gsl_matrix_alloc(n, n);
   gsl_matrix *cov = gsl_matrix_alloc(n, n);
@@ -5025,7 +5027,9 @@ void optimal_estimation(
   /* Set initial state... */
   copy_atm(ctl, atm_i, atm_apr, 0);
   copy_obs(ctl, obs_i, obs_meas, 0);
+  LIKWID_MARKER_START_ALL("ret_lm_formod");
   formod(ctl, tbl, atm_i, obs_i, los_scratch, obs_scratch);
+  LIKWID_MARKER_STOP_ALL("ret_lm_formod");
 
   /* Set state vectors and observation vectors... */
   atm2x(ctl, atm_apr, x_a, NULL, NULL);
@@ -5064,13 +5068,9 @@ void optimal_estimation(
   /* Compute initial kernel... */
   SELECT_TIMER("RET_KERNEL_INIT", "RETRIEVAL");
 
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_START("kernel_jacobian");
-  #endif
+  LIKWID_MARKER_START_ALL("kernel_jacobian");
   kernel(ctl, tbl, atm_i, obs_i, k_i);
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_STOP("kernel_jacobian");
-  #endif
+  LIKWID_MARKER_STOP_ALL("kernel_jacobian");
 
   /* ------------------------------------------------------------
      Levenberg-Marquardt minimization...
@@ -5085,8 +5085,13 @@ void optimal_estimation(
     double chisq_old = *chisq;
 
     /* Compute kernel matrix K_i... */
-    if (it > 1 && it % ret->kernel_recomp == 0)
+    if (it > 1 && it % ret->kernel_recomp == 0) {
+      LIKWID_MARKER_START_ALL("kernel_jacobian");
       kernel(ctl, tbl, atm_i, obs_i, k_i);
+      LIKWID_MARKER_STOP_ALL("kernel_jacobian");
+    }
+
+    LIKWID_MARKER_START_ALL("ret_linalg");
 
     /* Compute K_i^T * S_eps^{-1} * K_i ... */
     if (it == 1 || it % ret->kernel_recomp == 0)
@@ -5099,8 +5104,12 @@ void optimal_estimation(
     gsl_blas_dgemv(CblasTrans, 1.0, k_i, y_aux, 0.0, b);
     gsl_blas_dgemv(CblasNoTrans, -1.0, s_a_inv, dx, 1.0, b);
 
+    LIKWID_MARKER_STOP_ALL("ret_linalg");
+
     /* Inner loop... */
     for (int it2 = 0; it2 < 20; it2++) {
+
+      LIKWID_MARKER_START_ALL("ret_linalg");
 
       /* Compute A = (1 + lmpar) * S_a^{-1} + K_i^T * S_eps^{-1} * K_i ... */
       gsl_matrix_memcpy(a, s_a_inv);
@@ -5110,6 +5119,8 @@ void optimal_estimation(
       /* Solve A * x_step = b by means of Cholesky decomposition... */
       gsl_linalg_cholesky_decomp(a);
       gsl_linalg_cholesky_solve(a, b, x_step);
+
+      LIKWID_MARKER_STOP_ALL("ret_linalg");
 
       /* Update atmospheric state... */
       gsl_vector_add(x_i, x_step);
@@ -5135,7 +5146,9 @@ void optimal_estimation(
 	atm_i->sfeps[isf] = CLAMP(atm_i->sfeps[isf], 0, 1);
 
       /* Forward calculation... */
+      LIKWID_MARKER_START_ALL("ret_lm_formod");
       formod(ctl, tbl, atm_i, obs_i, los_scratch, obs_scratch);
+      LIKWID_MARKER_STOP_ALL("ret_lm_formod");
       obs2y(ctl, obs_i, y_i, NULL, NULL);
 
       /* Determine dx = x_i - x_a and dy = y - F(x_i) ... */
@@ -5177,6 +5190,7 @@ void optimal_estimation(
   if (ret->err_ana) {
 
     SELECT_TIMER("RET_DIAGNOSTICS", "OUTPUT");
+    LIKWID_MARKER_START_ALL("ret_err_ana");
 
     /* Store results... */
     lockfd = shared_io_lock(ret);
@@ -5258,7 +5272,11 @@ void optimal_estimation(
     gsl_matrix_free(auxnm);
     gsl_matrix_free(corr);
     gsl_matrix_free(gain);
+
+    LIKWID_MARKER_STOP_ALL("ret_err_ana");
   }
+
+  LIKWID_MARKER_STOP_ALL("retrieval");
 
   /* ------------------------------------------------------------
      Finalize...
