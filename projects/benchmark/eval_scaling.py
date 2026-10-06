@@ -1,5 +1,17 @@
+"""Evaluate run_scaling_*.sh output: runtime, speedup and parallel efficiency.
+
+Reads formod's own "RUNTIME: ... mean= ..." line from every
+out/<label>.t<threads>.b<batch>.rep<rep>.txt (older runs with a LIKWID group in
+the name, <label>.t<threads>.<GROUP>.b<batch>.rep<rep>.txt, are read as well).
+
+Two speedups are reported: the kernel (one formod_batch call, the RUNTIME mean)
+and the whole application, i.e. the serial phases from the TIMER_* lines
+(READ_*, FORMOD_REFERENCE, WRITE_OBS, FINALIZE) plus one batch. The gap between
+them is the Amdahl limit set by the serial phases.
+"""
 import argparse
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -7,234 +19,187 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from plot_results import plot_scaling, boxplot
-from likwid_parsing import parse_run_dir, collect_runtime, collect
+from plot_results import plot_scaling
+from likwid_parsing import parse_formod_log, get_stats
 
-DEFAULT_METRICS = [
-    "Memory data volume [GBytes]",
-    "Memory bandwidth [MBytes/s]",
-]
+SERIAL_TIMERS = {"TIMER_FORMOD_REFERENCE", "TIMER_WRITE_OBS", "TIMER_FINALIZE"}
 
-def metric_plot_style(metric_name: str):
-    """Return (ideal, higher_is_better, is_ceiling_metric, filename_stub, ylabel, color)."""
-    lower = metric_name.lower()
-    safe = metric_name.split("[")[0].strip().replace(" ", "_").lower()
-    if "volume" in lower or "energy" in lower:
-        return "constant", True, False, safe, f"{metric_name} (socket-wide / batch-size)", "#2a78d6"
-    if "bandwidth" in lower or "mflop/s" in lower:
-        return None, True, True, safe, f"{metric_name} (socket-wide)", "#2a78d6"
-    if metric_name.startswith("CAS_COUNT"):
-        color = "#eb6834" if metric_name.endswith("_RD") else "#2a78d6"
-        return "constant", False, False, metric_name.lower(), f"{metric_name} [GBytes-equiv] (socket-wide / batch-size)", color
-    return "linear", True, False, safe, f"{metric_name}/call", "#2a78d6"
+RUN_TXT_RE = re.compile(
+    r"^(?P<label>[A-Za-z0-9_]+)\.t(?P<threads>\d+)(?:\.[A-Za-z0-9_]+)?"
+    r"\.b(?P<batch>\d+)\.rep(?P<rep>\d+)\.txt$"
+)
+
+
+def load_runs(run_dir: Path) -> list:
+    out_dir = run_dir / "out" if (run_dir / "out").is_dir() else run_dir
+    runs = []
+    for txt in sorted(out_dir.glob("*.txt")):
+        m = RUN_TXT_RE.match(txt.name)
+        if not m:
+            continue
+        log = parse_formod_log(txt)
+        batch = log["batch"]
+        if batch is None:
+            print(f"WARNING: no RUNTIME line in {txt.name} (run failed?), skipping.")
+            continue
+        runs.append({
+            "label": m.group("label"),
+            "threads": int(m.group("threads")),
+            "batch_size": int(m.group("batch")),
+            "rep": int(m.group("rep")),
+            "mean_s": batch["mean_s"],
+            "serial_s": sum(v for k, v in log["timers"].items()
+                            if k.startswith("TIMER_READ_") or k in SERIAL_TIMERS)
+                        if log["timers"] else None,
+        })
+    return runs
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("run_dir", type=Path)
-    parser.add_argument("--region", default="formod", help="likwid-marker region to read (default: formod)")
-    parser.add_argument("--metrics", action="append",
-                         help="metric names to evaluate; default: %s" % ", ".join(DEFAULT_METRICS))
-    parser.add_argument("--warmup", type=int, default=1,
-                         help="number of leading repetitions to discard (default: 1)")
-    parser.add_argument("--stream-bw", type=float, default=None,
-                         help="measured STREAM bandwidth ceiling [MBytes/s] for this node, "
-                              "e.g. from likwid-bench -t load_avx. If omitted, bandwidth-like "
-                              "metrics are plotted without a reference ceiling.")
     parser.add_argument("--out", type=Path, default=None,
-                         help="output directory (default: <run_dir>/plots)")
+                        help="output directory (default: <run_dir>/plots)")
     args = parser.parse_args()
 
-    metrics = args.metrics or DEFAULT_METRICS
     res_dir = args.out or (args.run_dir / "plots")
     res_dir.mkdir(parents=True, exist_ok=True)
 
-    configs = parse_run_dir(args.run_dir)
-    if not configs:
-        print(f"No parsed configs found under {args.run_dir}.")
+    runs = load_runs(args.run_dir)
+    if not runs:
+        print(f"No runtime logs found under {args.run_dir}.")
         sys.exit(1)
 
     groups: dict[tuple, list] = {}
-    for c in configs:
-        key = (c["label"], c["threads"], c["group"], c["batch_size"])
-        groups.setdefault(key, []).append(c)
+    for r in runs:
+        groups.setdefault((r["label"], r["threads"]), []).append(r)
 
-    metric_keys = ["wall_time"] + metrics
-    medians: dict[str, dict[tuple, float]] = {m: {} for m in metric_keys}
-    values: dict[str, dict[tuple, list]] = {m: {} for m in metric_keys}
-    batch_size_dict: dict[tuple, int] = {}
+    medians: dict[tuple, float] = {}
+    serial: dict[tuple, float] = {}
+    batch_of: dict[tuple, int] = {}
+    max_cv, max_cv_key = 0.0, None
 
-    max_cv, max_cv_desc = 0.0, None
-    detected_modes = set()
-
-    header = (f"{'label':>25} {'thr':>4} {'group':>8} {'batch':>6} | " +
-              " | ".join(f"{m[:22]:>22}" for m in ["runtime/call [s]"] + metrics))
+    header = (f"{'label':>25} {'thr':>4} {'batch':>6} {'n':>3} | {'runtime/call [s]':>40} | "
+              f"{'serial [s]':>10}")
     print(header)
     print("-" * len(header))
 
-    for (label, threads, group, batch), entries in sorted(groups.items()):
-        if label.endswith("_strong"):
-            detected_modes.add("strong")
-        if label.endswith("_weak"):
-            detected_modes.add("weak")
-
-        batch_size_dict[(label, threads)] = batch
-        entries = sorted(entries, key=lambda e: e["rep"])
-        kept = entries[args.warmup:]
-        if len(kept) < 2:
-            print(f"{label:>25} {threads:>4} {group:>8} {batch:>6} | "
-                  f"insufficient repetitions after warmup discard ({len(kept)} left, need >= 2)")
+    for key, entries in sorted(groups.items()):
+        label, threads = key
+        vals = [e["mean_s"] for e in entries]
+        batch_of[key] = entries[0]["batch_size"]
+        if len(vals) < 2:
+            print(f"{label:>25} {threads:>4} {batch_of[key]:>6} {len(vals):>3} | "
+                  f"insufficient repetitions (need >= 2)")
             continue
+        mean, median, stdev, cv = get_stats(vals)
+        medians[key] = median
+        serial_vals = [e["serial_s"] for e in entries if e["serial_s"] is not None]
+        if serial_vals:
+            serial[key] = float(np.median(serial_vals))
+        if not math.isnan(cv) and cv > max_cv:
+            max_cv, max_cv_key = cv, key
+        print(f"{label:>25} {threads:>4} {batch_of[key]:>6} {len(vals):>3} | "
+              f"{f'{mean:.4g} (med={median:.4g}, sd={stdev:.3g}, cv={cv:.1%})':>40} | "
+              f"{serial.get(key, float('nan')):>10.3g}")
 
-        row_values = []
-        mean, median, stdev, cv, n, vals = collect_runtime(kept, warmup=0)
-        row_values.append(
-            f"{f'{mean:.4g}' if mean is not None else 'N/A'} "
-            f"(med={f'{median:.4g}' if median is not None else 'N/A'}, "
-            f"sd={f'{stdev:.4g}' if stdev is not None else 'N/A'}, "
-            f"cv={f'{cv:.1%}' if cv is not None and not math.isnan(cv) else 'N/A'})"
-        )
-        values["wall_time"][(label, threads)] = vals
-        medians["wall_time"][(label, threads)] = median
-        if cv is not None and not math.isnan(cv) and cv > max_cv:
-            max_cv, max_cv_desc = cv, (label, threads, group, batch, "wall_time")
+    if max_cv_key:
+        print(f"\nLargest coefficient of variation: {max_cv:.1%} (label={max_cv_key[0]}, threads={max_cv_key[1]})")
 
-        for metric in metrics:
-            mean, median, stdev, cv, n, vals = collect(kept, args.region, metric, warmup=0)
-            row_values.append(
-                f"{f'{mean:.4g}' if mean is not None else 'N/A'} "
-                f"(med={f'{median:.4g}' if median is not None else 'N/A'}, "
-                f"sd={f'{stdev:.4g}' if stdev is not None else 'N/A'}, "
-                f"cv={f'{cv:.1%}' if cv is not None and not math.isnan(cv) else 'N/A'})"
-            )
-            values[metric][(label, threads)] = vals
-            medians[metric][(label, threads)] = median
-            if cv is not None and not math.isnan(cv) and cv > max_cv:
-                max_cv, max_cv_desc = cv, (label, threads, group, batch, metric)
-
-        print(f"{label:>25} {threads:>4} {group:>8} {batch:>6} | " +
-              " | ".join(f"{v:>22}" for v in row_values))
-
-    if max_cv_desc:
-        print(f"\nLargest observed coefficient of variation: {max_cv:.1%} "
-              f"(config={max_cv_desc[:4]}, metric='{max_cv_desc[4]}')")
-    else:
-        print("\nNo metric produced a usable coefficient of variation.")
-
-    if not detected_modes:
-        print("\nNo strong/weak-scaling labels detected (expected '..._strong' / '..._weak'). "
-              "Skipping scaling plots.")
+    modes = sorted({m for (lbl, _) in medians for m in ("strong", "weak") if lbl.endswith(f"_{m}")})
+    if not modes:
+        print("\nNo strong/weak-scaling labels detected (expected '..._strong' / '..._weak'). Skipping plots.")
         return
 
-    for mode in sorted(detected_modes):
+    for mode in modes:
         print(f"\n=== Scaling analysis: {mode.upper()} ===")
-
         lbl_intra = f"intra_socket_{mode}"
-        lbl_smt = f"smt_socket_{mode}"
-        lbl_compact = f"inter_compact_{mode}"
-        lbl_spread = f"inter_spread_{mode}"
-
-        intra_threads = sorted({t for (lbl, t) in medians["wall_time"] if lbl == lbl_intra})
-        if not intra_threads:
-            print(f"No '{lbl_intra}' data found. Skipping.")
+        intra_threads = sorted(t for (lbl, t) in medians if lbl == lbl_intra)
+        t1 = medians.get((lbl_intra, 1))
+        if not intra_threads or t1 is None:
+            print(f"No '{lbl_intra}' data with a 1-thread baseline. Skipping {mode} plots.")
             continue
 
-        t1 = medians["wall_time"].get((lbl_intra, 1))
-        if t1 is None:
-            print(f"No 1-thread baseline for '{lbl_intra}'. Skipping speedup/efficiency plots for {mode}.")
-            continue
-
-        def speedup_and_efficiency(t_time, n_threads):
-            speedup = t1 / t_time
-            efficiency = speedup / n_threads if mode == "strong" else speedup
-            return speedup, efficiency
+        def speedup_and_efficiency(t_time, n, base=t1):
+            speedup = base / t_time
+            return speedup, (speedup / n if mode == "strong" else speedup)
 
         print(f"\n{'category':>15} {'threads':>8} {'wall_time [s]':>14} {'speedup':>9} {'efficiency':>11}")
-        print("-" * 65)
+        print("-" * 61)
 
-        intra_speedups: dict[int, float] = {}
-        intra_efficiency: dict[int, float] = {}
+        intra_speedup, intra_eff = {}, {}
         for t in intra_threads:
-            t_time = medians["wall_time"][(lbl_intra, t)]
-            speedup, efficiency = speedup_and_efficiency(t_time, t)
-            intra_speedups[t] = speedup
-            intra_efficiency[t] = efficiency
-            print(f"{'intra_socket':>15} {t:>8} {t_time:>14.4g} {speedup:>9.2f} {efficiency:>10.1%}")
+            s, e = speedup_and_efficiency(medians[(lbl_intra, t)], t)
+            intra_speedup[t], intra_eff[t] = s, e
+            print(f"{'intra_socket':>15} {t:>8} {medians[(lbl_intra, t)]:>14.4g} {s:>9.2f} {e:>10.1%}")
 
-        extra_speedup_points = []   # (threads, speedup, tag)
-        extra_efficiency_points = []  # (threads, efficiency, tag)
-        extra_wall_points = []      # (threads, wall_time_s, tag)
-        for lbl, tag in ((lbl_smt, "SMT"), (lbl_compact, "inter (compact)"), (lbl_spread, "inter (spread)")):
-            t_target = next((t for (l, t) in medians["wall_time"] if l == lbl), None)
-            if t_target is None:
-                continue
-            t_time = medians["wall_time"][(lbl, t_target)]
-            speedup, efficiency = speedup_and_efficiency(t_time, t_target)
-            print(f"{lbl:>15} {t_target:>8} {t_time:>14.4g} {speedup:>9.2f} {efficiency:>10.1%}")
-            extra_speedup_points.append((t_target, speedup, tag))
-            extra_efficiency_points.append((t_target, efficiency, tag))
-            extra_wall_points.append((t_target, t_time, tag))
-
-        intra_t_arr = np.asarray(intra_threads)
-
-        if mode == "strong":
-            plot_scaling(
-                intra_t_arr,
-                np.asarray([intra_speedups[t] for t in intra_threads]),
-                "Wall-clock speedup (strong scaling)", "#2a78d6", res_dir,
-                f"e2_{mode}_speedup.png", ideal="linear", higher_is_better=True,
-                smt_points=extra_speedup_points or None,
-            )
-            plot_scaling(
-                intra_t_arr,
-                np.asarray([intra_efficiency[t] for t in intra_threads]),
-                "Parallel efficiency (strong scaling, T1/(n*Tn))", "#2a78d6", res_dir,
-                f"e2_{mode}_efficiency.png", ideal="constant", higher_is_better=True,
-                smt_points=extra_efficiency_points or None,
-                yscale="linear", percent=True, ylim=(0, 1.1),
-            )
+        app_threads = [t for t in intra_threads if (lbl_intra, t) in serial]
+        app_speedup, app_eff = {}, {}
+        if (lbl_intra, 1) in serial:
+            app1 = serial[(lbl_intra, 1)] + t1
+            print(f"\nWhole application = serial phases + one batch "
+                  f"(kernel speedup vs. application speedup):")
+            print(f"{'threads':>8} {'serial [s]':>11} {'batch [s]':>10} {'total [s]':>10} "
+                  f"{'kernel spd':>11} {'app spd':>8} {'app eff':>8} {'serial share':>13}")
+            print("-" * 86)
+            for t in app_threads:
+                total = serial[(lbl_intra, t)] + medians[(lbl_intra, t)]
+                s, e = speedup_and_efficiency(total, t, base=app1)
+                app_speedup[t], app_eff[t] = s, e
+                print(f"{t:>8} {serial[(lbl_intra, t)]:>11.3g} {medians[(lbl_intra, t)]:>10.4g} "
+                      f"{total:>10.4g} {intra_speedup[t]:>11.2f} {s:>8.2f} {e:>8.1%} "
+                      f"{serial[(lbl_intra, t)] / total:>13.1%}")
         else:
-            plot_scaling(
-                intra_t_arr,
-                np.asarray([intra_efficiency[t] for t in intra_threads]),
-                "Parallel efficiency (weak scaling, T1/Tn)", "#2a78d6", res_dir,
-                f"e2_{mode}_efficiency.png", ideal="constant", higher_is_better=True,
-                smt_points=extra_speedup_points or None,
-                yscale="linear", percent=True, ylim=(0, 1.1),
-            )
+            print("\nNo TIMER_* lines for the 1-thread run: skipping application speedup.")
 
-        for metric in ["wall_time"] + metrics:
-            metric_medians = [medians[metric].get((lbl_intra, t)) for t in intra_threads]
-            if any(v is None for v in metric_medians):
-                print(f"WARNING: missing '{metric}' for some {lbl_intra} thread counts. Skipping plot.")
+        extra_speedup, extra_eff, extra_wall = [], [], []
+        for prefix, tag in (("smt_socket", "SMT"), ("inter_compact", "inter (compact)"),
+                            ("inter_spread", "inter (spread)")):
+            lbl = f"{prefix}_{mode}"
+            t = next((t for (l, t) in medians if l == lbl), None)
+            if t is None:
                 continue
+            s, e = speedup_and_efficiency(medians[(lbl, t)], t)
+            print(f"{prefix:>15} {t:>8} {medians[(lbl, t)]:>14.4g} {s:>9.2f} {e:>10.1%}")
+            extra_speedup.append((t, s, tag))
+            extra_eff.append((t, e, tag))
+            extra_wall.append((t, medians[(lbl, t)], tag))
 
-            if metric == "wall_time":
-                b0 = batch_size_dict.get((lbl_intra, intra_threads[0]), "?")
-                plot_scaling(
-                    intra_t_arr, np.asarray(metric_medians, dtype=float),
-                    f"Wall-clock time [s] ({b0} scenes, {mode})", "#2a78d6", res_dir,
-                    f"e2_{mode}_wallclock_scaling.png", ideal="linear", higher_is_better=False,
-                    smt_points=extra_wall_points or None,
-                )
-                continue
+        x = np.asarray(intra_threads)
+        if mode == "strong":
+            plot_scaling(x, np.asarray([intra_speedup[t] for t in intra_threads]),
+                         "Wall-clock speedup (strong scaling)", "#2a78d6", res_dir,
+                         f"e2_{mode}_speedup.png", ideal="linear", higher_is_better=True,
+                         smt_points=extra_speedup or None)
+            eff_label = "Parallel efficiency (strong scaling, T1/(n*Tn))"
+        else:
+            eff_label = "Parallel efficiency (weak scaling, T1/Tn)"
+        plot_scaling(x, np.asarray([intra_eff[t] for t in intra_threads]),
+                     eff_label, "#2a78d6", res_dir, f"e2_{mode}_efficiency.png",
+                     ideal="constant", higher_is_better=True,
+                     smt_points=extra_eff or None,
+                     yscale="linear", percent=True, ylim=(0, 1.1))
 
-            ideal, higher_is_better, is_ceiling, safe, ylabel, color = metric_plot_style(metric)
-            fname = f"e2_{mode}_{safe}_scaling.png"
-            stream_ceiling = args.stream_bw if is_ceiling else None
-            if is_ceiling and stream_ceiling is None:
-                print(f"NOTE: --stream-bw not given, plotting '{metric}' without a reference ceiling.")
+        if app_speedup:
+            ax_t = np.asarray(app_threads)
+            if mode == "strong":
+                plot_scaling(ax_t, np.asarray([app_speedup[t] for t in app_threads]),
+                             "Application speedup (serial phases + one batch, strong scaling)",
+                             "#2a78d6", res_dir, f"e2_{mode}_app_speedup.png",
+                             ideal="linear", higher_is_better=True)
+            else:
+                plot_scaling(ax_t, np.asarray([app_eff[t] for t in app_threads]),
+                             "Application efficiency (serial phases + one batch, weak scaling)",
+                             "#2a78d6", res_dir, f"e2_{mode}_app_efficiency.png",
+                             ideal="constant", higher_is_better=True,
+                             yscale="linear", percent=True, ylim=(0, 1.1))
 
-            plot_scaling(
-                intra_t_arr, np.asarray(metric_medians, dtype=float),
-                f"{ylabel} ({mode})", color, res_dir, fname,
-                ideal=ideal, higher_is_better=higher_is_better,
-                stream_ceiling=stream_ceiling,
-            )
-
-            metric_value_lists = [values[metric].get((lbl_intra, t)) or [] for t in intra_threads]
-            if any(metric_value_lists):
-                boxplot(intra_t_arr, metric_value_lists, f"{ylabel} ({mode})", res_dir,
-                        fname.replace(".png", "_box.png"))
+        b0 = batch_of[(lbl_intra, intra_threads[0])]
+        wall_label = f"Wall-clock time [s] ({b0} scenes, {mode})"
+        plot_scaling(x, np.asarray([medians[(lbl_intra, t)] for t in intra_threads]),
+                     wall_label, "#2a78d6", res_dir, f"e2_{mode}_wallclock_scaling.png",
+                     ideal="linear" if mode == "strong" else "constant", higher_is_better=False,
+                     smt_points=extra_wall or None)
 
     print(f"\nPlots written to {res_dir}/")
 

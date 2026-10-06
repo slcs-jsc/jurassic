@@ -75,10 +75,6 @@ def main():
         help="likwid-marker region name to read (default: formod)"
     )
     parser.add_argument(
-        "--warmup", type=int, default=1,
-        help="number of leading repetitions to discard (default: 1)"
-    )
-    parser.add_argument(
         "--peak-flops", type=float, default=None,
         help="override compute ceiling [MFLOP/s] (default: read from ceilings.txt)"
     )
@@ -214,12 +210,9 @@ def main():
         if not flops_entries or not mem_entries:
             print(f"{label:>20} {threads:>8} | missing FLOPS_DP and/or MEM_DP, skipping")
             continue
-        if len(flops_entries) < args.warmup or len(mem_entries) <= args.warmup:
-            print(f"{label:>20} {threads:>8} | insufficient reps after warmup discard, skipping")
-            continue
 
         _, mflops_med, _, mflops_cv, _, _ = collect(
-            flops_entries, args.region, "DP [MFLOP/s]", warmup=args.warmup
+            flops_entries, args.region, "DP [MFLOP/s]"
         )
 
         if mflops_med is None:
@@ -227,7 +220,7 @@ def main():
             continue
 
         _, intensity_med, _, intensity_cv, _, _ = collect_intensity(
-            mem_entries, args.region, warmup=args.warmup
+            mem_entries, args.region
         )
         if intensity_med is None:
             print(f"{label:>20} {threads:>8} | could not derive operational intensity, skipping")

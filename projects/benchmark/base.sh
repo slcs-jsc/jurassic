@@ -103,23 +103,27 @@ bench_init() {
     fi
     JR_MPI=${MPI:-0}
     JR_MPICC=${MPICC:-mpicc}
+    # runtime-only experiments set JR_USE_LIKWID=0 before bench_init
+    JR_USE_LIKWID=${JR_USE_LIKWID:-1}
 
     cd "$JR_WORK_DIR"
     export LANG=C LC_ALL=C
-    
+
     if command -v ml >/dev/null 2>&1; then
         ml Stages/2026 GCC/14.3.0
         ml ParaStationMPI
-        ml likwid/5.4.1
+        [ "$JR_USE_LIKWID" = 1 ] && ml likwid/5.4.1
         ml CMake/4.0.3
         ml ecBuild
         ml SciPy-bundle/2025.07
         ml netcdf4-python/1.7.2
     fi
-    
-    command -v likwid-perfctr >/dev/null 2>&1 || {
-        echo "likwid-perfctr not found after 'ml likwid'. Try: ml spider likwid" >&2
-        exit 1; }
+
+    if [ "$JR_USE_LIKWID" = 1 ]; then
+        command -v likwid-perfctr >/dev/null 2>&1 || {
+            echo "likwid-perfctr not found after 'ml likwid'. Try: ml spider likwid" >&2
+            exit 1; }
+    fi
     
     export LD_LIBRARY_PATH="$JR_REPO_ROOT/libs/build/lib:$JR_REPO_ROOT/libs/build/lib64:${LD_LIBRARY_PATH:-}"
     
@@ -134,9 +138,11 @@ bench_init() {
 
     command -v lscpu    >/dev/null 2>&1 && lscpu > "$JR_RUN_DIR/lscpu.txt"
     command -v numactl  >/dev/null 2>&1 && numactl --hardware > "$JR_RUN_DIR/numactl.txt"
-    likwid-perfctr -a > "$JR_RUN_DIR/likwid_available_groups.txt" 2>&1 || true
-    echo "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unavailable)" \
-        > "$JR_RUN_DIR/perf_paranoid_status.txt"
+    if [ "$JR_USE_LIKWID" = 1 ]; then
+        likwid-perfctr -a > "$JR_RUN_DIR/likwid_available_groups.txt" 2>&1 || true
+        echo "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unavailable)" \
+            > "$JR_RUN_DIR/perf_paranoid_status.txt"
+    fi
     ( cd "$JR_REPO_ROOT" && git rev-parse HEAD 2>/dev/null ) \
         > "$JR_RUN_DIR/git_commit.txt" || true
     
@@ -152,6 +158,7 @@ bench_init() {
         echo "compiler=$JR_COMPILER"
         echo "march_native=$JR_MARCH_NATIVE"
         echo "march=$JR_MARCH_TAG"
+        echo "likwid=$JR_USE_LIKWID"
         echo "partition=${SLURM_JOB_PARTITION:-unknown}"
         echo "nodelist=${SLURM_JOB_NODELIST:-unknown}"
     } > "$JR_RUN_DIR/config.txt"
@@ -208,10 +215,10 @@ bench_build_forward() {
 
     if [ -n "$extra" ]; then
         bench_build_isolated MPI="$JR_MPI" MPICC="$JR_MPICC" \
-            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra || return 1
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID="$JR_USE_LIKWID" $extra || return 1
     else
         bench_build_isolated MPI="$JR_MPI" MPICC="$JR_MPICC" \
-            COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 || return 1
+            COMPILER="$JR_COMPILER" GPU=0 LIKWID="$JR_USE_LIKWID" || return 1
     fi
 
     echo "$variant" > "$JR_RUN_DIR/build_variant.txt"
@@ -360,7 +367,7 @@ bench_run_forward() {
   local tag="${label}.t${threads}.${group}.b${batch}.rep${rep}"
   local csv="$JR_WORK_DIR/out/${tag}.csv"
   local txt="$JR_WORK_DIR/out/${tag}.txt"
-  local tab="/tmp/jurassic_${JR_RUN_ID}_${tag}.tab"
+  local tab="/tmp/jurassic_${JR_RUN_ID//\//_}_${tag}.tab"
   local formod_bin="${JR_FORMOD_BIN:-${JR_BIN_DIR:-$JR_SRC_DIR}/formod}"
   mkdir -p "$JR_WORK_DIR/out"
 
@@ -385,6 +392,54 @@ bench_run_forward() {
     echo "exit_code=$rc"
   } >> "$txt"
  
+  rm -f "$tab"
+  [ "$rc" -ne 0 ] && echo "WARNING: run failed ($tag, exit $rc)" >&2
+  return 0
+}
+
+# Runtime-only forward run (no LIKWID). Threads are pinned one per CPU of the
+# comma-separated core list via OpenMP places.
+bench_run_time() {
+  local label=$1 threads=$2 batch=$3 rep=$4 cores=$5
+
+  if [ -z "$cores" ]; then
+    echo "ERROR: bench_run_time: core list (arg 5) is required" >&2
+    return 1
+  fi
+
+  local tag="${label}.t${threads}.b${batch}.rep${rep}"
+  local txt="$JR_WORK_DIR/out/${tag}.txt"
+  local tab="/tmp/jurassic_${JR_RUN_ID//\//_}_${tag}.tab"
+  local formod_bin="${JR_FORMOD_BIN:-${JR_BIN_DIR:-$JR_SRC_DIR}/formod}"
+  local places
+  places=$(sed 's/[0-9]\+/{&}/g' <<< "$cores")
+  # MAX_ITER set: time exactly that many batches, time budget out of the way
+  local budget=${TIME_BUDGET:-10}
+  [ -n "${MAX_ITER:-}" ] && budget=1e9
+  mkdir -p "$JR_WORK_DIR/out"
+
+  echo "--- $tag (cores=$cores) ---"
+
+  set +e
+  OMP_NUM_THREADS=$threads OMP_PLACES="$places" OMP_PROC_BIND=close \
+    JURASSIC_TIME_BUDGET="$budget" JURASSIC_MAX_ITER="${MAX_ITER:-2147483647}" \
+    "$formod_bin" "$JR_ACTIVE_CTL" data/obs.tab data/atm.tab "$tab" \
+    TASK time BATCH_SIZE "$batch" \
+    > "$txt" 2>&1
+  local rc=$?
+  set -e
+
+  {
+    echo "label=$label"
+    echo "threads=$threads"
+    echo "batch_size=$batch"
+    echo "rep=$rep"
+    echo "core_list=$cores"
+    echo "time_budget=$budget"
+    echo "max_iter=${MAX_ITER:-}"
+    echo "exit_code=$rc"
+  } >> "$txt"
+
   rm -f "$tab"
   [ "$rc" -ne 0 ] && echo "WARNING: run failed ($tag, exit $rc)" >&2
   return 0
@@ -455,6 +510,32 @@ cpus_phys() {
   list=$(awk -F, -v s="$sock" '$3 == s { if (!($2 in c)) { c[$2]=1; print $1 } }' "$JR_TOPO_MAP" \
     | sort -n | head -n "$n" | paste -sd,)
   _cpus_require_count "$n" "$list" "cpus_phys $n $sock"
+}
+
+# N physical cores, filling socket 0 completely before using socket 1, ...
+cpus_phys_compact() {
+  local n=$1 left=$1 s take parts=()
+  for (( s=0; left>0 && s<JR_N_SOCKETS; s++ )); do
+    take=$(( left < JR_PHYS_PER_SOCKET ? left : JR_PHYS_PER_SOCKET ))
+    parts+=("$(cpus_phys "$take" "$s")")
+    left=$(( left - take ))
+  done
+  local IFS=,
+  _cpus_require_count "$n" "${parts[*]}" "cpus_phys_compact $n"
+}
+
+# N physical cores split evenly over all sockets (N must be a multiple of the socket count)
+cpus_phys_split() {
+  local n=$1 s parts=()
+  if (( n % JR_N_SOCKETS != 0 )); then
+    echo "FATAL: cpus_phys_split $n: not divisible by $JR_N_SOCKETS sockets." >&2
+    exit 1
+  fi
+  for (( s=0; s<JR_N_SOCKETS; s++ )); do
+    parts+=("$(cpus_phys $(( n / JR_N_SOCKETS )) "$s")")
+  done
+  local IFS=,
+  _cpus_require_count "$n" "${parts[*]}" "cpus_phys_split $n"
 }
 
 # All N physical cores across all sockets

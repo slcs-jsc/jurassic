@@ -6,7 +6,6 @@
 #SBATCH --cpus-per-task=128
 #SBATCH --time=04:00:00
 #SBATCH --exclusive
-#SBATCH --disable-perfparanoid
 #SBATCH --job-name=e1_scaling
 
 # Benchmarking Script for JURASSIC (CPU-version)
@@ -14,8 +13,8 @@
 #
 # Scaling Axes:
 #   1. Intra-Socket: Scale across physical cores on Socket 0
-#   2. SMT: Separate run using all 128 logical threads on Socket 0
-#   3. Inter-Socket: Compare at a fixed core count (e.g., 64 threads):
+#   2. SMT: Separate run using all logical threads on Socket 0
+#   3. Inter-Socket: Compare at a fixed core count (one socket's worth of cores):
 #      - Compact: All threads executed on Socket 0
 #      - Spread: Threads split evenly across Sockets
 #
@@ -25,8 +24,7 @@
 #
 # Metrics:
 #   - Measure Runtime -> compute Speedup & Efficiency
-#   - Analyze memory volume/bandwidth (MEM_DP)
-# Output: out/<category>_<strong/weak>.t<threads>.<GROUP>.b<batch>.rep<rep>.csv
+# Output: out/<category>_<strong/weak>.t<threads>.b<batch>.rep<rep>.txt (runtime only, no LIKWID)
 
 get_batch_size() {
   local threads=$1
@@ -63,6 +61,7 @@ SCALING_MODE=${SCALING_MODE:-"strong"}
 BATCH_SIZE=${BATCH_SIZE:-64}    
 
 export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
+JR_USE_LIKWID=0
 source "$jr_scripts_dir/base.sh"
  
 bench_init
@@ -71,12 +70,10 @@ target_threads=${JR_PHYS_PER_SOCKET:-64}
 reps=${REPS:-5}
 thread_list=${THREAD_LIST:-"1 2 4 8 16 32 64"}
 smt_threads=${SMT_THREADS:-128}
-groups=${LIKWID_GROUPS:-"MEM_DP"}
  
 bench_analyse_topology
 bench_build_forward "${VARIANT:-base}"
 bench_prepare_inputs
-bench_check_groups "$groups"
  
 if [ -z "${THREAD_LIST:-}" ]; then
   thread_list=""
@@ -88,47 +85,25 @@ if [ -z "${THREAD_LIST:-}" ]; then
   [ "$t" -ne $(( JR_PHYS_PER_SOCKET * 2 )) ] && thread_list="$thread_list $JR_PHYS_PER_SOCKET"
 fi
 smt_threads=${SMT_THREADS:-$(( JR_PHYS_PER_SOCKET * JR_SMT ))}
-spread_threads=${SPREAD_THREADS:-"$(( JR_PHYS_PER_SOCKET + 4 )) $(( JR_PHYS_PER_SOCKET * 2 ))"}
 
 for rep in $(seq 1 "$reps"); do
 
   # Intra-Socket
-  numa_flag="-m"
   for t in $thread_list; do
-    current_batch=$(get_batch_size "$t")
-    likwid_cores=$(cpus_phys "$t")
-
-    for group in "${JR_GROUPS[@]}"; do
-      bench_run_forward "intra_socket_${SCALING_MODE}" "$t" "$group" "$current_batch" "$rep" "$likwid_cores" "$numa_flag"
-    done
+    bench_run_time "intra_socket_${SCALING_MODE}" "$t" "$(get_batch_size "$t")" "$rep" "$(cpus_phys "$t")"
   done
 
-  current_batch=$(get_batch_size "$smt_threads")
-  likwid_cores=$(cpus_smt "$smt_threads")
+  # SMT: all logical CPUs of socket 0
+  bench_run_time "smt_socket_${SCALING_MODE}" "$smt_threads" "$(get_batch_size "$smt_threads")" "$rep" "$(cpus_smt "$smt_threads")"
 
-  for group in "${JR_GROUPS[@]}"; do
-    bench_run_forward smt_socket_${SCALING_MODE} "$smt_threads" "$group" "$current_batch" "$rep" "$likwid_cores" "-m"
-  done
-
-  # Inter-Socket
+  # Inter-Socket, same thread count: all on socket 0 vs. spread evenly across sockets
   current_batch=$(get_batch_size "$target_threads")
+  bench_run_time "inter_compact_${SCALING_MODE}" "$target_threads" "$current_batch" "$rep" "$(cpus_phys "$target_threads")"
 
-  # 1. All Threads on Socket 0
-  cores_compact=$(cpus_phys "$target_threads")
-  for group in "${JR_GROUPS[@]}"; do
-    bench_run_forward "inter_compact_${SCALING_MODE}" "$target_threads" "$group" "$current_batch" "$rep" "$cores_compact" "-i"
-  done
-
-  threads_per_sock=$(( target_threads / JR_N_SOCKETS ))
-
-  if [ "$threads_per_sock" -gt 0 ]; then
-    cores_spread=$(cpus_spread "$target_threads")
-
-    for group in "${JR_GROUPS[@]}"; do
-        bench_run_forward "inter_spread_${SCALING_MODE}" "$target_threads" "$group" "$current_batch" "$rep" "$cores_spread" "-i"
-    done
+  if [ $(( target_threads / JR_N_SOCKETS )) -gt 0 ]; then
+    bench_run_time "inter_spread_${SCALING_MODE}" "$target_threads" "$current_batch" "$rep" "$(cpus_spread "$target_threads")"
   else
-    echo "WARNING: target_threads ($target_threads) ist kleiner als die Anzahl der Sockets ($JR_N_SOCKETS). Full Spread wird übersprungen." >&2
+    echo "WARNING: target_threads ($target_threads) < sockets ($JR_N_SOCKETS), skipping spread run." >&2
   fi
 done
  

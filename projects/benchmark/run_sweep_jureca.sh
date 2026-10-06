@@ -64,7 +64,7 @@ BIN_CACHE_DIR="$JR_REPO_ROOT/projects/benchmark/bin_cache"
 BUILD_SCRATCH_DIR="$BIN_CACHE_DIR/_build"
 mkdir -p "$BIN_CACHE_DIR" "$BUILD_SCRATCH_DIR"
 
-# build_or_reuse ND NG
+# build_or_reuse ND NG GEOMETRY
 # formod's statically-sized arrays (los_t/atm_t etc., see src/jurassic.h) are
 # bounded by the compile-time ND/NG macros, so climatology and the geometry
 # binary (zenith/nadir/limb) need the SAME per-point -DND/-DNG as formod --
@@ -72,15 +72,15 @@ mkdir -p "$BIN_CACHE_DIR" "$BUILD_SCRATCH_DIR"
 # leaving climatology/geometry at whatever ND/NG they were last compiled with
 # means any sweep point past that bound fails in read_ctl() with
 # "Set 0 <= ND <= MAX!" as soon as the .ctl's runtime ND exceeds the binary's
-# compiled-in array size. All three binaries are cached together per (nd,ng)
-# key below so every sweep point is internally consistent.
+# compiled-in array size. All three binaries are cached together per
+# (nd,ng,geometry) key below so every sweep point is internally consistent.
 build_or_reuse() {
-    local nd="$1" ng="$2"
-    local key="nd${nd}_ng${ng}_${JR_MARCH_TAG}"
+    local nd="$1" ng="$2" geom="$3"
+    local key="nd${nd}_ng${ng}_${geom}_${JR_MARCH_TAG}"
     local variant_dir="$BIN_CACHE_DIR/${key}"
     local variant_bin="$variant_dir/formod"
     local variant_climatology="$variant_dir/climatology"
-    local variant_geom="$variant_dir/$JR_GEOMETRY"
+    local variant_geom="$variant_dir/$geom"
 
     if [[ -x "$variant_bin" && -x "$variant_climatology" && -x "$variant_geom" ]]; then
         echo "[e3] reusing cached build for ND=${nd} NG=${ng}" >&2
@@ -113,7 +113,7 @@ build_or_reuse() {
 
     local root_dir="$BUILD_SCRATCH_DIR/${key}"
     local build_dir="$root_dir/src"
-    echo "[e3] building ND=${nd} NG=${ng} (formod, climatology, $JR_GEOMETRY) in private copy -> $build_dir" >&2
+    echo "[e3] building ND=${nd} NG=${ng} (formod, climatology, $geom) in private copy -> $build_dir" >&2
     rm -rf "$root_dir"
     mkdir -p "$root_dir"
     for entry in "$JR_REPO_ROOT"/*; do
@@ -128,15 +128,15 @@ build_or_reuse() {
 
     if ! ( cd "$build_dir" \
         && make clean \
-        && make -j formod climatology "$JR_GEOMETRY" MARCH_NATIVE="$JR_MARCH_NATIVE" MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
+        && make -j formod climatology "$geom" MARCH_NATIVE="$JR_MARCH_NATIVE" MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
              GPU=0 LIKWID=1 DEFINES="-DND=${nd} -DNG=${ng}" ) 1>&2; then
-        echo "[e3] ERROR: build failed for ND=${nd} NG=${ng} -> $build_dir" >&2
+        echo "[e3] ERROR: build failed for ND=${nd} NG=${ng} geometry=${geom} -> $build_dir" >&2
         rm -rf "$root_dir"
         exit 1
     fi
 
-    if [[ ! -x "$build_dir/formod" || ! -x "$build_dir/climatology" || ! -x "$build_dir/$JR_GEOMETRY" ]]; then
-        echo "[e3] ERROR: build for ND=${nd} NG=${ng} did not produce formod/climatology/$JR_GEOMETRY -> $build_dir" >&2
+    if [[ ! -x "$build_dir/formod" || ! -x "$build_dir/climatology" || ! -x "$build_dir/$geom" ]]; then
+        echo "[e3] ERROR: build for ND=${nd} NG=${ng} did not produce formod/climatology/$geom -> $build_dir" >&2
         rm -rf "$root_dir"
         exit 1
     fi
@@ -144,15 +144,32 @@ build_or_reuse() {
     mkdir -p "$variant_dir"
     cp "$build_dir/formod" "$variant_bin"
     cp "$build_dir/climatology" "$variant_climatology"
-    cp "$build_dir/$JR_GEOMETRY" "$variant_geom"
+    cp "$build_dir/$geom" "$variant_geom"
     rm -rf "$root_dir"
 
     echo "$variant_bin"
 }
 
 
+# geom_base_ctl GEOMETRY
+# Baseline .ctl for one geometry, looked up in baseline_cases.tsv and with
+# TBLBASE substituted exactly as bench_init() does for the default case.
+geom_base_ctl() {
+    local geom="$1"
+    local template_rel template out
+    template_rel=$(awk -F'\t' -v key="${geom}_baseline" \
+        'NR > 1 && $1 == key { print $3; exit }' "$CONFIG_DIR/baseline_cases.tsv")
+    template="$JR_REPO_ROOT/$template_rel"
+    [ -f "$template" ] || { echo "Control file not found: $template" >&2; exit 1; }
+    out="$JR_WORK_DIR/${geom}_baseline.ctl"
+    awk -v tblbase="$JR_TBLBASE" \
+        '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' \
+        "$template" > "$out"
+    echo "$out"
+}
+
 run_point() {
-    local label="$1" nd="$2" ng="$3" gas_file="$4"
+    local label="$1" geom="$2" nd="$3" ng="$4" gas_file="$5" base_ctl="$6"
 
     local ctl_out="$JR_WORK_DIR/ctl/${label}.ctl"
     mkdir -p "$(dirname "$ctl_out")"
@@ -161,10 +178,12 @@ run_point() {
     if [[ -n "$gas_file" ]]; then
         gen_args+=(--gas-file "$gas_file")
     fi
-    python3 "$SCRIPT_DIR/generate_ctl.py" "${gen_args[@]}" "$JR_ACTIVE_CTL_BASE" "$ctl_out"
+    python3 "$SCRIPT_DIR/generate_ctl.py" "${gen_args[@]}" "$base_ctl" "$ctl_out"
 
+    # base.sh's bench_prepare_inputs() and bench_run_forward() read these globals
+    JR_GEOMETRY="$geom"
     JR_ACTIVE_CTL="$ctl_out"
-    JR_FORMOD_BIN="$(build_or_reuse "$nd" "$ng")"
+    JR_FORMOD_BIN="$(build_or_reuse "$nd" "$ng" "$geom")"
     export JR_FORMOD_BIN
     # bench_prepare_inputs() (base.sh) falls back to "${JR_BIN_DIR:-$JR_SRC_DIR}"
     # for climatology/geometry; point it at this point's own ND/NG-sized
@@ -177,38 +196,51 @@ run_point() {
     bench_run_forward "$label" "$THREADS" "MEM_DP"   "$BATCH_SIZE" "$REP" "$CORES" ""
 }
 
-JR_ACTIVE_CTL_BASE="$JR_ACTIVE_CTL"
+# Geometry axis: space-separated list of zenith/nadir/limb
+GEOMETRIES="${GEOMETRIES:-limb nadir zenith}"
+for geom in $GEOMETRIES; do
+    case "$geom" in
+        zenith|nadir|limb) ;;
+        *) echo "Unsupported geometry in GEOMETRIES: $geom" >&2; exit 1 ;;
+    esac
+done
 
-# NG held fixed at the selected baseline case's gas count while ND varies;
+# NG held fixed at the baseline case's gas count while ND varies;
 # ND held fixed at the baseline channel count while NG varies.
 BASELINE_ND="${BASELINE_ND:-32}"
 BASELINE_NG="${BASELINE_NG:-7}"
 
-echo "=== pre-building formod for all ND/NG variants ==="
-while read -r nd; do
-    [[ -z "$nd" ]] && continue
-    build_or_reuse "$nd" "$BASELINE_NG" >/dev/null
-done < "$CHANNEL_COUNTS_FILE"
+echo "=== pre-building formod for all ND/NG/geometry variants ==="
+for geom in $GEOMETRIES; do
+    while read -r nd; do
+        [[ -z "$nd" ]] && continue
+        build_or_reuse "$nd" "$BASELINE_NG" "$geom" >/dev/null
+    done < "$CHANNEL_COUNTS_FILE"
 
-for gas_file in "$GAS_SETS_DIR"/*.txt; do
-    [[ -e "$gas_file" ]] || continue
-    ng="$(grep -c . "$gas_file")"
-    build_or_reuse "$BASELINE_ND" "$ng" >/dev/null
+    for gas_file in "$GAS_SETS_DIR"/*.txt; do
+        [[ -e "$gas_file" ]] || continue
+        ng="$(grep -c . "$gas_file")"
+        build_or_reuse "$BASELINE_ND" "$ng" "$geom" >/dev/null
+    done
 done
 echo "=== pre-build complete ==="
 
-echo "=== channel scaling ==="
-while read -r nd; do
-    [[ -z "$nd" ]] && continue
-    run_point "channels_${nd}" "$nd" "$BASELINE_NG" ""
-done < "$CHANNEL_COUNTS_FILE"
+for geom in $GEOMETRIES; do
+    base_ctl="$(geom_base_ctl "$geom")"
 
-echo "=== gas set scaling ==="
-for gas_file in "$GAS_SETS_DIR"/*.txt; do
-    [[ -e "$gas_file" ]] || continue
-    name="$(basename "$gas_file" .txt)"
-    ng="$(grep -c . "$gas_file")"
-    run_point "gases_${name}" "$BASELINE_ND" "$ng" "$gas_file"
+    echo "=== geometry: ${geom} | channel scaling ==="
+    while read -r nd; do
+        [[ -z "$nd" ]] && continue
+        run_point "channels_${nd}_${geom}" "$geom" "$nd" "$BASELINE_NG" "" "$base_ctl"
+    done < "$CHANNEL_COUNTS_FILE"
+
+    echo "=== geometry: ${geom} | gas set scaling ==="
+    for gas_file in "$GAS_SETS_DIR"/*.txt; do
+        [[ -e "$gas_file" ]] || continue
+        name="$(basename "$gas_file" .txt)"
+        ng="$(grep -c . "$gas_file")"
+        run_point "gases_${name}_${geom}" "$geom" "$BASELINE_ND" "$ng" "$gas_file" "$base_ctl"
+    done
 done
 
 cp -a "$JR_WORK_DIR/ctl" "$JR_RUN_DIR/" 2>/dev/null || true

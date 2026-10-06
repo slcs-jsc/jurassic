@@ -298,9 +298,8 @@ def get_region_runtime(entry: dict, region: str):
             return sum(v for v in vals if isinstance(v, (int, float)))
     return None
 
-def collect(entries, region, metric, warmup):
-    """Median + CV of one metric across the kept repetitions."""
-    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
+def collect(entries, region, metric):
+    """Median + CV of one metric across repetitions."""
     vals = []
     for e in entries:
         raw = get_value(e, region, metric)
@@ -314,8 +313,7 @@ def collect(entries, region, metric, warmup):
     
     return *get_stats(vals), len(vals), vals
  
-def collect_runtime(entries, warmup):
-    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
+def collect_runtime(entries):
     vals = []
     for e in entries:
         b = e.get("batch")
@@ -325,12 +323,11 @@ def collect_runtime(entries, warmup):
         return None, None, None, float("nan"), 0, []
     return *get_stats(vals), len(vals), vals
 
-def collect_intensity(entries, region, warmup):
+def collect_intensity(entries, region):
     """
     Median + CV of arithmetic intensity across reps
     computed as (summed DP flops) / (summed memory bandwidth)
     """
-    entries = sorted(entries, key=lambda e: e["rep"])[warmup:]
     vals = []
     for e in entries:
         flops = get_value(e, region, "DP [MFLOP/s]")

@@ -155,3 +155,81 @@ def plot_scaling(
         ax.set_title(title)
     ax.legend(loc="best")
     save_figure(fig, res_dir / filename)
+
+
+def plot_series(
+    series: list,
+    label: str,
+    res_dir: Path,
+    filename: str,
+    stream_ceiling=None,
+    yscale: str = "log",
+    xlabel: str = "Threads (physical cores)",
+    percent: bool = False,
+    ylim: tuple | None = None,
+    vline: tuple | None = None,
+    markers: list | None = None,
+    marker_label: str | None = None,
+    ideal_linear: bool = False,
+) -> None:
+    """
+    Several measured curves on one axis, e.g. one per geometry.
+    series: list of (name, x, y, color) tuples
+    vline: optional (x, text) vertical reference, e.g. the socket boundary
+    markers: optional (x, y, color) hollow squares, labelled once as marker_label
+    ideal_linear: dashed y = x reference (ideal speedup)
+    """
+    res_dir.mkdir(parents=True, exist_ok=True)
+
+    fig, ax = plt.subplots()
+    xs_all, labelled = [], []
+    for name, x, y, color in series:
+        x = np.asarray(x, dtype=float)
+        y = np.asarray(y, dtype=float)
+        xs_all.extend(x)
+        ax.plot(x, y, label=name, zorder=3, **line_marker_kwargs(color))
+        # skip the end label if another one already sits at (almost) the same spot
+        if any(lx == x[-1] and abs(ly - y[-1]) <= 0.04 * max(abs(ly), 1e-12) for lx, ly in labelled):
+            continue
+        labelled.append((x[-1], y[-1]))
+        ax.annotate(f"{y[-1]:.0%}" if percent else _value_text(y[-1]), (x[-1], y[-1]),
+                    textcoords="offset points", xytext=(8, 0), ha="left", va="center",
+                    fontsize=9, color=INK)
+
+    if ideal_linear and xs_all:
+        lo, hi = min(xs_all), max(xs_all)
+        ax.plot([lo, hi], [lo, hi], linestyle=(0, (5, 3)), color=INK_MUTED,
+                linewidth=1.3, label="Ideal", zorder=2)
+
+    for i, (mx, my, color) in enumerate(markers or []):
+        ax.plot([mx], [my], linestyle="none", marker="s", markersize=8,
+                markerfacecolor=SURFACE, markeredgecolor=color, markeredgewidth=1.8,
+                zorder=4, label=marker_label if i == 0 else None)
+
+    if stream_ceiling is not None:
+        ax.axhline(stream_ceiling, linestyle=(0, (1, 2)), color=INK_2,
+                   linewidth=1.3, zorder=2,
+                   label=f"STREAM ceiling ({stream_ceiling:.0f})")
+
+    if vline is not None:
+        ax.axvline(vline[0], linestyle=(0, (1, 2)), color=INK_MUTED, linewidth=1.0, zorder=1)
+        ax.annotate(vline[1], (vline[0], 0.02), xycoords=("data", "axes fraction"),
+                    xytext=(-4, 0), textcoords="offset points", rotation=90,
+                    ha="right", va="bottom", fontsize=8, color=INK_2)
+
+    ax.set_yscale(yscale)
+    _thread_axis(ax, sorted(set(xs_all)), xlabel=xlabel)
+    ax.set_ylabel(wrap(label, 40))
+    if percent:
+        ax.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=0))
+    else:
+        ax.yaxis.set_major_formatter(FuncFormatter(_plain_number))
+    if yscale == "log":
+        ax.yaxis.set_minor_formatter(LogFormatter(base=10))
+    if ylim is not None:
+        ax.set_ylim(*ylim)
+    elif yscale != "log":
+        ax.set_ylim(bottom=0)
+    ax.margins(x=0.06)
+    ax.legend(loc="best")
+    save_figure(fig, res_dir / filename)
