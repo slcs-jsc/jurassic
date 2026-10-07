@@ -11,6 +11,8 @@ projects/benchmark/runs/
 projects/benchmark/scripts/__pycache__/
 !projects/benchmark/utils/
 projects/benchmark/utils/__pycache__/
+!projects/benchmark/experiments/
+projects/benchmark/experiments/__pycache__/
 !projects/benchmark/results/
 projects/benchmark/results/*
 !projects/benchmark/results/baseline/
