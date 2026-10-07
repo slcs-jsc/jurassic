@@ -10,10 +10,11 @@
 #SBATCH --job-name=e4_scaling_axes
 
 # OpenMP scaling over geometry, channels and gas sets (see scaling_axes.sh),
-# one array task per case; zenith takes longest.
+# one array task per case. Measure the cost per setting first:
+#   MODES=cost REPS=1 sbatch --time=02:00:00 run_scaling_axes_juwels.sh
 #   sbatch run_scaling_axes_juwels.sh
-#   MODES=t1check AXES=geometry sbatch --time=01:00:00 run_scaling_axes_juwels.sh
-#   MODES=batches AXES=geometry sbatch --time=01:00:00 run_scaling_axes_juwels.sh
+#   MODES=t1check AXES=geometry sbatch --time=02:00:00 run_scaling_axes_juwels.sh
+#   MODES=batches AXES=geometry sbatch --time=02:00:00 run_scaling_axes_juwels.sh
 #   python3 eval_scaling_axes.py runs/scaling_axes_<array job id>
 
 if [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/base.sh" ]; then

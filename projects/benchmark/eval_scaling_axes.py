@@ -22,6 +22,7 @@ AXIS_X = {"geometry": None, "channels": ("nd", "Channels (ND)"), "gases": ("ng",
 
 MEAN_RE = re.compile(r"RUNTIME:.*?\bmean=\s*([\d.eE+-]+)\s*s")
 TIMER_RE = re.compile(r"^(TIMER_\w+)\s*=\s*([\d.eE+-]+)\s*s", re.MULTILINE)
+TABLE_RE = re.compile(r"Read emissivity table: tbl_")
 SERIAL_TIMERS = {"TIMER_FORMOD_REFERENCE", "TIMER_WRITE_OBS", "TIMER_FINALIZE"}
 
 RUN_TXT_RE = re.compile(
@@ -49,6 +50,7 @@ def load_runs(run_dir: Path) -> list:
             "batch_size": int(m.group("batch")),
             "rep": int(m.group("rep")),
             "mean_s": float(mean.group(1)),
+            "tables": len(TABLE_RE.findall(text)),
             "serial_s": sum(v for k, v in timers.items()
                             if k.startswith("TIMER_READ_") or k in SERIAL_TIMERS)
                         if timers else None,
@@ -84,6 +86,7 @@ def main():
         runs += load_runs(d)
     per_socket = int(read_kv(run_dirs[0] / "topology.txt").get("phys_cores_per_socket", 0)) or None
 
+    tables: dict[str, int] = {}
     # (setting, placement, threads) -> throughput, serial time
     thr: dict[tuple, list] = {}
     serial: dict[tuple, list] = {}
@@ -94,6 +97,7 @@ def main():
         setting, _, placement = r["label"].rpartition("_")
         if setting not in settings:
             continue
+        tables[setting] = max(tables.get(setting, 0), r["tables"])
         if placement == "batch":
             key = (setting, r["threads"], r["batch_size"])
             bthr.setdefault(key, []).append(r["batch_size"] / r["mean_s"])
@@ -126,12 +130,25 @@ def main():
         return (s1 + batch / t1) / (n * (sn + batch / tn))
 
     def fmt(v, spec):
-        return format(v, spec) if v is not None else format("n/a", ">" + spec.split(".")[0])
+        return format(v, spec) if v is not None else format("n/a", ">" + re.match(r"\d*", spec).group())
 
     all_threads = sorted({n for (_, p, n) in thr if p == "compact"})
     has_weak = len(all_threads) > 1
     full = max(n for (_, p, n) in thr if p in ("compact", "strongcompact"))
     one_socket = per_socket if any(n == per_socket for (_, p, n) in thr if p != "spread") else None
+
+    # active (channel, gas) pairs: expected from the channel list, found = tables read
+    print("\n=== 1-thread cost ===")
+    print(f"{'setting':>22} {'ND':>4} {'NG':>3} {'rays':>4} {'pairs':>6} {'found':>6} | "
+          f"{'s/scene':>8} {'ms/pair':>8}")
+    print("-" * 72)
+    for s, r in settings.items():
+        t1 = thr.get((s, "compact", 1))
+        pairs = int(r["active_pairs"]) if r.get("active_pairs") else None
+        found = tables.get(s)
+        print(f"{s:>22} {r['nd']:>4} {r['ng']:>3} {r['nr']:>4} {fmt(pairs, '6d')} {fmt(found, '6d')} | "
+              f"{fmt(t1 and 1 / t1, '8.3g')} {fmt(t1 and pairs and 1e3 / t1 / pairs, '8.3g')}"
+              + ("  <- tables missing" if pairs and found is not None and found < pairs else ""))
 
     # axis tags: geometry, channels@<geom>, gases@<geom>
     tags = list(dict.fromkeys(t for r in settings.values() for t in r["axes"].split(",")))
@@ -143,9 +160,8 @@ def main():
         if not members:
             continue
         ref = settings[members[0]]
-        gas = ref["gas_set"].replace("_", " ")
-        axis_name = {"geometry": f"Geometries (ND={ref['nd']}, {gas} gases)",
-                     "channels": f"Channel count, {ref['geometry']} ({gas} gases)",
+        axis_name = {"geometry": f"Geometries (ND={ref['nd']}, NG={ref['ng']})",
+                     "channels": f"Channel count, {ref['geometry']} (NG={ref['ng']})",
                      "gases": f"Gas sets, {ref['geometry']} (ND={ref['nd']})"}[axis.split("@")[0]]
         if xinfo:
             members.sort(key=lambda s: int(settings[s][xinfo[0]]))
