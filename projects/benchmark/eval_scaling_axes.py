@@ -6,6 +6,7 @@ READ_*, FORMOD_REFERENCE, WRITE_OBS and FINALIZE timers.
 """
 import argparse
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -13,11 +14,44 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from eval_scaling import load_runs
+from likwid_parsing import parse_formod_log
 from plot_results import plot_series
 from plot_style import PALETTE
 
 AXIS_X = {"geometry": None, "channels": ("nd", "Channels (ND)"), "gases": ("ng", "Emitters (NG)")}
+
+
+SERIAL_TIMERS = {"TIMER_FORMOD_REFERENCE", "TIMER_WRITE_OBS", "TIMER_FINALIZE"}
+
+RUN_TXT_RE = re.compile(
+    r"^(?P<label>[A-Za-z0-9_]+)\.t(?P<threads>\d+)(?:\.[A-Za-z0-9_]+)?"
+    r"\.b(?P<batch>\d+)\.rep(?P<rep>\d+)\.txt$"
+)
+
+
+def load_runs(run_dir: Path) -> list:
+    out_dir = run_dir / "out" if (run_dir / "out").is_dir() else run_dir
+    runs = []
+    for txt in sorted(out_dir.glob("*.txt")):
+        m = RUN_TXT_RE.match(txt.name)
+        if not m:
+            continue
+        log = parse_formod_log(txt)
+        batch = log["batch"]
+        if batch is None:
+            print(f"WARNING: no RUNTIME line in {txt.name} (run failed?), skipping.")
+            continue
+        runs.append({
+            "label": m.group("label"),
+            "threads": int(m.group("threads")),
+            "batch_size": int(m.group("batch")),
+            "rep": int(m.group("rep")),
+            "mean_s": batch["mean_s"],
+            "serial_s": sum(v for k, v in log["timers"].items()
+                            if k.startswith("TIMER_READ_") or k in SERIAL_TIMERS)
+                        if log["timers"] else None,
+        })
+    return runs
 
 
 def read_kv(path: Path) -> dict:
