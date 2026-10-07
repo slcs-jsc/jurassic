@@ -153,8 +153,29 @@ def plot_scaling(
     ax.margins(x=0.06)
     if title:
         ax.set_title(title)
+    _end_labels(ax, labelled, percent)
     ax.legend(loc="best")
     save_figure(fig, res_dir / filename)
+
+
+def _end_labels(ax, points, percent, gap=11.0):
+    """Value labels at the line ends, pushed apart vertically so they don't overlap."""
+    fig = ax.figure
+    fig.canvas.draw()
+    to_pt = 72.0 / fig.dpi
+    by_x = {}
+    for x, y, color in points:
+        by_x.setdefault(x, []).append((ax.transData.transform((x, y))[1] * to_pt, y, color))
+    for x, group in by_x.items():
+        group.sort()
+        placed = []
+        for yp, _, _ in group:
+            placed.append(max(yp, placed[-1] + gap) if placed else yp)
+        shift = (sum(p - g[0] for p, g in zip(placed, group))) / len(group)
+        for p, (yp, y, color) in zip(placed, group):
+            ax.annotate(f"{y:.0%}" if percent else _value_text(y), (x, y),
+                        textcoords="offset points", xytext=(8, p - shift - yp),
+                        ha="left", va="center", fontsize=9, color=color)
 
 
 def plot_series(
@@ -171,6 +192,7 @@ def plot_series(
     markers: list | None = None,
     marker_label: str | None = None,
     ideal_linear: bool = False,
+    title: str | None = None,
 ) -> None:
     """
     Several measured curves on one axis, e.g. one per geometry.
@@ -188,13 +210,7 @@ def plot_series(
         y = np.asarray(y, dtype=float)
         xs_all.extend(x)
         ax.plot(x, y, label=name, zorder=3, **line_marker_kwargs(color))
-        # skip the end label if another one already sits at (almost) the same spot
-        if any(lx == x[-1] and abs(ly - y[-1]) <= 0.04 * max(abs(ly), 1e-12) for lx, ly in labelled):
-            continue
-        labelled.append((x[-1], y[-1]))
-        ax.annotate(f"{y[-1]:.0%}" if percent else _value_text(y[-1]), (x[-1], y[-1]),
-                    textcoords="offset points", xytext=(8, 0), ha="left", va="center",
-                    fontsize=9, color=INK)
+        labelled.append((x[-1], y[-1], color))
 
     if ideal_linear and xs_all:
         lo, hi = min(xs_all), max(xs_all)
@@ -231,5 +247,28 @@ def plot_series(
     elif yscale != "log":
         ax.set_ylim(bottom=0)
     ax.margins(x=0.06)
+    if title:
+        ax.set_title(title)
+    _end_labels(ax, labelled, percent)
     ax.legend(loc="best")
     save_figure(fig, res_dir / filename)
+
+
+def _end_labels(ax, points, percent, gap=11.0):
+    """Value labels at the line ends, pushed apart vertically so they don't overlap."""
+    fig = ax.figure
+    fig.canvas.draw()
+    to_pt = 72.0 / fig.dpi
+    by_x = {}
+    for x, y, color in points:
+        by_x.setdefault(x, []).append((ax.transData.transform((x, y))[1] * to_pt, y, color))
+    for x, group in by_x.items():
+        group.sort()
+        placed = []
+        for yp, _, _ in group:
+            placed.append(max(yp, placed[-1] + gap) if placed else yp)
+        shift = (sum(p - g[0] for p, g in zip(placed, group))) / len(group)
+        for p, (yp, y, color) in zip(placed, group):
+            ax.annotate(f"{y:.0%}" if percent else _value_text(y), (x, y),
+                        textcoords="offset points", xytext=(8, p - shift - yp),
+                        ha="left", va="center", fontsize=9, color=color)

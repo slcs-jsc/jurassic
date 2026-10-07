@@ -1,10 +1,8 @@
 """Evaluate scaling_axes.sh runs.
 
-Efficiency = throughput(n) / (n * throughput(1)); for strong runs T1 is the batch
-x the 1-thread time per scene. Per axis (geometry, channels@<case>, gases@<case>)
-it prints tables and writes e4_<axis>_*.png: strong speedup/efficiency vs threads
-for settings with a full curve (the baselines), strong efficiency vs ND or NG,
-single-thread cost, and the weak-scaling plots if weak runs exist.
+Efficiency = throughput(n) / (n * throughput(1)), T1 = batch x 1-thread time per scene.
+"formod batch" times one formod_batch call; "whole application" adds the
+READ_*, FORMOD_REFERENCE, WRITE_OBS and FINALIZE timers.
 """
 import argparse
 import csv
@@ -37,7 +35,7 @@ def main():
     res_dir = args.out or (args.run_dir / "plots")
     res_dir.mkdir(parents=True, exist_ok=True)
 
-    # a single run, or an array run with one subdirectory per case
+    # single run or array run (one subdirectory per case)
     run_dirs = ([args.run_dir] if (args.run_dir / "settings.tsv").is_file()
                 else sorted(d for d in args.run_dir.iterdir() if (d / "settings.tsv").is_file()))
     if not run_dirs:
@@ -50,12 +48,21 @@ def main():
         runs += load_runs(d)
     per_socket = int(read_kv(run_dirs[0] / "topology.txt").get("phys_cores_per_socket", 0)) or None
 
-    # (setting, placement, threads) -> lists of throughput / serial time
+    # (setting, placement, threads) -> throughput, serial time
     thr: dict[tuple, list] = {}
     serial: dict[tuple, list] = {}
+    # batch sweep: (setting, threads, batch)
+    bthr: dict[tuple, list] = {}
+    bserial: dict[tuple, list] = {}
     for r in runs:
         setting, _, placement = r["label"].rpartition("_")
         if setting not in settings:
+            continue
+        if placement == "batch":
+            key = (setting, r["threads"], r["batch_size"])
+            bthr.setdefault(key, []).append(r["batch_size"] / r["mean_s"])
+            if r["serial_s"] is not None:
+                bserial.setdefault(key, []).append(r["serial_s"])
             continue
         key = (setting, placement, r["threads"])
         thr.setdefault(key, []).append(r["batch_size"] / r["mean_s"])
@@ -65,12 +72,22 @@ def main():
         print(f"No usable runs under {args.run_dir}.")
         sys.exit(1)
     thr = {k: float(np.median(v)) for k, v in thr.items()}
-    serial = {k: float(np.median(v)) for k, v in serial.items()}
+    # min: first run of a setting reads the tables from a cold cache
+    serial = {k: float(np.min(v)) for k, v in serial.items()}
+    bthr = {k: float(np.median(v)) for k, v in bthr.items()}
+    bserial = {k: float(np.min(v)) for k, v in bserial.items()}
 
     def eff(setting, placement, n):
         base = thr.get((setting, "compact", 1))
         t = thr.get((setting, placement, n))
         return t / (n * base) if base and t else None
+
+    def app_eff(setting, n, batch):
+        t1, tn = thr.get((setting, "compact", 1)), thr.get((setting, "strongcompact", n))
+        s1, sn = serial.get((setting, "compact", 1)), serial.get((setting, "strongcompact", n))
+        if None in (t1, tn, s1, sn):
+            return None
+        return (s1 + batch / t1) / (n * (sn + batch / tn))
 
     def fmt(v, spec):
         return format(v, spec) if v is not None else format("n/a", ">" + spec.split(".")[0])
@@ -80,15 +97,20 @@ def main():
     full = max(n for (_, p, n) in thr if p in ("compact", "strongcompact"))
     one_socket = per_socket if any(n == per_socket for (_, p, n) in thr if p != "spread") else None
 
-    # axis tags: "geometry", "channels@<geom>", "gases@<geom>" (older runs: "channels", "gases")
+    # axis tags: geometry, channels@<geom>, gases@<geom>
     tags = list(dict.fromkeys(t for r in settings.values() for t in r["axes"].split(",")))
     tags.sort(key=lambda t: list(AXIS_X).index(t.split("@")[0]))
     for axis in tags:
         xinfo = AXIS_X[axis.split("@")[0]]
-        axis_name, stem = axis.replace("@", " around "), axis.replace("@", "_")
+        stem = axis.replace("@", "_")
         members = [s for s, r in settings.items() if axis in r["axes"].split(",")]
         if not members:
             continue
+        ref = settings[members[0]]
+        gas = ref["gas_set"].replace("_", " ")
+        axis_name = {"geometry": f"Geometries (ND={ref['nd']}, {gas} gases)",
+                     "channels": f"Channel count, {ref['geometry']} ({gas} gases)",
+                     "gases": f"Gas sets, {ref['geometry']} (ND={ref['nd']})"}[axis.split("@")[0]]
         if xinfo:
             members.sort(key=lambda s: int(settings[s][xinfo[0]]))
 
@@ -131,8 +153,9 @@ def main():
                         summary[name].append((x, v))
 
         if series:
-            plot_series(series, f"Parallel efficiency (weak scaling, {axis_name})", res_dir,
+            plot_series(series, "Parallel efficiency", res_dir,
                         f"e4_{stem}_efficiency.png", yscale="linear", percent=True,
+                        title=f"{axis_name} · weak scaling",
                         ylim=(0, 1.15),
                         vline=(one_socket, "1 socket") if one_socket and one_socket < full else None,
                         markers=markers, marker_label=f"{one_socket} threads over all sockets")
@@ -144,15 +167,16 @@ def main():
             curves = [(labels[k], [p[0] for p in v], [p[1] for p in v], PALETTE[j])
                       for j, (k, v) in enumerate(summary.items()) if len(v) > 1]
             if curves:
-                plot_series(curves, f"Parallel efficiency vs. {xinfo[1]} ({axis_name})", res_dir,
+                plot_series(curves, "Parallel efficiency", res_dir,
                             f"e4_{stem}_summary.png", yscale="linear", percent=True,
+                            title=f"{axis_name} · weak scaling",
                             ylim=(0, 1.15), xlabel=xinfo[1])
             cost = [(int(settings[s][xinfo[0]]), 1 / thr[(s, "compact", 1)])
                     for s in members if (s, "compact", 1) in thr]
             if len(cost) > 1:
                 plot_series([("1 thread", [c[0] for c in cost], [c[1] for c in cost], PALETTE[0])],
-                            "Time per scene, single thread [s]", res_dir, f"e4_{stem}_cost.png",
-                            xlabel=xinfo[1])
+                            "Time per scene [s]", res_dir, f"e4_{stem}_cost.png",
+                            xlabel=xinfo[1], title=f"{axis_name} · 1 thread")
 
         strong_ns = sorted({n for (st, p, n) in thr if st in members and p == "strongcompact"})
         if strong_ns:
@@ -160,7 +184,7 @@ def main():
             cols = [(n, "strongcompact") for n in dict.fromkeys((one_socket, max(strong_ns))) if n in strong_ns]
             if one_socket and any((st, "strongspread", one_socket) in thr for st in members):
                 cols.append((one_socket, "strongspread"))
-            print(f"\n--- {axis_name}: strong scaling, batch {batch} (T1 = batch x 1-thread time per scene) ---")
+            print(f"\n--- {axis_name}: strong scaling, formod batch, batch {batch} (T1 = batch x 1-thread time per scene) ---")
             print(f"{'setting':>26} {'rays':>4} {'s/scene':>8} {'T1 [s]':>9} | " + " | ".join(
                 f"{('spread ' if p == 'strongspread' else '') + str(n) + ' thr':>23}" for n, p in cols))
             print(f"{'':>26} {'':>4} {'':>8} {'':>9} | " + " | ".join(f"{'Tn [s]':>7} {'spd':>6} {'eff':>7}" for _ in cols))
@@ -188,29 +212,94 @@ def main():
                         curve_markers.append((one_socket, eff(s_, "strongspread", one_socket), PALETTE[i % len(PALETTE)]))
 
             for s_, _, ns, effs, _ in full_curves:
-                print(f"  full curve {s_}: " + "  ".join(f"{n}: {n * e:.1f}x/{e:.0%}" for n, e in zip(ns, effs)))
+                print(f"  formod batch {s_}: " + "  ".join(f"{n}: {n * e:.1f}x/{e:.0%}" for n, e in zip(ns, effs)))
+            app_curves = []
+            for s_, name, ns, _, c in full_curves:
+                ae = [app_eff(s_, n, batch) if n > 1 else 1.0 for n in ns]
+                if None not in ae:
+                    app_curves.append((name, ns, ae, c))
+                    print(f"  application  {s_}: " + "  ".join(f"{n}: {n * e:.1f}x/{e:.0%}" for n, e in zip(ns, ae)))
             if full_curves:
                 vline = (one_socket, "1 socket") if one_socket and one_socket < full else None
                 plot_series([(name, ns, [n * e for n, e in zip(ns, effs)], c) for _, name, ns, effs, c in full_curves],
-                            f"Speedup (strong scaling, batch {batch}, {axis_name})", res_dir,
+                            "Speedup", res_dir,
                             f"e4_{stem}_strong_speedup.png", ideal_linear=True, vline=vline,
+                            title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
                             markers=[(x, x * e, c) for x, e, c in curve_markers],
                             marker_label=f"{one_socket} threads over all sockets")
                 plot_series([(name, ns, effs, c) for _, name, ns, effs, c in full_curves],
-                            f"Parallel efficiency (strong scaling, batch {batch}, {axis_name})", res_dir,
+                            "Parallel efficiency", res_dir,
                             f"e4_{stem}_strong_efficiency.png", yscale="linear", percent=True,
+                            title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
                             ylim=(0, 1.15), vline=vline, markers=curve_markers,
                             marker_label=f"{one_socket} threads over all sockets")
+            if app_curves:
+                plot_series([(name, ns, [n * e for n, e in zip(ns, effs)], c) for name, ns, effs, c in app_curves],
+                            "Speedup", res_dir, f"e4_{stem}_app_speedup.png", ideal_linear=True, vline=vline,
+                            title=f"{axis_name} · whole application, strong scaling, batch {batch}")
+                plot_series(app_curves, "Parallel efficiency", res_dir, f"e4_{stem}_app_efficiency.png",
+                            yscale="linear", percent=True, ylim=(0, 1.15), vline=vline,
+                            title=f"{axis_name} · whole application, strong scaling, batch {batch}")
 
             curves = [(f"{n} threads" + (", all sockets" if p == "strongspread" or n > (one_socket or n) else ", 1 socket"),
                        [q[0] for q in v], [q[1] for q in v], PALETTE[j])
                       for j, ((n, p), v) in enumerate(strong_curves.items()) if len(v) > 1]
             if curves:
-                plot_series(curves, f"Parallel efficiency (strong scaling, batch {batch}) vs. {xinfo[1]}",
+                plot_series(curves, "Parallel efficiency",
                             res_dir, f"e4_{stem}_strong.png", yscale="linear", percent=True,
+                            title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
                             ylim=(0, 1.15), xlabel=xinfo[1])
 
+    checks = [(st, b) for (st, p, n) in thr if p == "t1full" and (st, "compact", 1) in thr
+              for b in {r["batch_size"] for r in runs if r["label"] == f"{st}_t1full"}]
+    if checks:
+        print("\n=== T1 check: 1 thread on the full batch vs. batch x 1-thread time per scene ===")
+        for st, b in sorted(checks):
+            est, meas = b / thr[(st, "compact", 1)], b / thr[(st, "t1full", 1)]
+            print(f"{st:>26} batch {b}: extrapolated {est:.4g} s, measured {meas:.4g} s ({est / meas - 1:+.1%})")
+
+    if bthr:
+        batch_sweep(settings, thr, serial, bthr, bserial, res_dir)
+
     print(f"\nPlots written to {res_dir}/")
+
+
+def batch_sweep(settings, thr, serial, bthr, bserial, res_dir):
+    """Efficiency vs batch size at a fixed thread count."""
+    for n in sorted({k[1] for k in bthr}):
+        print(f"\n=== Batch size sweep, {n} threads (T1 = batch x 1-thread time per scene) ===")
+        print(f"{'setting':>26} {'batch':>6} {'per thr':>7} | {'Tn [s]':>8} {'spd':>6} {'eff':>7} | "
+              f"{'app spd':>7} {'app eff':>7}")
+        print("-" * 86)
+        formod, app = [], []
+        for i, s in enumerate(sorted({k[0] for k in bthr if k[1] == n})):
+            t1, s1 = thr.get((s, "compact", 1)), serial.get((s, "compact", 1))
+            if not t1:
+                continue
+            bs = sorted(b for (st, nn, b) in bthr if st == s and nn == n)
+            effs, aeffs = [], []
+            for b in bs:
+                tn = b / bthr[(s, n, b)]
+                e = bthr[(s, n, b)] / (n * t1)
+                sn = bserial.get((s, n, b))
+                ae = (s1 + b / t1) / (n * (sn + tn)) if s1 is not None and sn is not None else None
+                effs.append(e)
+                aeffs.append(ae)
+                print(f"{s:>26} {b:>6} {b // n:>7} | {tn:8.3g} {n * e:6.1f} {e:7.1%} | "
+                      + (f"{n * ae:7.1f} {ae:7.1%}" if ae is not None else f"{'n/a':>7} {'n/a':>7}"))
+            name = settings[s]["geometry"]
+            color = PALETTE[i % len(PALETTE)]
+            formod.append((name, bs, effs, color))
+            if None not in aeffs:
+                app.append((name, bs, aeffs, color))
+        if formod and max(len(c[1]) for c in formod) > 1:
+            plot_series(formod, "Parallel efficiency", res_dir, f"e4_batch_t{n}.png",
+                        yscale="linear", percent=True, ylim=(0, 1.15), xlabel="Batch size (scenes)",
+                        title=f"Batch size · formod batch, {n} threads")
+        if app and max(len(c[1]) for c in app) > 1:
+            plot_series(app, "Parallel efficiency", res_dir, f"e4_batch_t{n}_app.png",
+                        yscale="linear", percent=True, ylim=(0, 1.15), xlabel="Batch size (scenes)",
+                        title=f"Batch size · whole application, {n} threads")
 
 
 if __name__ == "__main__":

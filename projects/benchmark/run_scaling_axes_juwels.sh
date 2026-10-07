@@ -9,12 +9,11 @@
 #SBATCH --exclusive
 #SBATCH --job-name=e4_scaling_axes
 
-# OpenMP scaling over geometry, channels and gas sets (see scaling_axes.sh).
-# One array task per case (zenith, nadir, limb), strong scaling over threads for
-# every setting: about 1-7 h for the longest task (zenith).
-# Cheaper: CURVE_SETTINGS="nd128 priority_full" sbatch --time=06:00:00 run_scaling_axes_juwels.sh
-# With weak scaling too (MODES="strong weak") use --time=24:00:00.
+# OpenMP scaling over geometry, channels and gas sets (see scaling_axes.sh),
+# one array task per case; zenith takes longest.
 #   sbatch run_scaling_axes_juwels.sh
+#   MODES=t1check AXES=geometry sbatch --time=01:00:00 run_scaling_axes_juwels.sh
+#   MODES=batches AXES=geometry sbatch --time=01:00:00 run_scaling_axes_juwels.sh
 #   python3 eval_scaling_axes.py runs/scaling_axes_<array job id>
 
 if [ -n "${SLURM_SUBMIT_DIR:-}" ] && [ -f "$SLURM_SUBMIT_DIR/base.sh" ]; then

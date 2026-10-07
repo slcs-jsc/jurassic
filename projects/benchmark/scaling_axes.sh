@@ -1,37 +1,27 @@
-# OpenMP scaling of the forward model over problem settings.
-# Submit via run_scaling_axes_jureca.sh / run_scaling_axes_juwels.sh.
+# OpenMP scaling of formod function over geometry, channels (ND) and gas sets (NG), one axis
+# at a time around the baselines of CASES. Run via run_scaling_axes_<machine>.sh;
+# as an array job, task i runs the i-th case into runs/scaling_axes_<array id>/<case>/.
 #
-# One axis is varied at a time: geometry, channels (ND), gas set (NG).
-# Channels and gases are varied around every case in CASES (default: all three
-# baselines); the geometry axis is made of the cases' baselines.
-# As a Slurm array job, task i runs only the i-th case, into
-# runs/scaling_axes_<array job id>/<case>/; eval_scaling_axes.py reads the whole
-# runs/scaling_axes_<array job id>/ directory.
+# MODES (default: strong t1check batches):
+#   strong   STRONG_BATCH scenes over STRONG_CURVE threads (up to one socket);
+#            settings not in CURVE_SETTINGS (default: all) only get STRONG_THREADS.
+#            T1 comes from a 1-thread run of SCENES_PER_THREAD scenes.
+#   t1check  1 thread on the full STRONG_BATCH for T1_CHECK (default: baselines)
+#   batches  BATCH_THREADS (default: one socket) over BATCH_LIST for BATCH_SETTINGS
+#   weak     SCENES_PER_THREAD scenes per thread over THREAD_LIST
+# SPREAD_THREADS adds runs with the threads split over all sockets.
+# Every run times MAX_ITER batches (default 3) after an untimed warm-up batch.
 #
-# Placements: compact (socket 0 filled first) by default; spread (one socket's
-# worth of threads split over all sockets) only with SPREAD_THREADS, e.g. 64.
-#
-# MODES (default: strong):
-#   strong  fixed batch of STRONG_BATCH scenes, up to one socket. Settings picked by
-#           CURVE_SETTINGS (default: all; or e.g. "nd256 priority_full") and the
-#           cases' baselines get the full STRONG_CURVE, the rest STRONG_THREADS
-#           (default: one socket). T1 is not run with the full batch but from a
-#           1-thread run of SCENES_PER_THREAD scenes.
-#   weak    SCENES_PER_THREAD scenes per thread over THREAD_LIST.
-#
-# Every run times MAX_ITER batches (default 1) after formod's untimed warm-up batch.
-#
-# Output: out/<geom>_nd<ND>_<gasset>_<placement>.t<n>.b<batch>.rep<r>.txt, settings.tsv
 # Overrides: CASES, AXES, MODES, CHANNEL_LIST, GAS_SETS, BASE_GAS, THREAD_LIST,
 #            CURVE_SETTINGS, STRONG_CURVE, STRONG_THREADS, STRONG_BATCH, SPREAD_THREADS,
-#            SCENES_PER_THREAD, MAX_ITER, REPS
+#            SCENES_PER_THREAD, MAX_ITER, REPS, T1_CHECK, BATCH_SETTINGS, BATCH_THREADS,
+#            BATCH_LIST
 
 set -euo pipefail
 
 JR_EXPERIMENT=scaling_axes
 JR_USE_LIKWID=0
 
-# only CASES: a CASE_NAME exported for other scripts must not silently shrink this run
 cases=${CASES:-"zenith_baseline nadir_baseline limb_baseline"}
 if [ -n "${SLURM_ARRAY_TASK_ID:-}" ]; then
   read -r -a case_arr <<< "$cases"
@@ -47,17 +37,18 @@ RUN_ID=${RUN_ID:-scaling_axes_${SLURM_JOB_ID:-manual}}
 export JR_SCRIPTS_DIR_OVERRIDE="$jr_scripts_dir"
 source "$jr_scripts_dir/base.sh"
 
-# bench_init only needs a valid case; every setting gets its own ctl file below
 CASE_NAME=${cases%% *}
 bench_init
 
 axes=${AXES:-"geometry channels gases"}
-modes=${MODES:-strong}
+modes=${MODES:-"strong t1check batches"}
 for m in $modes; do
-  case "$m" in strong|weak) ;; *) echo "Unknown mode '$m' (expected strong, weak)" >&2; exit 1 ;; esac
+  case "$m" in strong|weak|t1check|batches) ;;
+    *) echo "Unknown mode '$m' (expected strong, weak, t1check, batches)" >&2; exit 1 ;;
+  esac
 done
 has_mode() { [[ " $modes " == *" $1 "* ]]; }
-MAX_ITER=${MAX_ITER:-1}
+MAX_ITER=${MAX_ITER:-3}
 reps=${REPS:-2}
 k=${SCENES_PER_THREAD:-4}
 channel_list=${CHANNEL_LIST:-"8 16 32 64 128 256"}
@@ -76,7 +67,7 @@ if [ -z "${THREAD_LIST:-}" ]; then
 fi
 spread_threads=${SPREAD_THREADS:-}
 [ "$JR_N_SOCKETS" -lt 2 ] && spread_threads=""
-# strong scaling stops at one socket: the full node would force a batch of 2x all cores
+# strong curve: up to one socket
 strong_curve=${STRONG_CURVE:-}
 if [ -z "$strong_curve" ]; then
   for (( t=2; t<P; t*=2 )); do strong_curve="$strong_curve $t"; done
@@ -84,9 +75,11 @@ if [ -z "$strong_curve" ]; then
 fi
 strong_threads=${STRONG_THREADS-$P}
 curve_settings=${CURVE_SETTINGS:-all}
+batch_threads=${BATCH_THREADS:-$P}
+batch_list=${BATCH_LIST:-"$(( 2 * batch_threads )) $(( 4 * batch_threads )) $(( 8 * batch_threads )) $(( 16 * batch_threads ))"}
 
-# strong batch: smallest multiple of every strong thread count, >= 2 scenes per thread
-if has_mode strong; then
+# strong batch: lcm of all strong thread counts, >= 2 scenes per thread
+if has_mode strong || has_mode t1check; then
   all_strong=""
   for t in $strong_curve $strong_threads $spread_threads; do
     [ "$t" -gt 1 ] && [ "$t" -le "$N_PHYS" ] && all_strong="$all_strong $t"
@@ -108,6 +101,7 @@ fi
 {
   echo "cases=$cases"; echo "axes=$axes"; echo "threads=$THREAD_LIST"; echo "spread_threads=$spread_threads"
   echo "modes=$modes"; echo "scenes_per_thread=$k"; echo "reps=$reps"; echo "max_iter=$MAX_ITER"
+  echo "batch_threads=$batch_threads"; echo "batch_list=$batch_list"
   echo "curve_settings=$curve_settings"; echo "strong_curve=$strong_curve"; echo "strong_threads=$strong_threads"; echo "strong_batch=${STRONG_BATCH:-}"
 } >> "$JR_RUN_DIR/config.txt"
 
@@ -116,7 +110,7 @@ for c in $cases; do
   [ -n "$(case_field "$c" 1)" ] || { echo "Unknown case '$c' (see $cases_tsv)" >&2; exit 1; }
 done
 
-# settings: "label geometry nd gas_set"; a setting shared by several axes runs once
+# settings: "label geometry nd gas_set"
 settings=()
 declare -A setting_axes is_baseline
 add_setting() {        # axis geometry nd gas_set
@@ -142,8 +136,11 @@ for axis in $axes; do
 done
 
 for c in $cases; do is_baseline[$(case_field "$c" 2)_nd$(case_field "$c" 6)_$BASE_GAS]=1; done
+t1_check=${T1_CHECK-${!is_baseline[*]}}
+batch_settings=${BATCH_SETTINGS-${!is_baseline[*]}}
+{ echo "t1_check=$t1_check"; echo "batch_settings=$batch_settings"; } >> "$JR_RUN_DIR/config.txt"
 
-# one build per (ND, NG), with climatology and all geometry binaries
+# one build per (ND, NG)
 declare -A bin_dir
 build_variant() {
   local nd=$1 ng=$2 key="nd$1_ng$2"
@@ -190,7 +187,7 @@ for rep in $(seq 1 "$reps"); do
     cd "${setting_dir[$label]}"
     JR_ACTIVE_CTL=run.ctl
     JR_FORMOD_BIN="${setting_bin[$label]}/formod"
-    # 1-thread reference: T1 for strong, first point for weak
+    # 1-thread reference
     bench_run_time "${label}_compact" 1 "$k" "$rep" "$(cpus_phys_compact 1)"
     if has_mode weak; then
       for t in $THREAD_LIST; do
@@ -214,6 +211,14 @@ for rep in $(seq 1 "$reps"); do
       done
       for t in $spread_threads; do
         bench_run_time "${label}_strongspread" "$t" "$STRONG_BATCH" "$rep" "$(cpus_phys_split "$t")"
+      done
+    fi
+    if has_mode t1check && [[ " $t1_check " == *" $label "* ]]; then
+      bench_run_time "${label}_t1full" 1 "$STRONG_BATCH" "$rep" "$(cpus_phys_compact 1)"
+    fi
+    if has_mode batches && [[ " $batch_settings " == *" $label "* ]]; then
+      for b in $batch_list; do
+        bench_run_time "${label}_batch" "$batch_threads" "$b" "$rep" "$(cpus_phys_compact "$batch_threads")"
       done
     fi
   done

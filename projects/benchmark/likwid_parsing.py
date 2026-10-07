@@ -21,7 +21,7 @@ RUNTIME_RE = re.compile(
     r"(?:threads=\s*(?P<threads>\d+)\s*\|\s*)?"
     r"batch_size=\s*(?P<batch_size>\d+)\s*\|\s*"
     r"mean=\s*(?P<mean>[\d.eE+-]+)\s*s\s*\|\s*"
-    r"stddev=\s*(?P<stddev>[\d.eE+-]+)\s*s\s*\|\s*"
+    r"stddev=\s*(?P<stddev>-?nan|[\d.eE+-]+)\s*s\s*\|\s*"
     r"min=\s*(?P<min>[\d.eE+-]+)\s*s\s*\|\s*"
     r"max=\s*(?P<max>[\d.eE+-]+)\s*s"
 )
