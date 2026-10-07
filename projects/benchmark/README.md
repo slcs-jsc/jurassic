@@ -8,7 +8,7 @@ branch under `projects/benchmark/experiments/`.
 
 One axis is varied at a time around the baseline cases (`configs/baseline_cases.tsv`):
 geometry (limb, nadir, zenith), channel count (ND) and gas set (NG). Each setting is
-built with its own ND/NG and timed with `formod TASK time`, runtime only (no LIKWID).
+built with its own ND/NG and timed with `formod TASK time`.
 
 * `strong`: fixed batch over 1 thread up to one socket.
 * `t1check`: 1 thread on the full batch, to check the extrapolated T1.

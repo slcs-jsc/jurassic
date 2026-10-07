@@ -14,13 +14,14 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from likwid_parsing import parse_formod_log
 from plot_results import plot_series
 from plot_style import PALETTE
 
 AXIS_X = {"geometry": None, "channels": ("nd", "Channels (ND)"), "gases": ("ng", "Emitters (NG)")}
 
 
+MEAN_RE = re.compile(r"RUNTIME:.*?\bmean=\s*([\d.eE+-]+)\s*s")
+TIMER_RE = re.compile(r"^(TIMER_\w+)\s*=\s*([\d.eE+-]+)\s*s", re.MULTILINE)
 SERIAL_TIMERS = {"TIMER_FORMOD_REFERENCE", "TIMER_WRITE_OBS", "TIMER_FINALIZE"}
 
 RUN_TXT_RE = re.compile(
@@ -36,20 +37,21 @@ def load_runs(run_dir: Path) -> list:
         m = RUN_TXT_RE.match(txt.name)
         if not m:
             continue
-        log = parse_formod_log(txt)
-        batch = log["batch"]
-        if batch is None:
+        text = txt.read_text()
+        mean = MEAN_RE.search(text)
+        if mean is None:
             print(f"WARNING: no RUNTIME line in {txt.name} (run failed?), skipping.")
             continue
+        timers = {k: float(v) for k, v in TIMER_RE.findall(text)}
         runs.append({
             "label": m.group("label"),
             "threads": int(m.group("threads")),
             "batch_size": int(m.group("batch")),
             "rep": int(m.group("rep")),
-            "mean_s": batch["mean_s"],
-            "serial_s": sum(v for k, v in log["timers"].items()
+            "mean_s": float(mean.group(1)),
+            "serial_s": sum(v for k, v in timers.items()
                             if k.startswith("TIMER_READ_") or k in SERIAL_TIMERS)
-                        if log["timers"] else None,
+                        if timers else None,
         })
     return runs
 

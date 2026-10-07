@@ -20,7 +20,6 @@
 set -euo pipefail
 
 JR_EXPERIMENT=scaling_axes
-JR_USE_LIKWID=0
 
 cases=${CASES:-"zenith_baseline nadir_baseline limb_baseline"}
 if [ -n "${SLURM_ARRAY_TASK_ID:-}" ]; then
@@ -147,7 +146,7 @@ build_variant() {
   [ -n "${bin_dir[$key]:-}" ] && return
   echo "=== building ND=$nd NG=$ng ==="
   bench_build_isolated MPI="$JR_MPI" MPICC="$JR_MPICC" COMPILER="$JR_COMPILER" \
-    GPU=0 LIKWID=0 DEFINES="-DND=$nd -DNG=$ng"
+    GPU=0 DEFINES="-DND=$nd -DNG=$ng"
   mv "$JR_WORK_DIR/bin" "$JR_WORK_DIR/bin_$key"
   bin_dir[$key]="$JR_WORK_DIR/bin_$key"
 }
