@@ -1,19 +1,20 @@
 # OpenMP scaling of formod function over geometry, channels (ND) and gas sets (NG), one axis
-# at a time around the baselines of CASES. Run via run_scaling_axes_<machine>.sh;
+# at a time around the reference settings of CASES. Run via run_scaling_axes_<machine>.sh;
 # as an array job, task i runs the i-th case into runs/scaling_axes_<array id>/<case>/.
 # Channels are ND evenly spaced rows of CHANNEL_FILE (default configs/channels_alt3.tsv),
 # gases come from configs/gas_sets/<set>.txt.
 #
-# MODES (default: strong t1check batches):
-#   cost     only the 1-thread reference runs, to measure the cost per setting
+# MODES (default: strong batches):
+#   cost     only the 1-thread runs, to measure the cost per setting
 #   strong   STRONG_BATCH scenes over STRONG_CURVE threads (up to one socket);
-#            settings not in CURVE_SETTINGS (default: all) only get STRONG_THREADS.
+#            settings not in CURVE_SETTINGS (default: none) only get STRONG_THREADS
+#            (default: 4, 16 and one socket).
 #            T1 comes from a 1-thread run of SCENES_PER_THREAD scenes.
-#   t1check  1 thread on the full STRONG_BATCH for T1_CHECK (default: baselines)
+#   t1check  1 thread on the full STRONG_BATCH for T1_CHECK (default: reference settings)
 #   batches  BATCH_THREADS (default: one socket) over BATCH_LIST for BATCH_SETTINGS
 #   weak     SCENES_PER_THREAD scenes per thread over THREAD_LIST
 # SPREAD_THREADS adds runs with the threads split over all sockets.
-# Every run times MAX_ITER batches (default 3) after an untimed warm-up batch.
+# Every run times MAX_ITER batches (default 1) after an untimed warm-up batch.
 #
 # Overrides: CASES, AXES, MODES, CHANNEL_FILE, CHANNEL_LIST, GAS_SETS, BASE_GAS, THREAD_LIST,
 #            CURVE_SETTINGS, STRONG_CURVE, STRONG_THREADS, STRONG_BATCH, SPREAD_THREADS,
@@ -43,14 +44,14 @@ CASE_NAME=${cases%% *}
 bench_init
 
 axes=${AXES:-"geometry channels gases"}
-modes=${MODES:-"strong t1check batches"}
+modes=${MODES:-"strong batches"}
 for m in $modes; do
   case "$m" in cost|strong|weak|t1check|batches) ;;
     *) echo "Unknown mode '$m' (expected cost, strong, weak, t1check, batches)" >&2; exit 1 ;;
   esac
 done
 has_mode() { [[ " $modes " == *" $1 "* ]]; }
-MAX_ITER=${MAX_ITER:-3}
+MAX_ITER=${MAX_ITER:-1}
 reps=${REPS:-2}
 k=${SCENES_PER_THREAD:-4}
 channel_list=${CHANNEL_LIST:-"8 16 32 64 128"}
@@ -75,8 +76,8 @@ if [ -z "$strong_curve" ]; then
   for (( t=2; t<P; t*=2 )); do strong_curve="$strong_curve $t"; done
   strong_curve="$strong_curve $P"
 fi
-strong_threads=${STRONG_THREADS-$P}
-curve_settings=${CURVE_SETTINGS:-all}
+strong_threads=${STRONG_THREADS-$(printf '%s\n' 4 16 "$P" | sort -nu | tr '\n' ' ')}
+curve_settings=${CURVE_SETTINGS:-none}
 batch_threads=${BATCH_THREADS:-$P}
 batch_list=${BATCH_LIST:-"$(( 2 * batch_threads )) $(( 4 * batch_threads )) $(( 8 * batch_threads )) $(( 16 * batch_threads ))"}
 
@@ -193,7 +194,7 @@ for rep in $(seq 1 "$reps"); do
     cd "${setting_dir[$label]}"
     JR_ACTIVE_CTL=run.ctl
     JR_FORMOD_BIN="${setting_bin[$label]}/formod"
-    # 1-thread reference
+    # 1-thread run (T1)
     bench_run_time "${label}_compact" 1 "$k" "$rep" "$(cpus_phys_compact 1)"
     if has_mode weak; then
       for t in $THREAD_LIST; do

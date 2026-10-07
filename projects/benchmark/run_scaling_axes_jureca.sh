@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
-#SBATCH --time=08:00:00
+#SBATCH --time=10:00:00
 #SBATCH --array=0-2
 #SBATCH --exclusive
 #SBATCH --job-name=e4_scaling_axes
@@ -13,7 +13,7 @@
 # one array task per case. Measure the cost per setting first:
 #   MODES=cost REPS=1 sbatch --time=02:00:00 run_scaling_axes_jureca.sh
 #   sbatch run_scaling_axes_jureca.sh
-#   MODES=t1check AXES=geometry sbatch --time=02:00:00 run_scaling_axes_jureca.sh
+#   MODES=t1check AXES=geometry REPS=1 sbatch --time=02:00:00 run_scaling_axes_jureca.sh
 #   MODES=batches AXES=geometry sbatch --time=02:00:00 run_scaling_axes_jureca.sh
 #   python3 eval_scaling_axes.py runs/scaling_axes_<array job id>
 

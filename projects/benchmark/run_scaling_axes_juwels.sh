@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=09:00:00
+#SBATCH --time=10:00:00
 #SBATCH --array=0-2
 #SBATCH --exclusive
 #SBATCH --job-name=e4_scaling_axes
@@ -13,7 +13,7 @@
 # one array task per case. Measure the cost per setting first:
 #   MODES=cost REPS=1 sbatch --time=02:00:00 run_scaling_axes_juwels.sh
 #   sbatch run_scaling_axes_juwels.sh
-#   MODES=t1check AXES=geometry sbatch --time=02:00:00 run_scaling_axes_juwels.sh
+#   MODES=t1check AXES=geometry REPS=1 sbatch --time=02:00:00 run_scaling_axes_juwels.sh
 #   MODES=batches AXES=geometry sbatch --time=02:00:00 run_scaling_axes_juwels.sh
 #   python3 eval_scaling_axes.py runs/scaling_axes_<array job id>
 
