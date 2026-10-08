@@ -13,7 +13,7 @@
 # run_hermes_profile.sh, then plot both reports in one diagram.
 #
 # Output: runs/<RUN_ID>_{baseline,optimized}/   one hermes profile report each
-#         runs/<RUN_ID>_compare/                plot (png + pdf) and summary.tsv
+#         runs/<RUN_ID>_compare/                memory-volume + runtime plots and summaries
 #
 # Environment (all optional; the rest is passed through to run_hermes_profile.sh):
 #   BASELINE_SRC   source tree of the baseline  (default: projects/benchmark/baseline/src)
