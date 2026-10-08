@@ -7544,12 +7544,21 @@ void tbl_pack(
       cur += sizeof(nu);
 
       #if defined(_FLAT_ARRAYS)
-      memcpy(cur, &tbl->lut_flat[tbl->lut_offset[id][ig][ip][it]],
-             (size_t) nu * sizeof(tbl_pair_t));
+      const tbl_pair_t *lut = &tbl->lut_flat[tbl->lut_offset[id][ig][ip][it]];
       #else
-      memcpy(cur, tbl->lut[id][ig][ip][it], (size_t) nu * sizeof(tbl_pair_t));
+      const tbl_pair_t *lut = tbl->lut[id][ig][ip][it];
       #endif
-      cur += ((size_t) nu * sizeof(tbl_pair_t));
+
+      /* The packed format stores all log(u) values followed by all
+	 log(eps) values of the node... */
+      for (int iu = 0; iu < nu; iu++) {
+	memcpy(cur, &lut[iu].logu, sizeof(float));
+	cur += sizeof(float);
+      }
+      for (int iu = 0; iu < nu; iu++) {
+	memcpy(cur, &lut[iu].logeps, sizeof(float));
+	cur += sizeof(float);
+      }
     }
   }
 
@@ -7661,16 +7670,24 @@ size_t tbl_unpack(
 
       // record starting offset
       tbl->lut_offset[id][ig][ip][it] = tbl->lut_flat_used;
-
-      memcpy(&tbl->lut_flat[tbl->lut_flat_used], cur, (size_t) nu * sizeof(tbl_pair_t));
+      tbl_pair_t *lut = &tbl->lut_flat[tbl->lut_flat_used];
       tbl->lut_flat_used += (size_t) nu;
       #else
       ALLOC(tbl->lut[id][ig][ip][it], tbl_pair_t,
 	    nu);
-
-      memcpy(tbl->lut[id][ig][ip][it], cur, (size_t) nu * sizeof(tbl_pair_t));
+      tbl_pair_t *lut = tbl->lut[id][ig][ip][it];
       #endif
-      cur += ((size_t) nu * sizeof(tbl_pair_t));
+
+      /* Interleave log(u) and log(eps) values (the packed format stores
+	 all log(u) values followed by all log(eps) values)... */
+      for (int iu = 0; iu < nu; iu++) {
+	memcpy(&lut[iu].logu, cur, sizeof(float));
+	cur += sizeof(float);
+      }
+      for (int iu = 0; iu < nu; iu++) {
+	memcpy(&lut[iu].logeps, cur, sizeof(float));
+	cur += sizeof(float);
+      }
 
     }
   }
