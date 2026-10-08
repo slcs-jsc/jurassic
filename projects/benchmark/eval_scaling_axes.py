@@ -14,7 +14,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from plot_results import plot_series
+from plot_results import plot_panels, plot_series
 from plot_style import PALETTE
 
 AXIS_X = {"geometry": None, "channels": ("nd", "Channels (ND)"), "gases": ("ng", "Emitters (NG)")}
@@ -23,6 +23,7 @@ AXIS_X = {"geometry": None, "channels": ("nd", "Channels (ND)"), "gases": ("ng",
 MEAN_RE = re.compile(r"RUNTIME:.*?\bmean=\s*([\d.eE+-]+)\s*s")
 TIMER_RE = re.compile(r"^(TIMER_\w+)\s*=\s*([\d.eE+-]+)\s*s", re.MULTILINE)
 TABLE_RE = re.compile(r"Read emissivity table: tbl_")
+TABLES_READ_RE = re.compile(r"^tables_read=(\d+)", re.MULTILINE)  # stripped logs
 SERIAL_TIMERS = {"TIMER_FORMOD_REFERENCE", "TIMER_WRITE_OBS", "TIMER_FINALIZE"}
 
 RUN_TXT_RE = re.compile(
@@ -50,7 +51,8 @@ def load_runs(run_dir: Path) -> list:
             "batch_size": int(m.group("batch")),
             "rep": int(m.group("rep")),
             "mean_s": float(mean.group(1)),
-            "tables": len(TABLE_RE.findall(text)),
+            "tables": (int(m_t.group(1)) if (m_t := TABLES_READ_RE.search(text))
+                       else len(TABLE_RE.findall(text))),
             "serial_s": sum(v for k, v in timers.items()
                             if k.startswith("TIMER_READ_") or k in SERIAL_TIMERS)
                         if timers else None,
@@ -150,6 +152,13 @@ def main():
               f"{fmt(t1 and 1 / t1, '8.3g')} {fmt(t1 and pairs and 1e3 / t1 / pairs, '8.3g')}"
               + ("  <- tables missing" if pairs and found is not None and found < pairs else ""))
 
+    # channels/gases plots per geometry, drawn side by side after the loop
+    panels: dict[tuple, list] = {}
+
+    def add_panel(axis, ref, plot, series, batch=None):
+        kind, _, geom = axis.partition("@")
+        fixed = f"NG={ref['ng']}" if kind == "channels" else f"ND={ref['nd']}"
+        panels.setdefault((kind, plot), []).append((geom or "all", fixed, batch, series))
     # axis tags: geometry, channels@<geom>, gases@<geom>
     tags = list(dict.fromkeys(t for r in settings.values() for t in r["axes"].split(",")))
     tags.sort(key=lambda t: list(AXIS_X).index(t.split("@")[0]))
@@ -226,9 +235,8 @@ def main():
             cost = [(int(settings[s][xinfo[0]]), 1 / thr[(s, "compact", 1)])
                     for s in members if (s, "compact", 1) in thr]
             if len(cost) > 1:
-                plot_series([("1 thread", [c[0] for c in cost], [c[1] for c in cost], PALETTE[0])],
-                            "Time per scene [s]", res_dir, f"e4_{stem}_cost.png",
-                            xlabel=xinfo[1], title=f"{axis_name} · 1 thread")
+                add_panel(axis, ref, "cost",
+                          [("1 thread", [c[0] for c in cost], [c[1] for c in cost], PALETTE[0])])
 
         strong_ns = sorted({n for (st, p, n) in thr if st in members and p == "strongcompact"})
         if strong_ns:
@@ -271,36 +279,61 @@ def main():
                 if None not in ae:
                     app_curves.append((name, ns, ae, c))
                     print(f"  application  {s_}: " + "  ".join(f"{n}: {n * e:.1f}x/{e:.0%}" for n, e in zip(ns, ae)))
+            per_geom = "@" in axis
             if full_curves:
                 vline = (one_socket, "1 socket") if one_socket and one_socket < full else None
-                plot_series([(name, ns, [n * e for n, e in zip(ns, effs)], c) for _, name, ns, effs, c in full_curves],
-                            "Speedup", res_dir,
-                            f"e4_{stem}_strong_speedup.png", ideal_linear=True, vline=vline,
-                            title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
-                            markers=[(x, x * e, c) for x, e, c in curve_markers],
-                            marker_label=f"{one_socket} threads over all sockets")
-                plot_series([(name, ns, effs, c) for _, name, ns, effs, c in full_curves],
-                            "Parallel efficiency", res_dir,
-                            f"e4_{stem}_strong_efficiency.png", yscale="linear", percent=True,
-                            title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
-                            ylim=(0, 1.15), vline=vline, markers=curve_markers,
-                            marker_label=f"{one_socket} threads over all sockets")
+                spd = [(name, ns, [n * e for n, e in zip(ns, effs)], c) for _, name, ns, effs, c in full_curves]
+                effc = [(name, ns, effs, c) for _, name, ns, effs, c in full_curves]
+                if per_geom:
+                    add_panel(axis, ref, "strong_speedup", spd, batch)
+                    add_panel(axis, ref, "strong_efficiency", effc, batch)
+                else:
+                    plot_series(spd, "Speedup", res_dir, f"e4_{stem}_strong_speedup.png",
+                                ideal_linear=True, vline=vline,
+                                title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
+                                markers=[(x, x * e, c) for x, e, c in curve_markers],
+                                marker_label=f"{one_socket} threads over all sockets")
+                    plot_series(effc, "Parallel efficiency", res_dir, f"e4_{stem}_strong_efficiency.png",
+                                yscale="linear", percent=True, ylim=(0, 1.15), vline=vline,
+                                title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
+                                markers=curve_markers, marker_label=f"{one_socket} threads over all sockets")
             if app_curves:
-                plot_series([(name, ns, [n * e for n, e in zip(ns, effs)], c) for name, ns, effs, c in app_curves],
-                            "Speedup", res_dir, f"e4_{stem}_app_speedup.png", ideal_linear=True, vline=vline,
-                            title=f"{axis_name} · whole application, strong scaling, batch {batch}")
-                plot_series(app_curves, "Parallel efficiency", res_dir, f"e4_{stem}_app_efficiency.png",
-                            yscale="linear", percent=True, ylim=(0, 1.15), vline=vline,
-                            title=f"{axis_name} · whole application, strong scaling, batch {batch}")
+                app_spd = [(name, ns, [n * e for n, e in zip(ns, effs)], c) for name, ns, effs, c in app_curves]
+                if per_geom:
+                    add_panel(axis, ref, "app_speedup", app_spd, batch)
+                    add_panel(axis, ref, "app_efficiency", app_curves, batch)
+                else:
+                    plot_series(app_spd, "Speedup", res_dir, f"e4_{stem}_app_speedup.png",
+                                ideal_linear=True, vline=vline,
+                                title=f"{axis_name} · whole application, strong scaling, batch {batch}")
+                    plot_series(app_curves, "Parallel efficiency", res_dir, f"e4_{stem}_app_efficiency.png",
+                                yscale="linear", percent=True, ylim=(0, 1.15), vline=vline,
+                                title=f"{axis_name} · whole application, strong scaling, batch {batch}")
 
             curves = [(f"{n} threads" + (", all sockets" if p == "strongspread" or n > (one_socket or n) else ", 1 socket"),
                        [q[0] for q in v], [q[1] for q in v], PALETTE[j])
                       for j, ((n, p), v) in enumerate(strong_curves.items()) if len(v) > 1]
             if curves:
-                plot_series(curves, "Parallel efficiency",
-                            res_dir, f"e4_{stem}_strong.png", yscale="linear", percent=True,
-                            title=f"{axis_name} · formod batch, strong scaling, batch {batch}",
-                            ylim=(0, 1.15), xlabel=xinfo[1])
+                add_panel(axis, ref, "strong", curves, batch)
+
+    names = {"channels": "Channel count", "gases": "Gas sets"}
+    specs = {
+        "strong_speedup": ("Speedup", dict(yscale="log", ideal_linear=True), "formod batch, strong scaling"),
+        "strong_efficiency": ("Parallel efficiency", dict(percent=True, ylim=(0, 1.15)), "formod batch, strong scaling"),
+        "app_speedup": ("Speedup", dict(yscale="log", ideal_linear=True), "whole application, strong scaling"),
+        "app_efficiency": ("Parallel efficiency", dict(percent=True, ylim=(0, 1.15)), "whole application, strong scaling"),
+        "strong": ("Parallel efficiency", dict(percent=True, ylim=(0, 1.15)), "formod batch, strong scaling"),
+        "cost": ("Time per scene [s]", dict(yscale="log"), "1 thread"),
+    }
+    for (kind, plot), groups in panels.items():
+        label, opts, what = specs[plot]
+        if plot in ("strong", "cost"):
+            opts = dict(opts, xlabel=AXIS_X[kind][1])
+        groups.sort(key=lambda g: g[0])
+        _, fixed, batch, _ = groups[0]
+        plot_panels([(geom, series) for geom, _, _, series in groups], label, res_dir,
+                    f"e4_{kind}_{plot}.png", **opts,
+                    title=f"{names[kind]} ({fixed}) · {what}" + (f", batch {batch}" if batch else ""))
 
     checks = [(st, b) for (st, p, n) in thr if p == "t1full" and (st, "compact", 1) in thr
               for b in {r["batch_size"] for r in runs if r["label"] == f"{st}_t1full"}]
@@ -323,7 +356,7 @@ def batch_sweep(settings, thr, serial, bthr, bserial, res_dir):
         print(f"{'setting':>26} {'batch':>6} {'per thr':>7} | {'Tn [s]':>8} {'spd':>6} {'eff':>7} | "
               f"{'app spd':>7} {'app eff':>7}")
         print("-" * 86)
-        formod, app = [], []
+        formod = []
         for i, s in enumerate(sorted({k[0] for k in bthr if k[1] == n})):
             t1, s1 = thr.get((s, "compact", 1)), serial.get((s, "compact", 1))
             if not t1:
@@ -342,16 +375,10 @@ def batch_sweep(settings, thr, serial, bthr, bserial, res_dir):
             name = settings[s]["geometry"]
             color = PALETTE[i % len(PALETTE)]
             formod.append((name, bs, effs, color))
-            if None not in aeffs:
-                app.append((name, bs, aeffs, color))
         if formod and max(len(c[1]) for c in formod) > 1:
             plot_series(formod, "Parallel efficiency", res_dir, f"e4_batch_t{n}.png",
                         yscale="linear", percent=True, ylim=(0, 1.15), xlabel="Batch size (scenes)",
                         title=f"Batch size · formod batch, {n} threads")
-        if app and max(len(c[1]) for c in app) > 1:
-            plot_series(app, "Parallel efficiency", res_dir, f"e4_batch_t{n}_app.png",
-                        yscale="linear", percent=True, ylim=(0, 1.15), xlabel="Batch size (scenes)",
-                        title=f"Batch size · whole application, {n} threads")
 
 
 if __name__ == "__main__":

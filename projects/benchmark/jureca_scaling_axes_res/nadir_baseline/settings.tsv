@@ -1,0 +1,9 @@
+setting	axes	geometry	nd	ng	gas_set	nr	active_pairs
+nadir_nd32_ng18	geometry,channels@nadir,gases@nadir	nadir	32	18	ng18	8	458
+nadir_nd8_ng18	channels@nadir	nadir	8	18	ng18	8	116
+nadir_nd16_ng18	channels@nadir	nadir	16	18	ng18	8	229
+nadir_nd64_ng18	channels@nadir	nadir	64	18	ng18	8	915
+nadir_nd128_ng18	channels@nadir	nadir	128	18	ng18	8	1828
+nadir_nd32_ng04	gases@nadir	nadir	32	4	ng04	8	128
+nadir_nd32_ng08	gases@nadir	nadir	32	8	ng08	8	256
+nadir_nd32_ng13	gases@nadir	nadir	32	13	ng13	8	416

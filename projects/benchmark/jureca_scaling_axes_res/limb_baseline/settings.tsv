@@ -1,0 +1,9 @@
+setting	axes	geometry	nd	ng	gas_set	nr	active_pairs
+limb_nd32_ng18	geometry,channels@limb,gases@limb	limb	32	18	ng18	64	458
+limb_nd8_ng18	channels@limb	limb	8	18	ng18	64	116
+limb_nd16_ng18	channels@limb	limb	16	18	ng18	64	229
+limb_nd64_ng18	channels@limb	limb	64	18	ng18	64	915
+limb_nd128_ng18	channels@limb	limb	128	18	ng18	64	1828
+limb_nd32_ng04	gases@limb	limb	32	4	ng04	64	128
+limb_nd32_ng08	gases@limb	limb	32	8	ng08	64	256
+limb_nd32_ng13	gases@limb	limb	32	13	ng13	64	416

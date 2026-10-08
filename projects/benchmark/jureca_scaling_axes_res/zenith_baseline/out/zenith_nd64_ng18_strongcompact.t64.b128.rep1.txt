@@ -1,0 +1,28 @@
+RUNTIME: execution= batch | threads= 64 | batch_size= 128 | mean= 63.8425 s | stddev= 2.60391e-07 s | min= 63.8425 s | max= 63.8425 s | per_model= 0.49877 s | throughput= 2.00493 models/s | samples= 1
+TIMER_READ_CTL = 0.010 s    (min= 0.0102121 s, mean= 0.0102121 s, stddev= 6.78656e-11 s, max= 0.0102121 s, n= 1)
+TIMER_READ_TBL = 32.570 s    (min= 32.5698 s, mean= 32.5698 s, stddev= 0 s, max= 32.5698 s, n= 1)
+TIMER_READ_TASK = 0.001 s    (min= 0.00137292 s, mean= 0.00137292 s, stddev= 9.62519e-12 s, max= 0.00137292 s, n= 1)
+TIMER_READ_DIRLIST = 0.001 s    (min= 0.00125514 s, mean= 0.00125514 s, stddev= 0 s, max= 0.00125514 s, n= 1)
+TIMER_READ_OBSREF = 0.001 s    (min= 0.0012372 s, mean= 0.0012372 s, stddev= 0 s, max= 0.0012372 s, n= 1)
+TIMER_READ_ATM = 0.001 s    (min= 0.00140651 s, mean= 0.00140651 s, stddev= 9.62519e-12 s, max= 0.00140651 s, n= 1)
+TIMER_READ_OBS = 0.002 s    (min= 0.00180755 s, mean= 0.00180755 s, stddev= 1.40898e-11 s, max= 0.00180755 s, n= 1)
+TIMER_FORMOD_REFERENCE = 22.843 s    (min= 22.8428 s, mean= 22.8428 s, stddev= 0 s, max= 22.8428 s, n= 1)
+TIMER_WRITE_OBS = 0.005 s    (min= 0.00507915 s, mean= 0.00507915 s, stddev= 0 s, max= 0.00507915 s, n= 1)
+TIMER_BENCHMARK_SETUP = 62.469 s    (min= 62.4692 s, mean= 62.4692 s, stddev= 2.30668e-07 s, max= 62.4692 s, n= 1)
+TIMER_BENCHMARK_SAMPLE = 63.848 s    (min= 63.8481 s, mean= 63.8481 s, stddev= 0 s, max= 63.8481 s, n= 1)
+TIMER_FINALIZE = 0.293 s    (min= 0.293429 s, mean= 0.293429 s, stddev= 2.09519e-09 s, max= 0.293429 s, n= 1)
+TIMER_GROUP_INPUT = 32.587 s
+TIMER_GROUP_FORWARD = 22.843 s
+TIMER_GROUP_OUTPUT = 0.005 s
+TIMER_GROUP_OVERHEAD = 62.763 s
+TIMER_GROUP_ANALYSIS = 63.848 s
+TIMER_TOTAL = 182.046 s
+tables_read=915
+label=zenith_nd64_ng18_strongcompact
+threads=64
+batch_size=128
+rep=1
+core_list=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+time_budget=1e9
+max_iter=1
+exit_code=0

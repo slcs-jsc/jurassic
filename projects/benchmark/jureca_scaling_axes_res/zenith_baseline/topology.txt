@@ -1,0 +1,6 @@
+logical_cpus=256
+physical_cores=128
+sockets=2
+numa_domains=8
+smt_per_core=2
+phys_cores_per_socket=64

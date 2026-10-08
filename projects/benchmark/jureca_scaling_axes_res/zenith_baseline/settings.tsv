@@ -1,0 +1,9 @@
+setting	axes	geometry	nd	ng	gas_set	nr	active_pairs
+zenith_nd32_ng18	geometry,channels@zenith,gases@zenith	zenith	32	18	ng18	64	458
+zenith_nd8_ng18	channels@zenith	zenith	8	18	ng18	64	116
+zenith_nd16_ng18	channels@zenith	zenith	16	18	ng18	64	229
+zenith_nd64_ng18	channels@zenith	zenith	64	18	ng18	64	915
+zenith_nd128_ng18	channels@zenith	zenith	128	18	ng18	64	1828
+zenith_nd32_ng04	gases@zenith	zenith	32	4	ng04	64	128
+zenith_nd32_ng08	gases@zenith	zenith	32	8	ng08	64	256
+zenith_nd32_ng13	gases@zenith	zenith	32	13	ng13	64	416

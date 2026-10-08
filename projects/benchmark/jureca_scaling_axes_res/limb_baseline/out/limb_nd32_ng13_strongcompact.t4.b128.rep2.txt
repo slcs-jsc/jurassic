@@ -1,0 +1,28 @@
+RUNTIME: execution= batch | threads= 4 | batch_size= 128 | mean= 187.928 s | stddev= 1.19173e-06 s | min= 187.928 s | max= 187.928 s | per_model= 1.46819 s | throughput= 0.681112 models/s | samples= 1
+TIMER_READ_CTL = 0.006 s    (min= 0.00584988 s, mean= 0.00584988 s, stddev= 0 s, max= 0.00584988 s, n= 1)
+TIMER_READ_TBL = 12.363 s    (min= 12.3629 s, mean= 12.3629 s, stddev= 6.82285e-08 s, max= 12.3629 s, n= 1)
+TIMER_READ_TASK = 0.008 s    (min= 0.00791458 s, mean= 0.00791458 s, stddev= 4.54383e-11 s, max= 0.00791458 s, n= 1)
+TIMER_READ_DIRLIST = 0.005 s    (min= 0.00520855 s, mean= 0.00520855 s, stddev= 0 s, max= 0.00520855 s, n= 1)
+TIMER_READ_OBSREF = 0.005 s    (min= 0.00480733 s, mean= 0.00480733 s, stddev= 0 s, max= 0.00480733 s, n= 1)
+TIMER_READ_ATM = 0.004 s    (min= 0.00396254 s, mean= 0.00396254 s, stddev= 4.05108e-11 s, max= 0.00396254 s, n= 1)
+TIMER_READ_OBS = 0.003 s    (min= 0.00307034 s, mean= 0.00307034 s, stddev= 0 s, max= 0.00307034 s, n= 1)
+TIMER_FORMOD_REFERENCE = 5.684 s    (min= 5.68384 s, mean= 5.68384 s, stddev= 4.1142e-08 s, max= 5.68384 s, n= 1)
+TIMER_WRITE_OBS = 0.016 s    (min= 0.0161746 s, mean= 0.0161746 s, stddev= 0 s, max= 0.0161746 s, n= 1)
+TIMER_BENCHMARK_SETUP = 187.860 s    (min= 187.86 s, mean= 187.86 s, stddev= 7.27301e-07 s, max= 187.86 s, n= 1)
+TIMER_BENCHMARK_SAMPLE = 187.932 s    (min= 187.932 s, mean= 187.932 s, stddev= 0 s, max= 187.932 s, n= 1)
+TIMER_FINALIZE = 0.145 s    (min= 0.144766 s, mean= 0.144766 s, stddev= 1.2817e-09 s, max= 0.144766 s, n= 1)
+TIMER_GROUP_INPUT = 12.394 s
+TIMER_GROUP_FORWARD = 5.684 s
+TIMER_GROUP_OUTPUT = 0.016 s
+TIMER_GROUP_OVERHEAD = 188.004 s
+TIMER_GROUP_ANALYSIS = 187.932 s
+TIMER_TOTAL = 394.030 s
+tables_read=416
+label=limb_nd32_ng13_strongcompact
+threads=4
+batch_size=128
+rep=2
+core_list=0,1,2,3
+time_budget=1e9
+max_iter=1
+exit_code=0

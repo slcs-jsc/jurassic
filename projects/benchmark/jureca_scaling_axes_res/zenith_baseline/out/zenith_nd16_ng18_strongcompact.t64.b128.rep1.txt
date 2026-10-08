@@ -1,0 +1,28 @@
+RUNTIME: execution= batch | threads= 64 | batch_size= 128 | mean= 11.4455 s | stddev= 1.04597e-07 s | min= 11.4455 s | max= 11.4455 s | per_model= 0.0894178 s | throughput= 11.1835 models/s | samples= 1
+TIMER_READ_CTL = 0.005 s    (min= 0.00544052 s, mean= 0.00544052 s, stddev= 0 s, max= 0.00544052 s, n= 1)
+TIMER_READ_TBL = 13.296 s    (min= 13.2957 s, mean= 13.2957 s, stddev= 6.43548e-08 s, max= 13.2957 s, n= 1)
+TIMER_READ_TASK = 0.001 s    (min= 0.00112716 s, mean= 0.00112716 s, stddev= 9.62519e-12 s, max= 0.00112716 s, n= 1)
+TIMER_READ_DIRLIST = 0.001 s    (min= 0.00112988 s, mean= 0.00112988 s, stddev= 0 s, max= 0.00112988 s, n= 1)
+TIMER_READ_OBSREF = 0.001 s    (min= 0.00109942 s, mean= 0.00109942 s, stddev= 0 s, max= 0.00109942 s, n= 1)
+TIMER_READ_ATM = 0.002 s    (min= 0.00152918 s, mean= 0.00152918 s, stddev= 9.62519e-12 s, max= 0.00152918 s, n= 1)
+TIMER_READ_OBS = 0.001 s    (min= 0.000866141 s, mean= 0.000866141 s, stddev= 0 s, max= 0.000866141 s, n= 1)
+TIMER_FORMOD_REFERENCE = 4.740 s    (min= 4.73977 s, mean= 4.73977 s, stddev= 0 s, max= 4.73977 s, n= 1)
+TIMER_WRITE_OBS = 0.001 s    (min= 0.00111101 s, mean= 0.00111101 s, stddev= 0 s, max= 0.00111101 s, n= 1)
+TIMER_BENCHMARK_SETUP = 11.515 s    (min= 11.515 s, mean= 11.515 s, stddev= 8.89856e-08 s, max= 11.515 s, n= 1)
+TIMER_BENCHMARK_SAMPLE = 11.449 s    (min= 11.4491 s, mean= 11.4491 s, stddev= 0 s, max= 11.4491 s, n= 1)
+TIMER_FINALIZE = 0.101 s    (min= 0.100579 s, mean= 0.100579 s, stddev= 6.21051e-10 s, max= 0.100579 s, n= 1)
+TIMER_GROUP_INPUT = 13.307 s
+TIMER_GROUP_FORWARD = 4.740 s
+TIMER_GROUP_OUTPUT = 0.001 s
+TIMER_GROUP_OVERHEAD = 11.616 s
+TIMER_GROUP_ANALYSIS = 11.449 s
+TIMER_TOTAL = 41.112 s
+tables_read=229
+label=zenith_nd16_ng18_strongcompact
+threads=64
+batch_size=128
+rep=1
+core_list=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+time_budget=1e9
+max_iter=1
+exit_code=0
