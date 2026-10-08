@@ -10,7 +10,7 @@ The reference setting is timed on 1, 2, 4, 8, 16, 32 and 64 threads (one socket)
 
 Each setting is built with its own ND/NG and timed with `formod TASK time`. The timed part is one call of `formod_batch`, which computes a batch of 128 independent scenes in parallel (one scene per thread at a time). With T1 the time for the batch on 1 thread and Tn on n threads, the speedup is T1 / Tn and the parallel efficiency is T1 / (n × Tn).
 
-T1 is not measured directly: a 1-thread run of all 128 scenes would take about 23 minutes for zenith. Since the scences are independent of eachother, each setting is run on 1 thread with a batch of 4 scenes, and T1 is 32 × that time. A direct 1-thread run of all 128 scenes (mode `t1check`) agreed with this estimate within 0.2 % in an earlier test.
+T1 is not measured directly: a 1-thread run of all 128 scenes would take about 23 minutes for zenith. Since the scenes are independent of each other, each setting is run on 1 thread with a batch of 4 scenes, and T1 is 32 × that time. A direct 1-thread run of all 128 scenes (mode `t1check`, results in `jureca_scaling_axes_res/t1check/`) agrees with this estimate within ±1.1 % for ND = 16 and 32 in all three geometries.
 
 ### Channels and gases
 
