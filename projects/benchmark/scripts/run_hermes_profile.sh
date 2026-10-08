@@ -236,7 +236,26 @@ prepare_inputs() {
   "$src_dir/$geometry" "$active_ctl" data/obs.tab
 }
 
+# The validation cases need the default size limits (the smoke profile uses 125 channels,
+# i.e. ND=128, and 7 gases), so they cannot run on the benchmark binary built with
+# -DND=$nd. Validate a separate binary built from the same source tree instead.
+validation_formod="$src_dir/formod"
+build_validation() {
+  cd "$src_dir" || return 1
+  make clean || return 1
+  make -j formod INCDIR="-I $repo_root/libs/build/include" LIBDIR="-L $repo_root/libs/build/lib" \
+    ${BUILD_VERSION:+VERSION="$BUILD_VERSION"} DEFINES="-DND=128 -DNG=8" \
+    MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 || return 1
+  cp -a formod "$run_dir/formod.validation" || return 1
+  validation_formod="$run_dir/formod.validation"
+  cd "$work_dir" 2>/dev/null || true
+  return 0
+}
+
 if [ "$rebuild" = 1 ]; then
+  if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
+    build_validation
+  fi
   build_cpu
 fi
 
@@ -253,6 +272,7 @@ if [ "${SKIP_VALIDATION:-0}" != "1" ]; then
   set +e
   ( cd "$repo_root/projects/validation" && \
     VALIDATION_TBLBASE="$bench_tblbase" scripts/run_validation.py \
+      --formod "$validation_formod" \
       > "$run_dir/validation.log" 2>&1 )
   validation_rc=$?
   set -e
