@@ -18,7 +18,7 @@ JURASSIC only computes a gas in a channel if a lookup table exists for that gas 
 
 ![Active gases per channel in channels_alt3.tsv](figures/channels_alt3_gas_matrix.png)
 
-The script picks ND channels spread evenly over the whole range from 587 to 739 cm⁻¹. The reference setting has 458 active channel-gas pairs.
+The script picks ND channels evenly spaced in the list, including the first and the last one (for ND = 32 every 4th or 5th channel), so they cover the whole range from 587 to 739 cm⁻¹. Each column in the figure is one channel of the list. The reference setting has 458 active channel-gas pairs.
 
 The gas sets are defined in `configs/gas_sets/`. The name gives the number of gases, and each set contains the previous one plus some more gases:
 

@@ -52,9 +52,9 @@ def main():
                    key=lambda g: (-sum(g in gs for _, gs in rows), g))
     active = np.array([[g in gs for _, gs in rows] for g in gases], dtype=int)
 
-    # cell edges halfway between channels (the list is not evenly spaced)
-    mid = (nu[:-1] + nu[1:]) / 2
-    edges = np.concatenate(([nu[0] - (mid[0] - nu[0])], mid, [nu[-1] + (nu[-1] - mid[-1])]))
+    # one equal-width column per channel of the list; the picks are evenly spaced in this
+    # order, not in wavenumber (the list has 1 and 2 cm^-1 gaps)
+    edges = np.arange(len(nu) + 1)
     cell = dict(edgecolors=CELL_EDGE, linewidth=0.4, vmin=0, vmax=1)
 
     fig, (ax_pick, ax) = plt.subplots(
@@ -73,7 +73,10 @@ def main():
     ax.set_ylim(len(gases), 0)
     ax.set_yticks(np.arange(len(gases)) + 0.5)
     ax.set_yticklabels([f"{g} ({active[i].sum()})" for i, g in enumerate(gases)], fontsize=8)
-    ax.set_xlabel("Wavenumber [cm$^{-1}$]")
+    ticks = sorted({int(np.abs(nu - t).argmin()) for t in range(600, int(nu[-1]) + 1, 20)})
+    ax.set_xticks(np.array(ticks) + 0.5)
+    ax.set_xticklabels([str(nu[i]) for i in ticks])
+    ax.set_xlabel("Channel, in list order (wavenumber [cm$^{-1}$])")
     for a in (ax_pick, ax):
         a.tick_params(axis="y", length=0)
         a.grid(False)
