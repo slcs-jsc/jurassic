@@ -52,7 +52,8 @@ bench_init
 # before bench_prepare_inputs runs.
 
 CONFIG_DIR="$JR_REPO_ROOT/projects/benchmark/configs"
-CHANNEL_COUNTS_FILE="$CONFIG_DIR/channel_counts.txt"
+CHANNEL_FILE="$CONFIG_DIR/channels_alt3.tsv"
+CHANNEL_LIST="${CHANNEL_LIST:-8 16 32 64 128}"
 GAS_SETS_DIR="$CONFIG_DIR/gas_sets"
  
 THREADS="${THREADS:-${JR_PHYS_PER_SOCKET}}"
@@ -157,11 +158,8 @@ run_point() {
     local ctl_out="$JR_WORK_DIR/ctl/${label}.ctl"
     mkdir -p "$(dirname "$ctl_out")"
 
-    local gen_args=(--nd "$nd")
-    if [[ -n "$gas_file" ]]; then
-        gen_args+=(--gas-file "$gas_file")
-    fi
-    python3 "$SCRIPT_DIR/generate_ctl.py" "${gen_args[@]}" "$JR_ACTIVE_CTL_BASE" "$ctl_out"
+    python3 "$SCRIPT_DIR/generate_ctl.py" --channels "$CHANNEL_FILE" --nd "$nd" \
+        --gas-file "${gas_file:-$BASE_GAS_FILE}" "$JR_ACTIVE_CTL_BASE" "$ctl_out" >/dev/null
 
     JR_ACTIVE_CTL="$ctl_out"
     JR_FORMOD_BIN="$(build_or_reuse "$nd" "$ng")"
@@ -182,32 +180,31 @@ JR_ACTIVE_CTL_BASE="$JR_ACTIVE_CTL"
 # NG held fixed at the selected baseline case's gas count while ND varies;
 # ND held fixed at the baseline channel count while NG varies.
 BASELINE_ND="${BASELINE_ND:-32}"
-BASELINE_NG="${BASELINE_NG:-7}"
+BASELINE_NG="${BASELINE_NG:-18}"
+BASE_GAS_FILE="$GAS_SETS_DIR/ng18.txt"
 
 echo "=== pre-building formod for all ND/NG variants ==="
-while read -r nd; do
-    [[ -z "$nd" ]] && continue
+for nd in $CHANNEL_LIST; do
     build_or_reuse "$nd" "$BASELINE_NG" >/dev/null
-done < "$CHANNEL_COUNTS_FILE"
+done
 
 for gas_file in "$GAS_SETS_DIR"/*.txt; do
     [[ -e "$gas_file" ]] || continue
-    ng="$(grep -c . "$gas_file")"
+    ng="$(grep -c '^[^#[:space:]]' "$gas_file")"
     build_or_reuse "$BASELINE_ND" "$ng" >/dev/null
 done
 echo "=== pre-build complete ==="
 
 echo "=== channel scaling ==="
-while read -r nd; do
-    [[ -z "$nd" ]] && continue
+for nd in $CHANNEL_LIST; do
     run_point "channels_${nd}" "$nd" "$BASELINE_NG" ""
-done < "$CHANNEL_COUNTS_FILE"
+done
 
 echo "=== gas set scaling ==="
 for gas_file in "$GAS_SETS_DIR"/*.txt; do
     [[ -e "$gas_file" ]] || continue
     name="$(basename "$gas_file" .txt)"
-    ng="$(grep -c . "$gas_file")"
+    ng="$(grep -c '^[^#[:space:]]' "$gas_file")"
     run_point "gases_${name}" "$BASELINE_ND" "$ng" "$gas_file"
 done
 

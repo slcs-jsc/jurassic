@@ -100,7 +100,7 @@ awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblba
 
 cd "$src_dir"
 make clean
-make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_TARGET="$gpu_target" GPU_PIN="$gpu_pin" INFO="$info" FLAT_ARRAYS="$flat_arrays"
+make -j DEFINES="-DNG=18" MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 GPU_TARGET="$gpu_target" GPU_PIN="$gpu_pin" INFO="$info" FLAT_ARRAYS="$flat_arrays"
 cd "$work_dir"
 
 rm -rf data

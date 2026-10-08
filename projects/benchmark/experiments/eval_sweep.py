@@ -27,7 +27,7 @@ NG_RE = re.compile(r"^\s*NG\s*=\s*(\d+)", re.MULTILINE)
 
 # Sweep labels: channels_<nd>_<geom> / gases_<set>_<geom>. The geometry suffix is
 # optional so run directories from before the geometry axis still evaluate.
-# Gas-set names may contain underscores (priority_full), hence the anchored match.
+# Gas-set names may contain underscores, hence the anchored match.
 LABEL_RE = re.compile(r"^(channels|gases)_(.+?)(?:_(limb|nadir|zenith))?$")
 
 

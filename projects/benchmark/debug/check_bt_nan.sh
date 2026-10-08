@@ -88,7 +88,7 @@ prepare_inputs() {
 build_cpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi_cpu" COMPILER="$compiler_cpu" GPU=0
+  make -j DEFINES="-DNG=18" MPI="$mpi_cpu" COMPILER="$compiler_cpu" GPU=0
   cd "$work_dir"
 }
 
@@ -96,7 +96,7 @@ build_cpu() {
 build_gpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi_gpu" MPICC="$mpicc_gpu" COMPILER="$compiler_gpu" GPU=1 GPU_PIN="$gpu_pin"
+  make -j DEFINES="-DNG=18" MPI="$mpi_gpu" MPICC="$mpicc_gpu" COMPILER="$compiler_gpu" GPU=1 GPU_PIN="$gpu_pin"
   cd "$work_dir"
 }
 

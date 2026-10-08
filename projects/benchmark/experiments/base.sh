@@ -214,10 +214,10 @@ bench_build_forward() {
     echo "Building variant '$variant' (EXTRA_CFLAGS='$extra')"
 
     if [ -n "$extra" ]; then
-        bench_build_isolated MPI="$JR_MPI" MPICC="$JR_MPICC" \
+        bench_build_isolated DEFINES="-DNG=18" MPI="$JR_MPI" MPICC="$JR_MPICC" \
             COMPILER="$JR_COMPILER" GPU=0 LIKWID="$JR_USE_LIKWID" $extra || return 1
     else
-        bench_build_isolated MPI="$JR_MPI" MPICC="$JR_MPICC" \
+        bench_build_isolated DEFINES="-DNG=18" MPI="$JR_MPI" MPICC="$JR_MPICC" \
             COMPILER="$JR_COMPILER" GPU=0 LIKWID="$JR_USE_LIKWID" || return 1
     fi
 
@@ -237,10 +237,10 @@ bench_build_retrieval() {
     echo "=== building retrieval variant '$variant' (EXTRA_CFLAGS='$extra') ==="
 
     if [ -n "$extra" ]; then
-        bench_build_isolated MPI=1 MPICC="$JR_MPICC" \
+        bench_build_isolated DEFINES="-DNG=18" MPI=1 MPICC="$JR_MPICC" \
             COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra || return 1
     else
-        bench_build_isolated MPI=1 MPICC="$JR_MPICC" \
+        bench_build_isolated DEFINES="-DNG=18" MPI=1 MPICC="$JR_MPICC" \
             COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 || return 1
     fi
 
