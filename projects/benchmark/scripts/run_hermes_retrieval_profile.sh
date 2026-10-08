@@ -155,7 +155,7 @@ ensure_libs() {
 ensure_libs
 
 if [ "$rebuild" = 1 ]; then
-  ( cd "$src_dir" && make clean && make -j MPI=0 COMPILER="$compiler_cpu" GPU=0 LIKWID=1 )
+  ( cd "$src_dir" && make clean && make -j DEFINES="-DNG=18" MPI=0 COMPILER="$compiler_cpu" GPU=0 LIKWID=1 )
 fi
 
 # Forward-model validation, as in run_hermes_profile.sh: the retrieval is only

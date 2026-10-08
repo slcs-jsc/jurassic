@@ -61,10 +61,9 @@ Important subsets of the `tria_1cm` inventory include:
 The `nc_1e-6` set currently exposes 36 gas tables, for example `H2O`, `CO2`, `O3`,
 `CH4`, `N2O`, `CO`, `HNO3`, `NO2`, `O2`, and `N2`.
 
-Not every gas is relevant in every spectral band. Some tables may be missing, may
-contain only trivial values, or may be intentionally omitted. Benchmark cases should
-therefore resolve the final gas list per spectral band instead of assuming that every
-configured gas is active everywhere.
+Not every gas is relevant in every channel. Some tables may be missing, may contain
+only trivial values, or may be intentionally omitted. `configs/channels_alt3.tsv`
+therefore lists for each channel the gases that have a table there.
 
 ## Benchmark Axes
 
@@ -74,70 +73,51 @@ configured gas is active everywhere.
 - `nadir`
 - `limb`
 
-### Standard Channel Counts
+### Channels and gases
 
-The standard channel-scaling axis for version 1 is:
+JURASSIC only computes a gas in a channel if a lookup table exists for that gas at the
+channel's wavenumber. The runtime therefore depends on the number of active
+(channel, gas) pairs, i.e. the pairs for which a lookup table exists, and not simply
+on ND × NG.
 
-```text
-1, 2, 4, 8, 16, 32, 64, 128, 256
-```
+The file `configs/channels_alt3.tsv` contains a list of 128 channels between 587 and
+739 cm⁻¹, each listed with the gases for which a lookup table exists. For ND channels,
+the ND channels are picked evenly spaced in the list, including the first and the last
+one (`experiments/generate_ctl.py`), so they always cover the whole range.
 
-This explicitly includes the `1`-channel case, which is important for later nadir GPU
-throughput studies with little or no spectral parallelism.
+The gas sets are defined in `configs/gas_sets/`. The name gives the number of gases,
+and each set contains the previous one plus some more gases:
 
-Optional stretch cases such as `512`, `1024`, or full 1/cm spectra are intentionally
-kept outside the version-1 default matrix because they may exceed practical memory
-limits.
+| set | gases |
+|---|---|
+| `ng04` | CO2, H2O, O3, HNO3 |
+| `ng08` | `ng04` + CH4, N2O, NH3, SO2 |
+| `ng13` | `ng08` + C2H2, H2O2, HCN, HF, NO2 |
+| `ng18` | `ng13` + C2H6, COF2, N2O5, HCl, ClO |
 
-### Ray Sets
+`ng13` contains exactly the 13 gases that are active in all 128 channels. `ng18` adds
+the 5 gases that are only active in parts of the range and is the full gas list.
 
-The benchmark ray-count classes are geometry-specific:
+### Reference Cases
 
-| Geometry | `small` | `medium` | `large` |
-|---|---:|---:|---:|
-| `zenith` | 16 | 64 | 256 |
-| `nadir`  | 1  | 8  | 64  |
-| `limb`   | 16 | 64 | 128 |
+The benchmark defaults are tied to three reference cases listed in
+`configs/baseline_cases.tsv`, all with 32 channels from the channel list and all 18
+gases (`ng18`, 458 active pairs):
 
-### Gas Sets
+| Case | Geometry | Control file | Rays | Gases | Channels |
+|---|---|---|---:|---:|---:|
+| `zenith_baseline` | `zenith` | `projects/benchmark/cases/zenith_baseline.ctl` | 64 | 18 | 32 |
+| `nadir_baseline` | `nadir` | `projects/benchmark/cases/nadir_baseline.ctl` | 8 | 18 | 32 |
+| `limb_baseline` | `limb` | `projects/benchmark/cases/limb_baseline.ctl` | 64 | 18 | 32 |
 
-Gas sets are defined in HITRAN-like priority order and are intended to be filtered by
-actual LUT availability in the selected band.
+JURASSIC is compiled for at most 8 gases by default (`NG` in `src/jurassic.h`), so all
+benchmark scripts build with `DEFINES="-DNG=18"`.
 
-- `core`
-- `priority_mid`
-- `priority_full`
-
-The exact ordered candidate lists are stored in `configs/gas_sets/`.
-
-### Spectral Bands
-
-The standard version-1 spectral bands are:
-
-- `0500_0900`
-- `0900_1500`
-- `1500_2200`
-- `2200_3000`
-
-Definitions are stored in `configs/spectral_sets/`.
-
-### Baseline Cases
-
-The benchmark defaults are tied to three explicit `tria`-based baseline cases
-listed in `configs/baseline_cases.tsv`:
-
-| Case | Geometry | Control file | Rays | Gases | Channels | Table base |
-|---|---|---|---:|---:|---:|---|
-| `zenith_baseline` | `zenith` | `projects/benchmark/cases/zenith_baseline.ctl` | 64 | 7 | 32 | `BENCH_TBLBASE` |
-| `nadir_baseline` | `nadir` | `projects/benchmark/cases/nadir_baseline.ctl` | 8 | 7 | 32 | `BENCH_TBLBASE` |
-| `limb_baseline` | `limb` | `projects/benchmark/cases/limb_baseline.ctl` | 64 | 7 | 32 | `BENCH_TBLBASE` |
-
-The baseline CTLs are separate from the shipped example projects. The example
+The reference CTLs are separate from the shipped example projects. The example
 projects under `projects/examples/zenith`, `projects/examples/nadir`, and
-`projects/examples/limb` stay as-is
-with their small test LUTs; the benchmark runners only use the dedicated baseline
-CTLs and inject `TBLBASE` from `BENCH_TBLBASE` at runtime. These baseline cases
-are the concrete comparison anchor points for CPU/GPU, compiler, and system results.
+`projects/examples/limb` stay as-is with their small test LUTs; the benchmark runners
+only use the dedicated reference CTLs and inject `TBLBASE` from `BENCH_TBLBASE` at
+runtime.
 
 ### Targets
 
@@ -157,104 +137,15 @@ Batch-throughput scaling axis:
 BATCH_SIZE = 1, 8, 64, 256
 ```
 
-## Version-1 Benchmark Families
-
-### `geometry_baseline`
-
-Purpose: stable cross-geometry baseline case.
-
-- geometries: all three
-- ray set: `medium`
-- band: `0900_1500`
-- channels: `32`
-- gas set: `core`
-- CPU: `OMP=1,12`
-- GPU: `BATCH=1,8,64`
-
-### `channel_scaling`
-
-Purpose: quantify the effect of channel count.
-
-- geometries: all three
-- ray set: `medium`
-- band: `0900_1500`
-- gas set: `core`
-- channels: `1,2,4,8,16,32,64,128,256`
-- CPU: `OMP=1,12`
-- GPU: `BATCH=1,8,64,256`
-
-### `gas_scaling`
-
-Purpose: quantify the effect of gas-set size and composition.
-
-- geometries: all three
-- ray set: `medium`
-- band: `0900_1500`
-- channels: `64`, `256`
-- gas sets: `core`, `priority_mid`, `priority_full`
-- CPU: `OMP=1,12`
-- GPU: `BATCH=1,8,64`
-
-### `spectral_band_scaling`
-
-Purpose: compare physically different spectral regions.
-
-- geometries: all three
-- ray set: `medium`
-- bands: all four standard bands
-- channels: `64`, `256`
-- gas sets: `core`, `priority_full`
-- CPU: `OMP=1`
-- GPU: `BATCH=1,8,64`
-
-### `cpu_strong_scaling`
-
-Purpose: OpenMP scaling of representative single-case workloads.
-
-- geometries: all three
-- ray set: `medium`
-- band: `0900_1500`
-- channels: `64`
-- gas set: `core`
-- CPU only: `OMP=1,2,4,8,12`
-
-### `gpu_throughput_scaling`
-
-Purpose: throughput scaling of the current stable OpenACC path.
-
-- geometries: all three
-- ray sets:
-  - `zenith=medium`
-  - `nadir=small`
-  - `limb=medium`
-- band: `0900_1500`
-- channels: `1,16,64,256`
-- gas sets: `core`, `priority_mid`
-- GPU only: `BATCH=1,8,64,256`
-
-### `ray_scaling`
-
-Purpose: sensitivity to line-of-sight count.
-
-- geometries: all three
-- ray sets: `small`, `medium`, `large`
-- band: `0900_1500`
-- channels: `64`
-- gas set: `core`
-- CPU: `OMP=1,12`
-- GPU: `BATCH=1,8,64`
-
 ## Reported Metrics
 
 Every benchmark run should, as far as available, record:
 
 - geometry
-- ray set
 - number of rays (`NR`)
-- spectral band
 - number of channels (`ND`)
 - gas set
-- number of active gases (`NG`)
+- number of gases (`NG`) and active (channel, gas) pairs
 - target (`cpu` or `gpu`)
 - OpenMP thread count
 - batch size
@@ -270,20 +161,14 @@ metric in the current benchmark workflow.
 
 ## Current Repository Contents
 
+- `configs/channels_alt3.tsv`:
+  channel list with the active gases per channel
 - `configs/gas_sets/`:
-  ordered gas candidate lists
-- `configs/spectral_sets/`:
-  standard benchmark band definitions
-- `configs/rays.tsv`:
-  geometry-dependent ray-count classes
-- `configs/channel_counts.txt`:
-  standard version-1 channel counts
+  nested gas sets `ng04`, `ng08`, `ng13`, `ng18`
 - `configs/baseline_cases.tsv`:
-  canonical `tria`-based baseline cases for `zenith`, `nadir`, and `limb`
+  reference cases for `zenith`, `nadir`, and `limb`
 - `cases/*.ctl`:
-  dedicated baseline CTLs with runtime `TBLBASE` injection
-- `scripts/plan_matrix.py`:
-  prints the planned version-1 benchmark matrix as TSV
+  reference CTLs with runtime `TBLBASE` injection
 - `scripts/summarize_time_logs.py`:
   summarizes `TASK=time` benchmark logs into markdown and TSV tables
 - `scripts/plot_benchmark_results.py`:
@@ -297,7 +182,6 @@ metric in the current benchmark workflow.
 
 This setup is intentionally the first iteration. Likely follow-up work includes:
 
-- resolving `priority_full` dynamically from actual LUT availability
 - generating control files and observation geometries automatically
 - extending the runner set for JURECA and JUPITER
 - refining which benchmark families are required or optional
@@ -347,8 +231,8 @@ CASE_NAME=limb_baseline THREADS="1 6 12" CPU_BATCH_SIZE=64 COMPILER=clang ./run_
 ```
 
 `CASE_NAME` currently accepts `zenith_baseline`, `nadir_baseline`, or `limb_baseline`.
-Each baseline uses `core` gases, 32 channels in the `0900_1500` band, and a medium
-ray count for its geometry. The CPU runners benchmark batch throughput by default
+Each case uses all 18 gases (`ng18`), 32 channels from `configs/channels_alt3.tsv`,
+and the ray count listed in the reference case table above. The CPU runners benchmark batch throughput by default
 with `CPU_BATCH_SIZE=64`, so that `OMP_NUM_THREADS` measures the currently relevant
 formod-batch parallelism instead of single-case latency. In the current clean local
 notebook runs, `CPU_BATCH_SIZE=64` gives a useful compromise across geometries:

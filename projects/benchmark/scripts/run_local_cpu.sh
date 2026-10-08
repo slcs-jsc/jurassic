@@ -107,7 +107,7 @@ omp_proc_bind=%s
 if [ "$rebuild" = 1 ]; then
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" COMPILER="$compiler" GPU=0
+  make -j DEFINES="-DNG=18" MPI="$mpi" COMPILER="$compiler" GPU=0
   cd "$work_dir"
 fi
 

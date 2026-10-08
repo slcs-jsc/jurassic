@@ -1,11 +1,40 @@
 #!/usr/bin/env python3
+"""Write a control file with ND channels taken from a channel list and the
+emitters of a gas file. Prints the number of active (channel, gas) pairs."""
 import argparse
 import re
+import sys
 
 
 def block_range(lines, pattern):
     idxs = [i for i, l in enumerate(lines) if re.match(pattern, l)]
     return (min(idxs), max(idxs) + 1) if idxs else None
+
+
+def read_gases(path):
+    with open(path) as f:
+        return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
+
+
+def read_channels(path):
+    """Rows of the channel list: (wavenumber, set of active gases)."""
+    rows = []
+    with open(path) as f:
+        next(f)
+        for line in f:
+            if line.strip():
+                nu, _, gases = line.rstrip("\n").split("\t")
+                rows.append((int(nu), set(gases.split())))
+    return rows
+
+
+def pick_channels(rows, nd):
+    """nd evenly spaced rows, first and last included."""
+    if not 1 <= nd <= len(rows):
+        sys.exit(f"ND={nd} not possible with {len(rows)} channels in the list")
+    if nd == 1:
+        return [rows[len(rows) // 2]]
+    return [rows[round(i * (len(rows) - 1) / (nd - 1))] for i in range(nd)]
 
 
 def replace_gases(lines, gases):
@@ -27,41 +56,33 @@ def replace_gases(lines, gases):
         lines[start:end] = block
 
 
-def replace_channels(lines, nd, nu_min, nu_max):
+def replace_channels(lines, nus):
     r = block_range(lines, r"^\s*(ND|NU\[\d+\])\s*=")
-    if nd == 1:
-        freqs = [(nu_min + nu_max) / 2]
-    else:
-        step = (nu_max - nu_min) / (nd - 1)
-        freqs = [nu_min + i * step for i in range(nd)]
-    block = [f"ND = {nd}\n"]
-    block += [f"NU[{i}] = {v:.4f}\n" for i, v in enumerate(freqs)]
+    block = [f"ND = {len(nus)}\n"]
+    block += [f"NU[{i}] = {nu}\n" for i, nu in enumerate(nus)]
     lines[r[0]:r[1]] = block
 
 
 def main():
-    p = argparse.ArgumentParser()
+    p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("template")
     p.add_argument("out")
-    p.add_argument("--nd", type=int)
-    p.add_argument("--nu-min", type=float, default=900.0)
-    p.add_argument("--nu-max", type=float, default=1500.0)
-    p.add_argument("--gas-file")
+    p.add_argument("--channels", required=True, help="channel list (NU, NGAS, GASES)")
+    p.add_argument("--nd", type=int, required=True)
+    p.add_argument("--gas-file", required=True)
     args = p.parse_args()
 
     with open(args.template) as f:
         lines = f.readlines()
 
-    if args.gas_file:
-        with open(args.gas_file) as f:
-            gases = [g.strip() for g in f if g.strip()]
-        replace_gases(lines, gases)
-
-    if args.nd is not None:
-        replace_channels(lines, args.nd, args.nu_min, args.nu_max)
+    gases = read_gases(args.gas_file)
+    channels = pick_channels(read_channels(args.channels), args.nd)
+    replace_gases(lines, gases)
+    replace_channels(lines, [nu for nu, _ in channels])
 
     with open(args.out, "w") as f:
         f.writelines(lines)
+    print(sum(len(active & set(gases)) for _, active in channels))
 
 
 if __name__ == "__main__":

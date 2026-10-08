@@ -190,10 +190,10 @@ bench_build_forward() {
     echo "Building variant '$variant' (EXTRA_CFLAGS='$extra')"
 
     if [ -n "$extra" ]; then
-    ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
+    ( cd "$JR_SRC_DIR" && make clean && make -j DEFINES="-DNG=18" MPI="$JR_MPI" MPICC="$JR_MPICC" \
         COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra ) || return 1
     else
-        ( cd "$JR_SRC_DIR" && make clean && make -j MPI="$JR_MPI" MPICC="$JR_MPICC" \
+        ( cd "$JR_SRC_DIR" && make clean && make -j DEFINES="-DNG=18" MPI="$JR_MPI" MPICC="$JR_MPICC" \
             COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 ) || return 1
     fi
 
@@ -213,10 +213,10 @@ bench_build_retrieval() {
     echo "=== building retrieval variant '$variant' (EXTRA_CFLAGS='$extra') ==="
 
     if [ -n "$extra" ]; then
-    ( cd "$JR_SRC_DIR" && make clean && make -j MPI=1 MPICC="$JR_MPICC" \
+    ( cd "$JR_SRC_DIR" && make clean && make -j DEFINES="-DNG=18" MPI=1 MPICC="$JR_MPICC" \
         COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 $extra ) || return 1
     else
-        ( cd "$JR_SRC_DIR" && make clean && make -j MPI=1 MPICC="$JR_MPICC" \
+        ( cd "$JR_SRC_DIR" && make clean && make -j DEFINES="-DNG=18" MPI=1 MPICC="$JR_MPICC" \
             COMPILER="$JR_COMPILER" GPU=0 LIKWID=1 ) || return 1
     fi
 

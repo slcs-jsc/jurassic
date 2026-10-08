@@ -16,7 +16,7 @@ shopt -s inherit_errexit
 # compile-time array bounds exactly match its .ctl, at the cost of one
 # private "make clean && make" per distinct (ND,NG) pair in the sweep. This
 # script instead builds exactly once, sized for the LARGEST ND and NG
-# anywhere in the sweep's config files (channel_counts.txt and gas_sets/),
+# anywhere in the sweep (CHANNEL_LIST and gas_sets/),
 # and reuses that one binary set for every point.
 #
 # Tradeoff: fewer builds (one instead of one per distinct ND/NG), but every
@@ -48,7 +48,8 @@ SCRIPT_DIR="$jr_scripts_dir"
 bench_init
 
 CONFIG_DIR="$JR_REPO_ROOT/projects/benchmark/configs"
-CHANNEL_COUNTS_FILE="$CONFIG_DIR/channel_counts.txt"
+CHANNEL_FILE="$CONFIG_DIR/channels_alt3.tsv"
+CHANNEL_LIST="${CHANNEL_LIST:-8 16 32 64 128}"
 GAS_SETS_DIR="$CONFIG_DIR/gas_sets"
 
 THREADS="${THREADS:-${JR_PHYS_PER_SOCKET}}"
@@ -59,19 +60,17 @@ REP="${REP:-3}"
 # ND held fixed at the baseline channel count while NG varies -- same
 # baseline semantics as run_sweep_jureca.sh.
 BASELINE_ND="${BASELINE_ND:-32}"
-BASELINE_NG="${BASELINE_NG:-7}"
+BASELINE_NG="${BASELINE_NG:-18}"
+BASE_GAS_FILE="$GAS_SETS_DIR/ng18.txt"
 
 # Largest ND across the channel-scaling sweep (or BASELINE_ND if that's bigger).
-MAX_ND=$(awk -v base="$BASELINE_ND" '
-  /./ { if ($1 > max || NR == 1) max = $1 }
-  END { if (base > max) max = base; print max }
-' "$CHANNEL_COUNTS_FILE")
+MAX_ND=$(printf '%s\n' $CHANNEL_LIST "$BASELINE_ND" | sort -n | tail -n 1)
 
 # Largest NG across the gas-set-scaling sweep (or BASELINE_NG if that's bigger).
 MAX_NG="$BASELINE_NG"
 for gas_file in "$GAS_SETS_DIR"/*.txt; do
   [[ -e "$gas_file" ]] || continue
-  ng="$(grep -c . "$gas_file")"
+  ng="$(grep -c '^[^#[:space:]]' "$gas_file")"
   (( ng > MAX_NG )) && MAX_NG="$ng"
 done
 
@@ -90,11 +89,8 @@ run_point() {
     local ctl_out="$JR_WORK_DIR/ctl/${label}.ctl"
     mkdir -p "$(dirname "$ctl_out")"
 
-    local gen_args=(--nd "$nd")
-    if [[ -n "$gas_file" ]]; then
-        gen_args+=(--gas-file "$gas_file")
-    fi
-    python3 "$SCRIPT_DIR/generate_ctl.py" "${gen_args[@]}" "$JR_ACTIVE_CTL_BASE" "$ctl_out"
+    python3 "$SCRIPT_DIR/generate_ctl.py" --channels "$CHANNEL_FILE" --nd "$nd" \
+        --gas-file "${gas_file:-$BASE_GAS_FILE}" "$JR_ACTIVE_CTL_BASE" "$ctl_out" >/dev/null
 
     JR_ACTIVE_CTL="$ctl_out"
 
@@ -106,16 +102,15 @@ run_point() {
 JR_ACTIVE_CTL_BASE="$JR_ACTIVE_CTL"
 
 echo "=== channel scaling ==="
-while read -r nd; do
-    [[ -z "$nd" ]] && continue
+for nd in $CHANNEL_LIST; do
     run_point "channels_${nd}" "$nd" "$BASELINE_NG" ""
-done < "$CHANNEL_COUNTS_FILE"
+done
 
 echo "=== gas set scaling ==="
 for gas_file in "$GAS_SETS_DIR"/*.txt; do
     [[ -e "$gas_file" ]] || continue
     name="$(basename "$gas_file" .txt)"
-    ng="$(grep -c . "$gas_file")"
+    ng="$(grep -c '^[^#[:space:]]' "$gas_file")"
     run_point "gases_${name}" "$BASELINE_ND" "$ng" "$gas_file"
 done
 

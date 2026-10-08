@@ -212,7 +212,7 @@ bench_validate() {
 build_cpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=0
+  make -j DEFINES="-DNG=18" MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=0
   cd "$work_dir"
 }
 
@@ -220,7 +220,7 @@ build_cpu() {
 build_gpu() {
   cd "$src_dir"
   make clean
-  make -j MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 LIKWID=0 GPU_PIN="$gpu_pin" INFO="$info"
+  make -j DEFINES="-DNG=18" MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_gpu" GPU=1 LIKWID=0 GPU_PIN="$gpu_pin" INFO="$info"
   cd "$work_dir"
 }
 
