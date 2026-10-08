@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=01:45:00
+#SBATCH --time=01:30:00
 #SBATCH --exclusive
 #SBATCH --disable-perfparanoid
 #SBATCH --job-name=hermes_compare
@@ -14,6 +14,12 @@
 #
 # Output: runs/<RUN_ID>_{baseline,optimized}/   one hermes profile report each
 #         runs/<RUN_ID>_compare/                memory-volume + runtime plots and summaries
+#
+# Both runs use the reference setting of the scaling-axes benchmark (see
+# run_hermes_profile.sh): the case's geometry, ND channels and gas set from
+# baseline_cases.tsv (zenith: ND=32, ng18), one strong-scaling batch of 48 scenes
+# and 1 timed batch per run, over threads 1 2 4 8 16 24. This is a small
+# fraction of the ~10 h full scaling-axes sweep.
 #
 # Environment (all optional; the rest is passed through to run_hermes_profile.sh):
 #   BASELINE_SRC   source tree of the baseline  (default: projects/benchmark/baseline/src)

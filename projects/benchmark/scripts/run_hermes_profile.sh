@@ -32,6 +32,10 @@ run_id=${RUN_ID:-hermes_profile_report_${SLURM_JOB_ID:-manual}}
 run_dir="$runs_root/$run_id"
 work_dir="$run_dir/work"
 
+# Reference setting of the scaling-axes benchmark (experiments/run_scaling_axes_*): the
+# case's geometry with the case's number of channels (ND) and gas set, taken from
+# baseline_cases.tsv, and one strong-scaling batch (see "Strong batch" below). Only this
+# one reference setting is profiled -- the full scaling-axes sweep takes ~10 h.
 # Select the benchmark case from the shared baseline matrix.
 case_name=${CASE_NAME:-${GEOMETRY:-zenith}_baseline}
 baseline_cases="$repo_root/projects/benchmark/configs/baseline_cases.tsv"
@@ -46,17 +50,56 @@ geometry=$(printf '%s
 ctl_rel=$(printf '%s
 ' "$case_row" | awk -F'	' '{print $3}')
 ctl_template=${CTLFILE:-$repo_root/$ctl_rel}
+nd=${ND:-$(printf '%s\n' "$case_row" | awk -F'\t' '{print $5}')}
+gas_set=${GAS_SET:-$(printf '%s\n' "$case_row" | awk -F'\t' '{print $6}')}
+config_dir="$repo_root/projects/benchmark/configs"
+gas_file="$config_dir/gas_sets/$gas_set.txt"
+channel_file=${CHANNEL_FILE:-$config_dir/channels_alt3.tsv}
+if [ ! -f "$gas_file" ] || [ ! -f "$channel_file" ]; then
+  echo "Gas set file ($gas_file) or channel list ($channel_file) not found." >&2
+  exit 1
+fi
+ng=$(grep -c '^[^#[:space:]]' "$gas_file")
 bench_tblbase=${BENCH_TBLBASE:-/p/data1/slmet/model_data/jurassic/tab/tria_1cm/nc_1e-6/tria}
-cpu_batch_size=${CPU_BATCH_SIZE:-48}
 compiler_cpu=${COMPILER_CPU:-gcc}
 mpicc=${MPICC:-mpicc}
 mpi=${MPI:-0}
 rebuild=${REBUILD:-1}
 
 # LIKWID Setup
-likwid_threads=${LIKWID_THREADS:-"1 2 4 8 12 16 24"}
+# Default thread counts: single thread plus the strong-scaling curve of the reference
+# benchmark (powers of two up to one 24-core socket).
+likwid_threads=${LIKWID_THREADS:-"1 2 4 8 16 24"}
 likwid_groups=${LIKWID_GROUPS:-"MEM_DP FLOPS_DP"} # performance groups to collect
 likwid_socket=${LIKWID_SOCKET:-0}
+
+# Strong batch, as in the scaling-axes benchmark: the smallest multiple of the least common
+# multiple of all thread counts that gives every thread at least two scenes, so each count
+# divides the batch evenly (48 for 2 4 8 16 24). Override with CPU_BATCH_SIZE.
+strong_batch() {
+  local lcm=1 tmax=1 t a b
+  for t in "$@"; do
+    [ "$t" -gt 1 ] || continue
+    a=$lcm; b=$t
+    while [ "$b" -gt 0 ]; do set -- "$b" $(( a % b )); a=$1; b=$2; done
+    lcm=$(( lcm * t / a ))
+    [ "$t" -gt "$tmax" ] && tmax=$t
+  done
+  local batch=$lcm
+  while [ "$batch" -lt $(( 2 * tmax )) ]; do batch=$(( batch + lcm )); done
+  echo "$batch"
+}
+cpu_batch_size=${CPU_BATCH_SIZE:-$(strong_batch $likwid_threads)}
+for t in $likwid_threads; do
+  if [ "$t" -gt 1 ] && (( cpu_batch_size % t != 0 )); then
+    echo "CPU_BATCH_SIZE=$cpu_batch_size is not divisible by $t threads." >&2
+    exit 1
+  fi
+done
+# Timed batches per run. 1 matches the scaling-axes benchmark and keeps the LIKWID memory
+# volume at exactly one batch (volume per scene = volume / batch size), independent of how
+# fast a variant is. Do not raise it without changing the normalization in the evaluation.
+max_iter=${MAX_ITER:-1}
 
 mkdir -p "$work_dir"
 
@@ -108,7 +151,11 @@ export LD_LIBRARY_PATH="$repo_root/libs/build/lib:$repo_root/libs/build/lib64:${
 
 # Materialize a run-local control file with the chosen LUT base name.
 active_ctl="$work_dir/${case_name}.ctl"
-awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl"
+awk -v tblbase="$bench_tblbase" '{ if ($1 == "TBLBASE") print "TBLBASE = " tblbase; else print $0; }' "$ctl_template" > "$active_ctl.base"
+# ND channels (evenly spaced from the channel list) and the emitters of the gas set.
+python3 "$repo_root/projects/benchmark/experiments/generate_ctl.py" \
+  --channels "$channel_file" --nd "$nd" --gas-file "$gas_file" \
+  "$active_ctl.base" "$active_ctl" > "$run_dir/active_pairs.txt"
 
 # Record the effective benchmark configuration for later inspection.
 collect_hardware_info() {
@@ -144,8 +191,13 @@ record_git_info() {
 
 record_git_info
 
-printf 'src_dir=%s\ncase_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase=%s\ncpu_batch_size=%s\ncompiler_cpu=%s\nmpicc=%s\nmpi=%s\nrebuild=%s\nlikwid_threads=%s\nlikwid_groups=%s\n' \
+printf 'src_dir=%s\nnd=%s\nng=%s\ngas_set=%s\nchannel_file=%s\nmax_iter=%s\ncase_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase=%s\ncpu_batch_size=%s\ncompiler_cpu=%s\nmpicc=%s\nmpi=%s\nrebuild=%s\nlikwid_threads=%s\nlikwid_groups=%s\n' \
   "$src_dir" \
+  "$nd" \
+  "$ng" \
+  "$gas_set" \
+  "$channel_file" \
+  "$max_iter" \
   "$case_name" \
   "$geometry" \
   "$ctl_template" \
@@ -170,7 +222,7 @@ build_cpu() {
   make clean || return 1
   # Bundled libs are always taken from the repo root so SRC_DIR may live elsewhere.
   make -j INCDIR="-I $repo_root/libs/build/include" LIBDIR="-L $repo_root/libs/build/lib" \
-    ${BUILD_VERSION:+VERSION="$BUILD_VERSION"} DEFINES="-DNG=18" MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1 || return 1
+    ${BUILD_VERSION:+VERSION="$BUILD_VERSION"} DEFINES="-DND=$nd -DNG=$ng" MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1 || return 1
   # Return to work_dir (may have been entered via Slurm's temporary launch dir)
   cd "$work_dir" 2>/dev/null || true
   return 0
@@ -255,7 +307,7 @@ if [ "$run_profiling" = 1 ]; then
 
       echo "Running LIKWID group=$group OMP_NUM_THREADS=$omp ..."
 
-      OMP_NUM_THREADS=$omp JURASSIC_TIME_BUDGET=60 likwid-perfctr -C "$core_list" -g "$group" -m \
+      OMP_NUM_THREADS=$omp JURASSIC_TIME_BUDGET=1e9 JURASSIC_MAX_ITER=$max_iter likwid-perfctr -C "$core_list" -g "$group" -m \
         -o "$log_csv" \
         "$src_dir/formod" "$active_ctl" data/obs.tab data/atm.tab "$out_tab" \
         TASK time BATCH_SIZE "$cpu_batch_size" \
