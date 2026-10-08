@@ -100,3 +100,61 @@ def plot_scaling(
 
 
 
+
+def plot_compare_scaling(
+    series: list,
+    label: str,
+    res_dir: Path,
+    filename: str,
+    title: str | None = None,
+    ideal: bool = True
+) -> None:
+    """
+    Plot several variants of one metric against thread count in a single diagram.
+
+    series: list of (name, threads, values, errors, color); errors may be None.
+    The first entry is the reference: the dashed ideal-linear-scaling line
+    starts from its first point, and a speedup (reference / variant) is
+    annotated below every point of the other entries. Meant for cost-like
+    metrics (runtime), where lower is better.
+    """
+    res_dir.mkdir(parents=True, exist_ok=True)
+
+    fig, ax = plt.subplots()
+    ref_threads = np.asarray(series[0][1], dtype=float)
+    ref_values = np.asarray(series[0][2], dtype=float)
+
+    if ideal:
+        ax.plot(ref_threads, ref_values[0] * ref_threads[0] / ref_threads, "--",
+                color="#898781", label="Ideal linear scaling (baseline)", zorder=2)
+
+    for k, (name, threads, values, errors, color) in enumerate(series):
+        threads = np.asarray(threads, dtype=float)
+        values = np.asarray(values, dtype=float)
+        if errors is None:
+            ax.plot(threads, values, "o-", color=color, label=name, zorder=3)
+        else:
+            ax.errorbar(threads, values, yerr=np.asarray(errors, dtype=float),
+                        fmt="o-", color=color, capsize=3, label=name, zorder=3)
+
+        # Speedup relative to the reference at the thread counts both measured.
+        if k > 0:
+            for t, v in zip(threads, values):
+                hit = np.where(ref_threads == t)[0]
+                if len(hit) and v > 0:
+                    ax.annotate(f"{ref_values[hit[0]] / v:.2f}x", (t, v),
+                                textcoords="offset points", xytext=(0, -14),
+                                ha="center", fontsize=8, color=color)
+
+    ax.set_xlabel("threads (physical cores)")
+    ax.set_ylabel(label)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xticks(sorted({float(t) for s in series for t in s[1]}))
+    ax.xaxis.set_major_formatter(plt.ScalarFormatter())
+    ax.xaxis.set_minor_formatter(plt.NullFormatter())
+    ax.set_title(title or f"{label} vs thread count")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(res_dir / filename, bbox_inches="tight")
+    plt.close(fig)

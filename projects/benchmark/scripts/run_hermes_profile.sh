@@ -25,7 +25,8 @@ if [ ! -f "$repo_root/projects/benchmark/configs/baseline_cases.tsv" ] && [ -n "
     script_dir="$repo_root/projects/benchmark/scripts"
   fi
 fi
-src_dir="$repo_root/src"
+# SRC_DIR selects which source tree is built and profiled (default: the repo's src/).
+src_dir=$(cd "${SRC_DIR:-$repo_root/src}" && pwd)
 runs_root="$repo_root/projects/benchmark/runs"
 run_id=${RUN_ID:-hermes_profile_report_${SLURM_JOB_ID:-manual}}
 run_dir="$runs_root/$run_id"
@@ -143,7 +144,8 @@ record_git_info() {
 
 record_git_info
 
-printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase=%s\ncpu_batch_size=%s\ncompiler_cpu=%s\nmpicc=%s\nmpi=%s\nrebuild=%s\nlikwid_threads=%s\nlikwid_groups=%s\n' \
+printf 'src_dir=%s\ncase_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase=%s\ncpu_batch_size=%s\ncompiler_cpu=%s\nmpicc=%s\nmpi=%s\nrebuild=%s\nlikwid_threads=%s\nlikwid_groups=%s\n' \
+  "$src_dir" \
   "$case_name" \
   "$geometry" \
   "$ctl_template" \
@@ -166,7 +168,9 @@ printf 'case_name=%s\ngeometry=%s\nctl_template=%s\nactive_ctl=%s\nbench_tblbase
 build_cpu() {
   cd "$src_dir" || return 1
   make clean || return 1
-  make -j DEFINES="-DNG=18" MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1 || return 1
+  # Bundled libs are always taken from the repo root so SRC_DIR may live elsewhere.
+  make -j INCDIR="-I $repo_root/libs/build/include" LIBDIR="-L $repo_root/libs/build/lib" \
+    ${BUILD_VERSION:+VERSION="$BUILD_VERSION"} DEFINES="-DNG=18" MPI="$mpi" MPICC="$mpicc" COMPILER="$compiler_cpu" GPU=0 LIKWID=1 || return 1
   # Return to work_dir (may have been entered via Slurm's temporary launch dir)
   cd "$work_dir" 2>/dev/null || true
   return 0
