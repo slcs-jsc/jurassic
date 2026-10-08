@@ -3354,11 +3354,11 @@ void acc_copyin_tbl(
 
   #if defined(_FLAT_ARRAYS)
   (void) ctl;
-  if (tbl->logu_flat == NULL || tbl->logu_flat_used == 0)
+  if (tbl->lut_flat == NULL || tbl->lut_flat_used == 0)
     ERRMSG("Flattened data of lookup-table is missing. GPU transfer not possible!");
 
   #pragma acc enter data copyin(tbl[0:1])
-  #pragma acc enter data copyin(tbl->logu_flat[0:tbl->logu_flat_used], tbl->logeps_flat[0:tbl->logu_flat_used]) attach(tbl->logu_flat, tbl->logeps_flat)
+  #pragma acc enter data copyin(tbl->lut_flat[0:tbl->lut_flat_used]) attach(tbl->lut_flat)
   #else
   tbl_t *tbl_dev;
     ALLOC(tbl_dev, tbl_t, 1);
@@ -3370,14 +3370,10 @@ void acc_copyin_tbl(
         for (int ip = 0; ip < tbl->np[id][ig]; ip++)
     for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
       const size_t n = (size_t) tbl->nu[id][ig][ip][it];
-      if (tbl->logu[id][ig][ip][it] != NULL)
-        tbl_dev->logu[id][ig][ip][it]
-          = (float *) acc_copyin(tbl->logu[id][ig][ip][it],
-              n * sizeof(float));
-      if (tbl->logeps[id][ig][ip][it] != NULL)
-        tbl_dev->logeps[id][ig][ip][it]
-          = (float *) acc_copyin(tbl->logeps[id][ig][ip][it],
-              n * sizeof(float));
+      if (tbl->lut[id][ig][ip][it] != NULL)
+        tbl_dev->lut[id][ig][ip][it]
+          = (tbl_pair_t *) acc_copyin(tbl->lut[id][ig][ip][it],
+              n * sizeof(tbl_pair_t));
     }
 
     acc_memcpy_to_device(acc_deviceptr((void *) tbl), tbl_dev, sizeof(tbl_t));
@@ -3394,8 +3390,7 @@ void acc_delete_tbl(
   const tbl_t *tbl) {
 
   (void) ctl;
-  //#pragma acc exit data detach(tbl->logu_flat, tbl->logeps_flat)
-  #pragma acc exit data detach(tbl->logu_flat, tbl->logeps_flat) delete(tbl->logu_flat[0:tbl->logu_flat_used], tbl->logeps_flat[0:tbl->logu_flat_used])
+  #pragma acc exit data detach(tbl->lut_flat) delete(tbl->lut_flat[0:tbl->lut_flat_used])
 
   /* Scratch objects have no useful lifetime beyond this kernel batch. */
   #pragma acc exit data delete(tbl[0:1])
@@ -3405,14 +3400,14 @@ void debug_gpu_transfer(const tbl_t *tbl) {
   #pragma acc parallel num_gangs(1) num_workers(1) vector_length(1) present(tbl[0:1])
   {
      // 1. Test if the attached array pointer is even dereferenceable 
-     if (tbl->logu_flat != NULL) {
-         printf("GPU: logu_flat is attached! First element: %f\n", tbl->logu_flat[0]);
+     if (tbl->lut_flat != NULL) {
+         printf("GPU: lut_flat is attached! First element: %f\n", tbl->lut_flat[0].logu);
      } else {
-         printf("GPU ERROR: logu_flat is NULL on device!\n");
+         printf("GPU ERROR: lut_flat is NULL on device!\n");
      }
 
      // 2. Test if a known coordinate evaluates to a sane offset
-     printf("GPU: Offset sample: %lu\n", (unsigned long)tbl->logu_offset[0][0][0][0]);
+     printf("GPU: Offset sample: %lu\n", (unsigned long)tbl->lut_offset[0][0][0][0]);
   }
 }
 
@@ -4454,20 +4449,18 @@ inline double intpol_tbl_eps(
   const int nu = tbl->nu[id][ig][ip][it];
 
   #if defined(_FLAT_ARRAYS)
-  const float *logu_arr = &tbl->logu_flat[tbl->logu_offset[id][ig][ip][it]];
-  const float *logeps_arr = &tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it]];
+  const tbl_pair_t *lut = &tbl->lut_flat[tbl->lut_offset[id][ig][ip][it]];
   #else
-  const float *logu_arr = tbl->logu[id][ig][ip][it];
-  const float *logeps_arr = tbl->logeps[id][ig][ip][it];
+  const tbl_pair_t *lut = tbl->lut[id][ig][ip][it];
   #endif
   /* Work in log-space and only convert back when needed... */
-  const double logu_min = (double) logu_arr[0];
-  const double logu_max = (double) logu_arr[nu - 1];
+  const double logu_min = (double) lut[0].logu;
+  const double logu_max = (double) lut[nu - 1].logu;
 
   /* Lower boundary extrapolation (u < u_min)...
      eps ~ eps_min * u/u_min => log(eps) = logeps_min + log(u) - log(u_min) */
   if (logu < logu_min) {
-    const double logeps_min = (double) logeps_arr[0];
+    const double logeps_min = (double) lut[0].logeps;
     return exp(logeps_min + logu - logu_min);
   }
 
@@ -4479,16 +4472,16 @@ inline double intpol_tbl_eps(
    * Use log1p/expm1 and u/u_max = exp(log(u) - log(u_max)) for stability.
    */
   if (logu > logu_max) {
-    const double eps_max = exp((double) logeps_arr[nu - 1]);
+    const double eps_max = exp((double) lut[nu - 1].logeps);
     const double l1m_eps_max = log1p(-eps_max);
     const double r = exp(logu - logu_max);
     return -expm1(l1m_eps_max * r);
   }
 
   /* Interpolation (log-log using precomputed logs)... */
-  const int idx = locate_tbl(logu_arr, nu, logu);
-  return exp(LIN(logu_arr[idx], logeps_arr[idx],
-		 logu_arr[idx + 1], logeps_arr[idx + 1], logu));
+  const int idx = locate_tbl(&lut[0].logu, nu, logu);
+  return exp(LIN(lut[idx].logu, lut[idx].logeps,
+		 lut[idx + 1].logu, lut[idx + 1].logeps, logu));
 }
 
 /*****************************************************************************/
@@ -4504,21 +4497,19 @@ inline double intpol_tbl_u(
   const int nu = tbl->nu[id][ig][ip][it];
 
   #if defined(_FLAT_ARRAYS)
-  const float *logu_arr = &tbl->logu_flat[tbl->logu_offset[id][ig][ip][it]];
-  const float *logeps_arr = &tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it]];
+  const tbl_pair_t *lut = &tbl->lut_flat[tbl->lut_offset[id][ig][ip][it]];
   #else
-  const float *logeps_arr = tbl->logeps[id][ig][ip][it];
-  const float *logu_arr = tbl->logu[id][ig][ip][it];
+  const tbl_pair_t *lut = tbl->lut[id][ig][ip][it];
   #endif
 
   /* Work in log-space and only convert back when needed.... */
-  const double logeps_min = (double) logeps_arr[0];
-  const double logeps_max = (double) logeps_arr[nu - 1];
+  const double logeps_min = (double) lut[0].logeps;
+  const double logeps_max = (double) lut[nu - 1].logeps;
 
   /* Lower boundary extrapolation (eps < eps_min)...
      u ~ u_min * eps/eps_min => log(u) = log(u_min) + log(eps) - log(eps_min) */
   if (logeps < logeps_min) {
-    const double logu_min = (double) logu_arr[0];
+    const double logu_min = (double) lut[0].logu;
     return exp(logu_min + logeps - logeps_min);
   }
 
@@ -4531,16 +4522,16 @@ inline double intpol_tbl_u(
    * for numerical stability (log1p).
    */
   if (logeps > logeps_max) {
-    const double u_max = exp((double) logu_arr[nu - 1]);
+    const double u_max = exp((double) lut[nu - 1].logu);
     const double l1m_eps_max = log1p(-exp(logeps_max));
     const double logtau = log1p(-exp(logeps));
     return u_max * (logtau / l1m_eps_max);
   }
 
   /* Interpolation (log-log using precomputed logs)... */
-  const int idx = locate_tbl(logeps_arr, nu, logeps);
-  return exp(LIN(logeps_arr[idx], logu_arr[idx],
-		 logeps_arr[idx + 1], logu_arr[idx + 1], logeps));
+  const int idx = locate_tbl(&lut[0].logeps, nu, logeps);
+  return exp(LIN(lut[idx].logeps, lut[idx].logu,
+		 lut[idx + 1].logeps, lut[idx + 1].logu, logeps));
 }
 
 /*****************************************************************************/
@@ -4930,6 +4921,10 @@ inline int locate_tbl(
   const int n,
   const double x) {
 
+  /* xx is the key member of the first element of a tbl_pair_t array, so
+     consecutive keys are two floats apart. */
+  enum { STRIDE = sizeof(tbl_pair_t) / sizeof(float) };
+
   /* Branchless bisection. The loop trip count depends only on ilo/ihi, and
      the two assignments below are the same updates the original if/else made,
      so the returned bracket index is identical for every input. Written as
@@ -4943,7 +4938,7 @@ inline int locate_tbl(
 
   while (ihi > ilo + 1) {
     const int i = (ihi + ilo) >> 1;
-    const int gt = (xx[i] > x);
+    const int gt = (xx[STRIDE * i] > x);
     ihi = gt ? i : ihi;
     ilo = gt ? ilo : i;
   }
@@ -6771,10 +6766,9 @@ static void tbl_flatten(
   if (total == 0)
     return;
 
-  ALLOC(tbl->logu_flat, float, total);
-  ALLOC(tbl->logeps_flat, float, total);
-  tbl->logu_flat_size = total;
-  tbl->logu_flat_used = 0;
+  ALLOC(tbl->lut_flat, tbl_pair_t, total);
+  tbl->lut_flat_size = total;
+  tbl->lut_flat_used = 0;
 
   /* Concatenate arrays (id,ig,ip,it) into a single flat array and record where each entry starts... */
   for (int id = 0; id < ctl->nd; id++)
@@ -6782,26 +6776,21 @@ static void tbl_flatten(
       for (int ip = 0; ip < tbl->np[id][ig]; ip++)
         for (int it = 0; it < tbl->nt[id][ig][ip]; it++) {
           const size_t n = (size_t) tbl->nu[id][ig][ip][it];
-          tbl->logu_offset[id][ig][ip][it] = tbl->logu_flat_used;
-          if (tbl->logu[id][ig][ip][it] != NULL)
-            memcpy(&tbl->logu_flat[tbl->logu_flat_used],
-                   tbl->logu[id][ig][ip][it], n * sizeof(float));
-          if (tbl->logeps[id][ig][ip][it] != NULL)
-            memcpy(&tbl->logeps_flat[tbl->logu_flat_used],
-                   tbl->logeps[id][ig][ip][it], n * sizeof(float));
-          tbl->logu_flat_used += n;
+          tbl->lut_offset[id][ig][ip][it] = tbl->lut_flat_used;
+          if (tbl->lut[id][ig][ip][it] != NULL)
+            memcpy(&tbl->lut_flat[tbl->lut_flat_used],
+                   tbl->lut[id][ig][ip][it], n * sizeof(tbl_pair_t));
+          tbl->lut_flat_used += n;
 
           /* Staging arrays are no longer needed... */
-          free(tbl->logu[id][ig][ip][it]);
-          free(tbl->logeps[id][ig][ip][it]);
-          tbl->logu[id][ig][ip][it] = NULL;
-          tbl->logeps[id][ig][ip][it] = NULL;
+          free(tbl->lut[id][ig][ip][it]);
+          tbl->lut[id][ig][ip][it] = NULL;
         }
   printf("HOST CHECK: Sample index tracking:\n");
   for (int id = 0; id < 2; id++) {
     for (int ig = 0; ig < 2; ig++) {
-      printf("  host logu_offset[%d][%d][0][0] = %lu\n", 
-              id, ig, (unsigned long)tbl->logu_offset[id][ig][0][0]);
+      printf("  host lut_offset[%d][%d][0][0] = %lu\n", 
+              id, ig, (unsigned long)tbl->lut_offset[id][ig][0][0]);
     }
 }
 fflush(stdout);
@@ -6816,10 +6805,9 @@ tbl_t *read_tbl(
   ALLOC(tbl, tbl_t, 1);
 
   #if defined(_FLAT_ARRAYS)
-  tbl->logu_flat = NULL;
-  tbl->logeps_flat = NULL;
-  tbl->logu_flat_size = 0;
-  tbl->logu_flat_used = 0;
+  tbl->lut_flat = NULL;
+  tbl->lut_flat_size = 0;
+  tbl->lut_flat_used = 0;
   #endif
 
   /* Initialize filter function sizes... */
@@ -6959,9 +6947,7 @@ void read_tbl_asc(
 	[tbl->nt[id][ig][tbl->np[id][ig]]] = -1;
 
       /* Reset dynamic arrays for this (ip,it) node... */
-      tbl->logu[id][ig][tbl->np[id][ig]]
-	[tbl->nt[id][ig][tbl->np[id][ig]]] = NULL;
-      tbl->logeps[id][ig][tbl->np[id][ig]]
+      tbl->lut[id][ig][tbl->np[id][ig]]
 	[tbl->nt[id][ig][tbl->np[id][ig]]] = NULL;
     }
 
@@ -6980,29 +6966,23 @@ void read_tbl_asc(
       const int iu = tbl->nu[id][ig][ip][it];
       const size_t nnew = (size_t) (iu + 1);
 
-      float *tmp = (float *) realloc(tbl->logu[id][ig][ip][it],
-				     nnew * sizeof(float));
+      tbl_pair_t *tmp = (tbl_pair_t *) realloc(tbl->lut[id][ig][ip][it],
+					       nnew * sizeof(tbl_pair_t));
       if (!tmp)
 	ERRMSG("Out of memory!");
-      tbl->logu[id][ig][ip][it] = tmp;
-
-      tmp =
-	(float *) realloc(tbl->logeps[id][ig][ip][it], nnew * sizeof(float));
-      if (!tmp)
-	ERRMSG("Out of memory!");
-      tbl->logeps[id][ig][ip][it] = tmp;
+      tbl->lut[id][ig][ip][it] = tmp;
     }
 
     /* Store data... */
     tbl->p[id][ig][tbl->np[id][ig]] = press;
     tbl->t[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
       = temp;
-    tbl->logu[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
+    tbl->lut[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
       [tbl->nu[id][ig][tbl->np[id][ig]]
-       [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) log(u);
-    tbl->logeps[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
+       [tbl->nt[id][ig][tbl->np[id][ig]]]].logu = (float) log(u);
+    tbl->lut[id][ig][tbl->np[id][ig]][tbl->nt[id][ig][tbl->np[id][ig]]]
       [tbl->nu[id][ig][tbl->np[id][ig]]
-       [tbl->nt[id][ig][tbl->np[id][ig]]]] = (float) log(eps);
+       [tbl->nt[id][ig][tbl->np[id][ig]]]].logeps = (float) log(eps);
   }
 
   /* Increment counters... */
@@ -7520,17 +7500,14 @@ void tbl_free(
 	for (int it = 0; it < nt; it++) {
 
 	  /* Free... */
-	  free(tbl->logu[id][ig][ip][it]);
-	  free(tbl->logeps[id][ig][ip][it]);
-	  tbl->logu[id][ig][ip][it] = NULL;
-	  tbl->logeps[id][ig][ip][it] = NULL;
+	  free(tbl->lut[id][ig][ip][it]);
+	  tbl->lut[id][ig][ip][it] = NULL;
 	}
       }
     }
 
   /* Free... */
-  free(tbl->logu_flat);
-  free(tbl->logeps_flat);
+  free(tbl->lut_flat);
   free(tbl);
 }
 
@@ -7567,20 +7544,12 @@ void tbl_pack(
       cur += sizeof(nu);
 
       #if defined(_FLAT_ARRAYS)
-      memcpy(cur, &tbl->logu_flat[tbl->logu_offset[id][ig][ip][it]],
-             (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
-
-      memcpy(cur, &tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it]],
-             (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
+      memcpy(cur, &tbl->lut_flat[tbl->lut_offset[id][ig][ip][it]],
+             (size_t) nu * sizeof(tbl_pair_t));
       #else
-      memcpy(cur, tbl->logu[id][ig][ip][it], (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
-
-      memcpy(cur, tbl->logeps[id][ig][ip][it], (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
+      memcpy(cur, tbl->lut[id][ig][ip][it], (size_t) nu * sizeof(tbl_pair_t));
       #endif
+      cur += ((size_t) nu * sizeof(tbl_pair_t));
     }
   }
 
@@ -7678,42 +7647,30 @@ size_t tbl_unpack(
       tbl->nu[id][ig][ip][it] = nu;
 
       #if defined(_FLAT_ARRAYS)
-      const size_t required_size = tbl->logu_flat_used + (size_t) nu;
-      if (required_size > tbl->logu_flat_size) {
-        // Grow buffer logu_flat if entry does not fit
-        size_t new_size = tbl->logu_flat_size == 0 ? 1024 : tbl->logu_flat_size * 2;
+      const size_t required_size = tbl->lut_flat_used + (size_t) nu;
+      if (required_size > tbl->lut_flat_size) {
+        // Grow buffer lut_flat if entry does not fit
+        size_t new_size = tbl->lut_flat_size == 0 ? 1024 : tbl->lut_flat_size * 2;
         while (new_size < required_size)
           new_size *= 2;
-        tbl->logu_flat = (float *) realloc(tbl->logu_flat, new_size * sizeof(float));
-        tbl->logeps_flat = (float *) realloc(tbl->logeps_flat, new_size * sizeof(float));
-        if (!tbl->logu_flat || !tbl->logeps_flat)
-          ERRMSG("Ran out of memory while growing table buffers logu_flat / logeps_flat!");
-        tbl->logu_flat_size = new_size;
-      }      
+        tbl->lut_flat = (tbl_pair_t *) realloc(tbl->lut_flat, new_size * sizeof(tbl_pair_t));
+        if (!tbl->lut_flat)
+          ERRMSG("Ran out of memory while growing table buffer lut_flat!");
+        tbl->lut_flat_size = new_size;
+      }
 
       // record starting offset
-      tbl->logu_offset[id][ig][ip][it] = tbl->logu_flat_used;
+      tbl->lut_offset[id][ig][ip][it] = tbl->lut_flat_used;
 
-      memcpy(&tbl->logu_flat[tbl->logu_flat_used], cur, (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
-
-      memcpy(&tbl->logeps_flat[tbl->logu_flat_used], cur, (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
-
-      tbl->logu_flat_used += (size_t) nu;
-
+      memcpy(&tbl->lut_flat[tbl->lut_flat_used], cur, (size_t) nu * sizeof(tbl_pair_t));
+      tbl->lut_flat_used += (size_t) nu;
       #else
-      ALLOC(tbl->logu[id][ig][ip][it], float,
-	    nu);
-      ALLOC(tbl->logeps[id][ig][ip][it], float,
+      ALLOC(tbl->lut[id][ig][ip][it], tbl_pair_t,
 	    nu);
 
-      memcpy(tbl->logu[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
-
-      memcpy(tbl->logeps[id][ig][ip][it], cur, (size_t) nu * sizeof(float));
-      cur += ((size_t) nu * sizeof(float));
+      memcpy(tbl->lut[id][ig][ip][it], cur, (size_t) nu * sizeof(tbl_pair_t));
       #endif
+      cur += ((size_t) nu * sizeof(tbl_pair_t));
 
     }
   }
@@ -9331,11 +9288,11 @@ void write_tbl_asc(
 	fprintf(out, "%g %g %e %e\n",
 		tbl->p[id][ig][ip], tbl->t[id][ig][ip][it],
     #if defined(_FLAT_ARRAYS)
-    exp(tbl->logu_flat[tbl->logu_offset[id][ig][ip][it] + (size_t) iu]),
-		exp(tbl->logeps_flat[tbl->logu_offset[id][ig][ip][it] + (size_t) iu]));
+    exp(tbl->lut_flat[tbl->lut_offset[id][ig][ip][it] + (size_t) iu].logu),
+		exp(tbl->lut_flat[tbl->lut_offset[id][ig][ip][it] + (size_t) iu].logeps));
     #else
-    exp(tbl->logu[id][ig][ip][it][iu]),
-		exp(tbl->logeps[id][ig][ip][it][iu]));
+    exp(tbl->lut[id][ig][ip][it][iu].logu),
+		exp(tbl->lut[id][ig][ip][it][iu].logeps));
     #endif
     }
 

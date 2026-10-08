@@ -175,8 +175,7 @@ static void copy_density(
   int dst,
   int src) {
 
-  tbl->logu[id][ig][ip][it][dst] = tbl->logu[id][ig][ip][it][src];
-  tbl->logeps[id][ig][ip][it][dst] = tbl->logeps[id][ig][ip][it][src];
+  tbl->lut[id][ig][ip][it][dst] = tbl->lut[id][ig][ip][it][src];
 }
 
 /*****************************************************************************/
@@ -201,13 +200,14 @@ static void reduction(
 
     /* Linear interpolation in log-log space: interpolate log(eps) linearly over log(u)... */
     const double interp_logeps =
-      LIN(tbl->logu[id][ig][ip][it][left], tbl->logeps[id][ig][ip][it][left],
-	  tbl->logu[id][ig][ip][it][right],
-	  tbl->logeps[id][ig][ip][it][right],
-	  tbl->logu[id][ig][ip][it][iu]);
+      LIN(tbl->lut[id][ig][ip][it][left].logu,
+	  tbl->lut[id][ig][ip][it][left].logeps,
+	  tbl->lut[id][ig][ip][it][right].logu,
+	  tbl->lut[id][ig][ip][it][right].logeps,
+	  tbl->lut[id][ig][ip][it][iu].logu);
 
     /* Compute relative error in linear eps (eps = exp(logeps)) */
-    const double eps_i = exp((double) tbl->logeps[id][ig][ip][it][iu]);
+    const double eps_i = exp((double) tbl->lut[id][ig][ip][it][iu].logeps);
     const double interp_eps = exp(interp_logeps);
     const double diff = fabs(eps_i - interp_eps);
 

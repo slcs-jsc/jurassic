@@ -1221,13 +1221,13 @@ static inline size_t array_min_index(
           (tbl)->t[(id)][(ig)][(ip)]					\
 	  [(tbl)->nt[(id)][(ig)][(ip)] - 1],                            \
           (tbl)->nu[(id)][(ig)][(ip)][0] - 1,				\
-          exp((tbl)->logu[(id)][(ig)][(ip)][0][0]),			\
-          exp((tbl)->logu[(id)][(ig)][(ip)][0]				\
-	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1]),			\
+          exp((tbl)->lut[(id)][(ig)][(ip)][0][0].logu),			\
+          exp((tbl)->lut[(id)][(ig)][(ip)][0]				\
+	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1].logu),			\
           (tbl)->nu[(id)][(ig)][(ip)][0] - 1,				\
-          exp((tbl)->logeps[(id)][(ig)][(ip)][0][0]),			\
-          exp((tbl)->logeps[(id)][(ig)][(ip)][0]			\
-	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1]));			\
+          exp((tbl)->lut[(id)][(ig)][(ip)][0][0].logeps),			\
+          exp((tbl)->lut[(id)][(ig)][(ip)][0]			\
+	      [(tbl)->nu[(id)][(ig)][(ip)][0] - 1].logeps));			\
   } while (0)
 
 /**
@@ -1927,6 +1927,24 @@ typedef struct {
 } ret_t;
 
 /**
+ * @brief Emissivity look-up table sample.
+ *
+ * Column density and emissivity are stored as one adjacent pair: a table
+ * lookup first locates a position by binary search, then always reads the
+ * column density and the emissivity at that position (and its neighbour),
+ * so interleaving them serves both values from a single cache line.
+ */
+typedef struct {
+
+  /*! Logarithm of column density [molecules/cm^2]. */
+  float logu;
+
+  /*! Logarithm of emissivity. */
+  float logeps;
+
+} tbl_pair_t;
+
+/**
  * @brief Emissivity look-up tables.
  *
  * Stores precomputed emissivity and source-function data for
@@ -1952,16 +1970,12 @@ typedef struct {
   /*! Temperature [K]. */
   double t[ND][NG][TBLNP][TBLNT];
 
-  /*! Logarithm of column density [molecules/cm^2]. */
-  float *logu[ND][NG][TBLNP][TBLNT];
-  float *logu_flat; // single buffer that concatenates all (id,ig,ip,it) entries
-  size_t logu_offset[ND][NG][TBLNP][TBLNT]; // location of each entries starting point in logu_flat
-  size_t logu_flat_size;  // alloc-capacity
-  size_t logu_flat_used;  // acts as cursor to fill logu
-
-  /*! Logarithm of emissivity. */
-  float *logeps[ND][NG][TBLNP][TBLNT];
-  float *logeps_flat; // reuse logu_offset to operate on the flatted array
+  /*! Look-up table samples (log column density, log emissivity) pairs. */
+  tbl_pair_t *lut[ND][NG][TBLNP][TBLNT];
+  tbl_pair_t *lut_flat; // single buffer that concatenates all (id,ig,ip,it) entries
+  size_t lut_offset[ND][NG][TBLNP][TBLNT]; // location of each entry's starting point in lut_flat
+  size_t lut_flat_size;  // alloc-capacity
+  size_t lut_flat_used;  // acts as cursor to fill lut_flat
 
   /*! Filter function number of spectral grid points. */
   int filt_n[ND];
@@ -2594,7 +2608,7 @@ void formod_batch(
  * @brief Copy emissivity lookup table payloads to the OpenACC device.
  *
  * Creates a device copy of the host-side @ref tbl_t descriptor and transfers all
- * dynamically allocated `logu` and `logeps` payload arrays referenced by the table.
+ * dynamically allocated `lut` payload arrays referenced by the table.
  * The host-side descriptor remains unchanged; only the device-side descriptor is
  * patched to point to the copied device buffers.
  *
@@ -2615,8 +2629,8 @@ void acc_copyin_tbl(
 /**
  * @brief Release device-side payloads belonging to an OpenACC table mirror.
  *
- * Deletes all device allocations created by @ref acc_copyin_tbl for the nested `logu`
- * and `logeps` arrays and then removes the top-level device copy of @p tbl.
+ * Deletes all device allocations created by @ref acc_copyin_tbl for the nested `lut`
+ * arrays and then removes the top-level device copy of @p tbl.
  *
  * @param[in] ctl Control structure describing the active spectral dimensions.
  * @param[in] tbl Host-side table descriptor whose mirrored device payloads are removed.
@@ -3337,7 +3351,8 @@ int locate_reg(
  * Used for emissivity and column density interpolation in table-based
  * routines such as @ref intpol_tbl_eps and @ref intpol_tbl_u.
  *
- * @param[in] xx  Monotonic (increasing) single-precision grid array.
+ * @param[in] xx  Key member (`&lut[0].logu` or `&lut[0].logeps`) of the first
+ *                element of a @ref tbl_pair_t array; the key is increasing.
  * @param[in] n   Number of grid points.
  * @param[in] x   Target value to locate within the grid range.
  * @return Index `ilo` of the lower grid point surrounding `x`.
@@ -4862,7 +4877,7 @@ void tangent_point(
  * @brief Free lookup table and all internally allocated memory.
  *
  * Frees all dynamically allocated memory owned by a ::tbl_t object,
- * including the spectral lookup arrays (`logu` and `logeps`) for all
+ * including the spectral lookup arrays (`lut` pairs of `logu` and `logeps`) for all
  * detector/emitter/pressure/temperature combinations. The ::tbl_t
  * structure itself is freed at the end.
  *
