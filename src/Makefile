@@ -56,6 +56,9 @@ UNIDIR = ../../jurassic-unified
 # Use JURASSIC-UNIFIED library...
 UNIFIED ?= 0
 
+# Set march=native
+MARCH_NATIVE ?= 0
+
 # -----------------------------------------------------------------------------
 # Set compiler flags...
 # -----------------------------------------------------------------------------
@@ -151,6 +154,11 @@ ifeq ($(STATIC),1)
     $(error Static compilation does not work for JURASSIC-UNIFIED)
   endif
   CFLAGS += -static
+endif
+
+# Compile for the host CPU...
+ifeq ($(MARCH_NATIVE), 1)
+  CFLAGS += -O3 -march=native
 endif
 
 # -----------------------------------------------------------------------------

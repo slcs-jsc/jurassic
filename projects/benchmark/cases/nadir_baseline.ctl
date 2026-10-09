@@ -1,0 +1,116 @@
+# ======================================================================
+# Benchmark baseline forward model...
+# ======================================================================
+
+# Table directory...
+TBLBASE = __BENCH_TBLBASE__
+TBLFMT = 3
+
+# Emitters...
+NG = 18
+EMITTER[0] = CO2
+EMITTER[1] = H2O
+EMITTER[2] = O3
+EMITTER[3] = HNO3
+EMITTER[4] = CH4
+EMITTER[5] = N2O
+EMITTER[6] = NH3
+EMITTER[7] = SO2
+EMITTER[8] = C2H2
+EMITTER[9] = H2O2
+EMITTER[10] = HCN
+EMITTER[11] = HF
+EMITTER[12] = NO2
+EMITTER[13] = C2H6
+EMITTER[14] = COF2
+EMITTER[15] = N2O5
+EMITTER[16] = HCl
+EMITTER[17] = ClO
+
+# Channels...
+ND = 32
+NU[0] = 587
+NU[1] = 592
+NU[2] = 597
+NU[3] = 601
+NU[4] = 606
+NU[5] = 611
+NU[6] = 617
+NU[7] = 622
+NU[8] = 626
+NU[9] = 631
+NU[10] = 636
+NU[11] = 641
+NU[12] = 646
+NU[13] = 650
+NU[14] = 655
+NU[15] = 660
+NU[16] = 666
+NU[17] = 671
+NU[18] = 676
+NU[19] = 680
+NU[20] = 685
+NU[21] = 690
+NU[22] = 695
+NU[23] = 700
+NU[24] = 704
+NU[25] = 709
+NU[26] = 715
+NU[27] = 720
+NU[28] = 725
+NU[29] = 729
+NU[30] = 734
+NU[31] = 739
+
+# Nadir geometry baseline (8 rays)...
+OBSZ = 700
+LAT0 = -0.63
+LAT1 = 0.63
+DLAT = 0.18
+
+# Kernel...
+RETP_ZMIN = -100
+RETP_ZMAX = 88
+RETT_ZMIN = -100
+RETT_ZMAX = 88
+RETQ_ZMIN[0] = -100
+RETQ_ZMAX[0] = 88
+RETQ_ZMIN[1] = -100
+RETQ_ZMAX[1] = 88
+RETQ_ZMIN[2] = -100
+RETQ_ZMAX[2] = 88
+RETQ_ZMIN[3] = -100
+RETQ_ZMAX[3] = 88
+RETQ_ZMIN[4] = -100
+RETQ_ZMAX[4] = 88
+RETQ_ZMIN[5] = -100
+RETQ_ZMAX[5] = 88
+RETQ_ZMIN[6] = -100
+RETQ_ZMAX[6] = 88
+RETQ_ZMIN[7] = -100
+RETQ_ZMAX[7] = 88
+RETQ_ZMIN[8] = -100
+RETQ_ZMAX[8] = 88
+RETQ_ZMIN[9] = -100
+RETQ_ZMAX[9] = 88
+RETQ_ZMIN[10] = -100
+RETQ_ZMAX[10] = 88
+RETQ_ZMIN[11] = -100
+RETQ_ZMAX[11] = 88
+RETQ_ZMIN[12] = -100
+RETQ_ZMAX[12] = 88
+RETQ_ZMIN[13] = -100
+RETQ_ZMAX[13] = 88
+RETQ_ZMIN[14] = -100
+RETQ_ZMAX[14] = 88
+RETQ_ZMIN[15] = -100
+RETQ_ZMAX[15] = 88
+RETQ_ZMIN[16] = -100
+RETQ_ZMAX[16] = 88
+RETQ_ZMIN[17] = -100
+RETQ_ZMAX[17] = 88
+RETK_ZMIN[0] = -100
+RETK_ZMAX[0] = 88
+
+# Output...
+WRITE_BBT = 1
