@@ -4,8 +4,10 @@ Compare two hermes profile reports (run_hermes_profile.sh) in one diagram.
 
 Primary metric: memory data volume per scene [GBytes], read from the
 log.omp<threads>.MEM_DP.csv LIKWID marker output (region `formod`). Like
-eval_scaling.py, the socket-wide volume is divided by the batch size, so it
-should stay flat with thread count. A second diagram shows the formod runtime
+eval_scaling.py, the socket-wide volume is divided by the batch size. It is not
+flat over thread count, most likely because concurrent threads reuse each other's lookup-table
+lines in the shared L3, so read volume per scene falls as threads are added.
+Compare the variants at equal thread counts only. A second diagram shows the formod runtime
 from the `RUNTIME:` line of the matching log.omp<threads>.<GROUP>.txt files.
 
 Usage: eval_hermes_compare.py BASELINE_RUN_DIR OPTIMIZED_RUN_DIR [--out DIR]
@@ -93,7 +95,7 @@ def main() -> None:
         [(label, list(vol[label]), list(vol[label].values()), None, color)
          for label, _, color in variants],
         "Memory data volume per scene [GBytes]",
-        out, "memory_volume_compare.png", title=title, ideal="constant")
+        out, "memory_volume_compare.png", title=title, ideal=False, log_y=False)
 
     lines = ["threads\tbaseline_GB\toptimized_GB\treduction"]
     b, o = vol[args.baseline_label], vol[args.optimized_label]
@@ -108,7 +110,7 @@ def main() -> None:
         plot_compare_scaling(
             [(label, list(rt[label]), [v[0] for v in rt[label].values()],
               [v[1] for v in rt[label].values()], color) for label, _, color in variants],
-            "formod runtime [s]", out, "runtime_compare.png", title=title, ideal="linear")
+            "formod runtime [s]", out, "runtime_compare.png", title=title)
         lines = ["threads\tbaseline_s\toptimized_s\tspeedup"]
         b, o = rt[args.baseline_label], rt[args.optimized_label]
         for t in sorted(set(b) & set(o)):

@@ -107,18 +107,19 @@ def plot_compare_scaling(
     res_dir: Path,
     filename: str,
     title: str | None = None,
-    ideal: str | None = "linear"
+    ideal: bool = True,
+    log_y: bool = True
 ) -> None:
     """
     Plot several variants of one metric against thread count in a single diagram.
 
     series: list of (name, threads, values, errors, color); errors may be None.
-    The first entry is the reference. ideal selects the dashed guide line that
-    starts from its first point: "linear" (ideal strong scaling), "constant"
-    (value independent of thread count, e.g. memory volume per scene) or None.
-    The ratio reference / variant is annotated below every point of the other
-    entries. Meant for cost-like metrics (runtime, memory volume), where lower
-    is better, so a ratio above 1x is an improvement.
+    The first entry is the reference. ideal adds a dashed ideal-strong-scaling
+    line from its first point. log_y=False uses a linear y axis from zero,
+    which shows the size of a reduction directly. The ratio reference / variant
+    is annotated below every point of the other entries. Meant for cost-like
+    metrics (runtime, memory volume), where lower is better, so a ratio above
+    1x is an improvement.
     """
     res_dir.mkdir(parents=True, exist_ok=True)
 
@@ -126,12 +127,9 @@ def plot_compare_scaling(
     ref_threads = np.asarray(series[0][1], dtype=float)
     ref_values = np.asarray(series[0][2], dtype=float)
 
-    if ideal == "linear":
+    if ideal:
         ax.plot(ref_threads, ref_values[0] * ref_threads[0] / ref_threads, "--",
                 color="#898781", label="Ideal linear scaling (baseline)", zorder=2)
-    elif ideal == "constant":
-        ax.axhline(ref_values[0], linestyle="--", color="#898781",
-                   label="Constant (baseline, 1 thread)", zorder=2)
 
     for k, (name, threads, values, errors, color) in enumerate(series):
         threads = np.asarray(threads, dtype=float)
@@ -154,11 +152,10 @@ def plot_compare_scaling(
     ax.set_xlabel("threads (physical cores)")
     ax.set_ylabel(label)
     ax.set_xscale("log")
-    if ideal == "constant":
-        # Roughly flat quantity: a linear axis from zero shows the true reduction.
-        ax.set_ylim(0, 1.15 * max(float(np.max(s[2])) for s in series))
-    else:
+    if log_y:
         ax.set_yscale("log")
+    else:
+        ax.set_ylim(0, 1.15 * max(float(np.max(s[2])) for s in series))
     ax.set_xticks(sorted({float(t) for s in series for t in s[1]}))
     ax.xaxis.set_major_formatter(plt.ScalarFormatter())
     ax.xaxis.set_minor_formatter(plt.NullFormatter())
