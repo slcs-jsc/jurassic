@@ -1,7 +1,7 @@
 <map id="formod_rfm" name="formod_rfm">
 <area shape="rect" id="node1" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="5,81,93,108"/>
 <area shape="rect" id="node2" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="444,5,516,32"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="160,81,228,108"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="160,81,228,108"/>
 <area shape="rect" id="node8" href="$jurassic_8c.html#a675d14cbd1ae26f72e86f828d8367240" title="Write atmospheric profile in RFM&#45;compatible format." alt="" coords="141,132,247,159"/>
 <area shape="rect" id="node4" href="$jurassic_8c.html#aaf98f7230de0893b8dc4833d3c83c7a4" title="Converts Cartesian coordinates to geographic coordinates." alt="" coords="444,81,516,108"/>
 <area shape="rect" id="node5" href="$jurassic_8c.html#a82151ea4448e70f46f7f3b770bb77612" title="Interpolate atmospheric state variables at a given altitude." alt="" coords="303,157,386,184"/>

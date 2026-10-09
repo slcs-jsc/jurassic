@@ -4,7 +4,7 @@ var searchData=
   ['rad2deg_1',['RAD2DEG',['../jurassic_8h.html#aacc958134b53425ec947541bb72ac8b1',1,'jurassic.h']]],
   ['rayds_2',['rayds',['../structctl__t.html#add30b1dee3914f1d1473df0fccabb364',1,'ctl_t']]],
   ['raydz_3',['raydz',['../structctl__t.html#aee8d7ddf07ec801c7d4a2037cb23a6e7',1,'ctl_t']]],
-  ['raytrace_4',['raytrace',['../jurassic_8c.html#a44e1e4b6ab44e79d049f99a04e79df9f',1,'raytrace(const ctl_t *ctl, const atm_t *atm, obs_t *obs, los_t *los, const int ir):&#160;jurassic.c'],['../jurassic_8h.html#a44e1e4b6ab44e79d049f99a04e79df9f',1,'raytrace(const ctl_t *ctl, const atm_t *atm, obs_t *obs, los_t *los, const int ir):&#160;jurassic.c']]],
+  ['raytrace_4',['raytrace',['../jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2',1,'raytrace(const ctl_t *ctl, const atm_t *atm, obs_t *obs, los_t *los, const int ir):&#160;jurassic.c'],['../jurassic_8h.html#a1e4c669d0fb6acd286ef83104e83e0a2',1,'raytrace(const ctl_t *ctl, const atm_t *atm, obs_t *obs, los_t *los, const int ir):&#160;jurassic.c']]],
   ['raytrace_2ec_5',['raytrace.c',['../raytrace_8c.html',1,'']]],
   ['re_6',['RE',['../jurassic_8h.html#a0600e3f227b6e9a3ae26f4d6e2a0581e',1,'jurassic.h']]],
   ['read_5fatm_7',['read_atm',['../jurassic_8h.html#a9b53106fcc10a9ec709a6be5ddab4a5c',1,'read_atm(const char *dirname, const char *filename, const ctl_t *ctl, atm_t *atm, int profile):&#160;jurassic.c'],['../jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c',1,'read_atm(const char *dirname, const char *filename, const ctl_t *ctl, atm_t *atm, int profile):&#160;jurassic.c']]],
