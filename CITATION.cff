@@ -13,6 +13,46 @@ authors:
     email: l.hoffmann@fz-juelich.de
     affiliation: Forschungszentrum Jülich
     orcid: 'https://orcid.org/0000-0003-3773-4377'
+  - given-names: Paul F.
+    family-names: Baumeister
+    email: p.baumeister@fz-juelich.de
+    affiliation: Forschungszentrum Jülich
+    orcid: 'https://orcid.org/0000-0002-2005-4474'
+  - given-names: Sabine
+    family-names: Griessbach
+    email: s.griessbach@fz-juelich.de
+    affiliation: Forschungszentrum Jülich
+    orcid: 'https://orcid.org/0000-0003-3792-3573'
+  - given-names: Catrin
+    family-names: Meyer
+    email: cat.meyer@fz-juelich.de
+    affiliation: Forschungszentrum Jülich
+    orcid: 'https://orcid.org/0000-0002-9271-6174'
+  - given-names: Luis
+    family-names: Niewöhner
+    email: luisniewoehner@gmail.com
+    affiliation: Leibniz University Hannover
+    orcid: 'https://orcid.org/0009-0004-2244-9842'
+  - given-names: Amirhossein
+    family-names: Nikfal
+    email: a.nikfal@fz-juelich.de
+    affiliation: Forschungszentrum Jülich
+    orcid: 'https://orcid.org/0000-0002-6699-9473'
+  - given-names: Florian
+    family-names: Rahlmann
+    email: florian.rahlmann@tuhh.de
+    affiliation: Technische Universität Hamburg
+    orcid: 'https://orcid.org/0009-0006-4785-6406'
+  - given-names: Stjepan
+    family-names: Požgaj
+    email: stjepan.pozgaj1@gmail.com
+    affiliation: University of Zagreb
+    orcid: 'https://orcid.org/0009-0002-4799-3911'
+  - given-names: Yiran
+    family-names: Zhang
+    email: yir.zhang@fz-juelich.de
+    affiliation: Forschungszentrum Jülich
+    orcid: 'https://orcid.org/0009-0009-9539-9598'
 identifiers:
   - type: doi
     value: 10.5281/zenodo.4572889
