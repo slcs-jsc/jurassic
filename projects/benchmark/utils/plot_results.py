@@ -116,10 +116,10 @@ def plot_compare_scaling(
     series: list of (name, threads, values, errors, color); errors may be None.
     The first entry is the reference. ideal adds a dashed ideal-strong-scaling
     line from its first point. log_y=False uses a linear y axis from zero,
-    which shows the size of a reduction directly. The ratio reference / variant
-    is annotated below every point of the other entries. Meant for cost-like
-    metrics (runtime, memory volume), where lower is better, so a ratio above
-    1x is an improvement.
+    which shows the size of a reduction directly. Every point of the other
+    entries is annotated with its value as a percentage of the reference at
+    the same thread count. Meant for cost-like metrics (runtime, memory
+    volume), where lower is better, so below 100 % is an improvement.
     """
     res_dir.mkdir(parents=True, exist_ok=True)
 
@@ -140,12 +140,12 @@ def plot_compare_scaling(
             ax.errorbar(threads, values, yerr=np.asarray(errors, dtype=float),
                         fmt="o-", color=color, capsize=3, label=name, zorder=3)
 
-        # Speedup relative to the reference at the thread counts both measured.
+        # Percentage of the reference at the thread counts both measured.
         if k > 0:
             for t, v in zip(threads, values):
                 hit = np.where(ref_threads == t)[0]
-                if len(hit) and v > 0:
-                    ax.annotate(f"{ref_values[hit[0]] / v:.2f}x", (t, v),
+                if len(hit) and ref_values[hit[0]] > 0:
+                    ax.annotate(f"{100 * v / ref_values[hit[0]]:.0f} %", (t, v),
                                 textcoords="offset points", xytext=(0, -14),
                                 ha="center", fontsize=8, color=color)
 

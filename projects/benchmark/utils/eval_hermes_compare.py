@@ -97,10 +97,10 @@ def main() -> None:
         "Memory data volume per scene [GBytes]",
         out, "memory_volume_compare.png", title=title, ideal=False, log_y=False)
 
-    lines = ["threads\tbaseline_GB\toptimized_GB\treduction"]
+    lines = ["threads\tbaseline_GB\toptimized_GB\toptimized_pct_of_baseline"]
     b, o = vol[args.baseline_label], vol[args.optimized_label]
     for t in sorted(set(b) & set(o)):
-        lines.append(f"{t}\t{b[t]:.4f}\t{o[t]:.4f}\t{b[t] / o[t]:.3f}")
+        lines.append(f"{t}\t{b[t]:.4f}\t{o[t]:.4f}\t{100 * o[t] / b[t]:.1f}")
     (out / "summary_memory_volume.tsv").write_text("\n".join(lines) + "\n")
     print("Memory data volume per scene:\n" + "\n".join(lines))
 
@@ -111,10 +111,10 @@ def main() -> None:
             [(label, list(rt[label]), [v[0] for v in rt[label].values()],
               [v[1] for v in rt[label].values()], color) for label, _, color in variants],
             "formod runtime [s]", out, "runtime_compare.png", title=title)
-        lines = ["threads\tbaseline_s\toptimized_s\tspeedup"]
+        lines = ["threads\tbaseline_s\toptimized_s\toptimized_pct_of_baseline"]
         b, o = rt[args.baseline_label], rt[args.optimized_label]
         for t in sorted(set(b) & set(o)):
-            lines.append(f"{t}\t{b[t][0]:.3f}\t{o[t][0]:.3f}\t{b[t][0] / o[t][0]:.3f}")
+            lines.append(f"{t}\t{b[t][0]:.3f}\t{o[t][0]:.3f}\t{100 * o[t][0] / b[t][0]:.1f}")
         (out / "summary_runtime.tsv").write_text("\n".join(lines) + "\n")
         print("Runtime:\n" + "\n".join(lines))
     else:
