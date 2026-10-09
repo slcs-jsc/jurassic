@@ -24,8 +24,11 @@ authors:
   - name: Yiran Zhang
     affiliation: 1
     orcid: 0009-0009-9539-9598
-  - name: Florian Rahlmann
+  - name: Luis Niewöhner
     affiliation: 3
+    orcid: 0009-0004-2244-9842
+  - name: Florian Rahlmann
+    affiliation: 4
     orcid: 0009-0006-4785-6406
   - name: Amirhossein Nikfal
     affiliation: 1
@@ -39,8 +42,10 @@ affiliations:
     index: 1
   - name: University of Zagreb, Faculty of Electrical Engineering and Computing, Zagreb, Croatia
     index: 2
-  - name: Technische Universität Hamburg, Hamburg, Germany
+  - name: Leibniz University Hannover, Hannover, Germany
     index: 3
+  - name: Technische Universität Hamburg, Hamburg, Germany
+    index: 4
 
 date: 2026-01-07
 
