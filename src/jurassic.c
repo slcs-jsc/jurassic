@@ -23,7 +23,6 @@
 */
 
 #include "jurassic.h"
-int jurassic_marker_ref = 0;
 
 /*****************************************************************************/
 
@@ -3312,6 +3311,8 @@ int formod(
   return FORMOD_STATUS_OK;
 }
 
+/*****************************************************************************/
+
 void formod_batch(
   const ctl_t *ctl,
   const tbl_t *tbl,
@@ -3329,36 +3330,24 @@ void formod_batch(
     ERRMSG("formod_batch requires scratch arrays for los and obs_scratch!");
 
   /* The RFM interface uses fixed temporary filenames and is therefore
-     not thread-safe in the current implementation. */
+     not thread-safe... */
   if (ctl->formod == 2) {
     for (int ib = 0; ib < nbatch; ib++) {
       const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
-                                   &los_scratch[ib], &obs_scratch[ib]);
+				   &los_scratch[ib], &obs_scratch[ib]);
       if (status)
-        status[ib] = ib_status;
+	status[ib] = ib_status;
       else if (ib_status != FORMOD_STATUS_OK)
-        ERRMSG("Forward model failed with status code %d!", ib_status);
+	ERRMSG("Forward model failed with status code %d!", ib_status);
     }
     return;
   }
 
-  /* The single-threaded reference run is not measured; LIKWID would report
-     empty regions for all other threads. */
-  const int measure = !jurassic_marker_ref;
-  (void) measure;
-#pragma omp parallel for schedule(static) default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch,measure)
+  /* Run independent cases in parallel... */
+#pragma omp parallel for schedule(static) default(none) shared(ctl,tbl,atm,obs,nbatch,status,los_scratch,obs_scratch)
   for (int ib = 0; ib < nbatch; ib++) {
-
-    #ifdef LIKWID_PERFMON
-    if (measure)
-      LIKWID_MARKER_START("formod");
-    #endif
     const int ib_status = formod(ctl, tbl, &atm[ib], &obs[ib],
-                                 &los_scratch[ib], &obs_scratch[ib]);
-    #ifdef LIKWID_PERFMON
-    if (measure)
-      LIKWID_MARKER_STOP("formod");
-    #endif
+				 &los_scratch[ib], &obs_scratch[ib]);
     if (status)
       status[ib] = ib_status;
     else if (ib_status != FORMOD_STATUS_OK)

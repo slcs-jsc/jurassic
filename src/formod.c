@@ -22,6 +22,7 @@
   JURASSIC forward model.
 */
 
+#include <limits.h>
 #include "jurassic.h"
 #ifdef UNIFIED
 #include "jurassic_unified_library.h"
@@ -69,17 +70,14 @@ void exec_formod_single(
   obs_t * obs_scratch,
   int formod_scalar);
 
-/*! Execute a batch throughput benchmark with perturbed atmospheric cases and
-  return the first result in @p obs. */
-
+/*! Build a batch of randomly perturbed copies of the input atmosphere. */
 void exec_formod_batch_setup(
-  const ctl_t *ctl, 
-  const atm_t *atm, 
-  const obs_t *obs,
-  int batch_size, 
-  atm_t *atm_batch, 
-  obs_t *obs_batch
-);
+  const ctl_t * ctl,
+  const atm_t * atm,
+  const obs_t * obs,
+  int batch_size,
+  atm_t * atm_batch,
+  obs_t * obs_batch);
 
 /*! Calculate relative errors. */
 void compute_rel_errors(
@@ -100,16 +98,6 @@ void compute_abs_errors(
   double *sdae,
   double *minae,
   double *maxae);
-
-/*! Run the default forward-model path. */
-void exec_formod_default(
-  const ctl_t * ctl,
-  const tbl_t * tbl,
-  atm_t * atm,
-  obs_t * obs,
-  los_t * los_scratch,
-  obs_t * obs_scratch,
-  int formod_scalar);
 
 /*! Process observation data profile by profile using time-based matching. */
 void exec_formod_profiles(
@@ -180,16 +168,6 @@ void usage(
 int main(
   int argc,
   char *argv[]) {
-
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_INIT;
-
-  #pragma omp parallel
-  {
-    LIKWID_MARKER_THREADINIT;
-    LIKWID_MARKER_REGISTER("formod");
-  }
-  #endif
 
   static ctl_t ctl;
 
@@ -273,8 +251,7 @@ int main(
 
       /* Call forward model... */
       call_formod(&ctl, tbl, wrkdir, argv[2], argv[3], argv[4], task_mode,
-		  obsref,
-		  formod_scalar, batch_size);
+		  obsref, formod_scalar, batch_size);
     }
 
     /* Close dirlist... */
@@ -287,10 +264,6 @@ int main(
   SELECT_TIMER("FINALIZE", "OVERHEAD");
   tbl_free(&ctl, tbl);
   PRINT_TIMERS;
-
-  #ifdef LIKWID_PERFMON
-  LIKWID_MARKER_CLOSE;
-  #endif
 
   return EXIT_SUCCESS;
 }
@@ -385,9 +358,6 @@ char parse_task_mode(
   if (task[0] == 't' || strcmp(task, "time") == 0
       || strcmp(task, "benchmark") == 0)
     return 't';
-  if (task[0] == 'b' || strcmp(task, "batch") == 0
-      || strcmp(task, "batch_benchmark") == 0)
-    return 't';
 
   ERRMSG("Unknown TASK '%s'!", task);
   return 'f';
@@ -448,21 +418,6 @@ void exec_formod_single(
   formod_batch(ctl, tbl, atm, obs, 1, status, los_scratch, obs_scratch);
   if (status[0] != FORMOD_STATUS_OK)
     ERRMSG("Forward model failed with status code %d!", status[0]);
-}
-
-/*****************************************************************************/
-
-void exec_formod_default(
-  const ctl_t *ctl,
-  const tbl_t *tbl,
-  atm_t *atm,
-  obs_t *obs,
-  los_t *los_scratch,
-  obs_t *obs_scratch,
-  int formod_scalar) {
-
-  exec_formod_single(ctl, tbl, atm, obs, los_scratch, obs_scratch,
-		     formod_scalar);
 }
 
 /*****************************************************************************/
@@ -609,23 +564,33 @@ void exec_formod_contributions(
 
 /*****************************************************************************/
 
-/*! Build the perturbed batch. */
 void exec_formod_batch_setup(
-  const ctl_t *ctl, const atm_t *atm, const obs_t *obs,
-  int batch_size, atm_t *atm_batch, obs_t *obs_batch) {
+  const ctl_t *ctl,
+  const atm_t *atm,
+  const obs_t *obs,
+  int batch_size,
+  atm_t *atm_batch,
+  obs_t *obs_batch) {
 
   double *dtemp, *dpress, *dq;
-  ALLOC(dtemp, double, batch_size);
-  ALLOC(dpress, double, batch_size);
-  ALLOC(dq, double, batch_size * NG);
+  ALLOC(dtemp, double,
+	batch_size);
+  ALLOC(dpress, double,
+	batch_size);
+  ALLOC(dq, double,
+	batch_size * NG);
 
+  /* Draw perturbations (the first case stays unperturbed)... */
   gsl_rng_env_setup();
   gsl_rng *rng = gsl_rng_alloc(gsl_rng_default);
   gsl_rng_set(rng, 0UL);
   for (int ib = 0; ib < batch_size; ib++) {
-    dtemp[ib] = 0; dpress[ib] = 1;
-    for (int ig = 0; ig < ctl->ng; ig++) dq[ib * NG + ig] = 1;
-    if (ib == 0) continue;
+    dtemp[ib] = 0;
+    dpress[ib] = 1;
+    for (int ig = 0; ig < ctl->ng; ig++)
+      dq[ib * NG + ig] = 1;
+    if (ib == 0)
+      continue;
     dtemp[ib] = 40.0 * (gsl_rng_uniform(rng) - 0.5);
     dpress[ib] = 1.0 - 0.1 * gsl_rng_uniform(rng);
     for (int ig = 0; ig < ctl->ng; ig++)
@@ -633,6 +598,7 @@ void exec_formod_batch_setup(
   }
   gsl_rng_free(rng);
 
+  /* Apply perturbations... */
 #pragma omp parallel for schedule(static)
   for (int ib = 0; ib < batch_size; ib++) {
     atm_batch[ib] = *atm;
@@ -641,11 +607,17 @@ void exec_formod_batch_setup(
       atm_batch[ib].t[ip] += dtemp[ib];
       atm_batch[ib].p[ip] *= dpress[ib];
       for (int ig = 0; ig < ctl->ng; ig++)
-        atm_batch[ib].q[ig][ip] *= dq[ib * NG + ig];
+	atm_batch[ib].q[ig][ip] *= dq[ib * NG + ig];
     }
   }
-  free(dtemp); free(dpress); free(dq);
+
+  /* Free... */
+  free(dtemp);
+  free(dpress);
+  free(dq);
 }
+
+/*****************************************************************************/
 
 void exec_formod_benchmark(
   const ctl_t *ctl,
@@ -667,28 +639,29 @@ void exec_formod_benchmark(
   if (formod_scalar && batch_size > 1)
     ERRMSG("BATCH_SIZE > 1 cannot be combined with EXECUTION scalar!");
 
+  /* Set up the batch and run it once untimed (warm-up)... */
   atm_t *atm_batch = NULL;
   obs_t *obs_batch = NULL;
   int *status = NULL;
   los_t *los_batch = NULL;
   obs_t *obs_scratch_batch = NULL;
-  
   if (batch_size > 1) {
     ALLOC(atm_batch, atm_t, batch_size);
     ALLOC(obs_batch, obs_t, batch_size);
     ALLOC(los_batch, los_t, batch_size);
     ALLOC(obs_scratch_batch, obs_t, batch_size);
-    ALLOC(status, int, batch_size);
+    ALLOC(status, int,
+	  batch_size);
 
-	SELECT_TIMER("BENCHMARK_SETUP", "OVERHEAD");
+    SELECT_TIMER("BENCHMARK_SETUP", "OVERHEAD");
     exec_formod_batch_setup(ctl, atm, obs, batch_size, atm_batch, obs_batch);
     formod_batch(ctl, tbl, atm_batch, obs_batch, batch_size, status,
-                 los_batch, obs_scratch_batch);
+		 los_batch, obs_scratch_batch);
   }
 
-  const char* env_max_iter = getenv("JURASSIC_MAX_ITER");
+  /* Stop after JURASSIC_MAX_ITER samples or JURASSIC_TIME_BUDGET seconds... */
+  const char *env_max_iter = getenv("JURASSIC_MAX_ITER");
   const int max_iter = env_max_iter ? atoi(env_max_iter) : INT_MAX;
-
   const char *env_budget = getenv("JURASSIC_TIME_BUDGET");
   const double t_budget = env_budget ? atof(env_budget) : 10.0;
 
@@ -697,33 +670,32 @@ void exec_formod_benchmark(
     double dt;
 
     if (batch_size > 1) {
-      double t0 = omp_get_wtime();
+      const double t0 = omp_get_wtime();
       formod_batch(ctl, tbl, atm_batch, obs_batch, batch_size, status,
-                 los_batch, obs_scratch_batch);
+		   los_batch, obs_scratch_batch);
       dt = omp_get_wtime() - t0;
       for (int ib = 0; ib < batch_size; ib++)
-        if (status[ib] != FORMOD_STATUS_OK)
-          ERRMSG("Batch benchmark failed with status %d at element %d!",
-                status[ib], ib);
-    }
-    else {
-	  copy_atm(ctl, atm_scratch, atm, 0);
+	if (status[ib] != FORMOD_STATUS_OK)
+	  ERRMSG("Batch benchmark failed with status %d at element %d!",
+		 status[ib], ib);
+    } else {
+      copy_atm(ctl, atm_scratch, atm, 0);
       const double dtemp = 40. * (gsl_rng_uniform(rng) - 0.5);
       const double dpress = 1. - 0.1 * gsl_rng_uniform(rng);
       double dq[NG];
       for (int ig = 0; ig < ctl->ng; ig++)
-        dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
+	dq[ig] = 0.8 + 0.4 * gsl_rng_uniform(rng);
       for (int ip = 0; ip < atm_scratch->np; ip++) {
-        atm_scratch->t[ip] += dtemp;
-        atm_scratch->p[ip] *= dpress;
-        for (int ig = 0; ig < ctl->ng; ig++)
-          atm_scratch->q[ig][ip] *= dq[ig];
+	atm_scratch->t[ip] += dtemp;
+	atm_scratch->p[ip] *= dpress;
+	for (int ig = 0; ig < ctl->ng; ig++)
+	  atm_scratch->q[ig][ip] *= dq[ig];
       }
-		
-      double t0 = omp_get_wtime();
+
+      const double t0 = omp_get_wtime();
       exec_formod_single(ctl, tbl, atm_scratch, obs, los_scratch,
 			 obs_scratch, formod_scalar);
-       dt = omp_get_wtime() - t0;
+      dt = omp_get_wtime() - t0;
     }
 
     t_mean += dt;
@@ -736,6 +708,7 @@ void exec_formod_benchmark(
 
   } while (t_mean < t_budget && n < max_iter);
 
+  /* Free... */
   if (batch_size > 1) {
     free(status);
     free(obs_scratch_batch);
@@ -743,14 +716,16 @@ void exec_formod_benchmark(
     free(obs_batch);
     free(atm_batch);
   }
+
+  /* Write results... */
   t_mean /= (double) n;
   t_sd = sqrt(t_sd / (double) n - POW2(t_mean));
   printf("RUNTIME: execution= %s | threads= %d | batch_size= %d | mean= %g s"
-       " | stddev= %g s | min= %g s | max= %g s | per_model= %g s"
-       " | throughput= %g models/s | samples= %d\n",
-       formod_scalar ? "scalar" : "batch", omp_get_max_threads(),
-       batch_size, t_mean, t_sd, t_min, t_max,
-       t_mean / batch_size, batch_size / t_mean, n);
+	 " | stddev= %g s | min= %g s | max= %g s | per_model= %g s"
+	 " | throughput= %g models/s | samples= %d\n",
+	 formod_scalar ? "scalar" : "batch", omp_get_max_threads(),
+	 batch_size, t_mean, t_sd, t_min, t_max,
+	 t_mean / batch_size, batch_size / t_mean, n);
 
   gsl_rng_free(rng);
 }
@@ -841,10 +816,8 @@ void call_formod(
     else {
       SELECT_TIMER("FORMOD", "FORWARD");
     }
-    jurassic_marker_ref = 1;
-    exec_formod_default(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch,
-			formod_scalar);
-    jurassic_marker_ref = 0;
+    exec_formod_single(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch,
+		       formod_scalar);
     SELECT_TIMER("WRITE_OBS", "OUTPUT");
     write_obs(wrkdir, radfile, ctl, &obs, 0);
 

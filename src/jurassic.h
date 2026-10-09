@@ -154,23 +154,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <limits.h>
-
-#ifdef LIKWID_PERFMON
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#include <likwid-marker.h>
-#pragma GCC diagnostic pop
-#else
-#define LIKWID_MARKER_INIT
-#define LIKWID_MARKER_THREADINIT
-#define LIKWID_MARKER_REGISTER(r)
-#define LIKWID_MARKER_START(r)
-#define LIKWID_MARKER_STOP(r)
-#define LIKWID_MARKER_CLOSE
-#endif
-
-extern int jurassic_marker_ref;
 
 enum {
   FORMOD_STATUS_OK = 0,
