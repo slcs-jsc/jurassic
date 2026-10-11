@@ -2466,13 +2466,14 @@ int find_emitter(
   const char *emitter);
 
 /**
- * @brief Execute the selected forward model.
+ * @brief Execute one complete forward-model calculation.
  *
  * Computes synthetic radiances or brightness temperatures for the
  * given atmospheric state and observation geometry using the selected
  * forward-model method (CGA, EGA, or RFM). The function also applies
  * hydrostatic adjustment, field-of-view convolution, and optional
- * brightness-temperature conversion.
+ * brightness-temperature conversion. Independent cases can be evaluated
+ * with @ref formod_batch.
  *
  * @param[in]  ctl  Control structure defining model settings and options.
  * @param[in]  tbl  Emissivity and source-function lookup tables.
@@ -2510,8 +2511,9 @@ int formod(
 /**
  * @brief Execute the forward model for a batch of independent cases.
  *
- * Calls @ref formod for each element of @p atm / @p obs, in parallel with
- * OpenMP (serially for the RFM model).
+ * Runs one complete @ref formod calculation for each independent pair of
+ * atmospheric and observation states. Cases are evaluated in parallel with
+ * OpenMP where applicable (serially for the RFM model).
  *
  * @param[in]  ctl  Control structure.
  * @param[in]  tbl  Lookup tables.
@@ -3078,15 +3080,19 @@ void jsec2time(
  *
  * Evaluates the sensitivity of the simulated radiances to each
  * element of the atmospheric state vector by perturbing one
- * parameter at a time and re-running the forward model. The result
- * is the Jacobian matrix \f$ K = \partial y / \partial x \f$,
+ * parameter at a time and re-running the forward model. Independent
+ * perturbed states are prepared in batches and evaluated through
+ * @ref formod_batch. The resulting Jacobian matrix is
+ * \f$ K = \partial y / \partial x \f$,
  * where *y* is the measurement vector and *x* is the state vector.
  *
  * @param[in]  ctl  Control structure defining retrieval configuration
  *                  and model setup.
  * @param[in]  tbl  Emissivity lookup tables used by the forward model.
- * @param[in]  atm  Atmospheric state vector and profile data.
- * @param[in]  obs  Observation geometry and radiance data.
+ * @param[in,out] atm  Atmospheric state and profile data; may be adjusted
+ *                     for hydrostatic balance.
+ * @param[in,out] obs  Observation geometry and radiance data; populated
+ *                     with the undisturbed forward-model result.
  * @param[out] k    Jacobian matrix [m×n], where *m* is the number of
  *                  measurements and *n* the number of state variables.
  *
@@ -3097,7 +3103,8 @@ void jsec2time(
  *   depending on its physical type (pressure, temperature, VMR, etc.).
  * - For each perturbation, the forward model is re-evaluated, and
  *   the corresponding column of *K* is estimated using finite differences.
- * - Parallelized over state vector elements using OpenMP.
+ * - Independent perturbed forward-model calculations are parallelized
+ *   with OpenMP.
  *
  * @note
  * Typical perturbation sizes:
@@ -3107,7 +3114,7 @@ void jsec2time(
  * - Extinction: 1e–4 km⁻¹  
  * - Cloud and surface parameters: 1 K or 1e–2 as appropriate.
  *
- * @see ctl_t, tbl_t, atm_t, obs_t, formod, x2atm, atm2x, obs2y, copy_atm, copy_obs
+ * @see ctl_t, tbl_t, atm_t, obs_t, formod, formod_batch, x2atm, atm2x, obs2y, copy_atm, copy_obs
  * 
  * @warning Computationally intensive; requires one forward model
  *          evaluation per state vector element.
