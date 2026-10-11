@@ -25,7 +25,7 @@
 <area shape="rect" id="node11" href="$jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1" title="Copy or initialize atmospheric profile data." alt="" coords="596,411,675,437"/>
 <area shape="rect" id="node12" href="$formod_8c.html#a9cc70ef265d5c71bcba240380e822eb2" title="Build a batch of randomly perturbed copies of the input atmosphere." alt="" coords="548,259,723,285"/>
 <area shape="rect" id="node25" href="$jurassic_8c.html#aa9d19e596cd81af8cf571118658dd51e" title="Execute the forward model for a batch of independent cases." alt="" coords="773,309,875,336"/>
-<area shape="rect" id="node14" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute the selected forward model." alt="" coords="939,259,1001,285"/>
+<area shape="rect" id="node14" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute one complete forward&#45;model calculation." alt="" coords="939,259,1001,285"/>
 <area shape="rect" id="node15" href="$jurassic_8c.html#a9bb3fb765b43dc769ba80f2335bcea2d" title="Apply field&#45;of&#45;view (FOV) convolution to modeled radiances." alt="" coords="1071,309,1157,336"/>
 <area shape="rect" id="node18" href="$jurassic_8c.html#a4d724c788481e02814218ff749dce8bc" title="Compute line&#45;of&#45;sight radiances using the pencil&#45;beam forward model." alt="" coords="1063,157,1165,184"/>
 <area shape="rect" id="node23" href="$jurassic_8c.html#a250b8929fb33466876ef15d431e4994a" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="1070,107,1158,133"/>

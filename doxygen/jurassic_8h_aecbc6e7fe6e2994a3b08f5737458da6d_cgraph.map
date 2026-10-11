@@ -1,5 +1,5 @@
 <map id="formod" name="formod">
-<area shape="rect" id="node1" title="Execute the selected forward model." alt="" coords="5,461,68,488"/>
+<area shape="rect" id="node1" title="Execute one complete forward&#45;model calculation." alt="" coords="5,461,68,488"/>
 <area shape="rect" id="node2" href="$jurassic_8c.html#a9bb3fb765b43dc769ba80f2335bcea2d" title="Apply field&#45;of&#45;view (FOV) convolution to modeled radiances." alt="" coords="124,360,211,387"/>
 <area shape="rect" id="node5" href="$jurassic_8c.html#a4d724c788481e02814218ff749dce8bc" title="Compute line&#45;of&#45;sight radiances using the pencil&#45;beam forward model." alt="" coords="116,436,219,463"/>
 <area shape="rect" id="node24" href="$jurassic_8c.html#a250b8929fb33466876ef15d431e4994a" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="123,512,211,539"/>

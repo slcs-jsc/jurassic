@@ -1,6 +1,6 @@
 <map id="exec_formod_single" name="exec_formod_single">
 <area shape="rect" id="node1" title="Execute a single forward model call via the default batch path or the scalar debug path." alt="" coords="5,461,143,488"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute the selected forward model." alt="" coords="340,461,403,488"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute one complete forward&#45;model calculation." alt="" coords="340,461,403,488"/>
 <area shape="rect" id="node28" href="$jurassic_8c.html#aa9d19e596cd81af8cf571118658dd51e" title="Execute the forward model for a batch of independent cases." alt="" coords="191,487,292,513"/>
 <area shape="rect" id="node3" href="$jurassic_8c.html#a9bb3fb765b43dc769ba80f2335bcea2d" title="Apply field&#45;of&#45;view (FOV) convolution to modeled radiances." alt="" coords="459,360,545,387"/>
 <area shape="rect" id="node6" href="$jurassic_8c.html#a4d724c788481e02814218ff749dce8bc" title="Compute line&#45;of&#45;sight radiances using the pencil&#45;beam forward model." alt="" coords="451,436,553,463"/>

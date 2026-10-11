@@ -3,7 +3,7 @@
 <area shape="rect" id="node2" href="$formod_8c.html#ae9e76775b1c23b104b9bdf5cf8dc11af" title="Calculate relative errors." alt="" coords="206,132,339,159"/>
 <area shape="rect" id="node3" href="$jurassic_8c.html#aa855e52716bd4b479bb0d2446b300a4e" title="Copy or initialize observation geometry and radiance data." alt="" coords="821,107,898,133"/>
 <area shape="rect" id="node4" href="$formod_8c.html#acf9de645514db199cbbffa61ccc3497f" title="Execute a single forward model call via the default batch path or the scalar debug path." alt="" coords="204,309,341,336"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute the selected forward model." alt="" coords="539,360,601,387"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute one complete forward&#45;model calculation." alt="" coords="539,360,601,387"/>
 <area shape="rect" id="node30" href="$jurassic_8c.html#aa9d19e596cd81af8cf571118658dd51e" title="Execute the forward model for a batch of independent cases." alt="" coords="389,360,491,387"/>
 <area shape="rect" id="node6" href="$jurassic_8c.html#a9bb3fb765b43dc769ba80f2335bcea2d" title="Apply field&#45;of&#45;view (FOV) convolution to modeled radiances." alt="" coords="657,360,744,387"/>
 <area shape="rect" id="node8" href="$jurassic_8c.html#a4d724c788481e02814218ff749dce8bc" title="Compute line&#45;of&#45;sight radiances using the pencil&#45;beam forward model." alt="" coords="649,411,752,437"/>

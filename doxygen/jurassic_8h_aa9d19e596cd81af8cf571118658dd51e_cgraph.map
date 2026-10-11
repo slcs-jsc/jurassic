@@ -1,6 +1,6 @@
 <map id="formod_batch" name="formod_batch">
 <area shape="rect" id="node1" title="Execute the forward model for a batch of independent cases." alt="" coords="5,461,107,488"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute the selected forward model." alt="" coords="155,461,217,488"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute one complete forward&#45;model calculation." alt="" coords="155,461,217,488"/>
 <area shape="rect" id="node3" href="$jurassic_8c.html#a9bb3fb765b43dc769ba80f2335bcea2d" title="Apply field&#45;of&#45;view (FOV) convolution to modeled radiances." alt="" coords="273,360,360,387"/>
 <area shape="rect" id="node6" href="$jurassic_8c.html#a4d724c788481e02814218ff749dce8bc" title="Compute line&#45;of&#45;sight radiances using the pencil&#45;beam forward model." alt="" coords="265,436,368,463"/>
 <area shape="rect" id="node25" href="$jurassic_8c.html#a250b8929fb33466876ef15d431e4994a" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="273,512,361,539"/>
