@@ -1,11 +1,16 @@
 # JURASSIC–RFM spectral validation
 
-This directory contains a reproducible comparison of the current CPU JURASSIC
-implementation with the RFM line-by-line model. It covers 500–2999 cm⁻¹ at
-1 cm⁻¹ sampling with the mid-latitude climatology and 36 gases. Limb rays use
-geometric tangent heights of 5, 10, 20, and 50 km; refraction is enabled.
-Nadir and zenith each use one representative vertical ray. RFM line-by-line
-spectra are calculated at a fixed 0.0005 cm⁻¹ spectral step.
+This project validates the current CPU implementation of JURASSIC against the
+Reference Forward Model (RFM), which provides a high-resolution line-by-line
+reference. It asks how closely JURASSIC's EGA and CGA approximations reproduce
+line-by-line radiances and how much they reduce the computational cost.
+
+The comparison covers 2500 spectral channels from 500 to 2999 cm⁻¹ at 1 cm⁻¹
+sampling, with 36 gases in the mid-latitude climatology. It includes limb rays
+at geometric tangent heights of 5, 10, 20, and 50 km; refraction is enabled.
+Nadir and zenith each use one representative vertical ray. RFM spectra are
+calculated at a fixed 0.0005 cm⁻¹ spectral step and integrated with the same
+spectral response functions used by JURASSIC.
 
 The repository contains compact reference results:
 
@@ -22,7 +27,13 @@ The committed EGA, CGA, and RFM results were generated from commit
 
 ## Validation results
 
-### Reviewer-facing summary
+### Detailed summary
+
+For this configuration, typical JURASSIC–RFM radiance differences are at the
+percent level or below. Nadir and zenith RMS brightness-temperature differences
+are roughly 0.4–0.6 K. On the recorded single-thread reference system,
+JURASSIC reduces model runtime by roughly two to three orders of magnitude
+relative to RFM.
 
 For this 2500-channel, 36-gas mid-latitude test, median absolute relative limb
 radiance differences are 0.125–1.151% for EGA and 0.246–1.112% for CGA across
@@ -95,7 +106,10 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 ![Single-core model runtime](analysis/runtime_summary.png)
 
 The table shows total model time for each validation case. The timing definition
-and reference hardware are described below.
+and reference hardware are described below. The reported JURASSIC runtime
+refers to the forward-model calculation itself. Lookup-table reading and
+initialization (`READ_TBL`) are measured separately and are not included in
+the JURASSIC model-time values or RFM/JURASSIC speed-up ratios.
 
 | Geometry | EGA [s] | CGA [s] | RFM [s] | RFM/EGA | RFM/CGA |
 |:---|---:|---:|---:|---:|---:|
@@ -129,14 +143,19 @@ References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807),
 
 ## Lookup-table applicability
 
+This validation applies to the lookup-table set and atmospheric state used
+here. The following details show how that state relates to the tabulated
+parameter ranges and where extrapolation occurs.
+
 The external netCDF tables contain packed grids for each gas and channel rather
 than one global pressure, temperature, or absorber-column range in the netCDF
 metadata. Representative active variables in the table set used for this run
 have a pressure grid of 0.0103181–1017 hPa. The committed atmosphere spans
 0.00184003–1017 hPa: its ten levels from 81 to 90 km fall below that grid
-and therefore require pressure extrapolation when sampled. Its temperatures are within the pressure-dependent temperature
-grid of the representative CO2 table checked at 1500 cm⁻¹. This check does not
-establish the domain of every gas/channel table.
+and therefore require pressure extrapolation when sampled. Its temperatures
+are within the pressure-dependent temperature grid of the representative CO2
+table checked at 1500 cm⁻¹. This check does not establish the domain of every
+gas/channel table.
 
 Absorber-column grids differ by gas, channel, pressure, and temperature.
 JURASSIC interpolates pressure logarithmically and temperature linearly and
@@ -146,7 +165,8 @@ unity. These continuations keep the calculation defined but do not establish
 line-by-line accuracy outside the sampled state space.
 
 The runner requires all 36 table files and verifies that every requested CO2
-and H2O channel is present. Other gases may cover only their active spectral regions; the core emits a warning and applies zero absorption for an
+and H2O channel is present. Other gases may cover only their active spectral
+regions; the core emits a warning and applies zero absorption for an
 individual missing gas/channel table. New table sets and atmospheres must be
 checked separately, especially near pressure, temperature, and column-density
 boundaries. Accuracy outside or near those boundaries should not be inferred
