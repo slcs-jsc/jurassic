@@ -23,12 +23,13 @@ The reference setting is timed on 1, 2, 4, 8, 16, 32, and 64 threads and is
 the only setting used for the batch-size sweep. All other settings are timed
 on 1, 4, 16, and 64 threads. Each setting is built for its own `ND` and `NG`.
 
-The reported strong-scaling time covers one batched forward-model calculation
-over 128 independent scenes. Lookup-table reading, the reference calculation,
-and file I/O are timed separately and excluded from this main result. The batch
-is distributed across the available OpenMP threads. If
-`T1` is the one-thread batch time and `Tn` is the time on `n` threads, speedup
-is `T1 / Tn` and parallel efficiency is `T1 / (n × Tn)`.
+The reported strong-scaling times cover only one timed `formod_batch`
+calculation over 128 independent scenes, distributed across the available
+OpenMP threads. Lookup tables are read during program initialization and timed
+separately; the reference calculation and file I/O are also excluded from the
+forward-model scaling result. If `T1` is the one-thread batch time and `Tn` is
+the time on `n` threads, speedup is `T1 / Tn` and parallel efficiency is
+`T1 / (n × Tn)`.
 
 For practical reasons, the 128-scene one-thread time is estimated from a
 shorter four-scene run. Direct full-batch single-thread checks for
@@ -89,7 +90,16 @@ Up to 32 channels, the efficiency does not depend on ND. With 64 and 128 channel
 
 ![Speedup of the whole application per geometry](figures/e4_geometry_app_speedup.png)
 
-Including the table read, reference run and output, the speedup on 64 threads decreases to 28 (zenith), 25 (limb) and 9 (nadir). The time per phase for the reference setting (batch of 128 scenes) shows why:
+For completeness, we also report process-level timings that include lookup-table
+initialization, the single reference calculation, and file I/O. These costs are
+outside the forward-model scaling result. In a persistent application or
+retrieval workflow, lookup tables are initialized once and reused for many
+forward-model evaluations, so their initialization cost is amortized.
+
+When the one-time table initialization, reference run, and output are included,
+the process-level speedup on 64 threads decreases to 28 (zenith), 25 (limb)
+and 9 (nadir). The time per phase for the reference setting (batch of 128
+scenes) shows why:
 
 | geometry | threads | table read | reference run | other I/O | formod batch | total |
 |---|---:|---:|---:|---:|---:|---:|
