@@ -16,8 +16,8 @@ The reference cases for each geometry are defined in
 Here, `ND` means the number of spectral channels and `NG` means the number of
 gases in the selected gas set. The experiment varies geometry, channel count,
 and gas set one at a time, keeping the other settings at their reference
-values. The 32-channel setting lies in the middle of the tested channel range
-(8–128), and `ng18` uses the full gas list.
+values. The 32-channel setting is a representative intermediate point within
+the tested range of 8–128 channels, and `ng18` uses the full gas list.
 
 The reference setting is timed on 1, 2, 4, 8, 16, 32, and 64 threads and is
 the only setting used for the batch-size sweep. All other settings are timed
@@ -26,7 +26,7 @@ on 1, 4, 16, and 64 threads. Each setting is built for its own `ND` and `NG`.
 The reported strong-scaling time covers one batched forward-model calculation
 over 128 independent scenes. Lookup-table reading, the reference calculation,
 and file I/O are timed separately and excluded from this main result. The batch
-is evaluated through `formod_batch`, with one scene per thread at a time. If
+is distributed across the available OpenMP threads. If
 `T1` is the one-thread batch time and `Tn` is the time on `n` threads, speedup
 is `T1 / Tn` and parallel efficiency is `T1 / (n × Tn)`.
 
@@ -85,7 +85,7 @@ The number of gases (NG) has no visible effect on the scaling.
 
 ![Efficiency over threads for different channel counts, per geometry](figures/e4_channels_strong_efficiency.png)
 
-Up to 32 channels the efficiency does not depend on ND. With 64 and 128 channels it starts to decrease at 4 threads (128 channels: 43–55 % on 64 threads). This is most likely a memory limit, since the lookup tables grow from 29 MB (ND = 32) to 118 MB (ND = 128).
+Up to 32 channels, the efficiency does not depend on ND. With 64 and 128 channels, it starts to decrease at 4 threads (128 channels: 43–55 % on 64 threads). This is likely related to memory effects, since the lookup tables grow from 29 MB (ND = 32) to 118 MB (ND = 128).
 
 ![Speedup of the whole application per geometry](figures/e4_geometry_app_speedup.png)
 
