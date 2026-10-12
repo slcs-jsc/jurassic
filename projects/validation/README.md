@@ -17,39 +17,91 @@ The repository contains compact reference results:
 Temporary spectral chunks, NetCDF files, and model logs are written below
 `work/` and are not tracked by Git.
 
-## Inspect and reproduce the analysis
+The committed EGA, CGA, and RFM results were generated from commit
+`9a4bcfc14bbfaa39aa572cec525ca7f489d1eec9`.
 
-The supplied spectra are sufficient to reproduce every accuracy metric and
-figure without installing RFM or obtaining the external lookup tables:
+## Validation results
 
-```bash
-python3 projects/validation/analyze.py
-```
+### Reviewer-facing summary
 
-The analysis reports relative radiance differences for all limb channels with
-nonzero RFM radiance. A true zero reference would be reported as undefined.
-For nadir and zenith, the channel-averaged radiances are converted with
-JURASSIC's inverse Planck definition and differences are reported in kelvin.
+For this 2500-channel, 36-gas mid-latitude test, median absolute relative limb
+radiance differences are 0.125–1.151% for EGA and 0.246–1.112% for CGA across
+four tangent heights. The corresponding 95th percentiles are 1.147–4.260% and
+2.368–4.496%. Nadir and zenith RMS brightness-temperature differences are
+0.406–0.411 K for EGA and 0.452–0.561 K for CGA. On the recorded Intel Core
+i7-1365U run, the observed speed-ups are 102–793× for RFM/EGA and 173–1287×
+for RFM/CGA. These ratios compare total model time for each validation case:
+limb is one joint four-ray calculation, while nadir and zenith contain one ray
+each. The results are specific to this atmosphere, spectral responses, model
+configuration, timing definition, and hardware.
 
-Main outputs are:
+### Limb spectra and errors
 
-```text
-analysis/REPORT.md
-analysis/accuracy_metrics.csv
-analysis/limb_radiance_spectra.png
-analysis/limb_relative_errors.png
-analysis/nadir_brightness_temperature.png
-analysis/zenith_brightness_temperature.png
-analysis/limb_accuracy_summary.png
-analysis/brightness_temperature_accuracy_summary.png
-analysis/runtime_summary.png
-```
+![Limb radiance spectra](analysis/limb_radiance_spectra.png)
 
-The limb spectra use a logarithmic radiance axis. Nadir and zenith are shown
-separately as brightness temperatures with their absolute differences in
-kelvin. Accuracy and runtime summaries are separate figures. `analysis/REPORT.md`
-embeds all figures and tabulates the principal accuracy and timing results for
-review.
+![Relative limb radiance differences](analysis/limb_relative_errors.png)
+
+![Limb accuracy summary](analysis/limb_accuracy_summary.png)
+
+#### Limb error statistics
+
+| Height | Method | RMS [%] | Median [%] | 95th percentile [%] | Maximum [%] |
+|---:|:---|---:|---:|---:|---:|
+| 5 km geometric | EGA | 2.199 | 1.151 | 4.260 | 17.479 |
+| 10 km geometric | EGA | 1.762 | 0.713 | 3.395 | 17.910 |
+| 20 km geometric | EGA | 1.773 | 0.850 | 3.802 | 15.995 |
+| 50 km geometric | EGA | 0.607 | 0.125 | 1.147 | 10.704 |
+| 5 km geometric | CGA | 2.116 | 1.112 | 4.207 | 16.899 |
+| 10 km geometric | CGA | 2.009 | 0.750 | 4.496 | 19.071 |
+| 20 km geometric | CGA | 1.742 | 0.672 | 3.881 | 15.895 |
+| 50 km geometric | CGA | 1.056 | 0.246 | 2.368 | 8.883 |
+
+The maximum percentages are retained for completeness. Their radiance context
+is listed below; the absolute difference is not suppressed when the reference
+radiance is weak. The maxima at 5, 10, and 50 km occur in weak-radiance
+channels, while the 20 km maximum occurs at a larger radiance. Median and
+95th-percentile values characterize the bulk of the 2500 channels more robustly.
+
+| Height | Method | Channel [cm⁻¹] | RFM radiance [W m⁻² sr⁻¹ cm] | Absolute difference [W m⁻² sr⁻¹ cm] |
+|---:|:---|---:|---:|---:|
+| 5 km geometric | EGA | 2980 | 4.171396e-06 | 7.290976e-07 |
+| 10 km geometric | EGA | 2756 | 1.591986e-06 | 2.851214e-07 |
+| 20 km geometric | EGA | 1923 | 9.082896e-05 | 1.452847e-05 |
+| 50 km geometric | EGA | 2197 | 3.058876e-06 | 3.274091e-07 |
+| 5 km geometric | CGA | 2980 | 4.171396e-06 | 7.049242e-07 |
+| 10 km geometric | CGA | 2756 | 1.591986e-06 | 3.036099e-07 |
+| 20 km geometric | CGA | 1923 | 9.082896e-05 | 1.443728e-05 |
+| 50 km geometric | CGA | 2197 | 3.058876e-06 | 2.717155e-07 |
+
+### Nadir and zenith brightness temperature
+
+![Nadir brightness temperature](analysis/nadir_brightness_temperature.png)
+
+![Zenith brightness temperature](analysis/zenith_brightness_temperature.png)
+
+![Brightness temperature accuracy summary](analysis/brightness_temperature_accuracy_summary.png)
+
+#### Brightness temperature error statistics
+
+| Geometry | Method | RMS [K] | Median [K] | 95th percentile [K] | Maximum [K] |
+|:---|:---|---:|---:|---:|---:|
+| Nadir | EGA | 0.411 | 0.113 | 0.780 | 3.906 |
+| Zenith | EGA | 0.406 | 0.071 | 0.877 | 4.501 |
+| Nadir | CGA | 0.561 | 0.102 | 1.030 | 4.171 |
+| Zenith | CGA | 0.452 | 0.065 | 0.874 | 4.191 |
+
+### Runtime
+
+![Single-core model runtime](analysis/runtime_summary.png)
+
+The table shows total model time for each validation case. The timing definition
+and reference hardware are described below.
+
+| Geometry | EGA [s] | CGA [s] | RFM [s] | RFM/EGA | RFM/CGA |
+|:---|---:|---:|---:|---:|---:|
+| Limb (4 rays) | 112.03 | 65.66 | 11375.76 | 102× | 173× |
+| Nadir (1 ray) | 14.50 | 8.93 | 11495.12 | 793× | 1287× |
+| Zenith (1 ray) | 22.99 | 10.91 | 11285.60 | 491× | 1034× |
 
 ## Interpreting approximation errors
 
@@ -100,20 +152,37 @@ checked separately, especially near pressure, temperature, and column-density
 boundaries. Accuracy outside or near those boundaries should not be inferred
 from this validation.
 
-## Reviewer-facing summary
+## Inspect and reproduce the analysis
 
-For this 2500-channel, 36-gas mid-latitude test, median absolute relative limb
-radiance differences are 0.125–1.151% for EGA and 0.246–1.112% for CGA across
-four tangent heights. The corresponding 95th percentiles are 1.147–4.260% and
-2.368–4.496%. Nadir and zenith RMS brightness-temperature differences are
-0.406–0.411 K for EGA and 0.452–0.561 K for CGA. On the recorded Intel Core
-i7-1365U run, the observed speed-ups are 102–793× for RFM/EGA and 173–1287×
-for RFM/CGA. These ratios compare total model time for each validation case:
-limb is one joint four-ray calculation, while nadir and zenith contain one ray
-each. The results are specific to this atmosphere, spectral responses, model
-configuration, timing definition, and hardware. See
-`projects/validation/analysis/REPORT.md` for complete spectra, statistics,
-timings, limitations, and provenance.
+The supplied spectra are sufficient to reproduce every accuracy metric and
+figure without installing RFM or obtaining the external lookup tables:
+
+```bash
+python3 projects/validation/analyze.py
+```
+
+The analysis reports relative radiance differences for all limb channels with
+nonzero RFM radiance. A true zero reference would be reported as undefined.
+For nadir and zenith, the channel-averaged radiances are converted with
+JURASSIC's inverse Planck definition and differences are reported in kelvin.
+
+Main outputs are:
+
+```text
+analysis/accuracy_metrics.csv
+analysis/limb_radiance_spectra.png
+analysis/limb_relative_errors.png
+analysis/nadir_brightness_temperature.png
+analysis/zenith_brightness_temperature.png
+analysis/limb_accuracy_summary.png
+analysis/brightness_temperature_accuracy_summary.png
+analysis/runtime_summary.png
+```
+
+The limb spectra use a logarithmic radiance axis. Nadir and zenith are shown
+separately as brightness temperatures with their absolute differences in
+kelvin. Accuracy and runtime summaries are separate figures. The principal
+accuracy and timing results are tabulated above.
 
 ## Repeat the calculations
 
@@ -170,7 +239,7 @@ started 20 times per geometry.
 
 `timings.csv` records the summed single-process times across spectral chunks.
 JURASSIC model time is `TIMER_FORMOD`. Instrumented RFM model time is the
-reported path plus spectral phases minus output time. The main report uses
+reported path plus spectral phases minus output time. The runtime table uses
 the total model time for each validation case: limb contains four jointly
 calculated rays, while nadir and zenith contain one ray each. A limb RFM
 invocation shares its spectral setup and HITRAN processing across all four rays,
