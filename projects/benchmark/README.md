@@ -1,16 +1,38 @@
 # CPU/OpenMP Benchmark
 
-This directory contains the OpenMP scaling experiment for JURASSIC's forward model (`formod`).
+This benchmark measures how JURASSIC's forward model scales with OpenMP threads
+when it calculates a fixed batch of independent atmospheric scenes. It tests
+limb, nadir, and zenith viewing geometries. It also varies the number of
+spectral channels and gases to show how workload size affects scaling.
 
-## Scaling over geometry, channels and gas sets (`scaling_axes.sh`)
+## Benchmark design (`scaling_axes.sh`)
 
-The experiment varies one axis at a time: geometry (limb, nadir, zenith) number of channels (ND) and gas set (NG). The other two axes stay at a reference setting of 32 channels and all 18 gases (`ng18`), defined per geometry in `configs/baseline_cases.tsv`. This setting lies in the middle of the channel range (8–128) and uses the full gas list.
+The reference configuration has 32 spectral channels, all 18 benchmark gases
+(`ng18`), and a batch of 128 independent scenes. It is tested from 1 to 64
+threads on one CPU socket, with the batch size held fixed (strong scaling).
+The reference cases for each geometry are defined in
+`configs/baseline_cases.tsv`.
 
-The reference setting is timed on 1, 2, 4, 8, 16, 32 and 64 threads (one socket) and is the only setting used for the batch-size sweep. All other settings are timed on 1, 4, 16 and 64 threads only. 
+Here, `ND` means the number of spectral channels and `NG` means the number of
+gases in the selected gas set. The experiment varies geometry, channel count,
+and gas set one at a time, keeping the other settings at their reference
+values. The 32-channel setting lies in the middle of the tested channel range
+(8–128), and `ng18` uses the full gas list.
 
-Each setting is built with its own ND/NG and timed with `formod TASK time`. The timed part is one call of `formod_batch`, which computes a batch of 128 independent scenes in parallel (one scene per thread at a time). With T1 the time for the batch on 1 thread and Tn on n threads, the speedup is T1 / Tn and the parallel efficiency is T1 / (n × Tn).
+The reference setting is timed on 1, 2, 4, 8, 16, 32, and 64 threads and is
+the only setting used for the batch-size sweep. All other settings are timed
+on 1, 4, 16, and 64 threads. Each setting is built for its own `ND` and `NG`.
 
-T1 is not measured directly: a 1-thread run of all 128 scenes would take about 23 minutes for zenith. Since the scenes are independent of each other, each setting is run on 1 thread with a batch of 4 scenes, and T1 is 32 × that time. A direct 1-thread run of all 128 scenes (mode `t1check`, results in `jureca_scaling_axes_res/t1check/`) agrees with this estimate within ±1.1 % for ND = 16 and 32 in all three geometries.
+The reported strong-scaling time covers one batched forward-model calculation
+over 128 independent scenes. Lookup-table reading, the reference calculation,
+and file I/O are timed separately and excluded from this main result. The batch
+is evaluated through `formod_batch`, with one scene per thread at a time. If
+`T1` is the one-thread batch time and `Tn` is the time on `n` threads, speedup
+is `T1 / Tn` and parallel efficiency is `T1 / (n × Tn)`.
+
+For practical reasons, the 128-scene one-thread time is estimated from a
+shorter four-scene run. Direct full-batch single-thread checks for
+representative configurations agree with that estimate within about ±1.1%.
 
 ### Channels and gases
 
@@ -34,7 +56,8 @@ The gas sets are defined in `configs/gas_sets/`. The name gives the number of ga
 ### Execution
 
 * `strong` (default): fixed batch size, 1 thread up to one socket.
-* `t1check`: 1 thread on the full batch, to check the extrapolated T1.
+* `t1check`: 1 thread on the full batch, to check the estimated `T1`
+  (results in `jureca_scaling_axes_res/t1check/`).
 * `batches` (default): one socket's threads over several batch sizes.
 * `weak`: fixed scenes per thread.
 
@@ -50,9 +73,11 @@ The evaluation reports runtime, speedup and efficiency for the timed `formod_bat
 
 Batch of 128 scenes, threads pinned to socket 0. Results are in `jureca_scaling_axes_res/`.
 
-![Speedup of the formod batch per geometry](figures/e4_geometry_strong_speedup.png)
+For the 32-channel reference cases, all three geometries scale almost ideally
+up to 32 threads. On 64 cores they reach about 52–53× speedup, or about
+81–83% parallel efficiency.
 
-All three geometries scale almost ideally up to 32 threads and reach a speedup of 52–53 on 64 threads (81–83 % efficiency).
+![Speedup of the formod batch per geometry](figures/e4_geometry_strong_speedup.png)
 
 ![Efficiency over threads for different gas sets, per geometry](figures/e4_gases_strong_efficiency.png)
 
@@ -75,4 +100,4 @@ Including the table read, reference run and output, the speedup on 64 threads de
 | zenith | 1 | 33.0 s | 10.6 s | 0.1 s | 1366 s | 1409 s |
 | zenith | 64 | 14.1 s | 10.7 s | 0.2 s | 25.7 s | 51 s |
 
-Table read is `TIMER_READ_TBL`, reference run is `TIMER_FORMOD_REFERENCE` (one scene, computed on a single thread), other I/O is the remaining `TIMER_READ_*` plus `TIMER_WRITE_OBS` and `TIMER_FINALIZE`. The formod batch is the mean time of one batch from the `RUNTIME` line; on 1 thread it is the extrapolated T1 (see above).
+Table read is `TIMER_READ_TBL`, reference run is `TIMER_FORMOD_REFERENCE` (one scene, computed on a single thread), other I/O is the remaining `TIMER_READ_*` plus `TIMER_WRITE_OBS` and `TIMER_FINALIZE`. The formod batch is the mean time of one batch from the `RUNTIME` line; on 1 thread it is the estimated `T1` (see above).
