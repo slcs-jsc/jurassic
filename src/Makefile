@@ -165,7 +165,7 @@ endif
 # Targets...
 # -----------------------------------------------------------------------------
 
-.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs mpi_test print-exc strip uninstall $(TESTS)
+.PHONY : all check clean coverage cppcheck dist doxygen indent install lizard mkdocs arm_test mpi_test print-exc strip uninstall $(TESTS)
 
 all: $(EXC)
 	rm -f *~
@@ -184,7 +184,7 @@ check: $(TESTS)
 print-exc:
 	@printf '%s\n' $(EXC)
 
-$(TESTS) mpi_test: all
+$(TESTS) arm_test mpi_test: all
 	@(echo "\n===== Running \"$@\" ... =====") ; \
 	  cd ../tests/$@ ; bash ./run.sh \
 	  && (echo "\n===== Test \"$@\" passed! =====") \

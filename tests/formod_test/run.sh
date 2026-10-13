@@ -9,6 +9,7 @@ set -euo pipefail
 
 # Setup...
 jurassic=../../src
+refdir=${JURASSIC_REF_DIR:-data.ref}
 
 # Create directory...
 rm -rf data && mkdir -p data
@@ -23,14 +24,14 @@ for geo in limb nadir zenith ; do
     $jurassic/${geo} ${geo}.ctl data/obs_${geo}.tab
     
     # Call forward model...
-    $jurassic/formod ${geo}.ctl data/obs_${geo}.tab data/atm_${geo}.tab data/rad_${geo}.tab OBSREF data.ref/rad_${geo}.tab TASK time
+    $jurassic/formod ${geo}.ctl data/obs_${geo}.tab data/atm_${geo}.tab data/rad_${geo}.tab OBSREF "$refdir/rad_${geo}.tab" TASK time
     
     # Test CGA...
-    $jurassic/formod ${geo}.ctl data/obs_${geo}.tab data/atm_${geo}.tab data/rad_${geo}_cga.tab OBSREF data.ref/rad_${geo}.tab FORMOD 0
+    $jurassic/formod ${geo}.ctl data/obs_${geo}.tab data/atm_${geo}.tab data/rad_${geo}_cga.tab OBSREF "$refdir/rad_${geo}.tab" FORMOD 0
     
     # Test FOV...
     if [ ${geo} = "limb" ] ; then
-	$jurassic/formod ${geo}.ctl data/obs_${geo}.tab data/atm_${geo}.tab data/rad_${geo}_fov.tab OBSREF data.ref/rad_${geo}.tab FOV fov.tab
+	$jurassic/formod ${geo}.ctl data/obs_${geo}.tab data/atm_${geo}.tab data/rad_${geo}_fov.tab OBSREF "$refdir/rad_${geo}.tab" FOV fov.tab
     fi
     
     # Compute kernel...
@@ -41,7 +42,7 @@ done
 # Compare files...
 echo -e "\nCompare results..."
 error=0
-for f in $(ls data.ref/*.tab) ; do
+for f in "$refdir"/*.tab ; do
     diff -q -s data/"$(basename "$f")" "$f" || error=1
 done
 exit $error
