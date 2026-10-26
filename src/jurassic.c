@@ -212,29 +212,19 @@ void cart2geo(
 
 /*****************************************************************************/
 
-/*! Flat index into a (month, altitude, lat) JuMACS data field. */
-size_t climatology_jumacs_index(
-  const int m,
-  const int iz,
-  const int il,
-  const int nalt,
-  const int nlat) {
-  return (((size_t) m * (size_t) nalt) + (size_t) iz) * (size_t) nlat +
-    (size_t) il;
-}
-
-/*! Read and validate one JuMACS climatology field. Returns 1 if the
-   variable exists and was read, 0 if it is missing. Aborts if the
-   variable exists but is malformed or contains non-finite values. */
-int climatology_jumacs_read(
-  const int ncid,
+/*! Read and validate one JuMACS climatology field into a fixed-size array.
+   Returns 1 if the variable exists and was read, 0 if it is missing. Aborts
+   if the variable exists but is malformed or contains non-finite values. */
+int climatology_jumacs_read_field(
   const char *filename,
   const char *varname,
+  const int ncid,
   const int dim_month,
   const int dim_alt,
   const int dim_lat,
-  const size_t nfield,
-  double *buf) {
+  const int nalt,
+  const int nlat,
+  double field[CT][CZ][CLAT]) {
 
   int varid;
 
@@ -254,12 +244,18 @@ int climatology_jumacs_read(
     ERRMSG("NetCDF variable %s in climatology file %s has wrong dimensions!",
 	   varname, filename);
 
-  /* Read data and check for non-finite values... */
-  NC(nc_get_var_double(ncid, varid, buf));
-  for (size_t i = 0; i < nfield; i++)
-    if (!isfinite(buf[i]))
-      ERRMSG("Non-finite value in NetCDF variable %s of climatology file %s!",
-	     varname, filename);
+  /* Read data level by level and check for non-finite values... */
+  for (int m = 0; m < CT; m++) {
+    for (int iz = 0; iz < nalt; iz++) {
+      const size_t start[3] = {(size_t) m, (size_t) iz, 0};
+      const size_t count[3] = {1, 1, (size_t) nlat};
+      NC(nc_get_vara_double(ncid, varid, start, count, field[m][iz]));
+      for (int il = 0; il < nlat; il++)
+	if (!isfinite(field[m][iz][il]))
+	  ERRMSG("Non-finite value in NetCDF variable %s of climatology "
+		 "file %s!", varname, filename);
+    }
+  }
 
   return 1;
 }
@@ -269,15 +265,17 @@ int climatology_jumacs_read(
    thus retaining their built-in climatological values. Latitude is clamped
    at the outer band centers, altitude at the lowest JuMACS level. */
 void climatology_jumacs_interp(
+  const clim_t *clim,
   const atm_t *atm,
-  const double *alt,
-  const int nalt,
-  const double *latg,
-  const int nlat,
-  const double *buf,
+  const double field[CT][CZ][CLAT],
   double *out) {
 
   static const int nody[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+  const double *alt = clim->alt;
+  const double *latg = clim->lat;
+  const int nalt = clim->nalt;
+  const int nlat = clim->nlat;
 
   for (int ip = 0; ip < atm->np; ip++) {
 
@@ -325,40 +323,40 @@ void climatology_jumacs_interp(
     /* Trilinear interpolation (linear in all directions)... */
     const double v0 =
       LIN(alt[iz],
-	  LIN(latg[il], buf[climatology_jumacs_index(m0, iz, il, nalt, nlat)], latg[il +
-									1], buf
-	      [climatology_jumacs_index(m0, iz, il + 1, nalt, nlat)], latq),
+	  LIN(latg[il], field[m0][iz][il], latg[il + 1],
+	      field[m0][iz][il + 1], latq),
 	  alt[iz + 1],
-	  LIN(latg[il],
-	      buf[climatology_jumacs_index(m0, iz + 1, il, nalt, nlat)], latg[il + 1],
-	      buf[climatology_jumacs_index(m0, iz + 1, il + 1, nalt, nlat)], latq), zq);
+	  LIN(latg[il], field[m0][iz + 1][il], latg[il + 1],
+	      field[m0][iz + 1][il + 1], latq), zq);
     const double v1 =
       LIN(alt[iz],
-	  LIN(latg[il], buf[climatology_jumacs_index(m1, iz, il, nalt, nlat)], latg[il +
-									1], buf
-	      [climatology_jumacs_index(m1, iz, il + 1, nalt, nlat)], latq),
+	  LIN(latg[il], field[m1][iz][il], latg[il + 1],
+	      field[m1][iz][il + 1], latq),
 	  alt[iz + 1],
-	  LIN(latg[il],
-	      buf[climatology_jumacs_index(m1, iz + 1, il, nalt, nlat)], latg[il + 1],
-	      buf[climatology_jumacs_index(m1, iz + 1, il + 1, nalt, nlat)], latq), zq);
+	  LIN(latg[il], field[m1][iz + 1][il], latg[il + 1],
+	      field[m1][iz + 1][il + 1], latq), zq);
 
     out[ip] = (1.0 - wt) * v0 + wt * v1;
   }
 }
 
-/*! Overwrite the built-in climatology with data from a JuMACS monthly
-   zonal mean climatology file. The file must provide the dimensions
-   month, altitude, and lat as well as coordinate variables of the same
-   name. Fields are taken from the <varname>_mean variables. Missing
-   variables retain their built-in values, but malformed files or fields
-   cause an abort. Pressure is never overwritten. */
-void climatology_jumacs(
+/*! Read the JuMACS monthly zonal mean climatology file specified by the
+   CLIM_FILE control parameter into a climatology structure. The file is
+   opened, validated, and closed within this routine. It must provide the
+   dimensions month, altitude, and lat as well as coordinate variables of
+   the same name that are one-dimensional, strictly increasing, and equally
+   spaced. Fields are taken from the <varname>_mean variables. A
+   missing temperature field is an error, missing trace gas fields are
+   flagged by clim->has_q. */
+void climatology_jumacs_read(
   const ctl_t *ctl,
-  atm_t *atm) {
+  clim_t *clim) {
 
-  int ncid, varid;
+  /* Start with an empty climatology... */
+  memset(clim, 0, sizeof(clim_t));
 
   /* Open climatology file... */
+  int ncid;
   const int status = nc_open(ctl->climfile, NC_NOWRITE, &ncid);
   if (status != NC_NOERR)
     ERRMSG("Cannot open climatology file %s: %s",
@@ -375,55 +373,92 @@ void climatology_jumacs(
       nc_inq_dimlen(ncid, dim_alt, &len) != NC_NOERR || (int) len < 2)
     ERRMSG("Climatology file %s has no dimension 'altitude' - "
 	   "not a JuMACS climatology file?", ctl->climfile);
-  const int nalt = (int) len;
+  if ((int) len > CZ)
+    ERRMSG("Climatology file %s has %d altitude levels, exceeding the "
+	   "maximum of %d supported by this version of JURASSIC!",
+	   ctl->climfile, (int) len, CZ);
+  clim->nalt = (int) len;
   if (nc_inq_dimid(ncid, "lat", &dim_lat) != NC_NOERR ||
       nc_inq_dimlen(ncid, dim_lat, &len) != NC_NOERR || (int) len < 2)
     ERRMSG("Climatology file %s has no dimension 'lat' - "
 	   "not a JuMACS climatology file?", ctl->climfile);
-  const int nlat = (int) len;
+  if ((int) len > CLAT)
+    ERRMSG("Climatology file %s has %d latitude bands, exceeding the "
+	   "maximum of %d supported by this version of JURASSIC!",
+	   ctl->climfile, (int) len, CLAT);
+  clim->nlat = (int) len;
 
   /* Read and check coordinates... */
-  double *alt, *latg;
-  ALLOC(alt, double, nalt);
-  ALLOC(latg, double, nlat);
-  if (nc_inq_varid(ncid, "altitude", &varid) != NC_NOERR ||
-      nc_get_var_double(ncid, varid, alt) != NC_NOERR)
-    ERRMSG("Cannot read coordinate 'altitude' from climatology file %s!",
+  int varid;
+  int ndims;
+  int dims[4];
+  if (nc_inq_varid(ncid, "altitude", &varid) != NC_NOERR)
+    ERRMSG("Cannot find coordinate 'altitude' in climatology file %s!",
 	   ctl->climfile);
-  if (nc_inq_varid(ncid, "lat", &varid) != NC_NOERR ||
-      nc_get_var_double(ncid, varid, latg) != NC_NOERR)
-    ERRMSG("Cannot read coordinate 'lat' from climatology file %s!",
+  ndims = 0;
+  NC(nc_inq_varndims(ncid, varid, &ndims));
+  if (ndims != 1)
+    ERRMSG("Coordinate 'altitude' in climatology file %s is not a "
+	   "one-dimensional variable!", ctl->climfile);
+  NC(nc_inq_vardimid(ncid, varid, dims));
+  if (dims[0] != dim_alt)
+    ERRMSG("Coordinate 'altitude' in climatology file %s does not use the "
+	   "dimension 'altitude'!", ctl->climfile);
+  NC(nc_get_var_double(ncid, varid, clim->alt));
+  if (nc_inq_varid(ncid, "lat", &varid) != NC_NOERR)
+    ERRMSG("Cannot find coordinate 'lat' in climatology file %s!",
 	   ctl->climfile);
-  for (int i = 0; i < nalt; i++) {
-    if (!isfinite(alt[i]))
+  ndims = 0;
+  NC(nc_inq_varndims(ncid, varid, &ndims));
+  if (ndims != 1)
+    ERRMSG("Coordinate 'lat' in climatology file %s is not a "
+	   "one-dimensional variable!", ctl->climfile);
+  NC(nc_inq_vardimid(ncid, varid, dims));
+  if (dims[0] != dim_lat)
+    ERRMSG("Coordinate 'lat' in climatology file %s does not use the "
+	   "dimension 'lat'!", ctl->climfile);
+  NC(nc_get_var_double(ncid, varid, clim->lat));
+  for (int i = 0; i < clim->nalt; i++) {
+    if (!isfinite(clim->alt[i]))
       ERRMSG("Non-finite coordinate 'altitude' in climatology file %s!",
 	     ctl->climfile);
-    if (i > 0 && alt[i] <= alt[i - 1])
+    if (i > 0 && clim->alt[i] <= clim->alt[i - 1])
       ERRMSG("Coordinate 'altitude' not strictly increasing in climatology "
 	     "file %s!", ctl->climfile);
   }
-  for (int i = 0; i < nlat; i++) {
-    if (!isfinite(latg[i]))
+  for (int i = 0; i < clim->nlat; i++) {
+    if (!isfinite(clim->lat[i]))
       ERRMSG("Non-finite coordinate 'lat' in climatology file %s!",
 	     ctl->climfile);
-    if (i > 0 && latg[i] <= latg[i - 1])
+    if (i > 0 && clim->lat[i] <= clim->lat[i - 1])
       ERRMSG("Coordinate 'lat' not strictly increasing in climatology file "
 	     "%s!", ctl->climfile);
   }
 
-  /* Allocate field buffer... */
-  const size_t nfield =
-    (size_t) 12 * (size_t) nalt * (size_t) nlat;
-  double *buf;
-  ALLOC(buf, double, nfield);
+  /* Check that the coordinates are equally spaced, since the interpolation
+     locates grid cells by index arithmetic rather than by searching... */
+  const double dz = clim->alt[1] - clim->alt[0];
+  for (int i = 2; i < clim->nalt; i++)
+    if (fabs(clim->alt[i] - clim->alt[i - 1] - dz) > 1e-6 * fabs(dz))
+      ERRMSG("Coordinate 'altitude' not equally spaced in climatology "
+	     "file %s - interpolation requires a regular grid!",
+	     ctl->climfile);
+  const double dy = clim->lat[1] - clim->lat[0];
+  for (int i = 2; i < clim->nlat; i++)
+    if (fabs(clim->lat[i] - clim->lat[i - 1] - dy) > 1e-6 * fabs(dy))
+      ERRMSG("Coordinate 'lat' not equally spaced in climatology "
+	     "file %s - interpolation requires a regular grid!",
+	     ctl->climfile);
 
-  /* Overwrite temperature... */
-  if (climatology_jumacs_read
-      (ncid, ctl->climfile, "temperature_mean", dim_month, dim_alt, dim_lat,
-       nfield, buf))
-    climatology_jumacs_interp(atm, alt, nalt, latg, nlat, buf, atm->t);
+  /* Read and check temperature... */
+  if (!climatology_jumacs_read_field(ctl->climfile, "temperature_mean", ncid,
+				     dim_month, dim_alt, dim_lat, clim->nalt,
+				     clim->nlat, clim->t))
+    ERRMSG("Climatology file %s has no variable 'temperature_mean' - "
+	   "not a complete JuMACS climatology file?", ctl->climfile);
+  clim->has_t = 1;
 
-  /* Overwrite trace gases... */
+  /* Read trace gases... */
   /* Mapping of JURASSIC emitter names to JuMACS climatology variable base
      names. Species without an entry keep their built-in climatological
      values. CO2, N2, and O2 are deliberately not mapped, since they are
@@ -470,17 +505,34 @@ void climatology_jumacs(
     if (base == NULL)
       continue;
     sprintf(varname, "%s_mean", base);
-    if (climatology_jumacs_read
-	(ncid, ctl->climfile, varname, dim_month, dim_alt, dim_lat, nfield,
-	 buf))
-      climatology_jumacs_interp(atm, alt, nalt, latg, nlat, buf, atm->q[ig]);
+    clim->has_q[ig] = climatology_jumacs_read_field(ctl->climfile, varname,
+						    ncid, dim_month, dim_alt,
+						    dim_lat, clim->nalt,
+						    clim->nlat, clim->q[ig]);
   }
 
-  /* Close file and free memory... */
+  /* Close climatology file... */
   NC(nc_close(ncid));
-  free(alt);
-  free(latg);
-  free(buf);
+}
+
+/*! Overwrite the built-in climatology with data from a JuMACS climatology.
+   The climatological temperature and all mapped trace gas fields that are
+   available in the climatology are replaced, fields missing from the
+   climatology retain their built-in values. Pressure is never
+   overwritten. */
+void climatology_jumacs(
+  const ctl_t *ctl,
+  const clim_t *clim,
+  atm_t *atm) {
+
+  /* Overwrite temperature... */
+  if (clim->has_t)
+    climatology_jumacs_interp(clim, atm, clim->t, atm->t);
+
+  /* Overwrite trace gases... */
+  for (int ig = 0; ig < ctl->ng; ig++)
+    if (clim->has_q[ig])
+      climatology_jumacs_interp(clim, atm, clim->q[ig], atm->q[ig]);
 }
 
 /*****************************************************************************/
@@ -1420,8 +1472,13 @@ void climatology(
   }
 
   /* Overwrite with JuMACS climatology... */
-  if (strcmp(ctl->climfile, "-") != 0)
-    climatology_jumacs(ctl, atm);
+  if (strcmp(ctl->climfile, "-") != 0) {
+    clim_t *clim;
+    ALLOC(clim, clim_t, 1);
+    climatology_jumacs_read(ctl, clim);
+    climatology_jumacs(ctl, clim, atm);
+    free(clim);
+  }
 }
 
 /*****************************************************************************/

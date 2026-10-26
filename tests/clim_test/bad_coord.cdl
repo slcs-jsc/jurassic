@@ -1,0 +1,9 @@
+// Malformed JuMACS climatology: the coordinate variable 'altitude' is a
+// two-dimensional variable instead of a one-dimensional coordinate.
+netcdf bad_coord {
+dimensions: month = 12 ; altitude = 5 ; lat = 4 ;
+variables:
+  float altitude(altitude, lat) ;
+  float lat(lat) ;
+  float temperature_mean(month, altitude, lat) ;
+}

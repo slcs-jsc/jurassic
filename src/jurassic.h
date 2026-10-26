@@ -306,6 +306,21 @@ enum {
 #define NG 8
 #endif
 
+/*! Maximum number of time steps for climatological data. */
+#ifndef CT
+#define CT 12
+#endif
+
+/*! Maximum number of altitudes for climatological data. */
+#ifndef CZ
+#define CZ 200
+#endif
+
+/*! Maximum number of latitudes for climatological data. */
+#ifndef CLAT
+#define CLAT 96
+#endif
+
 /*! Maximum number of LOS points. */
 #ifndef NLOS
 #define NLOS 4096
@@ -1449,6 +1464,36 @@ typedef struct {
 
 } atm_t;
 
+/*! JuMACS climatology on a fixed grid. Monthly zonal mean fields on the
+   JuMACS (altitude, lat) grid, stored in fixed-size arrays only, such that
+   the structure can be copied to a compute device as a whole. The fields
+   are defined for month < CT, altitude < nalt, and lat < nlat. */
+typedef struct {
+  /*! Number of altitude levels. */
+  int nalt;
+
+  /*! Number of latitude bands. */
+  int nlat;
+
+  /*! Altitude grid [km]. */
+  double alt[CZ];
+
+  /*! Latitude grid [deg]. */
+  double lat[CLAT];
+
+  /*! Temperature [K]. */
+  double t[CT][CZ][CLAT];
+
+  /*! Volume mixing ratio [ppv]. */
+  double q[NG][CT][CZ][CLAT];
+
+  /*! Set if a temperature field was read. */
+  int has_t;
+
+  /*! Set for each emitter with a field read. */
+  int has_q[NG];
+} clim_t;
+
 /**
  * @brief Control parameters.
  * 
@@ -2149,54 +2194,37 @@ void climatology(
   atm_t * atm);
 
 /**
- * @brief Computes a flat index into a JuMACS climatology field.
- *
- * JuMACS climatology fields are stored as three-dimensional arrays with
- * dimension order (month, altitude, lat) in row-major storage.
- *
- * @param[in] m     Zero-based month index (0 = January).
- * @param[in] iz    Zero-based altitude level index.
- * @param[in] il    Zero-based latitude band index.
- * @param[in] nalt  Number of JuMACS altitude levels.
- * @param[in] nlat  Number of JuMACS latitude bands.
- * @return The zero-based flat index into the field buffer.
- */
-size_t climatology_jumacs_index(
-  const int m,
-  const int iz,
-  const int il,
-  const int nalt,
-  const int nlat);
-
-/**
  * @brief Reads and validates one JuMACS climatology field.
  *
  * Reads the NetCDF variable @a varname from an open JuMACS climatology
- * file into a preallocated buffer. The variable must be three-dimensional
- * with dimension order (month, altitude, lat).
+ * file into a fixed-size field array. The variable must be
+ * three-dimensional with dimension order (month, altitude, lat) and is
+ * read level by level into the used index range of the field.
  *
- * @param[in]  ncid       NetCDF file ID of the open climatology file.
  * @param[in]  filename   Name of the climatology file (for error messages).
  * @param[in]  varname    Name of the NetCDF variable to read.
+ * @param[in]  ncid       NetCDF file ID of the open climatology file.
  * @param[in]  dim_month  NetCDF ID of the month dimension.
  * @param[in]  dim_alt    NetCDF ID of the altitude dimension.
  * @param[in]  dim_lat    NetCDF ID of the lat dimension.
- * @param[in]  nfield     Expected number of field elements (12 * nalt * nlat).
- * @param[out] buf        Buffer of at least nfield elements receiving the data.
+ * @param[in]  nalt       Number of altitude levels actually present.
+ * @param[in]  nlat       Number of latitude bands actually present.
+ * @param[out] field      Fixed-size field array receiving the data.
  * @return 1 if the variable was found and read, 0 if it is missing.
  *
  * @note Aborts with an error message if the variable exists but is
  *       malformed or contains non-finite values.
  */
-int climatology_jumacs_read(
-  const int ncid,
+int climatology_jumacs_read_field(
   const char *filename,
   const char *varname,
+  const int ncid,
   const int dim_month,
   const int dim_alt,
   const int dim_lat,
-  const size_t nfield,
-  double *buf);
+  const int nalt,
+  const int nlat,
+  double field[CT][CZ][CLAT]);
 
 /**
  * @brief Interpolates a JuMACS climatology field onto atmospheric profiles.
@@ -2210,44 +2238,57 @@ int climatology_jumacs_read(
  * the lowest JuMACS level. Profile points above the top of the JuMACS
  * grid are skipped, thus retaining their existing values.
  *
+ * @param[in]  clim  JuMACS climatology providing the altitude and
+ *                   latitude grids.
  * @param[in]  atm   Atmospheric state providing profile times, latitudes,
  *                   and altitudes above the reference ellipsoid, in km.
- * @param[in]  alt   JuMACS altitude grid, in kilometers.
- * @param[in]  nalt  Number of JuMACS altitude levels.
- * @param[in]  latg  JuMACS latitude grid, in degrees.
- * @param[in]  nlat  Number of JuMACS latitude bands.
- * @param[in]  buf   Climatology field on the JuMACS grid (month, altitude, lat).
+ * @param[in]  field Climatology field on the JuMACS grid.
  * @param[out] out   Output array of atm->np values to be overwritten.
  */
 void climatology_jumacs_interp(
-  const atm_t * atm,
-  const double *alt,
-  const int nalt,
-  const double *latg,
-  const int nlat,
-  const double *buf,
+  const clim_t *clim,
+  const atm_t *atm,
+  const double field[CT][CZ][CLAT],
   double *out);
 
 /**
- * @brief Overwrites the built-in climatology with a JuMACS climatology file.
+ * @brief Reads a JuMACS climatology file into a climatology structure.
  *
- * Reads a JuMACS monthly zonal mean climatology from the file specified by
- * the CLIM_FILE control parameter and replaces the built-in climatological
- * temperature and trace gas volume mixing ratios of all atmospheric
- * profile points. Fields are taken from the <varname>_mean NetCDF
- * variables. Species not mapped to a JuMACS variable, and variables
- * missing from the file, retain their built-in values. The climatological
- * pressure is never overwritten.
+ * Reads the JuMACS monthly zonal mean climatology from the file specified
+ * by the CLIM_FILE control parameter. The file is opened, validated, and
+ * closed within this routine. It must provide the dimensions month,
+ * altitude, and lat as well as coordinate variables of the same name.
+ * Fields are taken from the <varname>_mean NetCDF variables. A missing
+ * temperature field is an error, trace gas fields missing from the file
+ * are flagged by clim->has_q.
  *
  * @param[in]  ctl  Control parameters providing the climatology file name
  *                  and the emitter list.
- * @param[out] atm  Atmospheric state to be updated in place.
+ * @param[out] clim Climatology structure to be filled.
  *
  * @note Aborts with an error message if the file cannot be opened or is
  *       not a valid JuMACS climatology file.
  */
+void climatology_jumacs_read(
+  const ctl_t *ctl,
+  clim_t *clim);
+
+/**
+ * @brief Overwrites the built-in climatology with a JuMACS climatology.
+ *
+ * Replaces the built-in climatological temperature and trace gas volume
+ * mixing ratios of all atmospheric profile points by the interpolated
+ * values of the given JuMACS climatology. Species not mapped to a JuMACS
+ * variable, and fields missing from the climatology, retain their
+ * built-in values. The climatological pressure is never overwritten.
+ *
+ * @param[in]  ctl  Control parameters providing the emitter list.
+ * @param[in]  clim JuMACS climatology to interpolate from.
+ * @param[out] atm  Atmospheric state to be updated in place.
+ */
 void climatology_jumacs(
   const ctl_t *ctl,
+  const clim_t *clim,
   atm_t *atm);
 
 /**

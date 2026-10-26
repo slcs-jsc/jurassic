@@ -1,0 +1,14 @@
+// Malformed JuMACS climatology: the coordinate 'altitude' is strictly
+// increasing but not equally spaced, which the interpolation cannot handle.
+netcdf bad_irreg {
+dimensions: month = 12 ; altitude = 5 ; lat = 4 ;
+variables:
+  float altitude(altitude) ;
+    altitude:units = "km" ;
+  float lat(lat) ;
+    lat:units = "degrees_north" ;
+  float temperature_mean(month, altitude, lat) ;
+data:
+  altitude = 0.f, 1.f, 3.f, 6.f, 10.f ;
+  lat = -87.5f, -82.5f, -77.5f, -72.5f ;
+}

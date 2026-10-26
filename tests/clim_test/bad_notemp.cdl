@@ -1,0 +1,15 @@
+// Malformed JuMACS climatology: the mandatory variable
+// 'temperature_mean' is missing.
+netcdf bad_notemp {
+dimensions: month = 12 ; altitude = 5 ; lat = 4 ;
+variables:
+  float altitude(altitude) ;
+    altitude:units = "km" ;
+  float lat(lat) ;
+    lat:units = "degrees_north" ;
+  float o3_mean(month, altitude, lat) ;
+    o3_mean:units = "ppv" ;
+data:
+  altitude = 0.f, 10.f, 20.f, 30.f, 40.f ;
+  lat = -60.f, -20.f, 20.f, 60.f ;
+}
