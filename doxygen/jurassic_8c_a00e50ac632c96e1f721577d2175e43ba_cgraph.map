@@ -1,4 +1,4 @@
 <map id="climatology_jumacs_read" name="climatology_jumacs_read">
-<area shape="rect" id="node1" title="Read the JuMACS monthly zonal mean climatology file specified by the CLIM_FILE control parameter into..." alt="" coords="5,13,173,39"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#afe2196f93d5f8e6c3489ade07c88124a" title="Read and validate one JuMACS climatology field into a fixed&#45;size array." alt="" coords="221,5,357,47"/>
+<area shape="rect" id="node1" title="Reads a JuMACS climatology file into a climatology structure." alt="" coords="5,13,173,39"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#afe2196f93d5f8e6c3489ade07c88124a" title="Reads and validates one JuMACS climatology field." alt="" coords="221,5,357,47"/>
 </map>
