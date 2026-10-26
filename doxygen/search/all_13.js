@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['t_0',['t',['../structatm__t.html#a306826df6fe870ab371fb945544cc13a',1,'atm_t::t()'],['../structlos__t.html#ae9885d0d23e84e6d0443d0d8e04c8867',1,'los_t::t()'],['../structtbl__t.html#ab9ecd0fd977282440f479d0e01d6a2bc',1,'tbl_t::t()']]],
+  ['t_0',['t',['../structatm__t.html#a306826df6fe870ab371fb945544cc13a',1,'atm_t::t()'],['../structclim__t.html#a87a27e4665b454afb2b4fdb73b867f86',1,'clim_t::t()'],['../structlos__t.html#ae9885d0d23e84e6d0443d0d8e04c8867',1,'los_t::t()'],['../structtbl__t.html#ab9ecd0fd977282440f479d0e01d6a2bc',1,'tbl_t::t()']]],
   ['t0_1',['T0',['../jurassic_8h.html#ad41b89d4eb6d63a0def5e5fd2a5ab326',1,'jurassic.h']]],
   ['tangent_5fpoint_2',['tangent_point',['../jurassic_8h.html#a9020f32787ea7be08486d537a4f5c0fc',1,'tangent_point(const los_t *los, double *tpz, double *tplon, double *tplat):&#160;jurassic.c'],['../jurassic_8c.html#a9020f32787ea7be08486d537a4f5c0fc',1,'tangent_point(const los_t *los, double *tpz, double *tplon, double *tplat):&#160;jurassic.c']]],
   ['tau_3',['tau',['../structobs__t.html#a0f8aac57859ceccb50b258d487e74670',1,'obs_t']]],

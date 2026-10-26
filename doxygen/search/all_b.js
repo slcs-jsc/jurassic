@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['lat_0',['lat',['../structatm__t.html#a25ef7d304d5cfa54c5af30192620373b',1,'atm_t::lat()'],['../structlos__t.html#ab1339541546c449911407fdabf0beea3',1,'los_t::lat()']]],
+  ['lat_0',['lat',['../structatm__t.html#a25ef7d304d5cfa54c5af30192620373b',1,'atm_t::lat()'],['../structclim__t.html#af4ff2b9d053fd8d9a1f9901220f390e7',1,'clim_t::lat()'],['../structlos__t.html#ab1339541546c449911407fdabf0beea3',1,'los_t::lat()']]],
   ['len_1',['LEN',['../jurassic_8h.html#a05b49c662c073f89e86804f7856622a0',1,'jurassic.h']]],
   ['limb_2ec_2',['limb.c',['../limb_8c.html',1,'']]],
   ['lin_3',['LIN',['../jurassic_8h.html#aebaef4a0f8136be064bf1d29ce1ced83',1,'jurassic.h']]],

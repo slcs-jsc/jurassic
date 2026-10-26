@@ -1,8 +1,0 @@
-<map id="climatology_jumacs" name="climatology_jumacs">
-<area shape="rect" id="node1" title="Overwrite the built&#45;in climatology with data from a JuMACS monthly zonal mean climatology file." alt="" coords="5,101,141,127"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#a9dc043fe0ca30973861c77d4b3a372c8" title="Interpolate a JuMACS climatology field onto the atmospheric grid points and overwrite the output arra..." alt="" coords="205,64,341,105"/>
-<area shape="rect" id="node6" href="$jurassic_8c.html#ada8264a5074d87a75664004614222cb8" title="Read and validate one JuMACS climatology field." alt="" coords="189,130,357,157"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a7200afb48a6d4270ce5cd2c98bdaf14b" title="Flat index into a (month, altitude, lat) JuMACS data field." alt="" coords="405,5,541,47"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#acc0c1829ca7770d2dd6342f2cdf10bb9" title="Converts Julian seconds to calendar date and time components." alt="" coords="434,71,513,98"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="432,122,515,149"/>
-</map>
