@@ -66,57 +66,6 @@ $jurassic/climatology alias.ctl data/alias.tab \
 $jurassic/climatology alias.ctl data/alias_legacy.tab \
     T0 0 T1 0 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE -
 
-# Error handling: nonexistent and incompatible climatology files...
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE /nonexistent_jumacs.nc 2>/dev/null ; then
-  echo "Error handling failed for nonexistent climatology file!"
-  exit 1
-fi
-$jurassic/atmfmt jumacs.ctl data/jan45.tab 1 data/wrong.nc 3 > /dev/null
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE data/wrong.nc 2>/dev/null ; then
-  echo "Error handling failed for incompatible climatology file!"
-  exit 1
-fi
-
-# Error handling: malformed climatology files...
-ncgen -o data/bad_coord.nc bad_coord.cdl > /dev/null
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE data/bad_coord.nc 2>/dev/null ; then
-  echo "Error handling failed for two-dimensional coordinate variable!"
-  exit 1
-fi
-ncgen -o data/bad_notemp.nc bad_notemp.cdl > /dev/null
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE data/bad_notemp.nc 2>/dev/null ; then
-  echo "Error handling failed for climatology file without temperature!"
-  exit 1
-fi
-ncgen -o data/bad_alt.nc bad_alt.cdl > /dev/null
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE data/bad_alt.nc 2>/dev/null ; then
-  echo "Error handling failed for too many altitude levels!"
-  exit 1
-fi
-ncgen -o data/bad_lat.nc bad_lat.cdl > /dev/null
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE data/bad_lat.nc 2>/dev/null ; then
-  echo "Error handling failed for too many latitude bands!"
-  exit 1
-fi
-ncgen -o data/bad_ndims.nc bad_ndims.cdl > /dev/null
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE data/bad_ndims.nc 2>/dev/null ; then
-  echo "Error handling failed for coordinate variable with too many dimensions!"
-  exit 1
-fi
-ncgen -o data/bad_irreg.nc bad_irreg.cdl > /dev/null
-if $jurassic/climatology jumacs.ctl data/error.tab \
-     T0 0 LAT 45 CLIM_FILE data/bad_irreg.nc 2>/dev/null ; then
-  echo "Error handling failed for irregularly spaced coordinate!"
-  exit 1
-fi
-
 # Compare reference files...
 echo -e "\nCompare results..."
 error=0

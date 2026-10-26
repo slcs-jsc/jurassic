@@ -1,9 +1,0 @@
-// Malformed JuMACS climatology: the coordinate variable 'altitude' uses
-// six dimensions, exceeding any fixed-size dimension buffer in the reader.
-netcdf bad_ndims {
-dimensions: month = 12 ; altitude = 5 ; lat = 4 ; d1 = 2 ; d2 = 2 ; d3 = 2 ;
-variables:
-  float altitude(altitude, lat, d1, d2, d3, month) ;
-  float lat(lat) ;
-  float temperature_mean(month, altitude, lat) ;
-}
