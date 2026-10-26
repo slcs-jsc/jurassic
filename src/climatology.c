@@ -62,6 +62,7 @@ int main(
   const double z0 = scan_ctl(argc, argv, "Z0", -1, "0", NULL);
   const double z1 = scan_ctl(argc, argv, "Z1", -1, "90", NULL);
   const double dz = scan_ctl(argc, argv, "DZ", -1, "1", NULL);
+  const double lat = scan_ctl(argc, argv, "LAT", -1, "0", NULL);
   const int zsurf = (int) scan_ctl(argc, argv, "ZSURF", -1, "0", NULL);
   const double clz = scan_ctl(argc, argv, "CLZ", -1, "0", NULL);
   const double cldz = scan_ctl(argc, argv, "CLDZ", -1, "0", NULL);
@@ -102,9 +103,11 @@ int main(
 	  ERRMSG("Too many atmospheric grid points!");
       }
 
-    /* Set time... */
-    for (int ip = 0; ip < atm.np; ip++)
+    /* Set time and latitude... */
+    for (int ip = 0; ip < atm.np; ip++) {
       atm.time[ip] = t;
+      atm.lat[ip] = lat;
+    }
   }
 
   /* Interpolate climatological data... */
@@ -143,6 +146,7 @@ static void usage(
   printf("Tool-specific control parameters:\n");
   printf("  T0, T1, DT      Time range and spacing.\n");
   printf("  Z0, Z1, DZ      Altitude range and spacing.\n");
+  printf("  LAT             Latitude of the profile.\n");
   printf("  ZSURF           Refine the near-surface grid if set.\n");
   printf("  CLZ, CLDZ, CLK  Cloud-layer settings.\n");
   printf("  SFT, SFEPS      Surface temperature and emissivity.\n\n");

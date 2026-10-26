@@ -1,0 +1,33 @@
+# $1 = time (seconds since 2000-01-01T00:00Z)
+# $2 = altitude [km]
+# $3 = longitude [deg]
+# $4 = latitude [deg]
+# $5 = pressure [hPa]
+# $6 = temperature [K]
+# $7 = H2O volume mixing ratio [ppv]
+# $8 = CO2 volume mixing ratio [ppv]
+# $9 = O3 volume mixing ratio [ppv]
+# $10 = CH4 volume mixing ratio [ppv]
+# $11 = O2 volume mixing ratio [ppv]
+# $12 = N2 volume mixing ratio [ppv]
+# $13 = SF6 volume mixing ratio [ppv]
+# $14 = OCS volume mixing ratio [ppv]
+# $15 = extinction (window 0) [km^-1]
+# $16 = extinction (window 1) [km^-1]
+# $17 = extinction (window 2) [km^-1]
+# $18 = cloud layer height [km]
+# $19 = cloud layer depth [km]
+# $20 = cloud layer extinction (500.0000 cm^-1) [km^-1]
+# $21 = cloud layer extinction (2500.0000 cm^-1) [km^-1]
+# $22 = surface temperature [K]
+# $23 = surface emissivity (0.0000 cm^-1)
+# $24 = surface emissivity (1000.0000 cm^-1)
+# $25 = surface emissivity (2000.0000 cm^-1)
+# $26 = surface emissivity (3000.0000 cm^-1)
+
+383788800.00 0 0 45 1017 274.465 0.00608336 0.000392688 4.0788e-08 1.8372e-06 0.20946 0.78084 4.103e-12 4.88437e-10 0 0 0 6 1 0.01 0.005 300 1 0.95 0.8 0.5
+383788800.00 15 0 45 122.198 215.519 1.99722e-06 0.000392688 8.54151e-07 1.62365e-06 0.20946 0.78084 3.755e-12 4.28395e-10 0 0 0 6 1 0.01 0.005 300 1 0.95 0.8 0.5
+383788800.00 30 0 45 11.9913 223.622 3.82621e-06 0.000392688 6.75019e-06 7.31455e-07 0.20946 0.78084 1.859e-12 2.73261e-12 0 0 0 6 1 0.01 0.005 300 1 0.95 0.8 0.5
+383788800.00 45 0 45 1.52519 254.339 4.4825e-06 0.000392688 3.96171e-06 3.8576e-07 0.20946 0.78084 1.668e-12 1.8623e-20 0 0 0 6 1 0.01 0.005 300 1 0.95 0.8 0.5
+383788800.00 60 0 45 0.213465 225.986 4.27653e-06 0.000392688 1.06646e-06 1.73271e-07 0.20946 0.78084 1.651e-12 2.15692e-29 0 0 0 6 1 0.01 0.005 300 1 0.95 0.8 0.5
+383788800.00 75 0 45 0.0229699 200.566 2.56594e-06 0.000392688 2.05869e-07 1.6539e-08 0.20946 0.78084 1.65e-12 4.10861e-33 0 0 0 6 1 0.01 0.005 300 1 0.95 0.8 0.5

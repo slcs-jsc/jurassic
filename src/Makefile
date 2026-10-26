@@ -6,7 +6,7 @@
 EXC = atmfmt brightness climatology day2doy doy2day filter formod hydrostatic interpolate invert jsec2time kernel limb matfmt nadir obs2spec obsfmt planck raytrace retrieval tblfmt tblgen tblrdc time2jsec zenith
 
 # List of tests...
-TESTS = cli_test tools_test atm_test mat_test obs_test tbl_test formod_test ret_test
+TESTS = cli_test tools_test atm_test mat_test obs_test tbl_test formod_test clim_test ret_test
 
 # Installation directory...
 DESTDIR ?= ../bin
