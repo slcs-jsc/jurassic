@@ -1518,6 +1518,7 @@ typedef struct {
 
   /*! Set for each emitter with a field read. */
   int has_q[NG];
+
 } clim_t;
 
 /**
@@ -2240,6 +2241,8 @@ void climatology(
  *
  * @note Aborts with an error message if the variable exists but is
  *       malformed or contains non-finite values.
+ *
+ * @author Lars Hoffmann
  */
 int climatology_jumacs_read_field(
   const char *filename,
@@ -2270,10 +2273,12 @@ int climatology_jumacs_read_field(
  *                   and altitudes above the reference ellipsoid, in km.
  * @param[in]  field Climatology field on the JuMACS grid.
  * @param[out] out   Output array of atm->np values to be overwritten.
+ *
+ * @author Lars Hoffmann
  */
 void climatology_jumacs_interp(
-  const clim_t *clim,
-  const atm_t *atm,
+  const clim_t * clim,
+  const atm_t * atm,
   const double field[CT][CZ][CLAT],
   double *out);
 
@@ -2294,10 +2299,12 @@ void climatology_jumacs_interp(
  *
  * @note Aborts with an error message if the file cannot be opened or is
  *       not a valid JuMACS climatology file.
+ *
+ * @author Lars Hoffmann
  */
 void climatology_jumacs_read(
-  const ctl_t *ctl,
-  clim_t *clim);
+  const ctl_t * ctl,
+  clim_t * clim);
 
 /**
  * @brief Overwrites the built-in climatology with a JuMACS climatology.
@@ -2311,11 +2318,13 @@ void climatology_jumacs_read(
  * @param[in]  ctl  Control parameters providing the emitter list.
  * @param[in]  clim JuMACS climatology to interpolate from.
  * @param[out] atm  Atmospheric state to be updated in place.
+ *
+ * @author Lars Hoffmann
  */
 void climatology_jumacs(
-  const ctl_t *ctl,
-  const clim_t *clim,
-  atm_t *atm);
+  const ctl_t * ctl,
+  const clim_t * clim,
+  atm_t * atm);
 
 /**
  * @brief Calculates the cosine of the solar zenith angle.

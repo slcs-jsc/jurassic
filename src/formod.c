@@ -47,7 +47,7 @@ void call_formod(
 
 /*! Parse the formod task selector and map aliases to an internal task code. */
 char parse_task_mode(
-  const char * task);
+  const char *task);
 
 /*! Parse the formod execution selector. */
 int parse_formod_scalar(
@@ -315,8 +315,7 @@ void usage(
     ("  OBSREF <file>    Read reference observations from <file> and print\n");
   printf
     ("                   relative and signed absolute-error diagnostics against\n");
-  printf
-    ("                   the simulated output.\n");
+  printf("                   the simulated output.\n");
   printf
     ("  EXECUTION <mode> Select execution backend: batch (default) or scalar.\n");
   printf
@@ -500,10 +499,10 @@ void eval_formod_results(
   for (int id = 0; id < ctl->nd; id++) {
     printf
       ("EVAL: nu= %.4f cm^-1 | MeanRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n",
-	 ctl->nu[id], mre[id], sdre[id], minre[id], maxre[id]);
+       ctl->nu[id], mre[id], sdre[id], minre[id], maxre[id]);
     printf
       ("EVAL: nu= %.4f cm^-1 | MeanAE= %g | SDAE= %g | MinAE= %g | MaxAE= %g\n",
-	 ctl->nu[id], meanae[id], sdae[id], minae[id], maxae[id]);
+       ctl->nu[id], meanae[id], sdae[id], minae[id], maxae[id]);
   }
 }
 
@@ -767,8 +766,7 @@ void exec_formod_stepsize(
 	printf
 	  ("STEPSIZE: ds= %.4f km | dz= %g km | t= %g s | nu= %.4f cm^-1"
 	   " | MeanRE= %g %% | SDRE= %g %% | MinRE= %g %% | MaxRE= %g %%\n",
-	   ds, dz, dt, ctl->nu[id], mre[id], sdre[id], minre[id],
-	   maxre[id]);
+	   ds, dz, dt, ctl->nu[id], mre[id], sdre[id], minre[id], maxre[id]);
     }
 }
 
@@ -812,8 +810,7 @@ void call_formod(
 
     if (task_mode == 't') {
       SELECT_TIMER("FORMOD_REFERENCE", "FORWARD");
-    }
-    else {
+    } else {
       SELECT_TIMER("FORMOD", "FORWARD");
     }
     exec_formod_single(ctl, tbl, &atm, &obs, &los_scratch, &obs_scratch,
@@ -827,7 +824,7 @@ void call_formod(
 
     if (task_mode == 'c') {
       exec_formod_contributions(ctl, tbl, wrkdir, radfile, &atm, &obs, &atm2,
-				   &los_scratch, &obs_scratch, formod_scalar);
+				&los_scratch, &obs_scratch, formod_scalar);
     }
 
     if (task_mode == 't') {
