@@ -1187,17 +1187,23 @@ int climatology_jumacs_read_field(
     ERRMSG("NetCDF variable %s in climatology file %s has wrong dimensions!",
 	   varname, filename);
 
-  /* Read data level by level and check for non-finite values... */
+  /* Read the whole field in a single call into a compact temporary buffer
+     and copy it into the padded target array, checking for non-finite
+     values... */
+  double *tmp;
+  ALLOC(tmp, double, (size_t) CT * (size_t) nalt * (size_t) nlat);
+  NC(nc_get_var_double(ncid, varid, tmp));
   for (int m = 0; m < CT; m++)
-    for (int iz = 0; iz < nalt; iz++) {
-      const size_t start[3] = { (size_t) m, (size_t) iz, 0 };
-      const size_t count[3] = { 1, 1, (size_t) nlat };
-      NC(nc_get_vara_double(ncid, varid, start, count, field[m][iz]));
-      for (int il = 0; il < nlat; il++)
-	if (!isfinite(field[m][iz][il]))
+    for (int iz = 0; iz < nalt; iz++)
+      for (int il = 0; il < nlat; il++) {
+	const size_t idx = ((size_t) m * (size_t) nalt + (size_t) iz)
+	  * (size_t) nlat + (size_t) il;
+	if (!isfinite(tmp[idx]))
 	  ERRMSG("Non-finite value in NetCDF variable %s of climatology "
 		 "file %s!", varname, filename);
-    }
+	field[m][iz][il] = tmp[idx];
+      }
+  free(tmp);
 
   return 1;
 }
