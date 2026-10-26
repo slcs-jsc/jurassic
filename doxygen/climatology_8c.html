@@ -147,74 +147,77 @@ Functions</h2></td></tr>
 <div class="line"><span class="lineno">   62</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> z0 = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;Z0&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
 <div class="line"><span class="lineno">   63</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> z1 = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;Z1&quot;</span>, -1, <span class="stringliteral">&quot;90&quot;</span>, NULL);</div>
 <div class="line"><span class="lineno">   64</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> dz = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;DZ&quot;</span>, -1, <span class="stringliteral">&quot;1&quot;</span>, NULL);</div>
-<div class="line"><span class="lineno">   65</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> zsurf = (int) <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;ZSURF&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
-<div class="line"><span class="lineno">   66</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> clz = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;CLZ&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
-<div class="line"><span class="lineno">   67</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cldz = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;CLDZ&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
-<div class="line"><span class="lineno">   68</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> icl = 0; icl &lt; ctl.<a class="code hl_variable" href="structctl__t.html#aaca3446ebb40caf6519044b624bc87d5">ncl</a>; icl++)</div>
-<div class="line"><span class="lineno">   69</span>    clk[icl] = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;CLK&quot;</span>, icl, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
-<div class="line"><span class="lineno">   70</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sft = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;SFT&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
-<div class="line"><span class="lineno">   71</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> isf = 0; isf &lt; ctl.<a class="code hl_variable" href="structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3">nsf</a>; isf++)</div>
-<div class="line"><span class="lineno">   72</span>    sfeps[isf] = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;SFEPS&quot;</span>, isf, <span class="stringliteral">&quot;1&quot;</span>, NULL);</div>
-<div class="line"><span class="lineno">   73</span> </div>
-<div class="line"><span class="lineno">   74</span>  <span class="comment">/* Loop over time steps... */</span></div>
-<div class="line"><span class="lineno">   75</span>  <span class="keywordflow">for</span> (<span class="keywordtype">double</span> t = t0; t &lt;= t1 + 0.5 * dt; t += dt) {</div>
-<div class="line"><span class="lineno">   76</span> </div>
-<div class="line"><span class="lineno">   77</span>    <span class="comment">/* Init... */</span></div>
-<div class="line"><span class="lineno">   78</span>    atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> = 0;</div>
-<div class="line"><span class="lineno">   79</span> </div>
-<div class="line"><span class="lineno">   80</span>    <span class="comment">/* Refine near-surface layer... */</span></div>
-<div class="line"><span class="lineno">   81</span>    <span class="keywordflow">if</span> (zsurf) {</div>
-<div class="line"><span class="lineno">   82</span>      atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> = 4;</div>
-<div class="line"><span class="lineno">   83</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[0] = z0;</div>
-<div class="line"><span class="lineno">   84</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[1] = z0 + 0.01;</div>
-<div class="line"><span class="lineno">   85</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[2] = z0 + 0.02;</div>
-<div class="line"><span class="lineno">   86</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[3] = z0 + 0.05;</div>
-<div class="line"><span class="lineno">   87</span>      <span class="keywordflow">if</span> (dz &gt; 0.1)</div>
-<div class="line"><span class="lineno">   88</span>        <span class="keywordflow">for</span> (<span class="keywordtype">double</span> z = 0.1; z &lt;= 1.0 + 1e-9; z += 0.1)</div>
-<div class="line"><span class="lineno">   89</span>          atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>++] = z0 + z;</div>
-<div class="line"><span class="lineno">   90</span>      if (dz &gt; 0.2)</div>
-<div class="line"><span class="lineno">   91</span>        <span class="keywordflow">for</span> (<span class="keywordtype">double</span> z = 1.2; z &lt;= 2.0 + 1e-9; z += 0.2)</div>
-<div class="line"><span class="lineno">   92</span>          atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>++] = z0 + z;</div>
-<div class="line"><span class="lineno">   93</span>      if (atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> &gt;= <a class="code hl_define" href="jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06">NP</a>)</div>
-<div class="line"><span class="lineno">   94</span>        <a class="code hl_define" href="jurassic_8h.html#a3e0ae69dee4a8bb2e616526b5ebe6875">ERRMSG</a>(<span class="stringliteral">&quot;Too many atmospheric grid points!&quot;</span>);</div>
-<div class="line"><span class="lineno">   95</span>    }</div>
-<div class="line"><span class="lineno">   96</span> </div>
-<div class="line"><span class="lineno">   97</span>    <span class="comment">/* Add heights... */</span></div>
-<div class="line"><span class="lineno">   98</span>    <span class="keywordflow">for</span> (<span class="keywordtype">double</span> z = z0; z &lt;= z1; z += dz)</div>
-<div class="line"><span class="lineno">   99</span>      <span class="keywordflow">if</span> (atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> == 0 || z &gt; atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> - 1] + 1e-9) {</div>
-<div class="line"><span class="lineno">  100</span>        atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = z;</div>
-<div class="line"><span class="lineno">  101</span>        <span class="keywordflow">if</span> ((++atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>) &gt;= <a class="code hl_define" href="jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06">NP</a>)</div>
-<div class="line"><span class="lineno">  102</span>          <a class="code hl_define" href="jurassic_8h.html#a3e0ae69dee4a8bb2e616526b5ebe6875">ERRMSG</a>(<span class="stringliteral">&quot;Too many atmospheric grid points!&quot;</span>);</div>
-<div class="line"><span class="lineno">  103</span>      }</div>
-<div class="line"><span class="lineno">  104</span> </div>
-<div class="line"><span class="lineno">  105</span>    <span class="comment">/* Set time... */</span></div>
-<div class="line"><span class="lineno">  106</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++)</div>
-<div class="line"><span class="lineno">  107</span>      atm.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[ip] = t;</div>
-<div class="line"><span class="lineno">  108</span>  }</div>
-<div class="line"><span class="lineno">  109</span> </div>
-<div class="line"><span class="lineno">  110</span>  <span class="comment">/* Interpolate climatological data... */</span></div>
-<div class="line"><span class="lineno">  111</span>  <a class="code hl_function" href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2">climatology</a>(&amp;ctl, &amp;atm);</div>
+<div class="line"><span class="lineno">   65</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lat = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;LAT&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
+<div class="line"><span class="lineno">   66</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> zsurf = (int) <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;ZSURF&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
+<div class="line"><span class="lineno">   67</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> clz = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;CLZ&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
+<div class="line"><span class="lineno">   68</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cldz = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;CLDZ&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
+<div class="line"><span class="lineno">   69</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> icl = 0; icl &lt; ctl.<a class="code hl_variable" href="structctl__t.html#aaca3446ebb40caf6519044b624bc87d5">ncl</a>; icl++)</div>
+<div class="line"><span class="lineno">   70</span>    clk[icl] = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;CLK&quot;</span>, icl, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
+<div class="line"><span class="lineno">   71</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sft = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;SFT&quot;</span>, -1, <span class="stringliteral">&quot;0&quot;</span>, NULL);</div>
+<div class="line"><span class="lineno">   72</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> isf = 0; isf &lt; ctl.<a class="code hl_variable" href="structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3">nsf</a>; isf++)</div>
+<div class="line"><span class="lineno">   73</span>    sfeps[isf] = <a class="code hl_function" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a>(argc, argv, <span class="stringliteral">&quot;SFEPS&quot;</span>, isf, <span class="stringliteral">&quot;1&quot;</span>, NULL);</div>
+<div class="line"><span class="lineno">   74</span> </div>
+<div class="line"><span class="lineno">   75</span>  <span class="comment">/* Loop over time steps... */</span></div>
+<div class="line"><span class="lineno">   76</span>  <span class="keywordflow">for</span> (<span class="keywordtype">double</span> t = t0; t &lt;= t1 + 0.5 * dt; t += dt) {</div>
+<div class="line"><span class="lineno">   77</span> </div>
+<div class="line"><span class="lineno">   78</span>    <span class="comment">/* Init... */</span></div>
+<div class="line"><span class="lineno">   79</span>    atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> = 0;</div>
+<div class="line"><span class="lineno">   80</span> </div>
+<div class="line"><span class="lineno">   81</span>    <span class="comment">/* Refine near-surface layer... */</span></div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">if</span> (zsurf) {</div>
+<div class="line"><span class="lineno">   83</span>      atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> = 4;</div>
+<div class="line"><span class="lineno">   84</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[0] = z0;</div>
+<div class="line"><span class="lineno">   85</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[1] = z0 + 0.01;</div>
+<div class="line"><span class="lineno">   86</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[2] = z0 + 0.02;</div>
+<div class="line"><span class="lineno">   87</span>      atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[3] = z0 + 0.05;</div>
+<div class="line"><span class="lineno">   88</span>      <span class="keywordflow">if</span> (dz &gt; 0.1)</div>
+<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">for</span> (<span class="keywordtype">double</span> z = 0.1; z &lt;= 1.0 + 1e-9; z += 0.1)</div>
+<div class="line"><span class="lineno">   90</span>          atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>++] = z0 + z;</div>
+<div class="line"><span class="lineno">   91</span>      if (dz &gt; 0.2)</div>
+<div class="line"><span class="lineno">   92</span>        <span class="keywordflow">for</span> (<span class="keywordtype">double</span> z = 1.2; z &lt;= 2.0 + 1e-9; z += 0.2)</div>
+<div class="line"><span class="lineno">   93</span>          atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>++] = z0 + z;</div>
+<div class="line"><span class="lineno">   94</span>      if (atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> &gt;= <a class="code hl_define" href="jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06">NP</a>)</div>
+<div class="line"><span class="lineno">   95</span>        <a class="code hl_define" href="jurassic_8h.html#a3e0ae69dee4a8bb2e616526b5ebe6875">ERRMSG</a>(<span class="stringliteral">&quot;Too many atmospheric grid points!&quot;</span>);</div>
+<div class="line"><span class="lineno">   96</span>    }</div>
+<div class="line"><span class="lineno">   97</span> </div>
+<div class="line"><span class="lineno">   98</span>    <span class="comment">/* Add heights... */</span></div>
+<div class="line"><span class="lineno">   99</span>    <span class="keywordflow">for</span> (<span class="keywordtype">double</span> z = z0; z &lt;= z1; z += dz)</div>
+<div class="line"><span class="lineno">  100</span>      <span class="keywordflow">if</span> (atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> == 0 || z &gt; atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a> - 1] + 1e-9) {</div>
+<div class="line"><span class="lineno">  101</span>        atm.<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>] = z;</div>
+<div class="line"><span class="lineno">  102</span>        <span class="keywordflow">if</span> ((++atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>) &gt;= <a class="code hl_define" href="jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06">NP</a>)</div>
+<div class="line"><span class="lineno">  103</span>          <a class="code hl_define" href="jurassic_8h.html#a3e0ae69dee4a8bb2e616526b5ebe6875">ERRMSG</a>(<span class="stringliteral">&quot;Too many atmospheric grid points!&quot;</span>);</div>
+<div class="line"><span class="lineno">  104</span>      }</div>
+<div class="line"><span class="lineno">  105</span> </div>
+<div class="line"><span class="lineno">  106</span>    <span class="comment">/* Set time and latitude... */</span></div>
+<div class="line"><span class="lineno">  107</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ip = 0; ip &lt; atm.<a class="code hl_variable" href="structatm__t.html#a473366004c7195d5c455373296ee1833">np</a>; ip++) {</div>
+<div class="line"><span class="lineno">  108</span>      atm.<a class="code hl_variable" href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">time</a>[ip] = t;</div>
+<div class="line"><span class="lineno">  109</span>      atm.<a class="code hl_variable" href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">lat</a>[ip] = lat;</div>
+<div class="line"><span class="lineno">  110</span>    }</div>
+<div class="line"><span class="lineno">  111</span>  }</div>
 <div class="line"><span class="lineno">  112</span> </div>
-<div class="line"><span class="lineno">  113</span>  <span class="comment">/* Set cloud layer... */</span></div>
-<div class="line"><span class="lineno">  114</span>  atm.<a class="code hl_variable" href="structatm__t.html#a467184c9e87a139e18fa656c565ab8a6">clz</a> = clz;</div>
-<div class="line"><span class="lineno">  115</span>  atm.<a class="code hl_variable" href="structatm__t.html#a49c74ec000bd9884836d6e8ae2b96a3a">cldz</a> = cldz;</div>
-<div class="line"><span class="lineno">  116</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> icl = 0; icl &lt; ctl.<a class="code hl_variable" href="structctl__t.html#aaca3446ebb40caf6519044b624bc87d5">ncl</a>; icl++)</div>
-<div class="line"><span class="lineno">  117</span>    atm.<a class="code hl_variable" href="structatm__t.html#a8c50a0221df51f13b2f07987aab6ab19">clk</a>[icl] = clk[icl];</div>
-<div class="line"><span class="lineno">  118</span> </div>
-<div class="line"><span class="lineno">  119</span>  <span class="comment">/* Set surface layer... */</span></div>
-<div class="line"><span class="lineno">  120</span>  atm.<a class="code hl_variable" href="structatm__t.html#a651f52626605a4dd79dd147ee245014f">sft</a> = sft;</div>
-<div class="line"><span class="lineno">  121</span>  for (<span class="keywordtype">int</span> isf = 0; isf &lt; ctl.<a class="code hl_variable" href="structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3">nsf</a>; isf++)</div>
-<div class="line"><span class="lineno">  122</span>    atm.<a class="code hl_variable" href="structatm__t.html#a09f5c1a2a0ecac7b481f3ea138b8a750">sfeps</a>[isf] = sfeps[isf];</div>
-<div class="line"><span class="lineno">  123</span> </div>
-<div class="line"><span class="lineno">  124</span>  <span class="comment">/* Write data to disk... */</span></div>
-<div class="line"><span class="lineno">  125</span>  <a class="code hl_function" href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a>(NULL, argv[2], &amp;ctl, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  113</span>  <span class="comment">/* Interpolate climatological data... */</span></div>
+<div class="line"><span class="lineno">  114</span>  <a class="code hl_function" href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2">climatology</a>(&amp;ctl, &amp;atm);</div>
+<div class="line"><span class="lineno">  115</span> </div>
+<div class="line"><span class="lineno">  116</span>  <span class="comment">/* Set cloud layer... */</span></div>
+<div class="line"><span class="lineno">  117</span>  atm.<a class="code hl_variable" href="structatm__t.html#a467184c9e87a139e18fa656c565ab8a6">clz</a> = clz;</div>
+<div class="line"><span class="lineno">  118</span>  atm.<a class="code hl_variable" href="structatm__t.html#a49c74ec000bd9884836d6e8ae2b96a3a">cldz</a> = cldz;</div>
+<div class="line"><span class="lineno">  119</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> icl = 0; icl &lt; ctl.<a class="code hl_variable" href="structctl__t.html#aaca3446ebb40caf6519044b624bc87d5">ncl</a>; icl++)</div>
+<div class="line"><span class="lineno">  120</span>    atm.<a class="code hl_variable" href="structatm__t.html#a8c50a0221df51f13b2f07987aab6ab19">clk</a>[icl] = clk[icl];</div>
+<div class="line"><span class="lineno">  121</span> </div>
+<div class="line"><span class="lineno">  122</span>  <span class="comment">/* Set surface layer... */</span></div>
+<div class="line"><span class="lineno">  123</span>  atm.<a class="code hl_variable" href="structatm__t.html#a651f52626605a4dd79dd147ee245014f">sft</a> = sft;</div>
+<div class="line"><span class="lineno">  124</span>  for (<span class="keywordtype">int</span> isf = 0; isf &lt; ctl.<a class="code hl_variable" href="structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3">nsf</a>; isf++)</div>
+<div class="line"><span class="lineno">  125</span>    atm.<a class="code hl_variable" href="structatm__t.html#a09f5c1a2a0ecac7b481f3ea138b8a750">sfeps</a>[isf] = sfeps[isf];</div>
 <div class="line"><span class="lineno">  126</span> </div>
-<div class="line"><span class="lineno">  127</span>  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
-<div class="line"><span class="lineno">  128</span>}</div>
-<div class="ttc" id="ajurassic_8c_html_a19b236d7e6cd812c67f36673f0dbefc3"><div class="ttname"><a href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a></div><div class="ttdeci">void write_atm(const char *dirname, const char *filename, const ctl_t *ctl, const atm_t *atm, int profile)</div><div class="ttdoc">Write atmospheric data to a file.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l07308">jurassic.c:7308</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read model control parameters from command-line and configuration input.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05542">jurassic.c:5542</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_abb6ce9b0361afe11cb23b8ac1e0c7fa3"><div class="ttname"><a href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a></div><div class="ttdeci">double scan_ctl(int argc, char *argv[], const char *varname, const int arridx, const char *defvalue, char *value)</div><div class="ttdoc">Scan control file or command-line arguments for a configuration variable.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l06613">jurassic.c:6613</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_ae324329aa277798b632b25de13faf1b2"><div class="ttname"><a href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2">climatology</a></div><div class="ttdeci">void climatology(const ctl_t *ctl, atm_t *atm)</div><div class="ttdoc">Initializes atmospheric climatology profiles.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l00215">jurassic.c:215</a></div></div>
+<div class="line"><span class="lineno">  127</span>  <span class="comment">/* Write data to disk... */</span></div>
+<div class="line"><span class="lineno">  128</span>  <a class="code hl_function" href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a>(NULL, argv[2], &amp;ctl, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  129</span> </div>
+<div class="line"><span class="lineno">  130</span>  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line"><span class="lineno">  131</span>}</div>
+<div class="ttc" id="ajurassic_8c_html_a19b236d7e6cd812c67f36673f0dbefc3"><div class="ttname"><a href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a></div><div class="ttdeci">void write_atm(const char *dirname, const char *filename, const ctl_t *ctl, const atm_t *atm, int profile)</div><div class="ttdoc">Write atmospheric data to a file.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l07588">jurassic.c:7588</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read model control parameters from command-line and configuration input.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05819">jurassic.c:5819</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_abb6ce9b0361afe11cb23b8ac1e0c7fa3"><div class="ttname"><a href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a></div><div class="ttdeci">double scan_ctl(int argc, char *argv[], const char *varname, const int arridx, const char *defvalue, char *value)</div><div class="ttdoc">Scan control file or command-line arguments for a configuration variable.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l06893">jurassic.c:6893</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_ae324329aa277798b632b25de13faf1b2"><div class="ttname"><a href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2">climatology</a></div><div class="ttdeci">void climatology(const ctl_t *ctl, atm_t *atm)</div><div class="ttdoc">Initializes atmospheric climatology profiles.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l00488">jurassic.c:488</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a3e0ae69dee4a8bb2e616526b5ebe6875"><div class="ttname"><a href="jurassic_8h.html#a3e0ae69dee4a8bb2e616526b5ebe6875">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(...)</div><div class="ttdoc">Print an error message with contextual information and terminate the program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01356">jurassic.h:1356</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a56fe9bff0a1be75aae2da3e593053e2c"><div class="ttname"><a href="jurassic_8h.html#a56fe9bff0a1be75aae2da3e593053e2c">USAGE</a></div><div class="ttdeci">#define USAGE</div><div class="ttdoc">Print usage information on -h or --help.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01237">jurassic.h:1237</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_ab04c88bedc6b2be8ddfe7aa8d3e93f06"><div class="ttname"><a href="jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06">NP</a></div><div class="ttdeci">#define NP</div><div class="ttdoc">Maximum number of atmospheric data points.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00316">jurassic.h:316</a></div></div>
@@ -223,6 +226,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="astructatm__t_html"><div class="ttname"><a href="structatm__t.html">atm_t</a></div><div class="ttdoc">Atmospheric profile data.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01406">jurassic.h:1406</a></div></div>
 <div class="ttc" id="astructatm__t_html_a05da6b99657d420d7bf4b37a392b048c"><div class="ttname"><a href="structatm__t.html#a05da6b99657d420d7bf4b37a392b048c">atm_t::time</a></div><div class="ttdeci">double time[NP]</div><div class="ttdoc">Time (seconds since 2000-01-01T00:00Z).</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01412">jurassic.h:1412</a></div></div>
 <div class="ttc" id="astructatm__t_html_a09f5c1a2a0ecac7b481f3ea138b8a750"><div class="ttname"><a href="structatm__t.html#a09f5c1a2a0ecac7b481f3ea138b8a750">atm_t::sfeps</a></div><div class="ttdeci">double sfeps[NSF]</div><div class="ttdoc">Surface emissivity.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01448">jurassic.h:1448</a></div></div>
+<div class="ttc" id="astructatm__t_html_a25ef7d304d5cfa54c5af30192620373b"><div class="ttname"><a href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">atm_t::lat</a></div><div class="ttdeci">double lat[NP]</div><div class="ttdoc">Latitude [deg].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01421">jurassic.h:1421</a></div></div>
 <div class="ttc" id="astructatm__t_html_a467184c9e87a139e18fa656c565ab8a6"><div class="ttname"><a href="structatm__t.html#a467184c9e87a139e18fa656c565ab8a6">atm_t::clz</a></div><div class="ttdeci">double clz</div><div class="ttdoc">Cloud layer height [km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01436">jurassic.h:1436</a></div></div>
 <div class="ttc" id="astructatm__t_html_a473366004c7195d5c455373296ee1833"><div class="ttname"><a href="structatm__t.html#a473366004c7195d5c455373296ee1833">atm_t::np</a></div><div class="ttdeci">int np</div><div class="ttdoc">Number of data points.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01409">jurassic.h:1409</a></div></div>
 <div class="ttc" id="astructatm__t_html_a49c74ec000bd9884836d6e8ae2b96a3a"><div class="ttname"><a href="structatm__t.html#a49c74ec000bd9884836d6e8ae2b96a3a">atm_t::cldz</a></div><div class="ttdeci">double cldz</div><div class="ttdoc">Cloud layer depth [km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01439">jurassic.h:1439</a></div></div>
@@ -237,17 +241,22 @@ Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="climatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph.png" border="0" usemap="#aclimatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph" alt=""/></div>
 <map name="aclimatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph" id="aclimatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph">
-<area shape="rect" title=" " alt="" coords="5,132,56,159"/>
-<area shape="rect" href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2" title="Initializes atmospheric climatology profiles." alt="" coords="104,31,191,57"/>
-<area shape="rect" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="113,107,181,133"/>
-<area shape="rect" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="257,157,327,184"/>
-<area shape="rect" href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3" title="Write atmospheric data to a file." alt="" coords="108,233,187,260"/>
-<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="251,5,333,32"/>
-<area shape="rect" href="jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="247,56,337,83"/>
-<area shape="rect" href="jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="247,107,337,133"/>
-<area shape="rect" href="jurassic_8c.html#aa30b84e6dd510a6419d07dcaaba6669f" title="Write atmospheric data to an ASCII file." alt="" coords="239,208,345,235"/>
-<area shape="rect" href="jurassic_8c.html#af40f268fa1f23a997abbebc49d4c88d2" title="Write atmospheric data to a binary file." alt="" coords="241,259,343,285"/>
-<area shape="rect" href="jurassic_8c.html#a55dc8eb554ec2a550b66ced8310c7d73" title="Write one atmospheric profile to a netCDF file." alt="" coords="242,309,342,336"/>
+<area shape="rect" title=" " alt="" coords="5,293,56,319"/>
+<area shape="rect" href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2" title="Initializes atmospheric climatology profiles." alt="" coords="104,166,191,193"/>
+<area shape="rect" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="113,267,181,294"/>
+<area shape="rect" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="271,318,342,345"/>
+<area shape="rect" href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3" title="Write atmospheric data to a file." alt="" coords="108,394,187,421"/>
+<area shape="rect" href="jurassic_8c.html#adf6e9231a224d13aabdee6fcb305cbb6" title="Overwrite the built&#45;in climatology with data from a JuMACS monthly zonal mean climatology file." alt="" coords="239,115,375,142"/>
+<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="665,137,748,163"/>
+<area shape="rect" href="jurassic_8c.html#a9dc043fe0ca30973861c77d4b3a372c8" title="Interpolate a JuMACS climatology field onto the atmospheric grid points and overwrite the output arra..." alt="" coords="439,49,575,91"/>
+<area shape="rect" href="jurassic_8c.html#ada8264a5074d87a75664004614222cb8" title="Read and validate one JuMACS climatology field." alt="" coords="423,115,591,142"/>
+<area shape="rect" href="jurassic_8c.html#a7200afb48a6d4270ce5cd2c98bdaf14b" title="Flat index into a (month, altitude, lat) JuMACS data field." alt="" coords="639,5,775,47"/>
+<area shape="rect" href="jurassic_8c.html#acc0c1829ca7770d2dd6342f2cdf10bb9" title="Converts Julian seconds to calendar date and time components." alt="" coords="667,71,746,98"/>
+<area shape="rect" href="jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="262,217,351,243"/>
+<area shape="rect" href="jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="262,267,351,294"/>
+<area shape="rect" href="jurassic_8c.html#aa30b84e6dd510a6419d07dcaaba6669f" title="Write atmospheric data to an ASCII file." alt="" coords="253,369,360,395"/>
+<area shape="rect" href="jurassic_8c.html#af40f268fa1f23a997abbebc49d4c88d2" title="Write atmospheric data to a binary file." alt="" coords="255,419,358,446"/>
+<area shape="rect" href="jurassic_8c.html#a55dc8eb554ec2a550b66ced8310c7d73" title="Write one atmospheric profile to a netCDF file." alt="" coords="257,470,357,497"/>
 </map>
 </div>
 

@@ -1,0 +1,6 @@
+<map id="climatology_jumacs_interp" name="climatology_jumacs_interp">
+<area shape="rect" id="node1" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="5,64,141,105"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#a7200afb48a6d4270ce5cd2c98bdaf14b" title="Flat index into a (month, altitude, lat) JuMACS data field." alt="" coords="189,5,325,47"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#acc0c1829ca7770d2dd6342f2cdf10bb9" title="Converts Julian seconds to calendar date and time components." alt="" coords="218,71,297,98"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="216,122,299,149"/>
+</map>

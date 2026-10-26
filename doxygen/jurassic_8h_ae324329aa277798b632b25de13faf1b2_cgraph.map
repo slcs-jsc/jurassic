@@ -1,4 +1,9 @@
 <map id="climatology" name="climatology">
-<area shape="rect" id="node1" title="Initializes atmospheric climatology profiles." alt="" coords="5,5,92,32"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="140,5,223,32"/>
+<area shape="rect" id="node1" title="Initializes atmospheric climatology profiles." alt="" coords="5,141,92,167"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#adf6e9231a224d13aabdee6fcb305cbb6" title="Overwrite the built&#45;in climatology with data from a JuMACS monthly zonal mean climatology file." alt="" coords="140,115,276,142"/>
+<area shape="rect" id="node6" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="567,137,649,163"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a9dc043fe0ca30973861c77d4b3a372c8" title="Interpolate a JuMACS climatology field onto the atmospheric grid points and overwrite the output arra..." alt="" coords="340,49,476,91"/>
+<area shape="rect" id="node7" href="$jurassic_8c.html#ada8264a5074d87a75664004614222cb8" title="Read and validate one JuMACS climatology field." alt="" coords="324,115,492,142"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a7200afb48a6d4270ce5cd2c98bdaf14b" title="Flat index into a (month, altitude, lat) JuMACS data field." alt="" coords="540,5,676,47"/>
+<area shape="rect" id="node5" href="$jurassic_8c.html#acc0c1829ca7770d2dd6342f2cdf10bb9" title="Converts Julian seconds to calendar date and time components." alt="" coords="569,71,647,98"/>
 </map>
