@@ -1153,7 +1153,8 @@ void climatology(
     climatology_jumacs_read(ctl, clim);
     climatology_jumacs(ctl, clim, atm);
     free(clim);
-  }
+  } else
+    LOG(1, "Use built-in climatology...");
 }
 
 /*****************************************************************************/
@@ -1167,7 +1168,9 @@ int climatology_jumacs_read_field(
   const int dim_lat,
   const int nalt,
   const int nlat,
-  double field[CT][CZ][CLAT]) {
+  double field[CT][CZ][CLAT],
+  double *vmin,
+  double *vmax) {
 
   int varid;
 
@@ -1193,6 +1196,8 @@ int climatology_jumacs_read_field(
   double *tmp;
   ALLOC(tmp, double, (size_t) CT * (size_t) nalt * (size_t) nlat);
   NC(nc_get_var_double(ncid, varid, tmp));
+  double min = 1e100;
+  double max = -1e100;
   for (int m = 0; m < CT; m++)
     for (int iz = 0; iz < nalt; iz++)
       for (int il = 0; il < nlat; il++) {
@@ -1201,9 +1206,14 @@ int climatology_jumacs_read_field(
 	if (!isfinite(tmp[idx]))
 	  ERRMSG("Non-finite value in NetCDF variable %s of climatology "
 		 "file %s!", varname, filename);
+	min = MIN(min, tmp[idx]);
+	max = MAX(max, tmp[idx]);
 	field[m][iz][il] = tmp[idx];
       }
   free(tmp);
+
+  *vmin = min;
+  *vmax = max;
 
   return 1;
 }
@@ -1305,6 +1315,8 @@ void climatology_jumacs_read(
   clim->ntime = CT;
   memcpy(clim->time, jumacs_time, sizeof(clim->time));
 
+  LOG(1, "Read JuMACS climatology: %s", ctl->climfile);
+
   /* Open climatology file... */
   int ncid;
   const int status = nc_open(ctl->climfile, NC_NOWRITE, &ncid);
@@ -1400,13 +1412,22 @@ void climatology_jumacs_read(
 	     "file %s - interpolation requires a regular grid!",
 	     ctl->climfile);
 
+  LOG(2, "Number of time steps: %d", clim->ntime);
+  LOG(2, "Altitude grid: %d levels, %g ... %g km | dz = %g km",
+      clim->nalt, clim->alt[0], clim->alt[clim->nalt - 1], dz);
+  LOG(2, "Latitude grid: %d bands, %g ... %g deg | dy = %g deg",
+      clim->nlat, clim->lat[0], clim->lat[clim->nlat - 1], dy);
+
   /* Read and check temperature... */
+  double vmin;
+  double vmax;
   if (!climatology_jumacs_read_field(ctl->climfile, "temperature_mean", ncid,
 				     dim_month, dim_alt, dim_lat, clim->nalt,
-				     clim->nlat, clim->t))
+				     clim->nlat, clim->t, &vmin, &vmax))
     ERRMSG("Climatology file %s has no variable 'temperature_mean' - "
 	   "not a complete JuMACS climatology file?", ctl->climfile);
   clim->has_t = 1;
+  LOG(2, "Temperature: JuMACS temperature_mean, %g ... %g K", vmin, vmax);
 
   /* Read trace gases... */
   /* Mapping of JURASSIC emitter names to JuMACS climatology variable base
@@ -1451,14 +1472,32 @@ void climatology_jumacs_read(
 	base = jumacs_map[i].varname;
 	break;
       }
-    if (base == NULL)
+    if (base == NULL) {
+      if (ig == ctl->ig_co2) {
+        LOG(2, "%s: built-in CO2 fit", ctl->emitter[ig]);
+      } else if (ig == ctl->ig_n2 || ig == ctl->ig_o2) {
+        LOG(2, "%s: constant", ctl->emitter[ig]);
+      } else {
+        LOG(2, "%s: built-in climatology", ctl->emitter[ig]);
+      }
       continue;
+    }
     sprintf(varname, "%s_mean", base);
     clim->has_q[ig] = climatology_jumacs_read_field(ctl->climfile, varname,
 						    ncid, dim_month, dim_alt,
 						    dim_lat, clim->nalt,
-						    clim->nlat, clim->q[ig]);
+						    clim->nlat, clim->q[ig],
+						    &vmin, &vmax);
+    if (clim->has_q[ig]) {
+      LOG(2, "%s: JuMACS %s, %g ... %g ppv", ctl->emitter[ig], varname,
+	  vmin, vmax);
+    } else {
+      LOG(2, "%s: built-in climatology (JuMACS variable %s not found)",
+	  ctl->emitter[ig], varname);
+    }
   }
+
+  LOG(2, "Pressure: built-in climatology");
 
   /* Close climatology file... */
   NC(nc_close(ncid));

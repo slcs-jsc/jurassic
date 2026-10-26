@@ -2237,6 +2237,8 @@ void climatology(
  * @param[in]  nalt       Number of altitude levels actually present.
  * @param[in]  nlat       Number of latitude bands actually present.
  * @param[out] field      Fixed-size field array receiving the data.
+ * @param[out] vmin       Minimum value over the actually read grid.
+ * @param[out] vmax       Maximum value over the actually read grid.
  * @return 1 if the variable was found and read, 0 if it is missing.
  *
  * @note Aborts with an error message if the variable exists but is
@@ -2253,7 +2255,9 @@ int climatology_jumacs_read_field(
   const int dim_lat,
   const int nalt,
   const int nlat,
-  double field[CT][CZ][CLAT]);
+  double field[CT][CZ][CLAT],
+  double *vmin,
+  double *vmax);
 
 /**
  * @brief Interpolates a JuMACS climatology field onto atmospheric profiles.
