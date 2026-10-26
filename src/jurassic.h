@@ -581,6 +581,24 @@ enum {
 #define DOTP(a, b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 
 /**
+ * @brief Compute floating-point remainder.
+ *
+ * Returns the floating-point remainder of `x` divided by `y`, computed
+ * as `x - (int) (x / y) * y`. The result has the same sign as `x`.
+ *
+ * @param[in] x Dividend.
+ * @param[in] y Divisor.
+ *
+ * @return The floating-point remainder of x divided by y.
+ *
+ * @note Macro substitutes `fmod()` to ensure GPU compatibility.
+ *
+ * @author Lars Hoffmann
+ */
+#define FMOD(x, y)				\
+  ((x) - (int) ((x) / (y)) * (y))
+
+/**
  * @brief Read binary data from a file.
  *
  * Reads `size` elements of type `type` from the file stream `out` into
@@ -1467,7 +1485,9 @@ typedef struct {
 /*! JuMACS climatology on a fixed grid. Monthly zonal mean fields on the
    JuMACS (altitude, lat) grid, stored in fixed-size arrays only, such that
    the structure can be copied to a compute device as a whole. The fields
-   are defined for month < CT, altitude < nalt, and lat < nlat. */
+   are defined for month < CT, altitude < nalt, and lat < nlat. The month
+   index is associated with the climatological time coordinates time, given
+   as seconds into a year of 365.25 days. */
 typedef struct {
   /*! Number of altitude levels. */
   int nalt;
@@ -1475,11 +1495,17 @@ typedef struct {
   /*! Number of latitude bands. */
   int nlat;
 
+  /*! Number of climatological time coordinates. */
+  int ntime;
+
   /*! Altitude grid [km]. */
   double alt[CZ];
 
   /*! Latitude grid [deg]. */
   double lat[CLAT];
+
+  /*! Climatological time coordinates [s into year]. */
+  double time[CT];
 
   /*! Temperature [K]. */
   double t[CT][CZ][CLAT];

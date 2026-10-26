@@ -261,21 +261,26 @@ int climatology_jumacs_read_field(
 }
 
 /*! Interpolate a JuMACS climatology field onto the atmospheric grid points
-   and overwrite the output array. Points above the JuMACS top are skipped,
-   thus retaining their built-in climatological values. Latitude is clamped
-   at the outer band centers, altitude at the lowest JuMACS level. */
+   and overwrite the output array. The temporal interpolation follows the
+   MPTRAC convention: the profile time is mapped onto the annual cycle of a
+   climatological year of 365.25 days and linearly interpolated between the
+   climatological time coordinates, cyclically across the turn of the year.
+   Points above the JuMACS top are skipped, thus retaining their built-in
+   climatological values. Latitude is clamped at the outer band centers,
+   altitude at the lowest JuMACS level. */
 void climatology_jumacs_interp(
   const clim_t *clim,
   const atm_t *atm,
   const double field[CT][CZ][CLAT],
   double *out) {
 
-  static const int nody[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
   const double *alt = clim->alt;
   const double *latg = clim->lat;
   const int nalt = clim->nalt;
   const int nlat = clim->nlat;
+
+  /* Length of a climatological year [s]... */
+  const double year = 365.25 * 86400.;
 
   for (int ip = 0; ip < atm->np; ip++) {
 
@@ -283,28 +288,29 @@ void climatology_jumacs_interp(
     if (atm->z[ip] > alt[nalt - 1])
       continue;
 
-    /* Determine actual calendar date... */
-    int year, mon, day, hour, min, sec;
-    double remain;
-    jsec2time(atm->time[ip], &year, &mon, &day, &hour, &min, &sec, &remain);
+    /* Position within the climatological year... */
+    double sec = FMOD(atm->time[ip], year);
+    while (sec < 0)
+      sec += year;
 
-    /* Fractional month position using actual month lengths... */
-    int nd = nody[mon - 1];
-    if (mon == 2 &&
-	((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)) nd = 29;
-    const double x = (mon - 1) + (day - 1 +
-				  (hour * 3600 + min * 60 + sec +
-				   remain) / 86400.0) / nd;
-
-    /* Monthly means are centered on their months -> cyclically interpolate
-       between adjacent month centers... */
-    const double y = x - 0.5;
-    const double fy = floor(y);
-    const double wt = y - fy;
-    int m0 = (int) fy % 12;
-    if (m0 < 0)
-      m0 += 12;
-    const int m1 = (m0 + 1) % 12;
+    /* Determine climatological time interval, cyclically interpolating
+       between December and January across the turn of the year... */
+    int it;
+    double t0, t1;
+    if (sec < clim->time[0]) {
+      it = clim->ntime - 1;
+      t0 = clim->time[it] - year;
+      t1 = clim->time[0];
+    } else if (sec >= clim->time[clim->ntime - 1]) {
+      it = clim->ntime - 1;
+      t0 = clim->time[it];
+      t1 = clim->time[0] + year;
+    } else {
+      it = locate_irr(clim->time, clim->ntime, sec);
+      t0 = clim->time[it];
+      t1 = clim->time[it + 1];
+    }
+    const int it2 = (it + 1) % clim->ntime;
 
     /* Latitude index (clamped at the polar band centers)... */
     double latq = atm->lat[ip];
@@ -323,20 +329,20 @@ void climatology_jumacs_interp(
     /* Trilinear interpolation (linear in all directions)... */
     const double v0 =
       LIN(alt[iz],
-	  LIN(latg[il], field[m0][iz][il], latg[il + 1],
-	      field[m0][iz][il + 1], latq),
+	  LIN(latg[il], field[it][iz][il], latg[il + 1],
+	      field[it][iz][il + 1], latq),
 	  alt[iz + 1],
-	  LIN(latg[il], field[m0][iz + 1][il], latg[il + 1],
-	      field[m0][iz + 1][il + 1], latq), zq);
+	  LIN(latg[il], field[it][iz + 1][il], latg[il + 1],
+	      field[it][iz + 1][il + 1], latq), zq);
     const double v1 =
       LIN(alt[iz],
-	  LIN(latg[il], field[m1][iz][il], latg[il + 1],
-	      field[m1][iz][il + 1], latq),
+	  LIN(latg[il], field[it2][iz][il], latg[il + 1],
+	      field[it2][iz][il + 1], latq),
 	  alt[iz + 1],
-	  LIN(latg[il], field[m1][iz + 1][il], latg[il + 1],
-	      field[m1][iz + 1][il + 1], latq), zq);
+	  LIN(latg[il], field[it2][iz + 1][il], latg[il + 1],
+	      field[it2][iz + 1][il + 1], latq), zq);
 
-    out[ip] = (1.0 - wt) * v0 + wt * v1;
+    out[ip] = LIN(t0, v0, t1, v1, sec);
   }
 }
 
@@ -354,6 +360,15 @@ void climatology_jumacs_read(
 
   /* Start with an empty climatology... */
   memset(clim, 0, sizeof(clim_t));
+
+  /* Set climatological time coordinates as seconds into a year of 365.25
+     days, matching the centers of the twelve monthly fields... */
+  static const double jumacs_time[CT] = {1209600.0, 3888000.0, 6393600.0,
+                                         9072000.0, 11664000.0, 14342400.0,
+                                         16934400.0, 19612800.0, 22291200.0,
+                                         24883200.0, 27561600.0, 30153600.0};
+  clim->ntime = CT;
+  memcpy(clim->time, jumacs_time, sizeof(clim->time));
 
   /* Open climatology file... */
   int ncid;

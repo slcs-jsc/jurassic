@@ -24,6 +24,18 @@ $jurassic/climatology jumacs.ctl data/jan_south.tab \
 $jurassic/climatology jumacs.ctl data/feb29.tab \
     T0 383788800 T1 383788800 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
 
+# December branch (past the December center) and negative time...
+$jurassic/climatology jumacs.ctl data/dec.tab \
+    T0 30758400 T1 30758400 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE $clim
+$jurassic/climatology jumacs.ctl data/neg.tab \
+    T0 -600 T1 -600 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE $clim
+
+# Same phases as the December and negative-time tests one year later...
+$jurassic/climatology jumacs.ctl data/dec2.tab \
+    T0 62316000 T1 62316000 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE $clim
+$jurassic/climatology jumacs.ctl data/neg2.tab \
+    T0 31557000 T1 31557000 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE $clim
+
 # Built-in climatology for the special and unmapped species...
 $jurassic/climatology jumacs.ctl data/legacy.tab \
     T0 0 T1 0 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE -
@@ -34,15 +46,19 @@ $jurassic/climatology jumacs.ctl data/polar89.tab \
 $jurassic/climatology jumacs.ctl data/polar875.tab \
     T0 0 T1 0 DT 1 Z0 0 Z1 90 DZ 10 LAT 87.5 CLIM_FILE $clim
 
-# New-Year and first-of-March invariances across leap and common years...
+# Same position in the climatological year across common and leap years...
 $jurassic/climatology jumacs.ctl data/ny2010.tab \
     T0 315619200 T1 315619200 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
 $jurassic/climatology jumacs.ctl data/ny2012.tab \
-    T0 378691200 T1 378691200 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
+    T0 378734400 T1 378734400 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
 $jurassic/climatology jumacs.ctl data/mar2010.tab \
     T0 320716800 T1 320716800 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
 $jurassic/climatology jumacs.ctl data/mar2012.tab \
-    T0 383875200 T1 383875200 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
+    T0 383832000 T1 383832000 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
+
+# Same climatological phase in the very first year...
+$jurassic/climatology jumacs.ctl data/phase.tab \
+    T0 43200 T1 43200 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
 
 # Nontrivial species name aliases (F11, F12, F22, H2CO, O3)...
 $jurassic/climatology alias.ctl data/alias.tab \
@@ -123,6 +139,22 @@ diff -q -s <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
     data/mar2010.tab) \
     <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
     data/mar2012.tab) || error=1
+
+# December and negative-time invariances across one climatological year...
+diff -q -s <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
+    data/dec.tab) \
+    <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
+    data/dec2.tab) || error=1
+diff -q -s <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
+    data/neg.tab) \
+    <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
+    data/neg2.tab) || error=1
+
+# Same climatological phase in the first year (pre-January cyclic branch)...
+diff -q -s <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
+    data/phase.tab) \
+    <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
+    data/ny2010.tab) || error=1
 
 # Special/unmapped species (CO2, O2, N2, SF6) must equal built-in values...
 diff -q -s <(awk '{print $2,$8,$11,$12,$13}' data/jan45.tab) \
