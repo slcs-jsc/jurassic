@@ -89,12 +89,18 @@ Data Fields</h2></td></tr>
 <tr class="memitem:afc8f4edbe44fd0103c8fbc39a0b10089"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structclim__t.html#afc8f4edbe44fd0103c8fbc39a0b10089">nlat</a></td></tr>
 <tr class="memdesc:afc8f4edbe44fd0103c8fbc39a0b10089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of latitude bands.  <a href="structclim__t.html#afc8f4edbe44fd0103c8fbc39a0b10089">More...</a><br /></td></tr>
 <tr class="separator:afc8f4edbe44fd0103c8fbc39a0b10089"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36a8ab995edef3d008c1a10ca3d733f3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structclim__t.html#a36a8ab995edef3d008c1a10ca3d733f3">ntime</a></td></tr>
+<tr class="memdesc:a36a8ab995edef3d008c1a10ca3d733f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of climatological time coordinates.  <a href="structclim__t.html#a36a8ab995edef3d008c1a10ca3d733f3">More...</a><br /></td></tr>
+<tr class="separator:a36a8ab995edef3d008c1a10ca3d733f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35419497c42e11439e515b06d5539830"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structclim__t.html#a35419497c42e11439e515b06d5539830">alt</a> [<a class="el" href="jurassic_8h.html#addbd2f751d6f06eaa9eac7526839a4c9">CZ</a>]</td></tr>
 <tr class="memdesc:a35419497c42e11439e515b06d5539830"><td class="mdescLeft">&#160;</td><td class="mdescRight">Altitude grid [km].  <a href="structclim__t.html#a35419497c42e11439e515b06d5539830">More...</a><br /></td></tr>
 <tr class="separator:a35419497c42e11439e515b06d5539830"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4ff2b9d053fd8d9a1f9901220f390e7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structclim__t.html#af4ff2b9d053fd8d9a1f9901220f390e7">lat</a> [<a class="el" href="jurassic_8h.html#aa2b33969819eb3a78f2f22f63cbbf274">CLAT</a>]</td></tr>
 <tr class="memdesc:af4ff2b9d053fd8d9a1f9901220f390e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Latitude grid [deg].  <a href="structclim__t.html#af4ff2b9d053fd8d9a1f9901220f390e7">More...</a><br /></td></tr>
 <tr class="separator:af4ff2b9d053fd8d9a1f9901220f390e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55578046b3e3d56cf53f9652b8d1e7c3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structclim__t.html#a55578046b3e3d56cf53f9652b8d1e7c3">time</a> [<a class="el" href="jurassic_8h.html#a7e463881fb9033a2fb65f3782d4e1c01">CT</a>]</td></tr>
+<tr class="memdesc:a55578046b3e3d56cf53f9652b8d1e7c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Climatological time coordinates [s into year].  <a href="structclim__t.html#a55578046b3e3d56cf53f9652b8d1e7c3">More...</a><br /></td></tr>
+<tr class="separator:a55578046b3e3d56cf53f9652b8d1e7c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87a27e4665b454afb2b4fdb73b867f86"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structclim__t.html#a87a27e4665b454afb2b4fdb73b867f86">t</a> [<a class="el" href="jurassic_8h.html#a7e463881fb9033a2fb65f3782d4e1c01">CT</a>][<a class="el" href="jurassic_8h.html#addbd2f751d6f06eaa9eac7526839a4c9">CZ</a>][<a class="el" href="jurassic_8h.html#aa2b33969819eb3a78f2f22f63cbbf274">CLAT</a>]</td></tr>
 <tr class="memdesc:a87a27e4665b454afb2b4fdb73b867f86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temperature [K].  <a href="structclim__t.html#a87a27e4665b454afb2b4fdb73b867f86">More...</a><br /></td></tr>
 <tr class="separator:a87a27e4665b454afb2b4fdb73b867f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -110,9 +116,9 @@ Data Fields</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >JuMACS climatology on a fixed grid. </p>
-<p >Monthly zonal mean fields on the JuMACS (altitude, lat) grid, stored in fixed-size arrays only, such that the structure can be copied to a compute device as a whole. The fields are defined for month &lt; CT, altitude &lt; nalt, and lat &lt; nlat. </p>
+<p >Monthly zonal mean fields on the JuMACS (altitude, lat) grid, stored in fixed-size arrays only, such that the structure can be copied to a compute device as a whole. The fields are defined for month &lt; CT, altitude &lt; nalt, and lat &lt; nlat. The month index is associated with the climatological time coordinates time, given as seconds into a year of 365.25 days. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01471">1471</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01491">1491</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 </div><h2 class="groupheader">Field Documentation</h2>
 <a id="a8916bbe804bd3947e45b2105e6c4b684" name="a8916bbe804bd3947e45b2105e6c4b684"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8916bbe804bd3947e45b2105e6c4b684">&#9670;&nbsp;</a></span>nalt</h2>
@@ -128,7 +134,7 @@ Data Fields</h2></td></tr>
 
 <p>Number of altitude levels. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01473">1473</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01493">1493</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>
@@ -146,7 +152,25 @@ Data Fields</h2></td></tr>
 
 <p>Number of latitude bands. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01476">1476</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01496">1496</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+
+</div>
+</div>
+<a id="a36a8ab995edef3d008c1a10ca3d733f3" name="a36a8ab995edef3d008c1a10ca3d733f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36a8ab995edef3d008c1a10ca3d733f3">&#9670;&nbsp;</a></span>ntime</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int clim_t::ntime</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Number of climatological time coordinates. </p>
+
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01499">1499</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>
@@ -164,7 +188,7 @@ Data Fields</h2></td></tr>
 
 <p>Altitude grid [km]. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01479">1479</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01502">1502</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>
@@ -182,7 +206,25 @@ Data Fields</h2></td></tr>
 
 <p>Latitude grid [deg]. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01482">1482</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01505">1505</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+
+</div>
+</div>
+<a id="a55578046b3e3d56cf53f9652b8d1e7c3" name="a55578046b3e3d56cf53f9652b8d1e7c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55578046b3e3d56cf53f9652b8d1e7c3">&#9670;&nbsp;</a></span>time</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double clim_t::time[<a class="el" href="jurassic_8h.html#a7e463881fb9033a2fb65f3782d4e1c01">CT</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Climatological time coordinates [s into year]. </p>
+
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01508">1508</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>
@@ -200,7 +242,7 @@ Data Fields</h2></td></tr>
 
 <p>Temperature [K]. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01485">1485</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01511">1511</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>
@@ -218,7 +260,7 @@ Data Fields</h2></td></tr>
 
 <p>Volume mixing ratio [ppv]. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01488">1488</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01514">1514</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>
@@ -236,7 +278,7 @@ Data Fields</h2></td></tr>
 
 <p>Set if a temperature field was read. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01491">1491</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01517">1517</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>
@@ -254,7 +296,7 @@ Data Fields</h2></td></tr>
 
 <p>Set for each emitter with a field read. </p>
 
-<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01494">1494</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="jurassic_8h_source.html#l01520">1520</a> of file <a class="el" href="jurassic_8h_source.html">jurassic.h</a>.</p>
 
 </div>
 </div>

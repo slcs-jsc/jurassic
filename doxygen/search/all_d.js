@@ -29,8 +29,8 @@ var searchData=
   ['nlos_26',['NLOS',['../jurassic_8h.html#aecba64d582576f89695ab0ff97805b3e',1,'jurassic.h']]],
   ['nmax_27',['NMAX',['../invert_8c.html#a5de5d183f9a6a8d53316f743e1ca6dc2',1,'invert.c']]],
   ['norm_28',['NORM',['../jurassic_8h.html#a7fa3afb5cf2625deb1e859cbb93d2943',1,'jurassic.h']]],
-  ['np_29',['np',['../structatm__t.html#a473366004c7195d5c455373296ee1833',1,'atm_t::np()'],['../structlos__t.html#a8a1dd4eed9a219b4dba98db4e22e6355',1,'los_t::np()'],['../structtbl__t.html#adc68798047aad09d90b16c84aba2117c',1,'tbl_t::np()']]],
-  ['np_30',['NP',['../jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06',1,'jurassic.h']]],
+  ['np_29',['NP',['../jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06',1,'jurassic.h']]],
+  ['np_30',['np',['../structatm__t.html#a473366004c7195d5c455373296ee1833',1,'atm_t::np()'],['../structlos__t.html#a8a1dd4eed9a219b4dba98db4e22e6355',1,'los_t::np()'],['../structtbl__t.html#adc68798047aad09d90b16c84aba2117c',1,'tbl_t::np()']]],
   ['nq_31',['NQ',['../jurassic_8h.html#a68c2775fc4d7385df9c7bb96d23b482b',1,'jurassic.h']]],
   ['nr_32',['nr',['../structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0',1,'obs_t']]],
   ['nr_33',['NR',['../jurassic_8h.html#af146485306ae74a2edf18636300fd107',1,'jurassic.h']]],
@@ -38,8 +38,9 @@ var searchData=
   ['nsf_35',['nsf',['../structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3',1,'ctl_t']]],
   ['nshape_36',['NSHAPE',['../jurassic_8h.html#a7705bd290b81177c733651a18441be93',1,'jurassic.h']]],
   ['nt_37',['nt',['../structtbl__t.html#a454a107571770aaaf5cbdd9d6ee27aab',1,'tbl_t']]],
-  ['ntimer_38',['NTIMER',['../jurassic_8h.html#ab14495ae1f9667df5d198613bcc8d092',1,'jurassic.h']]],
-  ['nu_39',['nu',['../structtbl__t.html#a1675f08cd8ed441e415ec83b9bf010b3',1,'tbl_t::nu()'],['../structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044',1,'ctl_t::nu()']]],
-  ['nw_40',['nw',['../structctl__t.html#a094e10d6d25abb248ee383a3da02181a',1,'ctl_t']]],
-  ['nw_41',['NW',['../jurassic_8h.html#af9cccf331f045b89a9f12366df5f7687',1,'jurassic.h']]]
+  ['ntime_38',['ntime',['../structclim__t.html#a36a8ab995edef3d008c1a10ca3d733f3',1,'clim_t']]],
+  ['ntimer_39',['NTIMER',['../jurassic_8h.html#ab14495ae1f9667df5d198613bcc8d092',1,'jurassic.h']]],
+  ['nu_40',['nu',['../structtbl__t.html#a1675f08cd8ed441e415ec83b9bf010b3',1,'tbl_t::nu()'],['../structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044',1,'ctl_t::nu()']]],
+  ['nw_41',['nw',['../structctl__t.html#a094e10d6d25abb248ee383a3da02181a',1,'ctl_t']]],
+  ['nw_42',['NW',['../jurassic_8h.html#af9cccf331f045b89a9f12366df5f7687',1,'jurassic.h']]]
 ];

@@ -19,7 +19,7 @@ var searchData=
   ['tblnt_16',['TBLNT',['../jurassic_8h.html#aad9835e9e4be4ad8ed538f95bdceddea',1,'jurassic.h']]],
   ['tblnu_17',['TBLNU',['../jurassic_8h.html#a910036a8c83f3464c3de6bf398467c03',1,'jurassic.h']]],
   ['tblrdc_2ec_18',['tblrdc.c',['../tblrdc_8c.html',1,'']]],
-  ['time_19',['time',['../structobs__t.html#ad86987afb2b3307399b50383f4dbdc40',1,'obs_t::time()'],['../structatm__t.html#a05da6b99657d420d7bf4b37a392b048c',1,'atm_t::time()']]],
+  ['time_19',['time',['../structobs__t.html#ad86987afb2b3307399b50383f4dbdc40',1,'obs_t::time()'],['../structclim__t.html#a55578046b3e3d56cf53f9652b8d1e7c3',1,'clim_t::time()'],['../structatm__t.html#a05da6b99657d420d7bf4b37a392b048c',1,'atm_t::time()']]],
   ['time2jsec_20',['time2jsec',['../jurassic_8c.html#a578e7ebaa62304182de8fe7ddf144b8f',1,'time2jsec(const int year, const int mon, const int day, const int hour, const int min, const int sec, const double remain, double *jsec):&#160;jurassic.c'],['../jurassic_8h.html#a578e7ebaa62304182de8fe7ddf144b8f',1,'time2jsec(const int year, const int mon, const int day, const int hour, const int min, const int sec, const double remain, double *jsec):&#160;jurassic.c']]],
   ['time2jsec_2ec_21',['time2jsec.c',['../time2jsec_8c.html',1,'']]],
   ['timer_5fgroup_22',['timer_group',['../jurassic_8h.html#a8f924d811ac203a3bb0afabaf66a7baa',1,'timer_group(const char *name, const char *group, int output):&#160;jurassic.c'],['../jurassic_8c.html#a8f924d811ac203a3bb0afabaf66a7baa',1,'timer_group(const char *name, const char *group, int output):&#160;jurassic.c']]],

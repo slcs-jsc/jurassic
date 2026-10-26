@@ -9,6 +9,7 @@ var searchData=
   ['nr_6',['nr',['../structobs__t.html#aebd5d0d6c2d1dba7a769c4d506570fa0',1,'obs_t']]],
   ['nsf_7',['nsf',['../structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3',1,'ctl_t']]],
   ['nt_8',['nt',['../structtbl__t.html#a454a107571770aaaf5cbdd9d6ee27aab',1,'tbl_t']]],
-  ['nu_9',['nu',['../structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044',1,'ctl_t::nu()'],['../structtbl__t.html#a1675f08cd8ed441e415ec83b9bf010b3',1,'tbl_t::nu()']]],
-  ['nw_10',['nw',['../structctl__t.html#a094e10d6d25abb248ee383a3da02181a',1,'ctl_t']]]
+  ['ntime_9',['ntime',['../structclim__t.html#a36a8ab995edef3d008c1a10ca3d733f3',1,'clim_t']]],
+  ['nu_10',['nu',['../structctl__t.html#a16a7e8119bff09ce8de3ee89d6ca0044',1,'ctl_t::nu()'],['../structtbl__t.html#a1675f08cd8ed441e415ec83b9bf010b3',1,'tbl_t::nu()']]],
+  ['nw_11',['nw',['../structctl__t.html#a094e10d6d25abb248ee383a3da02181a',1,'ctl_t']]]
 ];
