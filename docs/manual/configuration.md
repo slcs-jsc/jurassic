@@ -162,6 +162,35 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
     When the same files are used by several tools, use the same format
     selectors in each control file or command-line override.
 
+### Climatology
+
+- `CLIM_FILE` *(default: `-`)*  
+  Climatological data source for the `climatology` tool. `-` uses the
+  built-in JURASSIC climatology. A JuMACS netCDF file provides temperature
+  and mapped trace gases from JuMACS, while quantities not supplied by
+  JuMACS retain built-in behavior.
+
+!!! note
+    JuMACS products are monthly zonal-mean climatologies, and the
+    `climatology` tool interpolates them in climatological time, latitude,
+    and altitude. Harmonized JuMACS products provide 12 monthly means on
+    36 area-weighted 5-degree latitude bands; their upper altitude is
+    model-dependent.
+
+    JuMACS values are used unchanged up to and including the model top of
+    the product. Above the model top, JURASSIC smoothly transitions back
+    to the built-in climatology over a fixed 20 km layer using a cosine
+    taper: the JuMACS value is retained at the model top, the built-in
+    climatology is recovered exactly at the end of the transition layer,
+    and above the transition layer the built-in climatology is used
+    unchanged.
+
+    The mapped trace gases are C2H2, C2H6, CCl4, CH4, ClO, ClONO2, CO,
+    F11, F12, F22, H2CO, H2O, H2O2, HCl, HNO3, HNO4, HOCl, N2O, N2O5, NO,
+    NO2, O3, OCS, and SO2. Species not mapped to the product, including
+    the main gases CO2, O2, and N2, continue to use the built-in
+    climatology.
+
 ### Hydrostasy
 
 - `HYDZ` *(default: `-999`)*  

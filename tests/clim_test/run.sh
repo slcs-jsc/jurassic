@@ -46,6 +46,12 @@ $jurassic/climatology jumacs.ctl data/polar89.tab \
 $jurassic/climatology jumacs.ctl data/polar875.tab \
     T0 0 T1 0 DT 1 Z0 0 Z1 90 DZ 10 LAT 87.5 CLIM_FILE $clim
 
+# Smooth transition to the built-in climatology above the JuMACS top...
+$jurassic/climatology jumacs.ctl data/trans_jul.tab \
+    T0 15724800 T1 15724800 DT 1 Z0 70 Z1 100 DZ 1 LAT 45 CLIM_FILE $clim
+$jurassic/climatology jumacs.ctl data/legacy_jul.tab \
+    T0 15724800 T1 15724800 DT 1 Z0 70 Z1 100 DZ 1 LAT 45 CLIM_FILE -
+
 # Same position in the climatological year across common and leap years...
 $jurassic/climatology jumacs.ctl data/ny2010.tab \
     T0 315619200 T1 315619200 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
@@ -109,9 +115,45 @@ diff -q -s <(awk '{print $2,$3,$4,$5,$6,$7,$9,$10,$11,$12,$13,$14}' \
 diff -q -s <(awk '{print $2,$8,$11,$12,$13}' data/jan45.tab) \
     <(awk '{print $2,$8,$11,$12,$13}' data/legacy.tab) || error=1
 
-# Altitudes above the JuMACS top (z > 76 km) must equal built-in values...
-diff -q -s <(awk '$2>76' data/jan45.tab) \
-    <(awk '$2>76' data/legacy.tab) || error=1
+# At the transition inlet (70 km), values must equal pure JuMACS behavior...
+diff -q -s <(awk '$2==70' data/trans_jul.tab) \
+    <(awk '$2==70' data.ref/jul45.tab) || error=1
+
+# Altitudes above the transition region (z >= 96 km) must equal built-in
+# values...
+diff -q -s <(awk '$2>=96' data/trans_jul.tab) \
+    <(awk '$2>=96' data/legacy_jul.tab) || error=1
+
+# Within the transition region (76 < z < 96 km), values must differ from
+# pure built-in values...
+if diff -q <(awk '$2>76 && $2<96' data/trans_jul.tab) \
+   <(awk '$2>76 && $2<96' data/legacy_jul.tab) > /dev/null ; then
+  echo "Transition band unexpectedly equals built-in values!"
+  error=1
+fi
+
+# The hard switch at the JuMACS top must be removed: the temperature step
+# across 76 to 77 km must be much smaller than towards the built-in
+# climatology...
+if ! awk -v t76="$(awk '$2 == 76 {print $6}' data/trans_jul.tab)" \
+        -v t77="$(awk '$2 == 77 {print $6}' data/trans_jul.tab)" \
+        -v l77="$(awk '$2 == 77 {print $6}' data/legacy_jul.tab)" \
+    'BEGIN { exit !((t77 - t76)^2 < (l77 - t76)^2) }' ; then
+  echo "Temperature jump at the JuMACS top not removed!"
+  error=1
+fi
+
+# Transition values must be finite, and temperatures and mixing ratios
+# must remain non-negative...
+if ! awk '$2 >= 70 && $2 <= 100 && NF {
+       for (i = 6; i <= 14; i++)
+         if ($i !~ /^[+-]?([0-9]+\.?[0-9]*|\.?[0-9]+)([eE][+-]?[0-9]+)?$/ \
+             || $i + 0 < 0)
+           exit 1
+     }' data/trans_jul.tab ; then
+  echo "Non-finite or negative transition values!"
+  error=1
+fi
 
 # Mapped alias species must differ from their built-in values...
 if diff -q <(awk '!/^#/{print $6,$7,$8,$9}' data/alias.tab) \

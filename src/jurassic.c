@@ -1220,6 +1220,9 @@ int climatology_jumacs_read_field(
 
 /*****************************************************************************/
 
+/* Width of transition region towards built-in climatology [km]. */
+#define JUMACS_TRANSITION 20.
+
 void climatology_jumacs_interp(
   const clim_t *clim,
   const atm_t *atm,
@@ -1231,13 +1234,16 @@ void climatology_jumacs_interp(
   const int nalt = clim->nalt;
   const int nlat = clim->nlat;
 
+  /* JuMACS model top... */
+  const double ztop = alt[nalt - 1];
+
   /* Length of a climatological year [s]... */
   const double year = 365.25 * 86400.;
 
   for (int ip = 0; ip < atm->np; ip++) {
 
-    /* Keep built-in values above the JuMACS top... */
-    if (atm->z[ip] > alt[nalt - 1])
+    /* Keep built-in climatology above the transition region... */
+    if (atm->z[ip] >= ztop + JUMACS_TRANSITION)
       continue;
 
     /* Position within the climatological year... */
@@ -1272,10 +1278,12 @@ void climatology_jumacs_interp(
       latq = latg[nlat - 1];
     const int il = locate_reg(latg, nlat, latq);
 
-    /* Altitude index (clamped at the lowest JuMACS level)... */
+    /* Altitude index (clamped at the JuMACS grid boundaries)... */
     double zq = atm->z[ip];
     if (zq < alt[0])
       zq = alt[0];
+    else if (zq > ztop)
+      zq = ztop;
     const int iz = locate_reg(alt, nalt, zq);
 
     /* Trilinear interpolation (linear in all directions)... */
@@ -1292,7 +1300,17 @@ void climatology_jumacs_interp(
 			  LIN(latg[il], field[it2][iz + 1][il], latg[il + 1],
 			      field[it2][iz + 1][il + 1], latq), zq);
 
-    out[ip] = LIN(t0, v0, t1, v1, sec);
+    const double jumacs = LIN(t0, v0, t1, v1, sec);
+
+    /* Blend smoothly towards the built-in climatology above the model
+       top, using a cosine taper over the transition region; before
+       overwriting, out[] holds the built-in climatology... */
+    if (atm->z[ip] > ztop) {
+      const double x = (atm->z[ip] - ztop) / JUMACS_TRANSITION;
+      const double w = 0.5 * (1. + cos(M_PI * x));
+      out[ip] = w * jumacs + (1. - w) * out[ip];
+    } else
+      out[ip] = jumacs;
   }
 }
 
