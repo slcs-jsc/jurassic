@@ -706,6 +706,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Climatology
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#hydrostasy" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1523,6 +1534,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Climatology
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#hydrostasy" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1815,6 +1837,34 @@ layout, JURASSIC expects one netCDF file per emitter and one packed
 lookup-table variable per channel inside that file.</p>
 <p>When the same files are used by several tools, use the same format
 selectors in each control file or command-line override.</p>
+</div>
+<h3 id="climatology">Climatology</h3>
+<ul>
+<li><code>CLIM_FILE</code> <em>(default: <code>-</code>)</em><br />
+  Climatological data source for the <code>climatology</code> tool. <code>-</code> uses the
+  built-in JURASSIC climatology. A JuMACS netCDF file provides temperature
+  and mapped trace gases from JuMACS, while quantities not supplied by
+  JuMACS retain built-in behavior.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>JuMACS products are monthly zonal-mean climatologies, and the
+<code>climatology</code> tool interpolates them in climatological time, latitude,
+and altitude. Harmonized JuMACS products provide 12 monthly means on
+36 area-weighted 5-degree latitude bands; their upper altitude is
+model-dependent.</p>
+<p>JuMACS values are used unchanged up to and including the model top of
+the product. Above the model top, JURASSIC smoothly transitions back
+to the built-in climatology over a fixed 20 km layer using a cosine
+taper: the JuMACS value is retained at the model top, the built-in
+climatology is recovered exactly at the end of the transition layer,
+and above the transition layer the built-in climatology is used
+unchanged.</p>
+<p>The mapped trace gases are C2H2, C2H6, CCl4, CH4, ClO, ClONO2, CO,
+F11, F12, F22, H2CO, H2O, H2O2, HCl, HNO3, HNO4, HOCl, N2O, N2O5, NO,
+NO2, O3, OCS, and SO2. Species not mapped to the product, including
+the main gases CO2, O2, and N2, continue to use the built-in
+climatology.</p>
 </div>
 <h3 id="hydrostasy">Hydrostasy</h3>
 <ul>
