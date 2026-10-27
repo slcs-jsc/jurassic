@@ -66,11 +66,18 @@ $jurassic/climatology jumacs.ctl data/mar2012.tab \
 $jurassic/climatology jumacs.ctl data/phase.tab \
     T0 43200 T1 43200 DT 1 Z0 0 Z1 75 DZ 15 LAT 45 CLIM_FILE $clim
 
-# Nontrivial species name aliases (F11, F12, F22, H2CO, O3)...
+# Nontrivial species name aliases (F11, F12, F22, H2CO, N2O5, O3,
+# HOCl, ClONO2)...
 $jurassic/climatology alias.ctl data/alias.tab \
     T0 0 T1 0 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE $clim
 $jurassic/climatology alias.ctl data/alias_legacy.tab \
     T0 0 T1 0 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 CLIM_FILE -
+
+# Transition profile for the alias species, with built-in reference...
+$jurassic/climatology alias.ctl data/alias_trans_jul.tab \
+    T0 15724800 T1 15724800 DT 1 Z0 70 Z1 100 DZ 1 LAT 45 CLIM_FILE $clim
+$jurassic/climatology alias.ctl data/alias_legacy_jul.tab \
+    T0 15724800 T1 15724800 DT 1 Z0 70 Z1 100 DZ 1 LAT 45 CLIM_FILE -
 
 # Compare reference files...
 echo -e "\nCompare results..."
@@ -120,9 +127,107 @@ diff -q -s <(awk '$2==70' data/trans_jul.tab) \
     <(awk '$2==70' data.ref/jul45.tab) || error=1
 
 # Altitudes above the transition region (z >= 96 km) must equal built-in
-# values...
-diff -q -s <(awk '$2>=96' data/trans_jul.tab) \
-    <(awk '$2>=96' data/legacy_jul.tab) || error=1
+# values for all fields except OCS ($14), which instead keeps its JuMACS
+# top-level value...
+diff -q -s <(awk '$2>=96 {print $2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13}' \
+    data/trans_jul.tab) \
+    <(awk '$2>=96 {print $2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13}' \
+    data/legacy_jul.tab) || error=1
+
+# Constant extrapolation above the JuMACS top: F22 at 77, 90, 96, and
+# 100 km must equal its value at 76 km and must not revert to the built-in
+# climatology above 96 km, while temperature ($3) and O3 ($6) must recover
+# the built-in values...
+if ! awk '$2 == 76 {f = $9}
+         $2 == 77 || $2 == 90 || $2 == 96 || $2 == 100 {
+           if ($9 != f) exit 1
+         }' data/alias_trans_jul.tab ; then
+  echo "F22 not held constant above the JuMACS top!"
+  error=1
+fi
+if diff -q <(awk '$2>=96 {print $9}' data/alias_trans_jul.tab) \
+   <(awk '$2>=96 {print $9}' data/alias_legacy_jul.tab) > /dev/null ; then
+  echo "F22 unexpectedly reverts to built-in climatology above 96 km!"
+  error=1
+fi
+if ! awk '$2 == 76 {f = $11}
+         $2 == 77 || $2 == 90 || $2 == 96 || $2 == 100 {
+           if ($11 != f) exit 1
+         }' data/alias_trans_jul.tab ; then
+  echo "N2O5 not held constant above the JuMACS top!"
+  error=1
+fi
+if diff -q <(awk '$2>=96 {print $11}' data/alias_trans_jul.tab) \
+   <(awk '$2>=96 {print $11}' data/alias_legacy_jul.tab) > /dev/null ; then
+  echo "N2O5 unexpectedly reverts to built-in climatology above 96 km!"
+  error=1
+fi
+diff -q -s <(awk '$2>=96 {print $3,$6}' data/alias_trans_jul.tab) \
+    <(awk '$2>=96 {print $3,$6}' data/alias_legacy_jul.tab) || error=1
+
+# HOCl ($13) uses the normal transition again: it must converge exactly
+# to the built-in climatology at and above 96 km, and must not be held
+# constant above the JuMACS top...
+if ! diff -q <(awk '$2>=96 {print $13}' data/alias_trans_jul.tab) \
+   <(awk '$2>=96 {print $13}' data/alias_legacy_jul.tab) > /dev/null ; then
+  echo "HOCl does not converge to built-in climatology above 96 km!"
+  error=1
+fi
+if awk '$2 == 76 {f = $13}
+        $2 == 96 { exit !(f == $13) }' data/alias_trans_jul.tab ; then
+  echo "HOCl unexpectedly held constant above the JuMACS top!"
+  error=1
+fi
+
+# ClONO2 ($14) uses the logarithmic blend: it must equal the JuMACS
+# value at 76 km and the built-in climatology at and above 96 km;
+# within the transition region it must follow the geometric
+# interpolation between both, remain finite and non-negative, and must
+# not overshoot the larger of the two endpoints (no bulge)...
+if ! awk '$2 == 76 {f = $14}
+         END { exit !(f > 0) }' data/alias_trans_jul.tab ; then
+  echo "ClONO2 top value not positive!"
+  error=1
+fi
+if ! diff -q <(awk '$2>=96 {print $14}' data/alias_trans_jul.tab) \
+   <(awk '$2>=96 {print $14}' data/alias_legacy_jul.tab) > /dev/null ; then
+  echo "ClONO2 does not converge to built-in climatology above 96 km!"
+  error=1
+fi
+if ! awk 'NR == FNR {
+           if ($2 == 76) { q = $14 }
+           t[$2] = $14
+           next
+         }
+         {
+           z = $2
+           if (z > 76 && z < 96) {
+             x = (z - 76) / 20
+             w = 0.5 * (1 + cos(atan2(0, -1) * x))
+             if ($14 <= 0 || q <= 0)
+               e = w * q + (1 - w) * $14
+             else
+               e = exp(w * log(q) + (1 - w) * log($14))
+             d = t[z] - e
+             if (d > 1e-3 * e || d < -1e-3 * e) exit 1
+             m = (q > $14 ? q : $14)
+             if (t[z] > m * (1 + 1e-3)) exit 1
+           }
+         }' data/alias_trans_jul.tab data/alias_legacy_jul.tab ; then
+  echo "ClONO2 transition not a bulge-free log-space blend!"
+  error=1
+fi
+
+# Alias transition values must be finite and non-negative...
+if ! awk '$2 >= 70 && $2 <= 100 && NF {
+       for (i = 6; i <= 14; i++)
+         if ($i !~ /^[+-]?([0-9]+\.?[0-9]*|\.?[0-9]+)([eE][+-]?[0-9]+)?$/ \
+             || $i + 0 < 0)
+           exit 1
+     }' data/alias_trans_jul.tab ; then
+  echo "Non-finite or negative alias transition values!"
+  error=1
+fi
 
 # Within the transition region (76 < z < 96 km), values must differ from
 # pure built-in values...

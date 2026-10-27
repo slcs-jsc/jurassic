@@ -178,12 +178,18 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
     model-dependent.
 
     JuMACS values are used unchanged up to and including the model top of
-    the product. Above the model top, JURASSIC smoothly transitions back
-    to the built-in climatology over a fixed 20 km layer using a cosine
-    taper: the JuMACS value is retained at the model top, the built-in
-    climatology is recovered exactly at the end of the transition layer,
-    and above the transition layer the built-in climatology is used
-    unchanged.
+    the product. Above the model top, temperature and most mapped gases
+    smoothly transition back to the built-in climatology over a fixed
+    20 km layer using a cosine taper: the JuMACS value is retained at the
+    model top, the built-in climatology is recovered exactly at the end of
+    the transition layer, and above the transition layer the built-in
+    climatology is used unchanged. For selected gases whose built-in
+    upper-atmosphere extrapolation is unsuitable, the top-level JuMACS
+    value is instead kept constant with altitude above the model top:
+    C2H6, CCl4, F11, F12, F22, H2CO, HNO3, HNO4, N2O, N2O5, NO2,
+    and OCS. ClONO2 transitions to the built-in climatology
+    logarithmically (geometrically) with altitude within the transition
+    region.
 
     The mapped trace gases are C2H2, C2H6, CCl4, CH4, ClO, ClONO2, CO,
     F11, F12, F22, H2CO, H2O, H2O2, HCl, HNO3, HNO4, HOCl, N2O, N2O5, NO,

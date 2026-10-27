@@ -3,20 +3,24 @@
 # ======================================================================
 
 # Emitters...
-NG = 5
+NG = 8
 EMITTER[0] = F11
 EMITTER[1] = F12
 EMITTER[2] = F22
 EMITTER[3] = H2CO
-EMITTER[4] = O3
+EMITTER[4] = N2O5
+EMITTER[5] = O3
+EMITTER[6] = HOCl
+EMITTER[7] = ClONO2
 
 # Channels...
-ND = 5
+ND = 6
 NU[0] = 700.0000
 NU[1] = 800.0000
 NU[2] = 900.0000
 NU[3] = 1000.0000
 NU[4] = 1100.0000
+NU[5] = 1200.0000
 
 # Extinction...
 NW = 3
@@ -25,6 +29,7 @@ WINDOW[1] = 0
 WINDOW[2] = 1
 WINDOW[3] = 1
 WINDOW[4] = 2
+WINDOW[5] = 2
 
 # Cloud layer...
 NCL = 2

@@ -2271,14 +2271,23 @@ int climatology_jumacs_read_field(
  * actual month lengths and a cyclic wrap-around at the end of the year.
  * Latitude is clamped at the outermost JuMACS band centers, altitude at
  * the lowest JuMACS level. Profile points above the top of the JuMACS
- * grid are skipped, thus retaining their existing values.
+ * grid are either held at the top-level JuMACS value or blended smoothly
+ * towards the built-in climatology, according to the top-boundary policy.
  *
- * @param[in]  clim  JuMACS climatology providing the altitude and
- *                   latitude grids.
- * @param[in]  atm   Atmospheric state providing profile times, latitudes,
- *                   and altitudes above the reference ellipsoid, in km.
- * @param[in]  field Climatology field on the JuMACS grid.
- * @param[out] out   Output array of atm->np values to be overwritten.
+ * @param[in]  clim         JuMACS climatology providing the altitude and
+ *                          latitude grids.
+ * @param[in]  atm          Atmospheric state providing profile times,
+ *                          latitudes, and altitudes above the reference
+ *                          ellipsoid, in km.
+ * @param[in]  field        Climatology field on the JuMACS grid.
+ * @param[in]  top_policy   Top-boundary policy above the model top: 0
+ *                          blends towards the built-in climatology, 1
+ *                          keeps the JuMACS top-level value constant,
+ *                          2 blends towards the built-in climatology in
+ *                          logarithmic space where both values are
+ *                          strictly positive.
+ * @param[out] out          Output array of atm->np values to be
+ *                          overwritten.
  *
  * @author Lars Hoffmann
  */
@@ -2286,6 +2295,7 @@ void climatology_jumacs_interp(
   const clim_t * clim,
   const atm_t * atm,
   const double field[CT][CZ][CLAT],
+  const int top_policy,
   double *out);
 
 /**
