@@ -1,0 +1,6 @@
+<map id="climatology_external" name="climatology_external">
+<area shape="rect" id="node1" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="5,31,144,57"/>
+<area shape="rect" id="node2" href="$jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="192,23,331,65"/>
+<area shape="rect" id="node3" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="383,5,457,32"/>
+<area shape="rect" id="node4" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="379,56,461,83"/>
+</map>

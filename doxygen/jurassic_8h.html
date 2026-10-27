@@ -456,15 +456,15 @@ Functions</h2></td></tr>
 <tr class="memitem:afc9a79d882cc74b4e023beffbe53739c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#afc9a79d882cc74b4e023beffbe53739c">read_clim_field</a> (const char *filename, const char *varname, const int ncid, const int dim_month, const int dim_alt, const int dim_lat, const int nalt, const int nlat, double field[<a class="el" href="jurassic_8h.html#a7e463881fb9033a2fb65f3782d4e1c01">CT</a>][<a class="el" href="jurassic_8h.html#addbd2f751d6f06eaa9eac7526839a4c9">CZ</a>][<a class="el" href="jurassic_8h.html#aa2b33969819eb3a78f2f22f63cbbf274">CLAT</a>], double *vmin, double *vmax)</td></tr>
 <tr class="memdesc:afc9a79d882cc74b4e023beffbe53739c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads and validates one JuMACS climatology field.  <a href="jurassic_8h.html#afc9a79d882cc74b4e023beffbe53739c">More...</a><br /></td></tr>
 <tr class="separator:afc9a79d882cc74b4e023beffbe53739c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3581708aa5dfeb6bee5abd0c382b0f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#af3581708aa5dfeb6bee5abd0c382b0f2">climatology_jumacs_interp</a> (const <a class="el" href="structclim__t.html">clim_t</a> *clim, const <a class="el" href="structatm__t.html">atm_t</a> *atm, const double field[<a class="el" href="jurassic_8h.html#a7e463881fb9033a2fb65f3782d4e1c01">CT</a>][<a class="el" href="jurassic_8h.html#addbd2f751d6f06eaa9eac7526839a4c9">CZ</a>][<a class="el" href="jurassic_8h.html#aa2b33969819eb3a78f2f22f63cbbf274">CLAT</a>], const int top_policy, double *out)</td></tr>
-<tr class="memdesc:af3581708aa5dfeb6bee5abd0c382b0f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolates a JuMACS climatology field onto atmospheric profiles.  <a href="jurassic_8h.html#af3581708aa5dfeb6bee5abd0c382b0f2">More...</a><br /></td></tr>
-<tr class="separator:af3581708aa5dfeb6bee5abd0c382b0f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9e3d314a7cb5d5cf7dcd51fb56ee5a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5">climatology_external_interp</a> (const <a class="el" href="structclim__t.html">clim_t</a> *clim, const <a class="el" href="structatm__t.html">atm_t</a> *atm, const double field[<a class="el" href="jurassic_8h.html#a7e463881fb9033a2fb65f3782d4e1c01">CT</a>][<a class="el" href="jurassic_8h.html#addbd2f751d6f06eaa9eac7526839a4c9">CZ</a>][<a class="el" href="jurassic_8h.html#aa2b33969819eb3a78f2f22f63cbbf274">CLAT</a>], const int top_policy, double *out)</td></tr>
+<tr class="memdesc:ad9e3d314a7cb5d5cf7dcd51fb56ee5a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolates a JuMACS climatology field onto atmospheric profiles.  <a href="jurassic_8h.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5">More...</a><br /></td></tr>
+<tr class="separator:ad9e3d314a7cb5d5cf7dcd51fb56ee5a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee0afe3e4be54f2c889e213f4721938a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structclim__t.html">clim_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#aee0afe3e4be54f2c889e213f4721938a">read_clim</a> (const <a class="el" href="structctl__t.html">ctl_t</a> *ctl)</td></tr>
 <tr class="memdesc:aee0afe3e4be54f2c889e213f4721938a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a JuMACS climatology file into an allocated climatology structure.  <a href="jurassic_8h.html#aee0afe3e4be54f2c889e213f4721938a">More...</a><br /></td></tr>
 <tr class="separator:aee0afe3e4be54f2c889e213f4721938a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f2e32c3b6d921e697b268ebfcc857f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#a0f2e32c3b6d921e697b268ebfcc857f3">climatology_jumacs</a> (const <a class="el" href="structctl__t.html">ctl_t</a> *ctl, const <a class="el" href="structclim__t.html">clim_t</a> *clim, <a class="el" href="structatm__t.html">atm_t</a> *atm)</td></tr>
-<tr class="memdesc:a0f2e32c3b6d921e697b268ebfcc857f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overwrites the built-in climatology with a JuMACS climatology.  <a href="jurassic_8h.html#a0f2e32c3b6d921e697b268ebfcc857f3">More...</a><br /></td></tr>
-<tr class="separator:a0f2e32c3b6d921e697b268ebfcc857f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4db5ac40be288ea359dd270e359525b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#a4db5ac40be288ea359dd270e359525b6">climatology_external</a> (const <a class="el" href="structctl__t.html">ctl_t</a> *ctl, const <a class="el" href="structclim__t.html">clim_t</a> *clim, <a class="el" href="structatm__t.html">atm_t</a> *atm)</td></tr>
+<tr class="memdesc:a4db5ac40be288ea359dd270e359525b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overwrites the built-in climatology with a JuMACS climatology.  <a href="jurassic_8h.html#a4db5ac40be288ea359dd270e359525b6">More...</a><br /></td></tr>
+<tr class="separator:a4db5ac40be288ea359dd270e359525b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c8c72b0bc66d214b4575c13a7a0eb6b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="jurassic_8h.html#a1c8c72b0bc66d214b4575c13a7a0eb6b">cos_sza</a> (const double sec, const double lon, const double lat)</td></tr>
 <tr class="memdesc:a1c8c72b0bc66d214b4575c13a7a0eb6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the cosine of the solar zenith angle.  <a href="jurassic_8h.html#a1c8c72b0bc66d214b4575c13a7a0eb6b">More...</a><br /></td></tr>
 <tr class="separator:a1c8c72b0bc66d214b4575c13a7a0eb6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -5459,7 +5459,7 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno"> 1151</span> </div>
 <div class="line"><span class="lineno"> 1152</span>  <span class="comment">/* Overwrite with JuMACS climatology... */</span></div>
 <div class="line"><span class="lineno"> 1153</span>  <span class="keywordflow">if</span> (clim != NULL)</div>
-<div class="line"><span class="lineno"> 1154</span>    <a class="code hl_function" href="jurassic_8c.html#a0f2e32c3b6d921e697b268ebfcc857f3">climatology_jumacs</a>(ctl, clim, atm);</div>
+<div class="line"><span class="lineno"> 1154</span>    <a class="code hl_function" href="jurassic_8c.html#a4db5ac40be288ea359dd270e359525b6">climatology_external</a>(ctl, clim, atm);</div>
 <div class="line"><span class="lineno"> 1155</span>  <span class="keywordflow">else</span></div>
 <div class="line"><span class="lineno"> 1156</span>    <a class="code hl_define" href="jurassic_8h.html#acaa1c3fa56061380a29889d703236251">LOG</a>(1, <span class="stringliteral">&quot;Use built-in climatology...&quot;</span>);</div>
 <div class="line"><span class="lineno"> 1157</span> </div>
@@ -5468,8 +5468,8 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno"> 1160</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
 <div class="line"><span class="lineno"> 1161</span>      atm-&gt;<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip] = <a class="code hl_define" href="jurassic_8h.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(atm-&gt;<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig][ip], 0.);</div>
 <div class="line"><span class="lineno"> 1162</span>}</div>
-<div class="ttc" id="ajurassic_8c_html_a0f2e32c3b6d921e697b268ebfcc857f3"><div class="ttname"><a href="jurassic_8c.html#a0f2e32c3b6d921e697b268ebfcc857f3">climatology_jumacs</a></div><div class="ttdeci">void climatology_jumacs(const ctl_t *ctl, const clim_t *clim, atm_t *atm)</div><div class="ttdoc">Overwrites the built-in climatology with a JuMACS climatology.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01578">jurassic.c:1578</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a2a3c8ab98f21179741b274439786726d"><div class="ttname"><a href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d">locate_reg</a></div><div class="ttdeci">int locate_reg(const double *xx, const int n, const double x)</div><div class="ttdoc">Locate index for interpolation on a regular (uniform) grid.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05243">jurassic.c:5243</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a4db5ac40be288ea359dd270e359525b6"><div class="ttname"><a href="jurassic_8c.html#a4db5ac40be288ea359dd270e359525b6">climatology_external</a></div><div class="ttdeci">void climatology_external(const ctl_t *ctl, const clim_t *clim, atm_t *atm)</div><div class="ttdoc">Overwrites the built-in climatology with a JuMACS climatology.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01578">jurassic.c:1578</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a31412dbd7c9b5771f1e7a5ff85d20ab9"><div class="ttname"><a href="jurassic_8h.html#a31412dbd7c9b5771f1e7a5ff85d20ab9">O2</a></div><div class="ttdeci">#define O2</div><div class="ttdoc">Oxygen concentration.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00222">jurassic.h:222</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a3acffbd305ee72dcd4593c0d8af64a4f"><div class="ttname"><a href="jurassic_8h.html#a3acffbd305ee72dcd4593c0d8af64a4f">MIN</a></div><div class="ttdeci">#define MIN(a, b)</div><div class="ttdoc">Determine the minimum of two values.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00727">jurassic.h:727</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a612a86608df82b1b5774a8defd773d1e"><div class="ttname"><a href="jurassic_8h.html#a612a86608df82b1b5774a8defd773d1e">CO2_FIT</a></div><div class="ttdeci">#define CO2_FIT(TIME)</div><div class="ttdoc">Climatological CO2 volume mixing ratio as a quadratic function of time.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00510">jurassic.h:510</a></div></div>
@@ -5488,10 +5488,10 @@ Here is the call graph for this function:</div>
 <div class="center"><img src="jurassic_8h_a3a862315b799d9d7b1af9de34f9b0742_cgraph.png" border="0" usemap="#ajurassic_8h_a3a862315b799d9d7b1af9de34f9b0742_cgraph" alt=""/></div>
 <map name="ajurassic_8h_a3a862315b799d9d7b1af9de34f9b0742_cgraph" id="ajurassic_8h_a3a862315b799d9d7b1af9de34f9b0742_cgraph">
 <area shape="rect" title="Initializes atmospheric climatology profiles." alt="" coords="5,46,92,73"/>
-<area shape="rect" href="jurassic_8c.html#a0f2e32c3b6d921e697b268ebfcc857f3" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="140,17,276,43"/>
-<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="508,67,591,94"/>
-<area shape="rect" href="jurassic_8c.html#af3581708aa5dfeb6bee5abd0c382b0f2" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="324,5,460,47"/>
-<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="512,13,587,39"/>
+<area shape="rect" href="jurassic_8c.html#a4db5ac40be288ea359dd270e359525b6" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="140,17,279,43"/>
+<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="513,67,596,94"/>
+<area shape="rect" href="jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="327,5,465,47"/>
+<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="517,13,592,39"/>
 </map>
 </div>
 
@@ -5652,14 +5652,14 @@ Here is the call graph for this function:</div>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="af3581708aa5dfeb6bee5abd0c382b0f2" name="af3581708aa5dfeb6bee5abd0c382b0f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3581708aa5dfeb6bee5abd0c382b0f2">&#9670;&nbsp;</a></span>climatology_jumacs_interp()</h2>
+<a id="ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" name="ad9e3d314a7cb5d5cf7dcd51fb56ee5a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5">&#9670;&nbsp;</a></span>climatology_external_interp()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void climatology_jumacs_interp </td>
+          <td class="memname">void climatology_external_interp </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structclim__t.html">clim_t</a> *&#160;</td>
           <td class="paramname"><em>clim</em>, </td>
@@ -5728,8 +5728,8 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno"> 1277</span> </div>
 <div class="line"><span class="lineno"> 1278</span>    <span class="comment">/* Keep built-in climatology above the transition region, except for</span></div>
 <div class="line"><span class="lineno"> 1279</span><span class="comment">       fields with constant extrapolation... */</span></div>
-<div class="line"><span class="lineno"> 1280</span>    <span class="keywordflow">if</span> (top_policy != <a class="code hl_define" href="jurassic_8c.html#a7ee8147ca44d76f20abb09800af8d5d2">JUMACS_TOP_CONSTANT</a> &amp;&amp;</div>
-<div class="line"><span class="lineno"> 1281</span>        atm-&gt;<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip] &gt;= ztop + <a class="code hl_define" href="jurassic_8c.html#a41eef350d29176bde0db1d513ae0f8da">JUMACS_TRANSITION</a>)</div>
+<div class="line"><span class="lineno"> 1280</span>    <span class="keywordflow">if</span> (top_policy != <a class="code hl_define" href="jurassic_8c.html#a38be792b7bade0789bb5d1c8c50378d2">CLIM_TOP_CONSTANT</a> &amp;&amp;</div>
+<div class="line"><span class="lineno"> 1281</span>        atm-&gt;<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip] &gt;= ztop + <a class="code hl_define" href="jurassic_8c.html#a1917d10ad6a86e66c0578396f1cef40f">CLIM_TRANSITION</a>)</div>
 <div class="line"><span class="lineno"> 1282</span>      <span class="keywordflow">continue</span>;</div>
 <div class="line"><span class="lineno"> 1283</span> </div>
 <div class="line"><span class="lineno"> 1284</span>    <span class="comment">/* Position within the climatological year... */</span></div>
@@ -5795,10 +5795,10 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno"> 1344</span><span class="comment">       with logarithmic blending, taper the logarithms of the mixing</span></div>
 <div class="line"><span class="lineno"> 1345</span><span class="comment">       ratios if both are strictly positive, falling back to the ordinary</span></div>
 <div class="line"><span class="lineno"> 1346</span><span class="comment">       blend otherwise... */</span></div>
-<div class="line"><span class="lineno"> 1347</span>    <span class="keywordflow">if</span> (atm-&gt;<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip] &gt; ztop &amp;&amp; top_policy != <a class="code hl_define" href="jurassic_8c.html#a7ee8147ca44d76f20abb09800af8d5d2">JUMACS_TOP_CONSTANT</a>) {</div>
-<div class="line"><span class="lineno"> 1348</span>      <span class="keyword">const</span> <span class="keywordtype">double</span> x = (atm-&gt;<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip] - ztop) / <a class="code hl_define" href="jurassic_8c.html#a41eef350d29176bde0db1d513ae0f8da">JUMACS_TRANSITION</a>;</div>
+<div class="line"><span class="lineno"> 1347</span>    <span class="keywordflow">if</span> (atm-&gt;<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip] &gt; ztop &amp;&amp; top_policy != <a class="code hl_define" href="jurassic_8c.html#a38be792b7bade0789bb5d1c8c50378d2">CLIM_TOP_CONSTANT</a>) {</div>
+<div class="line"><span class="lineno"> 1348</span>      <span class="keyword">const</span> <span class="keywordtype">double</span> x = (atm-&gt;<a class="code hl_variable" href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">z</a>[ip] - ztop) / <a class="code hl_define" href="jurassic_8c.html#a1917d10ad6a86e66c0578396f1cef40f">CLIM_TRANSITION</a>;</div>
 <div class="line"><span class="lineno"> 1349</span>      <span class="keyword">const</span> <span class="keywordtype">double</span> w = 0.5 * (1. + cos(M_PI * x));</div>
-<div class="line"><span class="lineno"> 1350</span>      <span class="keywordflow">if</span> (top_policy == <a class="code hl_define" href="jurassic_8c.html#afdfb76e9007c0159a34c874e59624ef9">JUMACS_TOP_LOG</a> &amp;&amp; jumacs &gt; 0. &amp;&amp; out[ip] &gt; 0.)</div>
+<div class="line"><span class="lineno"> 1350</span>      <span class="keywordflow">if</span> (top_policy == <a class="code hl_define" href="jurassic_8c.html#a49647858c93e34c7a1a3167a86efd6ae">CLIM_TOP_LOG</a> &amp;&amp; jumacs &gt; 0. &amp;&amp; out[ip] &gt; 0.)</div>
 <div class="line"><span class="lineno"> 1351</span>        out[ip] = exp(w * log(jumacs) + (1. - w) * log(out[ip]));</div>
 <div class="line"><span class="lineno"> 1352</span>      <span class="keywordflow">else</span></div>
 <div class="line"><span class="lineno"> 1353</span>        out[ip] = w * jumacs + (1. - w) * out[ip];</div>
@@ -5806,10 +5806,10 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno"> 1355</span>      out[ip] = jumacs;</div>
 <div class="line"><span class="lineno"> 1356</span>  }</div>
 <div class="line"><span class="lineno"> 1357</span>}</div>
-<div class="ttc" id="ajurassic_8c_html_a41eef350d29176bde0db1d513ae0f8da"><div class="ttname"><a href="jurassic_8c.html#a41eef350d29176bde0db1d513ae0f8da">JUMACS_TRANSITION</a></div><div class="ttdeci">#define JUMACS_TRANSITION</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01228">jurassic.c:1228</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a1917d10ad6a86e66c0578396f1cef40f"><div class="ttname"><a href="jurassic_8c.html#a1917d10ad6a86e66c0578396f1cef40f">CLIM_TRANSITION</a></div><div class="ttdeci">#define CLIM_TRANSITION</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01228">jurassic.c:1228</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a38be792b7bade0789bb5d1c8c50378d2"><div class="ttname"><a href="jurassic_8c.html#a38be792b7bade0789bb5d1c8c50378d2">CLIM_TOP_CONSTANT</a></div><div class="ttdeci">#define CLIM_TOP_CONSTANT</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01235">jurassic.c:1235</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a49647858c93e34c7a1a3167a86efd6ae"><div class="ttname"><a href="jurassic_8c.html#a49647858c93e34c7a1a3167a86efd6ae">CLIM_TOP_LOG</a></div><div class="ttdeci">#define CLIM_TOP_LOG</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01236">jurassic.c:1236</a></div></div>
 <div class="ttc" id="ajurassic_8c_html_a4e1b87dc3c93a23c89f739adf10b60dc"><div class="ttname"><a href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc">locate_irr</a></div><div class="ttdeci">int locate_irr(const double *xx, const int n, const double x)</div><div class="ttdoc">Locate index for interpolation on an irregular grid.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l05213">jurassic.c:5213</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_a7ee8147ca44d76f20abb09800af8d5d2"><div class="ttname"><a href="jurassic_8c.html#a7ee8147ca44d76f20abb09800af8d5d2">JUMACS_TOP_CONSTANT</a></div><div class="ttdeci">#define JUMACS_TOP_CONSTANT</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01235">jurassic.c:1235</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_afdfb76e9007c0159a34c874e59624ef9"><div class="ttname"><a href="jurassic_8c.html#afdfb76e9007c0159a34c874e59624ef9">JUMACS_TOP_LOG</a></div><div class="ttdeci">#define JUMACS_TOP_LOG</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01236">jurassic.c:1236</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_aff4e721b49a057c4e4a3a6f56cc06469"><div class="ttname"><a href="jurassic_8h.html#aff4e721b49a057c4e4a3a6f56cc06469">FMOD</a></div><div class="ttdeci">#define FMOD(x, y)</div><div class="ttdoc">Compute floating-point remainder.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00600">jurassic.h:600</a></div></div>
 <div class="ttc" id="astructatm__t_html_a25ef7d304d5cfa54c5af30192620373b"><div class="ttname"><a href="structatm__t.html#a25ef7d304d5cfa54c5af30192620373b">atm_t::lat</a></div><div class="ttdeci">double lat[NP]</div><div class="ttdoc">Latitude [deg].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01456">jurassic.h:1456</a></div></div>
 <div class="ttc" id="astructclim__t_html_a35419497c42e11439e515b06d5539830"><div class="ttname"><a href="structclim__t.html#a35419497c42e11439e515b06d5539830">clim_t::alt</a></div><div class="ttdeci">double alt[CZ]</div><div class="ttdoc">Altitude grid [km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01504">jurassic.h:1504</a></div></div>
@@ -5821,11 +5821,11 @@ Here is the call graph for this function:</div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="jurassic_8h_af3581708aa5dfeb6bee5abd0c382b0f2_cgraph.png" border="0" usemap="#ajurassic_8h_af3581708aa5dfeb6bee5abd0c382b0f2_cgraph" alt=""/></div>
-<map name="ajurassic_8h_af3581708aa5dfeb6bee5abd0c382b0f2_cgraph" id="ajurassic_8h_af3581708aa5dfeb6bee5abd0c382b0f2_cgraph">
-<area shape="rect" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="5,23,141,65"/>
-<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="193,5,268,32"/>
-<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="189,56,272,83"/>
+<div class="center"><img src="jurassic_8h_ad9e3d314a7cb5d5cf7dcd51fb56ee5a5_cgraph.png" border="0" usemap="#ajurassic_8h_ad9e3d314a7cb5d5cf7dcd51fb56ee5a5_cgraph" alt=""/></div>
+<map name="ajurassic_8h_ad9e3d314a7cb5d5cf7dcd51fb56ee5a5_cgraph" id="ajurassic_8h_ad9e3d314a7cb5d5cf7dcd51fb56ee5a5_cgraph">
+<area shape="rect" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="5,23,144,65"/>
+<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="196,5,271,32"/>
+<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="192,56,275,83"/>
 </map>
 </div>
 
@@ -6096,14 +6096,14 @@ Here is the call graph for this function:</div>
 
 </div>
 </div>
-<a id="a0f2e32c3b6d921e697b268ebfcc857f3" name="a0f2e32c3b6d921e697b268ebfcc857f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f2e32c3b6d921e697b268ebfcc857f3">&#9670;&nbsp;</a></span>climatology_jumacs()</h2>
+<a id="a4db5ac40be288ea359dd270e359525b6" name="a4db5ac40be288ea359dd270e359525b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4db5ac40be288ea359dd270e359525b6">&#9670;&nbsp;</a></span>climatology_external()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void climatology_jumacs </td>
+          <td class="memname">void climatology_external </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structctl__t.html">ctl_t</a> *&#160;</td>
           <td class="paramname"><em>ctl</em>, </td>
@@ -6145,26 +6145,26 @@ Here is the call graph for this function:</div>
 <div class="line"><span class="lineno"> 1582</span> </div>
 <div class="line"><span class="lineno"> 1583</span>  <span class="comment">/* Overwrite temperature... */</span></div>
 <div class="line"><span class="lineno"> 1584</span>  <span class="keywordflow">if</span> (clim-&gt;<a class="code hl_variable" href="structclim__t.html#a6691730355dbee8c29327cca53a53cd8">has_t</a>)</div>
-<div class="line"><span class="lineno"> 1585</span>    <a class="code hl_function" href="jurassic_8c.html#af3581708aa5dfeb6bee5abd0c382b0f2">climatology_jumacs_interp</a>(clim, atm, clim-&gt;<a class="code hl_variable" href="structclim__t.html#a87a27e4665b454afb2b4fdb73b867f86">t</a>, 0, atm-&gt;<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>);</div>
+<div class="line"><span class="lineno"> 1585</span>    <a class="code hl_function" href="jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5">climatology_external_interp</a>(clim, atm, clim-&gt;<a class="code hl_variable" href="structclim__t.html#a87a27e4665b454afb2b4fdb73b867f86">t</a>, 0, atm-&gt;<a class="code hl_variable" href="structatm__t.html#a306826df6fe870ab371fb945544cc13a">t</a>);</div>
 <div class="line"><span class="lineno"> 1586</span> </div>
 <div class="line"><span class="lineno"> 1587</span>  <span class="comment">/* Overwrite trace gases... */</span></div>
 <div class="line"><span class="lineno"> 1588</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ig = 0; ig &lt; ctl-&gt;<a class="code hl_variable" href="structctl__t.html#a7e0035514fe22254130c64c9fa317c8d">ng</a>; ig++)</div>
 <div class="line"><span class="lineno"> 1589</span>    <span class="keywordflow">if</span> (clim-&gt;<a class="code hl_variable" href="structclim__t.html#a3041bb06d38c9eb75dcb4ec3c72f530b">has_q</a>[ig])</div>
-<div class="line"><span class="lineno"> 1590</span>      <a class="code hl_function" href="jurassic_8c.html#af3581708aa5dfeb6bee5abd0c382b0f2">climatology_jumacs_interp</a>(clim, atm, clim-&gt;<a class="code hl_variable" href="structclim__t.html#a6200f19347289304c790417589f2eaaf">q</a>[ig],</div>
-<div class="line"><span class="lineno"> 1591</span>                                climatology_jumacs_top_policy(</div>
-<div class="line"><span class="lineno"> 1592</span>                                  ctl-&gt;<a class="code hl_variable" href="structctl__t.html#ad91bbf51ada1919a24e2c7a5fd666e23">emitter</a>[ig]),</div>
-<div class="line"><span class="lineno"> 1593</span>                                atm-&gt;<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig]);</div>
+<div class="line"><span class="lineno"> 1590</span>      <a class="code hl_function" href="jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5">climatology_external_interp</a>(clim, atm, clim-&gt;<a class="code hl_variable" href="structclim__t.html#a6200f19347289304c790417589f2eaaf">q</a>[ig],</div>
+<div class="line"><span class="lineno"> 1591</span>                                  climatology_external_top_policy(</div>
+<div class="line"><span class="lineno"> 1592</span>                                    ctl-&gt;<a class="code hl_variable" href="structctl__t.html#ad91bbf51ada1919a24e2c7a5fd666e23">emitter</a>[ig]),</div>
+<div class="line"><span class="lineno"> 1593</span>                                  atm-&gt;<a class="code hl_variable" href="structatm__t.html#aa87ac5feb176468221bef178ae364d00">q</a>[ig]);</div>
 <div class="line"><span class="lineno"> 1594</span>}</div>
-<div class="ttc" id="ajurassic_8c_html_af3581708aa5dfeb6bee5abd0c382b0f2"><div class="ttname"><a href="jurassic_8c.html#af3581708aa5dfeb6bee5abd0c382b0f2">climatology_jumacs_interp</a></div><div class="ttdeci">void climatology_jumacs_interp(const clim_t *clim, const atm_t *atm, const double field[CT][CZ][CLAT], const int top_policy, double *out)</div><div class="ttdoc">Interpolates a JuMACS climatology field onto atmospheric profiles.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01258">jurassic.c:1258</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_ad9e3d314a7cb5d5cf7dcd51fb56ee5a5"><div class="ttname"><a href="jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5">climatology_external_interp</a></div><div class="ttdeci">void climatology_external_interp(const clim_t *clim, const atm_t *atm, const double field[CT][CZ][CLAT], const int top_policy, double *out)</div><div class="ttdoc">Interpolates a JuMACS climatology field onto atmospheric profiles.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01258">jurassic.c:1258</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="jurassic_8h_a0f2e32c3b6d921e697b268ebfcc857f3_cgraph.png" border="0" usemap="#ajurassic_8h_a0f2e32c3b6d921e697b268ebfcc857f3_cgraph" alt=""/></div>
-<map name="ajurassic_8h_a0f2e32c3b6d921e697b268ebfcc857f3_cgraph" id="ajurassic_8h_a0f2e32c3b6d921e697b268ebfcc857f3_cgraph">
-<area shape="rect" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="5,31,141,57"/>
-<area shape="rect" href="jurassic_8c.html#af3581708aa5dfeb6bee5abd0c382b0f2" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="189,23,325,65"/>
-<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="377,5,452,32"/>
-<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="373,56,456,83"/>
+<div class="center"><img src="jurassic_8h_a4db5ac40be288ea359dd270e359525b6_cgraph.png" border="0" usemap="#ajurassic_8h_a4db5ac40be288ea359dd270e359525b6_cgraph" alt=""/></div>
+<map name="ajurassic_8h_a4db5ac40be288ea359dd270e359525b6_cgraph" id="ajurassic_8h_a4db5ac40be288ea359dd270e359525b6_cgraph">
+<area shape="rect" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="5,31,144,57"/>
+<area shape="rect" href="jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="192,23,331,65"/>
+<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="383,5,457,32"/>
+<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="379,56,461,83"/>
 </map>
 </div>
 
