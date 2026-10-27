@@ -195,29 +195,36 @@ Functions</h2></td></tr>
 <div class="line"><span class="lineno">  110</span>    }</div>
 <div class="line"><span class="lineno">  111</span>  }</div>
 <div class="line"><span class="lineno">  112</span> </div>
-<div class="line"><span class="lineno">  113</span>  <span class="comment">/* Interpolate climatological data... */</span></div>
-<div class="line"><span class="lineno">  114</span>  <a class="code hl_function" href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2">climatology</a>(&amp;ctl, &amp;atm);</div>
+<div class="line"><span class="lineno">  113</span>  <span class="comment">/* Read JuMACS climatology, if requested... */</span></div>
+<div class="line"><span class="lineno">  114</span>  <a class="code hl_struct" href="structclim__t.html">clim_t</a> *clim = <a class="code hl_function" href="jurassic_8c.html#aee0afe3e4be54f2c889e213f4721938a">read_clim</a>(&amp;ctl);</div>
 <div class="line"><span class="lineno">  115</span> </div>
-<div class="line"><span class="lineno">  116</span>  <span class="comment">/* Set cloud layer... */</span></div>
-<div class="line"><span class="lineno">  117</span>  atm.<a class="code hl_variable" href="structatm__t.html#a467184c9e87a139e18fa656c565ab8a6">clz</a> = clz;</div>
-<div class="line"><span class="lineno">  118</span>  atm.<a class="code hl_variable" href="structatm__t.html#a49c74ec000bd9884836d6e8ae2b96a3a">cldz</a> = cldz;</div>
-<div class="line"><span class="lineno">  119</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> icl = 0; icl &lt; ctl.<a class="code hl_variable" href="structctl__t.html#aaca3446ebb40caf6519044b624bc87d5">ncl</a>; icl++)</div>
-<div class="line"><span class="lineno">  120</span>    atm.<a class="code hl_variable" href="structatm__t.html#a8c50a0221df51f13b2f07987aab6ab19">clk</a>[icl] = clk[icl];</div>
-<div class="line"><span class="lineno">  121</span> </div>
-<div class="line"><span class="lineno">  122</span>  <span class="comment">/* Set surface layer... */</span></div>
-<div class="line"><span class="lineno">  123</span>  atm.<a class="code hl_variable" href="structatm__t.html#a651f52626605a4dd79dd147ee245014f">sft</a> = sft;</div>
-<div class="line"><span class="lineno">  124</span>  for (<span class="keywordtype">int</span> isf = 0; isf &lt; ctl.<a class="code hl_variable" href="structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3">nsf</a>; isf++)</div>
-<div class="line"><span class="lineno">  125</span>    atm.<a class="code hl_variable" href="structatm__t.html#a09f5c1a2a0ecac7b481f3ea138b8a750">sfeps</a>[isf] = sfeps[isf];</div>
-<div class="line"><span class="lineno">  126</span> </div>
-<div class="line"><span class="lineno">  127</span>  <span class="comment">/* Write data to disk... */</span></div>
-<div class="line"><span class="lineno">  128</span>  <a class="code hl_function" href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a>(NULL, argv[2], &amp;ctl, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  116</span>  <span class="comment">/* Interpolate climatological data... */</span></div>
+<div class="line"><span class="lineno">  117</span>  <a class="code hl_function" href="jurassic_8c.html#a3a862315b799d9d7b1af9de34f9b0742">climatology</a>(&amp;ctl, clim, &amp;atm);</div>
+<div class="line"><span class="lineno">  118</span> </div>
+<div class="line"><span class="lineno">  119</span>  <span class="comment">/* Set cloud layer... */</span></div>
+<div class="line"><span class="lineno">  120</span>  atm.<a class="code hl_variable" href="structatm__t.html#a467184c9e87a139e18fa656c565ab8a6">clz</a> = clz;</div>
+<div class="line"><span class="lineno">  121</span>  atm.<a class="code hl_variable" href="structatm__t.html#a49c74ec000bd9884836d6e8ae2b96a3a">cldz</a> = cldz;</div>
+<div class="line"><span class="lineno">  122</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> icl = 0; icl &lt; ctl.<a class="code hl_variable" href="structctl__t.html#aaca3446ebb40caf6519044b624bc87d5">ncl</a>; icl++)</div>
+<div class="line"><span class="lineno">  123</span>    atm.<a class="code hl_variable" href="structatm__t.html#a8c50a0221df51f13b2f07987aab6ab19">clk</a>[icl] = clk[icl];</div>
+<div class="line"><span class="lineno">  124</span> </div>
+<div class="line"><span class="lineno">  125</span>  <span class="comment">/* Set surface layer... */</span></div>
+<div class="line"><span class="lineno">  126</span>  atm.<a class="code hl_variable" href="structatm__t.html#a651f52626605a4dd79dd147ee245014f">sft</a> = sft;</div>
+<div class="line"><span class="lineno">  127</span>  for (<span class="keywordtype">int</span> isf = 0; isf &lt; ctl.<a class="code hl_variable" href="structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3">nsf</a>; isf++)</div>
+<div class="line"><span class="lineno">  128</span>    atm.<a class="code hl_variable" href="structatm__t.html#a09f5c1a2a0ecac7b481f3ea138b8a750">sfeps</a>[isf] = sfeps[isf];</div>
 <div class="line"><span class="lineno">  129</span> </div>
-<div class="line"><span class="lineno">  130</span>  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
-<div class="line"><span class="lineno">  131</span>}</div>
-<div class="ttc" id="ajurassic_8c_html_a19b236d7e6cd812c67f36673f0dbefc3"><div class="ttname"><a href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a></div><div class="ttdeci">void write_atm(const char *dirname, const char *filename, const ctl_t *ctl, const atm_t *atm, int profile)</div><div class="ttdoc">Write atmospheric data to a file.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l08030">jurassic.c:8030</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read model control parameters from command-line and configuration input.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l06259">jurassic.c:6259</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_abb6ce9b0361afe11cb23b8ac1e0c7fa3"><div class="ttname"><a href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a></div><div class="ttdeci">double scan_ctl(int argc, char *argv[], const char *varname, const int arridx, const char *defvalue, char *value)</div><div class="ttdoc">Scan control file or command-line arguments for a configuration variable.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l07335">jurassic.c:7335</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_ae324329aa277798b632b25de13faf1b2"><div class="ttname"><a href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2">climatology</a></div><div class="ttdeci">void climatology(const ctl_t *ctl, atm_t *atm)</div><div class="ttdoc">Initializes atmospheric climatology profiles.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l00215">jurassic.c:215</a></div></div>
+<div class="line"><span class="lineno">  130</span>  <span class="comment">/* Write data to disk... */</span></div>
+<div class="line"><span class="lineno">  131</span>  <a class="code hl_function" href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a>(NULL, argv[2], &amp;ctl, &amp;atm, 0);</div>
+<div class="line"><span class="lineno">  132</span> </div>
+<div class="line"><span class="lineno">  133</span>  <span class="comment">/* Free climatology... */</span></div>
+<div class="line"><span class="lineno">  134</span>  free(clim);</div>
+<div class="line"><span class="lineno">  135</span> </div>
+<div class="line"><span class="lineno">  136</span>  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
+<div class="line"><span class="lineno">  137</span>}</div>
+<div class="ttc" id="ajurassic_8c_html_a19b236d7e6cd812c67f36673f0dbefc3"><div class="ttname"><a href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3">write_atm</a></div><div class="ttdeci">void write_atm(const char *dirname, const char *filename, const ctl_t *ctl, const atm_t *atm, int profile)</div><div class="ttdoc">Write atmospheric data to a file.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l08037">jurassic.c:8037</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a3635d1716488dea37d1176c1fb02675f"><div class="ttname"><a href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f">read_ctl</a></div><div class="ttdeci">void read_ctl(int argc, char *argv[], ctl_t *ctl)</div><div class="ttdoc">Read model control parameters from command-line and configuration input.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l06266">jurassic.c:6266</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a3a862315b799d9d7b1af9de34f9b0742"><div class="ttname"><a href="jurassic_8c.html#a3a862315b799d9d7b1af9de34f9b0742">climatology</a></div><div class="ttdeci">void climatology(const ctl_t *ctl, const clim_t *clim, atm_t *atm)</div><div class="ttdoc">Initializes atmospheric climatology profiles.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l00215">jurassic.c:215</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_abb6ce9b0361afe11cb23b8ac1e0c7fa3"><div class="ttname"><a href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3">scan_ctl</a></div><div class="ttdeci">double scan_ctl(int argc, char *argv[], const char *varname, const int arridx, const char *defvalue, char *value)</div><div class="ttdoc">Scan control file or command-line arguments for a configuration variable.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l07342">jurassic.c:7342</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_aee0afe3e4be54f2c889e213f4721938a"><div class="ttname"><a href="jurassic_8c.html#aee0afe3e4be54f2c889e213f4721938a">read_clim</a></div><div class="ttdeci">clim_t * read_clim(const ctl_t *ctl)</div><div class="ttdoc">Reads a JuMACS climatology file into an allocated climatology structure.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8c_source.html#l01361">jurassic.c:1361</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a3e0ae69dee4a8bb2e616526b5ebe6875"><div class="ttname"><a href="jurassic_8h.html#a3e0ae69dee4a8bb2e616526b5ebe6875">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(...)</div><div class="ttdoc">Print an error message with contextual information and terminate the program.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01391">jurassic.h:1391</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a56fe9bff0a1be75aae2da3e593053e2c"><div class="ttname"><a href="jurassic_8h.html#a56fe9bff0a1be75aae2da3e593053e2c">USAGE</a></div><div class="ttdeci">#define USAGE</div><div class="ttdoc">Print usage information on -h or --help.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01272">jurassic.h:1272</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_ab04c88bedc6b2be8ddfe7aa8d3e93f06"><div class="ttname"><a href="jurassic_8h.html#ab04c88bedc6b2be8ddfe7aa8d3e93f06">NP</a></div><div class="ttdeci">#define NP</div><div class="ttdoc">Maximum number of atmospheric data points.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l00333">jurassic.h:333</a></div></div>
@@ -233,6 +240,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="astructatm__t_html_a651f52626605a4dd79dd147ee245014f"><div class="ttname"><a href="structatm__t.html#a651f52626605a4dd79dd147ee245014f">atm_t::sft</a></div><div class="ttdeci">double sft</div><div class="ttdoc">Surface temperature [K].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01480">jurassic.h:1480</a></div></div>
 <div class="ttc" id="astructatm__t_html_a84dad6b8069641faddf06baad38b82f8"><div class="ttname"><a href="structatm__t.html#a84dad6b8069641faddf06baad38b82f8">atm_t::z</a></div><div class="ttdeci">double z[NP]</div><div class="ttdoc">Altitude [km].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01450">jurassic.h:1450</a></div></div>
 <div class="ttc" id="astructatm__t_html_a8c50a0221df51f13b2f07987aab6ab19"><div class="ttname"><a href="structatm__t.html#a8c50a0221df51f13b2f07987aab6ab19">atm_t::clk</a></div><div class="ttdeci">double clk[NCL]</div><div class="ttdoc">Cloud layer extinction [km^-1].</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01477">jurassic.h:1477</a></div></div>
+<div class="ttc" id="astructclim__t_html"><div class="ttname"><a href="structclim__t.html">clim_t</a></div><div class="ttdoc">JuMACS climatology on a fixed grid.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01493">jurassic.h:1493</a></div></div>
 <div class="ttc" id="astructctl__t_html"><div class="ttname"><a href="structctl__t.html">ctl_t</a></div><div class="ttdoc">Control parameters.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01533">jurassic.h:1533</a></div></div>
 <div class="ttc" id="astructctl__t_html_aaca3446ebb40caf6519044b624bc87d5"><div class="ttname"><a href="structctl__t.html#aaca3446ebb40caf6519044b624bc87d5">ctl_t::ncl</a></div><div class="ttdeci">int ncl</div><div class="ttdoc">Number of cloud layer spectral grid points.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01566">jurassic.h:1566</a></div></div>
 <div class="ttc" id="astructctl__t_html_adbb746bb71f7a71dffed2bfa519037c3"><div class="ttname"><a href="structctl__t.html#adbb746bb71f7a71dffed2bfa519037c3">ctl_t::nsf</a></div><div class="ttdeci">int nsf</div><div class="ttdoc">Number of surface layer spectral grid points.</div><div class="ttdef"><b>Definition:</b> <a href="jurassic_8h_source.html#l01572">jurassic.h:1572</a></div></div>
@@ -241,22 +249,22 @@ Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="climatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph.png" border="0" usemap="#aclimatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph" alt=""/></div>
 <map name="aclimatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph" id="aclimatology_8c_a0ddf1224851353fc92bfbff6f499fa97_cgraph">
-<area shape="rect" title=" " alt="" coords="5,249,56,275"/>
-<area shape="rect" href="jurassic_8c.html#ae324329aa277798b632b25de13faf1b2" title="Initializes atmospheric climatology profiles." alt="" coords="104,97,191,123"/>
+<area shape="rect" title=" " alt="" coords="5,223,56,250"/>
+<area shape="rect" href="jurassic_8c.html#a3a862315b799d9d7b1af9de34f9b0742" title="Initializes atmospheric climatology profiles." alt="" coords="104,71,191,98"/>
+<area shape="rect" href="jurassic_8c.html#aee0afe3e4be54f2c889e213f4721938a" title="Reads a JuMACS climatology file into an allocated climatology structure." alt="" coords="108,147,187,174"/>
 <area shape="rect" href="jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="113,223,181,250"/>
-<area shape="rect" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="287,274,358,301"/>
+<area shape="rect" href="jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="271,274,342,301"/>
 <area shape="rect" href="jurassic_8c.html#a19b236d7e6cd812c67f36673f0dbefc3" title="Write atmospheric data to a file." alt="" coords="108,350,187,377"/>
-<area shape="rect" href="jurassic_8c.html#a0f2e32c3b6d921e697b268ebfcc857f3" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="255,17,391,43"/>
-<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="639,67,721,94"/>
-<area shape="rect" href="jurassic_8c.html#a00e50ac632c96e1f721577d2175e43ba" title="Reads a JuMACS climatology file into a climatology structure." alt="" coords="239,122,407,149"/>
-<area shape="rect" href="jurassic_8c.html#af3581708aa5dfeb6bee5abd0c382b0f2" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="455,5,591,47"/>
-<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="643,13,717,39"/>
-<area shape="rect" href="jurassic_8c.html#a51ad44fd383ff1079aec502680d9a514" title="Reads and validates one JuMACS climatology field." alt="" coords="455,123,591,164"/>
-<area shape="rect" href="jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="278,173,367,199"/>
-<area shape="rect" href="jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="278,223,367,250"/>
-<area shape="rect" href="jurassic_8c.html#aa30b84e6dd510a6419d07dcaaba6669f" title="Write atmospheric data to an ASCII file." alt="" coords="269,325,376,351"/>
-<area shape="rect" href="jurassic_8c.html#af40f268fa1f23a997abbebc49d4c88d2" title="Write atmospheric data to a binary file." alt="" coords="271,375,374,402"/>
-<area shape="rect" href="jurassic_8c.html#a55dc8eb554ec2a550b66ced8310c7d73" title="Write one atmospheric profile to a netCDF file." alt="" coords="273,426,373,453"/>
+<area shape="rect" href="jurassic_8c.html#a0f2e32c3b6d921e697b268ebfcc857f3" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="239,17,375,43"/>
+<area shape="rect" href="jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="607,67,689,94"/>
+<area shape="rect" href="jurassic_8c.html#af3581708aa5dfeb6bee5abd0c382b0f2" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="423,5,559,47"/>
+<area shape="rect" href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="611,13,685,39"/>
+<area shape="rect" href="jurassic_8c.html#afc9a79d882cc74b4e023beffbe53739c" title="Reads and validates one JuMACS climatology field." alt="" coords="253,122,361,149"/>
+<area shape="rect" href="jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="262,173,351,199"/>
+<area shape="rect" href="jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="262,223,351,250"/>
+<area shape="rect" href="jurassic_8c.html#aa30b84e6dd510a6419d07dcaaba6669f" title="Write atmospheric data to an ASCII file." alt="" coords="253,325,360,351"/>
+<area shape="rect" href="jurassic_8c.html#af40f268fa1f23a997abbebc49d4c88d2" title="Write atmospheric data to a binary file." alt="" coords="255,375,358,402"/>
+<area shape="rect" href="jurassic_8c.html#a55dc8eb554ec2a550b66ced8310c7d73" title="Write one atmospheric profile to a netCDF file." alt="" coords="257,426,357,453"/>
 </map>
 </div>
 
