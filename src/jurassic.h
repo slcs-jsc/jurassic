@@ -2213,6 +2213,9 @@ void cart2geo(
  * for atmospheric modeling and radiative transfer calculations.
  *
  * @param[in]  ctl  Control parameters structure.
+ * @param[in]  clim Pre-loaded JuMACS climatology to apply, or NULL to use
+ *                  only the built-in climatology. The structure is treated
+ *                  as read-only and remains owned by the caller.
  * @param[out] atm  Atmospheric state structure to be populated with
  *                  climatological data.
  *
@@ -2220,6 +2223,7 @@ void cart2geo(
  */
 void climatology(
   const ctl_t * ctl,
+  const clim_t * clim,
   atm_t * atm);
 
 /**
@@ -2248,7 +2252,7 @@ void climatology(
  *
  * @author Lars Hoffmann
  */
-int climatology_jumacs_read_field(
+int read_clim_field(
   const char *filename,
   const char *varname,
   const int ncid,
@@ -2299,7 +2303,8 @@ void climatology_jumacs_interp(
   double *out);
 
 /**
- * @brief Reads a JuMACS climatology file into a climatology structure.
+ * @brief Reads a JuMACS climatology file into an allocated climatology
+ *        structure.
  *
  * Reads the JuMACS monthly zonal mean climatology from the file specified
  * by the CLIM_FILE control parameter. The file is opened, validated, and
@@ -2309,18 +2314,23 @@ void climatology_jumacs_interp(
  * temperature field is an error, trace gas fields missing from the file
  * are flagged by clim->has_q.
  *
- * @param[in]  ctl  Control parameters providing the climatology file name
- *                  and the emitter list.
- * @param[out] clim Climatology structure to be filled.
+ * @param[in] ctl  Control parameters providing the climatology file name
+ *                 and the emitter list.
+ *
+ * @return Pointer to an allocated and initialized @c clim_t structure, or
+ *         NULL if the CLIM_FILE control parameter is set to "-", in which
+ *         case only the built-in climatology is to be used.
  *
  * @note Aborts with an error message if the file cannot be opened or is
  *       not a valid JuMACS climatology file.
  *
+ * @note Memory for the returned structure is dynamically allocated and must
+ *       be released by the caller.
+ *
  * @author Lars Hoffmann
  */
-void climatology_jumacs_read(
-  const ctl_t * ctl,
-  clim_t * clim);
+clim_t *read_clim(
+  const ctl_t * ctl);
 
 /**
  * @brief Overwrites the built-in climatology with a JuMACS climatology.

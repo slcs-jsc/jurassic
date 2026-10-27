@@ -110,8 +110,11 @@ int main(
     }
   }
 
+  /* Read JuMACS climatology, if requested... */
+  clim_t *clim = read_clim(&ctl);
+
   /* Interpolate climatological data... */
-  climatology(&ctl, &atm);
+  climatology(&ctl, clim, &atm);
 
   /* Set cloud layer... */
   atm.clz = clz;
@@ -126,6 +129,9 @@ int main(
 
   /* Write data to disk... */
   write_atm(NULL, argv[2], &ctl, &atm, 0);
+
+  /* Free climatology... */
+  free(clim);
 
   return EXIT_SUCCESS;
 }

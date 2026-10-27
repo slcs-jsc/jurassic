@@ -214,6 +214,7 @@ void cart2geo(
 
 void climatology(
   const ctl_t *ctl,
+  const clim_t *clim,
   atm_t *atm) {
 
   static const double z[121] = {
@@ -1149,13 +1150,9 @@ void climatology(
   }
 
   /* Overwrite with JuMACS climatology... */
-  if (strcmp(ctl->climfile, "-") != 0) {
-    clim_t *clim;
-    ALLOC(clim, clim_t, 1);
-    climatology_jumacs_read(ctl, clim);
+  if (clim != NULL)
     climatology_jumacs(ctl, clim, atm);
-    free(clim);
-  } else
+  else
     LOG(1, "Use built-in climatology...");
 
   /* Ensure non-negative trace-gas mixing ratios... */
@@ -1166,7 +1163,7 @@ void climatology(
 
 /*****************************************************************************/
 
-int climatology_jumacs_read_field(
+int read_clim_field(
   const char *filename,
   const char *varname,
   const int ncid,
@@ -1361,9 +1358,16 @@ void climatology_jumacs_interp(
 
 /*****************************************************************************/
 
-void climatology_jumacs_read(
-  const ctl_t *ctl,
-  clim_t *clim) {
+clim_t *read_clim(
+  const ctl_t *ctl) {
+
+  /* No JuMACS climatology requested... */
+  if (strcmp(ctl->climfile, "-") == 0)
+    return NULL;
+
+  /* Allocate... */
+  clim_t *clim;
+  ALLOC(clim, clim_t, 1);
 
   /* Start with an empty climatology... */
   memset(clim, 0, sizeof(clim_t));
@@ -1484,9 +1488,9 @@ void climatology_jumacs_read(
   /* Read and check temperature... */
   double vmin;
   double vmax;
-  if (!climatology_jumacs_read_field(ctl->climfile, "temperature_mean", ncid,
-				     dim_month, dim_alt, dim_lat, clim->nalt,
-				     clim->nlat, clim->t, &vmin, &vmax))
+  if (!read_clim_field(ctl->climfile, "temperature_mean", ncid,
+		       dim_month, dim_alt, dim_lat, clim->nalt,
+		       clim->nlat, clim->t, &vmin, &vmax))
     ERRMSG("Climatology file %s has no variable 'temperature_mean' - "
 	   "not a complete JuMACS climatology file?", ctl->climfile);
   clim->has_t = 1;
@@ -1546,11 +1550,11 @@ void climatology_jumacs_read(
       continue;
     }
     sprintf(varname, "%s_mean", base);
-    clim->has_q[ig] = climatology_jumacs_read_field(ctl->climfile, varname,
-						    ncid, dim_month, dim_alt,
-						    dim_lat, clim->nalt,
-						    clim->nlat, clim->q[ig],
-						    &vmin, &vmax);
+    clim->has_q[ig] = read_clim_field(ctl->climfile, varname,
+				      ncid, dim_month, dim_alt,
+				      dim_lat, clim->nalt,
+				      clim->nlat, clim->q[ig],
+				      &vmin, &vmax);
     if (clim->has_q[ig]) {
       LOG(2, "%s: JuMACS %s, %g ... %g ppv", ctl->emitter[ig], varname,
 	  vmin, vmax);
@@ -1564,6 +1568,9 @@ void climatology_jumacs_read(
 
   /* Close climatology file... */
   NC(nc_close(ncid));
+
+  /* Return pointer... */
+  return clim;
 }
 
 /*****************************************************************************/
