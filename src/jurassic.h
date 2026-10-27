@@ -2697,7 +2697,7 @@ int find_emitter(
  *
  * @return Forward-model status code, e.g. @ref FORMOD_STATUS_OK.
  *
- * @note The model type is selected via @ref ctl_t::formod:
+ * @note The model type is selected via @ref ctl_t::formod "FORMOD":
  *       - 0 or 1 → pencil-beam models (@ref formod_pencil)  
  *       - 2 → RFM line-by-line model (@ref formod_rfm)
  *
@@ -2826,7 +2826,7 @@ int formod_fov(
  *
  * @return @ref FORMOD_STATUS_OK, or the error status returned by @ref raytrace.
  *
- * @note Depending on @ref ctl_t::formod, this function calls either
+ * @note Depending on @ref ctl_t::formod "FORMOD", this function calls either
  *       @ref intpol_tbl_cga() (CGA) or @ref intpol_tbl_ega() (EGA)
  *       for gas absorption interpolation.  
  *       Surface effects include emission, reflection, and—if enabled—
@@ -3165,7 +3165,7 @@ void intpol_tbl_cga(
  * @see ctl_t, tbl_t, los_t, intpol_tbl_u, intpol_tbl_eps, LIN, locate_irr, locate_reg
  * 
  * @note Implements the EGA variant of the forward model,
- *       selected when @ref ctl_t::formod = 1.
+ *       selected when @ref ctl_t::formod "FORMOD" = 1.
  *
  * @author Lars Hoffmann
  */
