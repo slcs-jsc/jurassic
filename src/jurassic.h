@@ -2298,7 +2298,7 @@ int read_clim_field(
  *
  * @author Lars Hoffmann
  */
-void climatology_jumacs_interp(
+void climatology_external_interp(
   const clim_t * clim,
   const atm_t * atm,
   const double field[CT][CZ][CLAT],
@@ -2350,7 +2350,7 @@ clim_t *read_clim(
  *
  * @author Lars Hoffmann
  */
-void climatology_jumacs(
+void climatology_external(
   const ctl_t * ctl,
   const clim_t * clim,
   atm_t * atm);

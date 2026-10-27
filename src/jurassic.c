@@ -1151,7 +1151,7 @@ void climatology(
 
   /* Overwrite with JuMACS climatology... */
   if (clim != NULL)
-    climatology_jumacs(ctl, clim, atm);
+    climatology_external(ctl, clim, atm);
   else
     LOG(1, "Use built-in climatology...");
 
@@ -1225,17 +1225,17 @@ int read_clim_field(
 /*****************************************************************************/
 
 /* Width of transition region towards built-in climatology [km]. */
-#define JUMACS_TRANSITION 20.
+#define CLIM_TRANSITION 20.
 
 /* Top-boundary policies for blending back to the built-in climatology
    above the JuMACS model top. Default is a cosine blend of the mixing
    ratio itself. Gases for which such a blend is scientifically less
    appropriate instead keep the top-level JuMACS value constant with
    altitude... */
-#define JUMACS_TOP_CONSTANT 1
-#define JUMACS_TOP_LOG      2
+#define CLIM_TOP_CONSTANT 1
+#define CLIM_TOP_LOG      2
 
-static int climatology_jumacs_top_policy(
+static int climatology_external_top_policy(
   const char *emitter) {
   static const char *constant_gases[] = {
     "C2H6", "CCl4", "F11", "F12", "F22", "H2CO", "HNO3", "HNO4",
@@ -1246,16 +1246,16 @@ static int climatology_jumacs_top_policy(
   for (size_t i = 0; i < sizeof(constant_gases) / sizeof(constant_gases[0]);
        i++)
     if (strcasecmp(emitter, constant_gases[i]) == 0)
-      return JUMACS_TOP_CONSTANT;
+      return CLIM_TOP_CONSTANT;
 
   for (size_t i = 0; i < sizeof(log_gases) / sizeof(log_gases[0]); i++)
     if (strcasecmp(emitter, log_gases[i]) == 0)
-      return JUMACS_TOP_LOG;
+      return CLIM_TOP_LOG;
 
   return 0;
 }
 
-void climatology_jumacs_interp(
+void climatology_external_interp(
   const clim_t *clim,
   const atm_t *atm,
   const double field[CT][CZ][CLAT],
@@ -1277,8 +1277,8 @@ void climatology_jumacs_interp(
 
     /* Keep built-in climatology above the transition region, except for
        fields with constant extrapolation... */
-    if (top_policy != JUMACS_TOP_CONSTANT &&
-        atm->z[ip] >= ztop + JUMACS_TRANSITION)
+    if (top_policy != CLIM_TOP_CONSTANT &&
+        atm->z[ip] >= ztop + CLIM_TRANSITION)
       continue;
 
     /* Position within the climatological year... */
@@ -1344,10 +1344,10 @@ void climatology_jumacs_interp(
        with logarithmic blending, taper the logarithms of the mixing
        ratios if both are strictly positive, falling back to the ordinary
        blend otherwise... */
-    if (atm->z[ip] > ztop && top_policy != JUMACS_TOP_CONSTANT) {
-      const double x = (atm->z[ip] - ztop) / JUMACS_TRANSITION;
+    if (atm->z[ip] > ztop && top_policy != CLIM_TOP_CONSTANT) {
+      const double x = (atm->z[ip] - ztop) / CLIM_TRANSITION;
       const double w = 0.5 * (1. + cos(M_PI * x));
-      if (top_policy == JUMACS_TOP_LOG && jumacs > 0. && out[ip] > 0.)
+      if (top_policy == CLIM_TOP_LOG && jumacs > 0. && out[ip] > 0.)
         out[ip] = exp(w * log(jumacs) + (1. - w) * log(out[ip]));
       else
         out[ip] = w * jumacs + (1. - w) * out[ip];
@@ -1575,22 +1575,22 @@ clim_t *read_clim(
 
 /*****************************************************************************/
 
-void climatology_jumacs(
+void climatology_external(
   const ctl_t *ctl,
   const clim_t *clim,
   atm_t *atm) {
 
   /* Overwrite temperature... */
   if (clim->has_t)
-    climatology_jumacs_interp(clim, atm, clim->t, 0, atm->t);
+    climatology_external_interp(clim, atm, clim->t, 0, atm->t);
 
   /* Overwrite trace gases... */
   for (int ig = 0; ig < ctl->ng; ig++)
     if (clim->has_q[ig])
-      climatology_jumacs_interp(clim, atm, clim->q[ig],
-                                climatology_jumacs_top_policy(
-                                  ctl->emitter[ig]),
-                                atm->q[ig]);
+      climatology_external_interp(clim, atm, clim->q[ig],
+                                  climatology_external_top_policy(
+                                    ctl->emitter[ig]),
+                                  atm->q[ig]);
 }
 
 /*****************************************************************************/
