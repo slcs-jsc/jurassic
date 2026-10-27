@@ -79,6 +79,26 @@ $jurassic/climatology alias.ctl data/alias_trans_jul.tab \
 $jurassic/climatology alias.ctl data/alias_legacy_jul.tab \
     T0 15724800 T1 15724800 DT 1 Z0 70 Z1 100 DZ 1 LAT 45 CLIM_FILE -
 
+# Non-negativity of the final climatology output for all available
+# species across the four emitter groups (built-in climatology)...
+$jurassic/climatology jumacs.ctl data/nn_jumacs.tab \
+    T0 0 T1 0 DT 1 Z0 0 Z1 160 DZ 1 LAT 45 CLIM_FILE -
+$jurassic/climatology alias.ctl data/nn_alias.tab \
+    T0 0 T1 0 DT 1 Z0 0 Z1 160 DZ 1 LAT 45 CLIM_FILE -
+$jurassic/climatology tracers1.ctl data/nn_tracers1.tab \
+    T0 0 T1 0 DT 1 Z0 0 Z1 160 DZ 1 LAT 45 CLIM_FILE -
+$jurassic/climatology tracers2.ctl data/nn_tracers2.tab \
+    T0 0 T1 0 DT 1 Z0 0 Z1 160 DZ 1 LAT 45 CLIM_FILE -
+
+# Same invariant for the JuMACS path (WACCM-X, valid up to 150 km),
+# exercising both file values and built-in fallback species...
+$jurassic/climatology jumacs.ctl data/nn_jumacs_waccmx.tab \
+    T0 15724800 T1 15724800 DT 1 Z0 0 Z1 150 DZ 1 LAT 75 \
+    CLIM_FILE ../../data/jumacs_waccmx_1985-2014_5deg_1km.nc
+$jurassic/climatology tracers1.ctl data/nn_tracers1_waccmx.tab \
+    T0 15724800 T1 15724800 DT 1 Z0 0 Z1 150 DZ 1 LAT 75 \
+    CLIM_FILE ../../data/jumacs_waccmx_1985-2014_5deg_1km.nc
+
 # Compare reference files...
 echo -e "\nCompare results..."
 error=0
@@ -266,5 +286,21 @@ if diff -q <(awk '!/^#/{print $6,$7,$8,$9}' data/alias.tab) \
   echo "Alias species columns unexpectedly equal built-in values!"
   error=1
 fi
+
+# The final climatology output must be finite and non-negative for every
+# species at every altitude (mixing ratios are columns 7-14, all groups
+# use NG = 8)...
+for f in nn_jumacs nn_alias nn_tracers1 nn_tracers2 \
+         nn_jumacs_waccmx nn_tracers1_waccmx ; do
+  if ! awk 'NF > 13 {
+         for (i = 7; i <= 14; i++)
+           if ($i !~ /^[+-]?([0-9]+\.?[0-9]*|\.?[0-9]+)([eE][+-]?[0-9]+)?$/ \
+               || $i + 0 < 0)
+             exit 1
+       }' data/$f.tab ; then
+    echo "Non-finite or negative mixing ratios in final climatology ($f)!"
+    error=1
+  fi
+done
 
 exit $error

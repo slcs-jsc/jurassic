@@ -1155,6 +1155,11 @@ void climatology(
     free(clim);
   } else
     LOG(1, "Use built-in climatology...");
+
+  /* Ensure non-negative trace-gas mixing ratios... */
+  for (int ip = 0; ip < atm->np; ip++)
+    for (int ig = 0; ig < ctl->ng; ig++)
+      atm->q[ig][ip] = MAX(atm->q[ig][ip], 0.);
 }
 
 /*****************************************************************************/
