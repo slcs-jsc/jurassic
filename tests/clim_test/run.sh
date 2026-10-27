@@ -303,4 +303,66 @@ for f in nn_jumacs nn_alias nn_tracers1 nn_tracers2 \
   fi
 done
 
+# The built-in climatology (temperature, columns 6, and mixing ratios,
+# columns 7-14) must be held constant above the 120 km table top...
+for f in nn_jumacs nn_alias nn_tracers1 nn_tracers2 ; do
+  if ! awk 'NF > 13 {
+         if ($2 == 120)
+           for (i = 6; i <= 14; i++) v[i] = $i
+         if ($2 > 120)
+           for (i = 6; i <= 14; i++)
+             if ($i != v[i]) exit 1
+       }' data/$f.tab ; then
+    echo "Built-in climatology not held constant above 120 km ($f)!"
+    error=1
+  fi
+done
+
+# Pressure must NOT be held constant above the built-in table top (the
+# log-linear extrapolation must remain active)...
+for f in nn_jumacs nn_alias nn_tracers1 nn_tracers2 ; do
+  if ! awk 'NF > 13 {
+         if ($2 == 120) p120 = $5
+         if ($2 == 121) p121 = $5
+         if ($2 == 160) p160 = $5
+       }
+       END { exit !(p121 < p120 && p160 < p121) }' data/$f.tab ; then
+    echo "Pressure not extrapolated above 120 km ($f)!"
+    error=1
+  fi
+done
+
+# With WACCM-X (top at 150 km), file-provided fields (temperature and
+# O3) must keep changing above 120 km and must not be clamped there...
+if ! awk 'NF > 13 {
+       if ($2 == 120) { t = $6; o = $9 }
+       if ($2 == 135 || $2 == 150) {
+         if ($6 == t && $9 == o) exit 1
+       }
+     }' data/nn_jumacs_waccmx.tab ; then
+  echo "WACCM-X fields unexpectedly clamped at 120 km!"
+  error=1
+fi
+
+# With WACCM-X, species missing from the file (H2O and OCS in
+# jumacs.ctl, and all species in tracers1.ctl) must follow the constant
+# built-in fallback above 120 km...
+if ! awk 'NF > 13 {
+       if ($2 == 120) { h = $7; c = $14 }
+       if ($2 > 120 && ($7 != h || $14 != c)) exit 1
+     }' data/nn_jumacs_waccmx.tab ; then
+  echo "WACCM-X built-in fallback not constant above 120 km!"
+  error=1
+fi
+if ! awk 'NF > 13 {
+       if ($2 == 120)
+         for (i = 7; i <= 14; i++) v[i] = $i
+       if ($2 > 120)
+         for (i = 7; i <= 14; i++)
+           if ($i != v[i]) exit 1
+     }' data/nn_tracers1_waccmx.tab ; then
+  echo "WACCM-X fallback species not constant above 120 km!"
+  error=1
+fi
+
 exit $error

@@ -1108,14 +1108,16 @@ void climatology(
     /* Interpolate pressure... */
     atm->p[ip] = LOGY(z[iz], pre[iz], z[iz + 1], pre[iz + 1], atm->z[ip]);
 
-    /* Interpolate temperature... */
-    atm->t[ip] = LIN(z[iz], tem[iz], z[iz + 1], tem[iz + 1], atm->z[ip]);
+    /* Interpolate temperature and trace gases, holding them constant
+       above the top of the built-in climatology table... */
+    const double zt = MIN(atm->z[ip], z[120]);
 
-    /* Interpolate trace gases... */
+    atm->t[ip] = LIN(z[iz], tem[iz], z[iz + 1], tem[iz + 1], zt);
+
     for (int ig = 0; ig < ctl->ng; ig++)
       if (q[ig] != NULL)
 	atm->q[ig][ip] =
-	  LIN(z[iz], q[ig][iz], z[iz + 1], q[ig][iz + 1], atm->z[ip]);
+	  LIN(z[iz], q[ig][iz], z[iz + 1], q[ig][iz + 1], zt);
       else
 	atm->q[ig][ip] = 0;
 
