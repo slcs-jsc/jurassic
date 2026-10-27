@@ -311,14 +311,16 @@ enum {
 #define CT 12
 #endif
 
-/*! Maximum number of altitudes for climatological data. */
+/*! Maximum number of altitudes for climatological data
+    (JuMACS: 0...150 km at 1 km spacing). */
 #ifndef CZ
-#define CZ 200
+#define CZ 151
 #endif
 
-/*! Maximum number of latitudes for climatological data. */
+/*! Maximum number of latitudes for climatological data
+    (JuMACS: 36 area-weighted 5-degree bands). */
 #ifndef CLAT
-#define CLAT 96
+#define CLAT 36
 #endif
 
 /*! Maximum number of LOS points. */
