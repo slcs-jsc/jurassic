@@ -344,6 +344,32 @@ unexpected results.
 
 ---
 
+## Generating climatological profiles
+
+Atmospheric profiles can also be generated from climatological data
+instead of being prepared externally:
+
+```bash
+./climatology <ctl> <atm_out> [KEY VALUE ...]
+```
+
+The tool builds pressure, temperature, and trace-gas profiles on the
+time, latitude, and altitude grid given in the control file (or
+overridden via `KEY VALUE` pairs) and writes the result as a standard
+JURASSIC atmospheric file that can subsequently be used by `formod`,
+`kernel`, the retrieval tools, and any other application that reads
+atmospheric profiles.
+
+- By default (`CLIM_FILE = -`) the built-in JURASSIC climatology is used.
+- Setting `CLIM_FILE` to a JuMACS netCDF file overlays the available
+  JuMACS temperature and mapped trace-gas fields on the built-in profile.
+
+See [Configuration](configuration.md) for the detailed climatology
+behavior, including gas mapping and the treatment of altitudes above the
+top of the JuMACS products.
+
+---
+
 ## Summary
 
 The atmospheric data file defines the thermodynamic and compositional

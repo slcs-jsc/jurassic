@@ -26,6 +26,12 @@ represented in the core JURASSIC model.
     absorption plays a significant role unless dedicated extensions are
     employed.
 
+!!! note "Climatological input at high altitudes"
+    Climatological input may extend to high altitudes (e.g. JuMACS
+    products such as WACCM-X up to 150 km), but this does not imply that
+    the LTE assumption of the radiative transfer remains valid throughout
+    that altitude range. The validity limits stated above still apply.
+
 ---
 
 ## Spectral approximations

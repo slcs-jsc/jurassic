@@ -175,7 +175,9 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
     `climatology` tool interpolates them in climatological time, latitude,
     and altitude. Harmonized JuMACS products provide 12 monthly means on
     36 area-weighted 5-degree latitude bands; their upper altitude is
-    model-dependent.
+    model-dependent. Pressure always remains based on the built-in
+    JURASSIC climatology, because the harmonized JuMACS products do not
+    provide a pressure field.
 
     JuMACS values are used unchanged up to and including the model top of
     the product. Above the model top, temperature and most mapped gases
@@ -195,7 +197,28 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
     F11, F12, F22, H2CO, H2O, H2O2, HCl, HNO3, HNO4, HOCl, N2O, N2O5, NO,
     NO2, O3, OCS, and SO2. Species not mapped to the product, including
     the main gases CO2, O2, and N2, continue to use the built-in
-    climatology.
+    climatology. Not every JuMACS product provides all mapped species;
+    if a mapped species is missing from a specific product, JURASSIC
+    keeps the built-in climatological value for that species. This is
+    product-dependent and intentional.
+
+    Above 120 km, the built-in temperature and trace-gas profiles are
+    held constant at their 120 km values, while the built-in pressure
+    continues to decrease with its existing logarithmic high-altitude
+    extrapolation. Where a JuMACS product provides data above 120 km
+    (e.g. WACCM-X up to 150 km), its values are used there according to
+    the rules above.
+
+    JURASSIC distributes three harmonized JuMACS climatology files in
+    `data/`:
+
+    | File | Model | Approximate vertical coverage |
+    |------|-------|-------------------------------|
+    | `jumacs_emac_refd1_1985-2014_5deg_1km.nc` | EMAC | 0–76 km |
+    | `jumacs_geosccm_refd1_1985-2014_5deg_1km.nc` | GEOSCCM | 0–75 km |
+    | `jumacs_waccmx_1985-2014_5deg_1km.nc` | WACCM-X | 0–150 km |
+
+    The products differ in their covered species and upper altitude.
 
 ### Hydrostasy
 

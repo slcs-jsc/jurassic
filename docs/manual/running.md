@@ -35,6 +35,7 @@ applications, parameters may optionally be overridden via `KEY VALUE` pairs.
 | Forward model | `./formod <ctl> <obs_in> <atm_in> <rad_out>` | control file, observation geometry input, atmosphere input, radiance/observation output |
 | Kernels (Jacobians) | `./kernel <ctl> <obs_in> <atm_in> <kernel_out>` | control file, observation geometry input, atmosphere input, kernel matrix output |
 | Retrieval (optimal estimation) | `./retrieval <ctl> <dirlist-or->` | control file, either a text file listing working directories or `-` for shared-file/profile-list mode |
+| Climatology profiles | `./climatology <ctl> <atm_out> [KEY VALUE ...]` | control file, atmospheric output file |
 
 !!! note
     For `formod` and `kernel`, the filenames are usually `*.tab` files,
@@ -184,6 +185,27 @@ At least one of the following must be provided:
 
 Additional matrices (covariance, averaging kernels, etc.) are written if
 enabled via control parameters.
+
+---
+
+## Generating profiles from climatology (`climatology`)
+
+The `climatology` tool prepares an atmospheric profile from
+climatological data:
+
+```bash
+./climatology run.ctl atm.tab
+```
+
+- The time, latitude, and altitude grid comes from the control file or
+  command-line overrides.
+- `CLIM_FILE` selects the built-in climatology (`-`, the default) or a
+  JuMACS netCDF climatology.
+- The result is written as a standard JURASSIC atmospheric file.
+
+See [Configuration](configuration.md) for `CLIM_FILE` and
+[Atmospheric data](atmospheric_data.md) for the atmospheric output
+format.
 
 ---
 

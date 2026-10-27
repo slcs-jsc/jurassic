@@ -33,6 +33,7 @@ Key data structures (typedefs):
 - `los_t` — **line-of-sight representation** used internally during ray tracing / integration
 - `ret_t` — **retrieval control parameters** (optimal estimation settings, convergence, regularization)
 - `tbl_t` — **lookup-table container** (precomputed spectroscopy / emissivity tables)
+- `clim_t` — **monthly zonal climatology data** loaded from JuMACS and reused as read-only runtime state
 
 The header is Doxygen-friendly and many functions/types have docstrings.
 If you are looking for “what is the intended contract of this function?”,
@@ -86,12 +87,28 @@ Typical project-style tools rely on table-based I/O helpers:
   - `write_obs(dirname, filename, ctl, obs, profile)`
 - Retrieval configuration:
   - `read_ret`
+- Climatology:
+  - `read_clim(&ctl)`
 - Generic helpers:
   - `read_matrix(dirname, filename, ctl, matrix, dataset)`
   - `write_matrix(dirname, filename, ctl, matrix, atm, obs, rowspace, colspace, sort, dataset)`
 
 For ASCII and binary formats, the `profile` / `dataset` arguments are ignored.
 For netCDF formats, they select the record along the unlimited dimension.
+
+`read_clim` follows the same allocate-and-return ownership pattern as
+`read_tbl`: it returns `NULL` when `CLIM_FILE = -` (built-in climatology
+only); otherwise it allocates and loads the JuMACS climatology once.
+`climatology()` treats the structure as read-only, and the caller owns
+and frees it:
+
+```c
+clim_t *clim = read_clim(&ctl);
+...
+climatology(&ctl, clim, &atm);
+...
+free(clim);
+```
 
 !!! tip
     The small example tools (`formod.c`, `kernel.c`, `retrieval.c`) are

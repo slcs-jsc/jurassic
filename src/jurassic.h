@@ -2231,8 +2231,10 @@ void climatology(
  *
  * Reads the NetCDF variable @a varname from an open JuMACS climatology
  * file into a fixed-size field array. The variable must be
- * three-dimensional with dimension order (month, altitude, lat) and is
- * read level by level into the used index range of the field.
+ * three-dimensional with dimension order (month, altitude, lat). The
+ * complete field is read in a single nc_get_var_double() call into a
+ * compact temporary buffer and then copied into the used index range
+ * of the padded field array.
  *
  * @param[in]  filename   Name of the climatology file (for error messages).
  * @param[in]  varname    Name of the NetCDF variable to read.
@@ -2271,8 +2273,9 @@ int read_clim_field(
  * Trilinearly interpolates a monthly zonal mean field from the JuMACS
  * (altitude, lat) grid onto the altitude and latitude of each atmospheric
  * profile point and overwrites the output array. In time, the field is
- * interpolated linearly between the centers of the adjacent months, using
- * actual month lengths and a cyclic wrap-around at the end of the year.
+ * interpolated linearly between the fixed climatological monthly center
+ * times on a 365.25-day year, with a cyclic wrap-around between December
+ * and January.
  * Latitude is clamped at the outermost JuMACS band centers, altitude at
  * the lowest JuMACS level. Profile points above the top of the JuMACS
  * grid are either held at the top-level JuMACS value or blended smoothly
@@ -2310,9 +2313,9 @@ void climatology_jumacs_interp(
  * by the CLIM_FILE control parameter. The file is opened, validated, and
  * closed within this routine. It must provide the dimensions month,
  * altitude, and lat as well as coordinate variables of the same name.
- * Fields are taken from the <varname>_mean NetCDF variables. A missing
- * temperature field is an error, trace gas fields missing from the file
- * are flagged by clim->has_q.
+ * Fields are taken from NetCDF variables named after the quantity with
+ * a @c _mean suffix. A missing temperature field is an error, trace gas
+ * fields missing from the file are flagged by clim->has_q.
  *
  * @param[in] ctl  Control parameters providing the climatology file name
  *                 and the emitter list.
