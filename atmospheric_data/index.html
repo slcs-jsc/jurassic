@@ -766,6 +766,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#generating-climatological-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating climatological profiles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1432,6 +1443,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#generating-climatological-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating climatological profiles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1827,6 +1849,26 @@ might look like:</p>
 </ul>
 <p>Inconsistent atmospheric input is a common source of runtime errors or
 unexpected results.</p>
+<hr />
+<h2 id="generating-climatological-profiles">Generating climatological profiles</h2>
+<p>Atmospheric profiles can also be generated from climatological data
+instead of being prepared externally:</p>
+<pre><code class="language-bash">./climatology &lt;ctl&gt; &lt;atm_out&gt; [KEY VALUE ...]
+</code></pre>
+<p>The tool builds pressure, temperature, and trace-gas profiles on the
+time, latitude, and altitude grid given in the control file (or
+overridden via <code>KEY VALUE</code> pairs) and writes the result as a standard
+JURASSIC atmospheric file that can subsequently be used by <code>formod</code>,
+<code>kernel</code>, the retrieval tools, and any other application that reads
+atmospheric profiles.</p>
+<ul>
+<li>By default (<code>CLIM_FILE = -</code>) the built-in JURASSIC climatology is used.</li>
+<li>Setting <code>CLIM_FILE</code> to a JuMACS netCDF file overlays the available
+  JuMACS temperature and mapped trace-gas fields on the built-in profile.</li>
+</ul>
+<p>See <a href="../configuration/">Configuration</a> for the detailed climatology
+behavior, including gas mapping and the treatment of altitudes above the
+top of the JuMACS products.</p>
 <hr />
 <h2 id="summary">Summary</h2>
 <p>The atmospheric data file defines the thermodynamic and compositional

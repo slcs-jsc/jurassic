@@ -734,6 +734,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#generating-profiles-from-climatology-climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating profiles from climatology (climatology)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#parallel-execution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1496,6 +1507,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#generating-profiles-from-climatology-climatology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating profiles from climatology (climatology)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#parallel-execution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1656,6 +1678,11 @@ applications, parameters may optionally be overridden via <code>KEY VALUE</code>
 <td><code>./retrieval &lt;ctl&gt; &lt;dirlist-or-&gt;</code></td>
 <td>control file, either a text file listing working directories or <code>-</code> for shared-file/profile-list mode</td>
 </tr>
+<tr>
+<td>Climatology profiles</td>
+<td><code>./climatology &lt;ctl&gt; &lt;atm_out&gt; [KEY VALUE ...]</code></td>
+<td>control file, atmospheric output file</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition note">
@@ -1772,6 +1799,22 @@ the records written to shared output files.</p>
 </ul>
 <p>Additional matrices (covariance, averaging kernels, etc.) are written if
 enabled via control parameters.</p>
+<hr />
+<h2 id="generating-profiles-from-climatology-climatology">Generating profiles from climatology (<code>climatology</code>)</h2>
+<p>The <code>climatology</code> tool prepares an atmospheric profile from
+climatological data:</p>
+<pre><code class="language-bash">./climatology run.ctl atm.tab
+</code></pre>
+<ul>
+<li>The time, latitude, and altitude grid comes from the control file or
+  command-line overrides.</li>
+<li><code>CLIM_FILE</code> selects the built-in climatology (<code>-</code>, the default) or a
+  JuMACS netCDF climatology.</li>
+<li>The result is written as a standard JURASSIC atmospheric file.</li>
+</ul>
+<p>See <a href="../configuration/">Configuration</a> for <code>CLIM_FILE</code> and
+<a href="../atmospheric_data/">Atmospheric data</a> for the atmospheric output
+format.</p>
 <hr />
 <h2 id="parallel-execution">Parallel execution</h2>
 <p>Parallel execution in JURASSIC is achieved through workflow-level

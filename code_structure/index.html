@@ -1683,6 +1683,7 @@ and declares the public functions used throughout the code base.</p>
 <li><code>los_t</code> — <strong>line-of-sight representation</strong> used internally during ray tracing / integration</li>
 <li><code>ret_t</code> — <strong>retrieval control parameters</strong> (optimal estimation settings, convergence, regularization)</li>
 <li><code>tbl_t</code> — <strong>lookup-table container</strong> (precomputed spectroscopy / emissivity tables)</li>
+<li><code>clim_t</code> — <strong>monthly zonal climatology data</strong> loaded from JuMACS and reused as read-only runtime state</li>
 </ul>
 <p>The header is Doxygen-friendly and many functions/types have docstrings.
 If you are looking for “what is the intended contract of this function?”,
@@ -1728,12 +1729,25 @@ contains most of the numerical machinery used by the example tools:</p>
 <li><code>write_obs(dirname, filename, ctl, obs, profile)</code></li>
 <li>Retrieval configuration:</li>
 <li><code>read_ret</code></li>
+<li>Climatology:</li>
+<li><code>read_clim(&amp;ctl)</code></li>
 <li>Generic helpers:</li>
 <li><code>read_matrix(dirname, filename, ctl, matrix, dataset)</code></li>
 <li><code>write_matrix(dirname, filename, ctl, matrix, atm, obs, rowspace, colspace, sort, dataset)</code></li>
 </ul>
 <p>For ASCII and binary formats, the <code>profile</code> / <code>dataset</code> arguments are ignored.
 For netCDF formats, they select the record along the unlimited dimension.</p>
+<p><code>read_clim</code> follows the same allocate-and-return ownership pattern as
+<code>read_tbl</code>: it returns <code>NULL</code> when <code>CLIM_FILE = -</code> (built-in climatology
+only); otherwise it allocates and loads the JuMACS climatology once.
+<code>climatology()</code> treats the structure as read-only, and the caller owns
+and frees it:</p>
+<pre><code class="language-c">clim_t *clim = read_clim(&amp;ctl);
+...
+climatology(&amp;ctl, clim, &amp;atm);
+...
+free(clim);
+</code></pre>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The small example tools (<code>formod.c</code>, <code>kernel.c</code>, <code>retrieval.c</code>) are

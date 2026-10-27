@@ -2190,7 +2190,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 
 <p>Reads and validates one JuMACS climatology field. </p>
-<p >Reads the NetCDF variable <em>varname</em> from an open JuMACS climatology file into a fixed-size field array. The variable must be three-dimensional with dimension order (month, altitude, lat) and is read level by level into the used index range of the field.</p>
+<p >Reads the NetCDF variable <em>varname</em> from an open JuMACS climatology file into a fixed-size field array. The variable must be three-dimensional with dimension order (month, altitude, lat). The complete field is read in a single nc_get_var_double() call into a compact temporary buffer and then copied into the used index range of the padded field array.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>Name of the climatology file (for error messages). </td></tr>
@@ -2310,7 +2310,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 
 <p>Interpolates a JuMACS climatology field onto atmospheric profiles. </p>
-<p >Trilinearly interpolates a monthly zonal mean field from the JuMACS (altitude, lat) grid onto the altitude and latitude of each atmospheric profile point and overwrites the output array. In time, the field is interpolated linearly between the centers of the adjacent months, using actual month lengths and a cyclic wrap-around at the end of the year. Latitude is clamped at the outermost JuMACS band centers, altitude at the lowest JuMACS level. Profile points above the top of the JuMACS grid are either held at the top-level JuMACS value or blended smoothly towards the built-in climatology, according to the top-boundary policy.</p>
+<p >Trilinearly interpolates a monthly zonal mean field from the JuMACS (altitude, lat) grid onto the altitude and latitude of each atmospheric profile point and overwrites the output array. In time, the field is interpolated linearly between the fixed climatological monthly center times on a 365.25-day year, with a cyclic wrap-around between December and January. Latitude is clamped at the outermost JuMACS band centers, altitude at the lowest JuMACS level. Profile points above the top of the JuMACS grid are either held at the top-level JuMACS value or blended smoothly towards the built-in climatology, according to the top-boundary policy.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">clim</td><td>JuMACS climatology providing the altitude and latitude grids. </td></tr>
@@ -2461,7 +2461,7 @@ Here is the call graph for this function:</div>
 </div><div class="memdoc">
 
 <p>Reads a JuMACS climatology file into an allocated climatology structure. </p>
-<p >Reads the JuMACS monthly zonal mean climatology from the file specified by the CLIM_FILE control parameter. The file is opened, validated, and closed within this routine. It must provide the dimensions month, altitude, and lat as well as coordinate variables of the same name. Fields are taken from the &lt;varname&gt;_mean NetCDF variables. A missing temperature field is an error, trace gas fields missing from the file are flagged by clim-&gt;has_q.</p>
+<p >Reads the JuMACS monthly zonal mean climatology from the file specified by the CLIM_FILE control parameter. The file is opened, validated, and closed within this routine. It must provide the dimensions month, altitude, and lat as well as coordinate variables of the same name. Fields are taken from NetCDF variables named after the quantity with a <code>_mean</code> suffix. A missing temperature field is an error, trace gas fields missing from the file are flagged by clim-&gt;has_q.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">ctl</td><td>Control parameters providing the climatology file name and the emitter list.</td></tr>
