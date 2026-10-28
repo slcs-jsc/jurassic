@@ -19,8 +19,9 @@ and gas set one at a time, keeping the other settings at their reference
 values. The 32-channel setting is a representative intermediate point within
 the tested range of 8–128 channels, and `ng18` uses the full gas list.
 
-The reference setting is timed on 1, 2, 4, 8, 16, 32, and 64 threads and is
-the only setting used for the batch-size sweep. All other settings are timed
+The reference setting is evaluated at 1, 2, 4, 8, 16, 32, and 64 threads; the
+one-thread reference time is estimated as described below. It is the only
+setting used for the batch-size sweep. All other settings are timed
 on 1, 4, 16, and 64 threads. Each setting is built for its own `ND` and `NG`.
 
 The reported strong-scaling times cover only one timed `formod_batch`
@@ -60,7 +61,6 @@ The gas sets are defined in `configs/gas_sets/`. The name gives the number of ga
 * `t1check`: 1 thread on the full batch, to check the estimated `T1`
   (results in `jureca_scaling_axes_res/t1check/`).
 * `batches` (default): one socket's threads over several batch sizes.
-* `weak`: fixed scenes per thread.
 
 ```sh
 cd projects/benchmark
@@ -82,11 +82,15 @@ up to 32 threads. On 64 cores they reach about 52–53× speedup, or about
 
 ![Efficiency over threads for different gas sets, per geometry](figures/e4_gases_strong_efficiency.png)
 
-The number of gases (NG) has no visible effect on the scaling. 
+Within the tested gas sets, the number of gases has no clear effect on parallel
+efficiency.
 
 ![Efficiency over threads for different channel counts, per geometry](figures/e4_channels_strong_efficiency.png)
 
-Up to 32 channels, the efficiency does not depend on ND. With 64 and 128 channels, it starts to decrease at 4 threads (128 channels: 43–55 % on 64 threads). This is likely related to memory effects, since the lookup tables grow from 29 MB (ND = 32) to 118 MB (ND = 128).
+Up to 32 channels, no clear dependence of parallel efficiency on ND is visible.
+With 64 and 128 channels, it starts to decrease at 4 threads (128 channels:
+43–55 % on 64 threads). This is likely related to memory effects, since the
+lookup tables grow from 29 MB (ND = 32) to 118 MB (ND = 128).
 
 ![Speedup of the whole application per geometry](figures/e4_geometry_app_speedup.png)
 
@@ -96,7 +100,8 @@ outside the forward-model scaling result. In a persistent application or
 retrieval workflow, lookup tables are initialized once and reused for many
 forward-model evaluations, so their initialization cost is amortized.
 
-When the one-time table initialization, reference run, and output are included,
+When table initialization, the reference run, and output are included in the
+process-level timing,
 the process-level speedup on 64 threads decreases to 28 (zenith), 25 (limb)
 and 9 (nadir). The time per phase for the reference setting (batch of 128
 scenes) shows why:

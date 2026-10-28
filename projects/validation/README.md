@@ -27,7 +27,7 @@ The committed EGA, CGA, and RFM results were generated from commit
 
 ## Validation results
 
-### Detailed summary
+### Key results
 
 For this configuration, typical JURASSIC–RFM radiance differences are at the
 percent level or below. Nadir and zenith RMS brightness-temperature differences
@@ -109,7 +109,10 @@ The table shows total model time for each validation case. The timing definition
 and reference hardware are described below. The reported JURASSIC runtime
 refers to the forward-model calculation itself. Lookup-table reading and
 initialization (`READ_TBL`) are measured separately and are not included in
-the JURASSIC model-time values or RFM/JURASSIC speed-up ratios.
+the JURASSIC model-time values or RFM/JURASSIC speed-up ratios. The comparison
+represents repeated forward-model evaluations after the precomputed JURASSIC
+lookup tables have been initialized, as in a retrieval or other persistent
+workflow.
 
 | Geometry | EGA [s] | CGA [s] | RFM [s] | RFM/EGA | RFM/CGA |
 |:---|---:|---:|---:|---:|---:|
