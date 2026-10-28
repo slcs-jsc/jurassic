@@ -304,6 +304,7 @@ retrieval application and state-vector definition.)
 Some workflows use external line-by-line assets or tools, for example
 the [Reference Forward Model (RFM)](https://eodg.atm.ox.ac.uk/RFM/) for
 table generation. These parameters provide paths.
+RFM ASCII spectra read by JURASSIC must contain at least two spectral points.
 
 - `RFMBIN` *(default: `-`)*  
   Path to the RFM binary (if used).

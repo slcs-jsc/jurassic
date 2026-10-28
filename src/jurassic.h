@@ -4358,6 +4358,7 @@ void read_ret(
  *
  * @warning
  * - Aborts if the file cannot be opened or has an invalid header format.
+ * - Requires at least two spectral points.
  * - Aborts if the number of grid points exceeds `RFMNPTS`.
  * - Assumes ASCII format consistent with standard RFM `.asc` output.
  *

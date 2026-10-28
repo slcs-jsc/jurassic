@@ -1158,7 +1158,7 @@ void climatology(
   /* Ensure non-negative trace-gas mixing ratios... */
   for (int ip = 0; ip < atm->np; ip++)
     for (int ig = 0; ig < ctl->ng; ig++)
-      atm->q[ig][ip] = MAX(atm->q[ig][ip], 0.);
+      atm->q[ig][ip] = MAX(atm->q[ig][ip], 0.0);
 }
 
 /*****************************************************************************/
@@ -4841,13 +4841,13 @@ void intpol_tbl_cga(
 		      tbl->lnp[id][ig][ipr + 1], eps11, lnp[ig]);
 
 	  /* Check emissivity range... */
-	  eps00 = CLAMP(eps00, 0, 1);
+	  eps00 = CLAMP(eps00, 0.0, 1.0);
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
 
 	  /* Check emissivity range... */
-	  eps = CLAMP(eps, 0, 1);
+	  eps = CLAMP(eps, 0.0, 1.0);
 	}
       }
 
@@ -4943,13 +4943,13 @@ void intpol_tbl_ega(
 		      tbl->lnp[id][ig][ipr + 1], eps11, lnp);
 
 	  /* Check emissivity range... */
-	  eps00 = CLAMP(eps00, 0, 1);
+	  eps00 = CLAMP(eps00, 0.0, 1.0);
 
 	  /* Determine segment emissivity... */
 	  eps = 1 - (1 - eps00) / tau_path[id][ig];
 
 	  /* Check emissivity range... */
-	  eps = CLAMP(eps, 0, 1);
+	  eps = CLAMP(eps, 0.0, 1.0);
 	}
       }
 
@@ -5535,19 +5535,19 @@ void optimal_estimation(
       /* Check atmospheric state... */
       for (int ip = 0; ip < atm_i->np; ip++) {
 	atm_i->p[ip] = CLAMP(atm_i->p[ip], 5e-7, 5e4);
-	atm_i->t[ip] = CLAMP(atm_i->t[ip], 100, 400);
+	atm_i->t[ip] = CLAMP(atm_i->t[ip], 100.0, 400.0);
 	for (int ig = 0; ig < ctl->ng; ig++)
-	  atm_i->q[ig][ip] = CLAMP(atm_i->q[ig][ip], 0, 1);
+	  atm_i->q[ig][ip] = CLAMP(atm_i->q[ig][ip], 0.0, 1.0);
 	for (int iw = 0; iw < ctl->nw; iw++)
-	  atm_i->k[iw][ip] = MAX(atm_i->k[iw][ip], 0);
+	  atm_i->k[iw][ip] = MAX(atm_i->k[iw][ip], 0.0);
       }
-      atm_i->clz = MAX(atm_i->clz, 0);
+      atm_i->clz = MAX(atm_i->clz, 0.0);
       atm_i->cldz = MAX(atm_i->cldz, 0.1);
       for (int icl = 0; icl < ctl->ncl; icl++)
-	atm_i->clk[icl] = MAX(atm_i->clk[icl], 0);
-      atm_i->sft = CLAMP(atm_i->sft, 100, 400);
+	atm_i->clk[icl] = MAX(atm_i->clk[icl], 0.0);
+      atm_i->sft = CLAMP(atm_i->sft, 100.0, 400.0);
       for (int isf = 0; isf < ctl->nsf; isf++)
-	atm_i->sfeps[isf] = CLAMP(atm_i->sfeps[isf], 0, 1);
+	atm_i->sfeps[isf] = CLAMP(atm_i->sfeps[isf], 0.0, 1.0);
 
       /* Forward calculation... */
       if (formod(ctl, tbl, atm_i, obs_i, los_scratch, obs_scratch)
@@ -6988,6 +6988,8 @@ void read_rfm_spec(
     ERRMSG("Invalid spectrum header format!");
 
   /* Check number of spectral grid points... */
+  if (*npts < 2)
+    ERRMSG("RFM spectrum must contain at least two spectral points!");
   if (*npts > RFMNPTS)
     ERRMSG("Too many spectral grid points!");
 
