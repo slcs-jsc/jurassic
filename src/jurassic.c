@@ -5098,7 +5098,8 @@ void kernel(
   /* Get sizes... */
   const size_t m = k->size1;
   const size_t n = k->size2;
-  const size_t batch_size = MIN(n, (size_t) MAX(1, omp_get_max_threads()));
+  const size_t nthreads = (size_t) MAX(1, omp_get_max_threads());
+  const size_t batch_size = n < nthreads ? n : nthreads;
 
   /* Allocate... */
   gsl_vector *x0 = gsl_vector_alloc(n);
