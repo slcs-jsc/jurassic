@@ -136,9 +136,10 @@ in the same order.
 
 ## Aerosol and cloud extinction
 
-Extinction coefficients are provided per spectral window. If aerosol or
-cloud extinction is not used, the corresponding columns should still be
-present and set to zero.
+The vertically resolved `k[iw][ip]` extinction coefficients are
+provided per spectral window `iw`. Detector channels use the coefficient
+of their assigned `WINDOW[id]`. If this extinction is not used, the
+corresponding columns should still be present and set to zero.
 
 Extinction values are assumed to be vertically distributed and are
 applied along the ray path during radiative transfer calculations.
@@ -147,13 +148,17 @@ applied along the ray path during radiative transfer calculations.
 
 ## Optional: cloud layer parameters
 
-Some workflows support simplified cloud-layer representations defined
-by a small set of parameters. If enabled via the control file, the
-ASCII format used by JURASSIC appends additional columns such as:
+With `NCL > 0`, the simplified cloud layer adds these profile-level
+quantities to the ASCII atmospheric data:
 
-- cloud-layer altitude
-- cloud-layer thickness
-- cloud extinction coefficients
+- `clz` (km): cloud center altitude;
+- `cldz` (km): Gaussian vertical width, rather than a bounded layer thickness;
+- `clk[icl]` (km⁻¹): cloud extinction coefficient at wavenumber
+  `CLNU[icl]` (cm⁻¹).
+
+The model interpolates `clk` to detector channels and multiplies it by
+`exp[-0.5 × ((z - clz) / cldz)²]` before adding it to the profile
+extinction. This term is active when `cldz > 0`.
 
 These cloud-layer values are written on every row in the standard ASCII
 output, even though they represent profile-level parameters. When
@@ -166,15 +171,22 @@ disabled in the control file and omitted from the atmospheric data.
 
 ## Optional: surface parameters
 
-Surface-related parameters (e.g. surface temperature or emissivity) may
-also be specified in the atmospheric data file for certain applications.
+With `NSF > 0`, the atmospheric data also contain profile-level surface
+temperature `sft` (K) and dimensionless emissivity `sfeps[isf]` at
+`SFNU[isf]` (cm⁻¹). The model linearly interpolates emissivity to
+detector channels. If `NSF = 0`, channel emissivity is 1 and the surface
+temperature is taken from the atmospheric temperature at the lowest
+profile altitude. With `NSF > 0`, `sft` is used when positive; otherwise
+the atmospheric boundary temperature is used.
 
 As with the cloud-layer parameters, the standard ASCII writer appends
 these values on every row, but the ASCII reader consumes them from the
 first row only.
 
-If surface effects are not required, the default configuration should
-be used and these fields omitted.
+Surface radiance is controlled separately by `SFTYPE`; see
+[Surface treatment](configuration.md#surface-treatment). With `NSF = 0`,
+these surface fields are omitted even though the default `SFTYPE = 2`
+still allows emission from the lower atmospheric boundary.
 
 ---
 
@@ -264,8 +276,9 @@ For example, `SFNU[0] = 925.0000` corresponds to a variable named
     `NSF`, and `SFNU[i]` determine which netCDF variables JURASSIC will
     look for.
 
-A compact `ncdump -h`-style skeleton for `NG = 2`, `NW = 1`, `NCL = 1`,
-and `NSF = 1` could look like:
+A compact `ncdump -h`-style skeleton for `NG = 2`, `NW = 1`, `NCL = 2`,
+`CLNU = [800, 900]` cm⁻¹, `NSF = 2`, and `SFNU = [925, 975]` cm⁻¹
+could look like:
 
 ```text
 netcdf atm {
@@ -305,16 +318,22 @@ variables:
     cld_dz:units = "km" ;
   double cld_k_800.0000(profile) ;
     cld_k_800.0000:units = "km**-1" ;
+  double cld_k_900.0000(profile) ;
+    cld_k_900.0000:units = "km**-1" ;
 
   double srf_t(profile) ;
     srf_t:units = "K" ;
   double srf_eps_925.0000(profile) ;
     srf_eps_925.0000:units = "1" ;
+  double srf_eps_975.0000(profile) ;
+    srf_eps_975.0000:units = "1" ;
 }
 ```
 
 Cloud and surface variables are only required when the corresponding
-options are enabled in the control file.
+options are enabled in the control file. Nonempty `CLNU` and `SFNU`
+grids require at least two points; the parser rejects `NCL = 1` and
+`NSF = 1`.
 
 ---
 

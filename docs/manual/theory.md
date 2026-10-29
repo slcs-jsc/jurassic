@@ -187,6 +187,27 @@ individual path segments are partly absorbed along the atmospheric path
 between the segment and the observer. Source:
 [Baumeister and Hoffmann (2022)](https://doi.org/10.5194/gmd-15-1855-2022), Fig. 1.*
 
+### Lower boundary and surface source
+
+The lowest altitude in the atmospheric profile is the surface boundary.
+When a ray reaches it, the forward model uses the configured surface
+temperature if `NSF > 0` and `sft > 0`; otherwise it uses the atmospheric
+temperature at that boundary. With `NSF = 0`, surface emissivity is 1
+in every channel. Otherwise, emissivity specified at the `SFNU` grid
+points is linearly interpolated to detector channels.
+
+`SFTYPE = 0` omits surface radiance. `SFTYPE >= 1` adds surface thermal
+emission, scaled by channel emissivity and transmission from the surface
+to the observer. The surface thermal source has no angular dependence
+in the core implementation and is therefore treated as isotropic.
+`SFTYPE >= 2` also adds a simplified reflection of
+downwelling atmospheric thermal radiance, using `1 - emissivity` as
+surface reflectivity. This is not a full angular integration of the
+reflected radiation field. `SFTYPE = 3` additionally adds a simplified
+surface-reflected solar contribution when the Sun is above the surface
+horizon. This optional surface term does not include atmospheric solar
+scattering or provide a general short-wave radiative-transfer treatment.
+
 ---
 
 ## Multiple absorbers and continua

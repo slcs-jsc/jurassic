@@ -110,6 +110,37 @@ Channels are detector wavenumbers (or band centers) and each channel belongs to 
 - `WINDOW[i]` *(array, default: `0`)*  
   Assign window index for channel *i*. (Typical use: group channels into bands for lookup tables and continua.)
 
+### Cloud and surface spectral grids
+
+- `NCL` *(default: `0`)* and `CLNU[icl]` *(cm⁻¹)*
+  Number and wavenumbers of cloud extinction grid points. When `NCL > 0`,
+  the atmospheric input supplies one `clk[icl]` coefficient per point.
+- `NSF` *(default: `0`)* and `SFNU[isf]` *(cm⁻¹)*
+  Number and wavenumbers of surface emissivity grid points. When `NSF > 0`,
+  the atmospheric input supplies surface temperature `sft` and one
+  emissivity `sfeps[isf]` per point. Emissivity is linearly interpolated
+  to detector channel wavenumbers. With `NSF = 0`, channel emissivity is 1
+  and the surface temperature comes from the lower atmospheric boundary.
+  With `NSF > 0`, a positive `sft` overrides that boundary temperature.
+
+Each grid may be empty (`0` points) or contain at least two points;
+`NCL = 1` and `NSF = 1` are rejected by the control parser.
+
+### Surface treatment
+
+- `SFTYPE` *(default: `2`)*
+  `0`: no surface radiance; `1`: surface thermal emission;
+  `2`: thermal emission plus simplified reflection of downwelling
+  atmospheric thermal radiance; `3`: the preceding terms plus a
+  simplified surface-reflected solar term. Reflection uses
+  `1 - emissivity`. Surface terms apply only when the ray reaches the
+  lowest altitude of the atmospheric profile. The solar option does not
+  include atmospheric solar scattering.
+- `SFSZA` *(default: `-999`, degrees)*
+  Solar zenith angle at the surface for `SFTYPE = 3`. A negative value
+  calculates the angle from observation time and surface location;
+  a nonnegative value supplies the angle directly.
+
 ### Continua
 
 Enable/disable built-in continuum contributions (interpreted as on/off switches).
@@ -233,32 +264,31 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
 
 ### Optional: retrieval and inversion configuration
 
-These keywords are used by applications that perform optimal-estimation retrievals (or compute retrieval-related products).
+These keywords select elements of the core optimal-estimation state
+vector. The `ZMIN`/`ZMAX` pairs are inclusive altitude bounds in km:
+each profile level within the pair enters the state vector. Both bounds
+default to `-999`, which selects no ordinary profile levels. Cloud and
+surface `RET_*` switches default to `0` (disabled); set one to `1` to
+retrieve the corresponding quantity.
 
-**Vertical limits (z-min/z-max):**
+| Quantity | Atmospheric field | Control keyword(s) | State-vector elements |
+| --- | --- | --- | --- |
+| Pressure (hPa) | `p[ip]` | `RETP_ZMIN`, `RETP_ZMAX` | One per selected altitude level; pressure itself is retrieved |
+| Temperature (K) | `t[ip]` | `RETT_ZMIN`, `RETT_ZMAX` | One per selected altitude level |
+| Gas volume mixing ratio (ppv) | `q[ig][ip]` | `RETQ_ZMIN[ig]`, `RETQ_ZMAX[ig]` | One per selected level and emitter `ig` |
+| Atmospheric extinction (km⁻¹) | `k[iw][ip]` | `RETK_ZMIN[iw]`, `RETK_ZMAX[iw]` | One per selected level and spectral window `iw` |
+| Cloud center altitude (km) | `clz` | `RET_CLZ` | One per profile |
+| Gaussian cloud vertical width (km) | `cldz` | `RET_CLDZ` | One per profile |
+| Cloud extinction (km⁻¹) | `clk[icl]` | `RET_CLK` | One per `CLNU[icl]` point when `NCL > 0` |
+| Surface temperature (K) | `sft` | `RET_SFT` | One per profile |
+| Surface emissivity (dimensionless) | `sfeps[isf]` | `RET_SFEPS` | One per `SFNU[isf]` point when `NSF > 0` |
 
-- `RETP_ZMIN`, `RETP_ZMAX` *(defaults: `-999`)*  
-  Pressure-related retrieval limits (application meaning depends on the retrieval setup).
-
-- `RETT_ZMIN`, `RETT_ZMAX` *(defaults: `-999`)*  
-  Temperature retrieval limits.
-
-- `RETQ_ZMIN[i]`, `RETQ_ZMAX[i]` *(array, defaults: `-999`)*  
-  VMR retrieval limits for emitter *i*.
-
-- `RETK_ZMIN[iw]`, `RETK_ZMAX[iw]` *(array, defaults: `-999`)*  
-  Retrieval limits for aerosol/extinction or window-dependent quantities (indexed by spectral window).
-
-**Cloud / surface fit toggles:**
-
-- `RET_CLZ` *(default: `0`)*
-- `RET_CLDZ` *(default: `0`)*
-- `RET_CLK` *(default: `0`)*
-- `RET_SFT` *(default: `0`)*
-- `RET_SFEPS` *(default: `0`)*
-
-(These switches enable/disable optional retrieval degrees of freedom. Exact interpretation depends on the chosen
-retrieval application and state-vector definition.)
+The cloud extinction is added to the atmospheric extinction with a
+Gaussian altitude dependence centered at `clz` and scaled by `cldz`.
+The surface emissivity elements are interpolated to detector channels.
+Instrument parameters, including spectral shift, gain, pointing, field
+of view, channel response, and offset, are not part of the current core
+retrieval state vector.
 
 **Shared retrieval file mode:**
 

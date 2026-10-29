@@ -35,17 +35,19 @@ address these challenges.
 
 ### State vector
 
-The atmospheric state to be retrieved is represented by a **state
-vector** \(\mathbf{x}\). Depending on the application, the state
-vector may include:
+The quantities selected for retrieval form the **state vector**
+\(\mathbf{x}\). The current core implementation supports pressure and
+temperature at selected altitude levels, gas volume mixing ratios,
+window-indexed atmospheric extinction, cloud center altitude and
+Gaussian vertical width, cloud spectral extinction, surface temperature,
+and spectral surface emissivity. Altitude bounds select profile levels;
+cloud and surface quantities use separate retrieval switches. The
+[state-vector table](configuration.md#optional-retrieval-and-inversion-configuration)
+lists the fields, controls, and indexing.
 
-- temperature at selected altitude levels,
-- volume mixing ratios of one or more trace gases,
-- additional parameters such as background continua or scaling factors.
-
-The mapping between the physical atmospheric representation used by
-JURASSIC and the state vector is handled internally by state-mapping
-operators.
+State-mapping routines transfer these atmospheric quantities between
+the profile and the state vector. Instrument parameters are not part
+of the current core retrieval state vector.
 
 ### Measurement vector
 

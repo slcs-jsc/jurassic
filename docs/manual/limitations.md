@@ -96,6 +96,14 @@ single- and multiple-scattering by clouds and aerosols, are **not**
 part of the core distribution but have been implemented in dedicated
 extensions.
 
+The core forward model includes an optional simplified surface-reflected
+solar term with `SFTYPE = 3`, but does not include atmospheric solar
+scattering. The default `SFTYPE = 2` omits that solar term. Daytime
+observations near the short-wavelength end of the supported range,
+especially around 3–5 µm, may need a more complete treatment of solar
+radiation and scattering; interpret core-model results there with this
+limitation in mind.
+
 !!! warning "Implication"
     Applications strongly affected by cloud or aerosol scattering require
     careful validation or the use of extended model versions. The core
