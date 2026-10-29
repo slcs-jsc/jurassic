@@ -177,6 +177,14 @@ At least one of the following must be provided:
 - `atm_apr.tab` — a priori atmospheric state
 - `obs_meas.tab` — measured (or synthetic) observations
 
+Synthetic radiances generated with `formod` can be used as `obs_meas.tab`
+input for `retrieval`, enabling OSSE-style workflows based on prescribed
+atmospheric states and viewing geometries. Additional atmospheric or
+instrument perturbations and radiance noise for a specific OSSE must be
+prepared externally. The
+[`tests/ret_test` regression suite](https://github.com/slcs-jsc/jurassic/blob/HEAD/tests/ret_test/run.sh)
+demonstrates the basic forward-model-to-retrieval chain.
+
 ### Outputs written in each working directory
 
 - `atm_final.tab` — retrieved atmospheric state
