@@ -1791,6 +1791,13 @@ the records written to shared output files.</p>
 <li><code>atm_apr.tab</code> — a priori atmospheric state</li>
 <li><code>obs_meas.tab</code> — measured (or synthetic) observations</li>
 </ul>
+<p>Synthetic radiances generated with <code>formod</code> can be used as <code>obs_meas.tab</code>
+input for <code>retrieval</code>, enabling OSSE-style workflows based on prescribed
+atmospheric states and viewing geometries. Additional atmospheric or
+instrument perturbations and radiance noise for a specific OSSE must be
+prepared externally. The
+<a href="https://github.com/slcs-jsc/jurassic/blob/HEAD/tests/ret_test/run.sh"><code>tests/ret_test</code> regression suite</a>
+demonstrates the basic forward-model-to-retrieval chain.</p>
 <h3 id="outputs-written-in-each-working-directory">Outputs written in each working directory</h3>
 <ul>
 <li><code>atm_final.tab</code> — retrieved atmospheric state</li>
