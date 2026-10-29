@@ -268,6 +268,65 @@ enum {
 #endif
 
 /* ------------------------------------------------------------
+   Kernel finite-difference perturbations...
+   ------------------------------------------------------------ */
+
+/*! Relative pressure step (fraction of pressure). */
+#ifndef KERNEL_P_REL
+#define KERNEL_P_REL 0.01
+#endif
+
+/*! Minimum absolute pressure step [hPa]. */
+#ifndef KERNEL_P_MIN
+#define KERNEL_P_MIN 1e-7
+#endif
+
+/*! Absolute temperature step [K]. */
+#ifndef KERNEL_T_ABS
+#define KERNEL_T_ABS 1.0
+#endif
+
+/*! Relative gas VMR step (fraction of VMR). */
+#ifndef KERNEL_Q_REL
+#define KERNEL_Q_REL 0.01
+#endif
+
+/*! Minimum absolute gas VMR step (dimensionless). */
+#ifndef KERNEL_Q_MIN
+#define KERNEL_Q_MIN 1e-15
+#endif
+
+/*! Absolute atmospheric extinction step [km^-1]. */
+#ifndef KERNEL_K_ABS
+#define KERNEL_K_ABS 1e-4
+#endif
+
+/*! Absolute cloud center altitude step [km]. */
+#ifndef KERNEL_CLZ_ABS
+#define KERNEL_CLZ_ABS 1.0
+#endif
+
+/*! Absolute cloud width step [km]. */
+#ifndef KERNEL_CLDZ_ABS
+#define KERNEL_CLDZ_ABS 1.0
+#endif
+
+/*! Absolute cloud extinction step [km^-1]. */
+#ifndef KERNEL_CLK_ABS
+#define KERNEL_CLK_ABS 1e-4
+#endif
+
+/*! Absolute surface temperature step [K]. */
+#ifndef KERNEL_SFT_ABS
+#define KERNEL_SFT_ABS 1.0
+#endif
+
+/*! Absolute surface emissivity step (dimensionless). */
+#ifndef KERNEL_SFEPS_ABS
+#define KERNEL_SFEPS_ABS 1e-2
+#endif
+
+/* ------------------------------------------------------------
    Dimensions...
    ------------------------------------------------------------ */
 

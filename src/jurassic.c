@@ -5149,21 +5149,25 @@ void kernel(
       /* Set perturbation size... */
       double h;
       if (iqa[j] == IDXP)
-	h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-7);
+	h = MAX(fabs(KERNEL_P_REL * gsl_vector_get(x0, j)),
+		KERNEL_P_MIN);
       else if (iqa[j] == IDXT)
-	h = 1.0;
+	h = KERNEL_T_ABS;
       else if (iqa[j] >= IDXQ(0) && iqa[j] < IDXQ(ctl->ng))
-	h = MAX(fabs(0.01 * gsl_vector_get(x0, j)), 1e-15);
+	h = MAX(fabs(KERNEL_Q_REL * gsl_vector_get(x0, j)),
+		KERNEL_Q_MIN);
       else if (iqa[j] >= IDXK(0) && iqa[j] < IDXK(ctl->nw))
-	h = 1e-4;
-      else if (iqa[j] == IDXCLZ || iqa[j] == IDXCLDZ)
-	h = 1.0;
+	h = KERNEL_K_ABS;
+      else if (iqa[j] == IDXCLZ)
+	h = KERNEL_CLZ_ABS;
+      else if (iqa[j] == IDXCLDZ)
+	h = KERNEL_CLDZ_ABS;
       else if (iqa[j] >= IDXCLK(0) && iqa[j] < IDXCLK(ctl->ncl))
-	h = 1e-4;
+	h = KERNEL_CLK_ABS;
       else if (iqa[j] == IDXSFT)
-	h = 1.0;
+	h = KERNEL_SFT_ABS;
       else if (iqa[j] >= IDXSFEPS(0) && iqa[j] < IDXSFEPS(ctl->nsf))
-	h = 1e-2;
+	h = KERNEL_SFEPS_ABS;
       else
 	ERRMSG("Cannot set perturbation size!");
 
