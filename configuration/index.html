@@ -673,6 +673,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cloud-and-surface-spectral-grids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud and surface spectral grids
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#surface-treatment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Surface treatment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#continua" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1501,6 +1523,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cloud-and-surface-spectral-grids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud and surface spectral grids
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#surface-treatment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Surface treatment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#continua" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1779,6 +1823,36 @@ your <code>TBLBASE</code>.</p>
   Assign window index for channel <em>i</em>. (Typical use: group channels into bands for lookup tables and continua.)</p>
 </li>
 </ul>
+<h3 id="cloud-and-surface-spectral-grids">Cloud and surface spectral grids</h3>
+<ul>
+<li><code>NCL</code> <em>(default: <code>0</code>)</em> and <code>CLNU[icl]</code> <em>(cm⁻¹)</em>
+  Number and wavenumbers of cloud extinction grid points. When <code>NCL &gt; 0</code>,
+  the atmospheric input supplies one <code>clk[icl]</code> coefficient per point.</li>
+<li><code>NSF</code> <em>(default: <code>0</code>)</em> and <code>SFNU[isf]</code> <em>(cm⁻¹)</em>
+  Number and wavenumbers of surface emissivity grid points. When <code>NSF &gt; 0</code>,
+  the atmospheric input supplies surface temperature <code>sft</code> and one
+  emissivity <code>sfeps[isf]</code> per point. Emissivity is linearly interpolated
+  to detector channel wavenumbers. With <code>NSF = 0</code>, channel emissivity is 1
+  and the surface temperature comes from the lower atmospheric boundary.
+  With <code>NSF &gt; 0</code>, a positive <code>sft</code> overrides that boundary temperature.</li>
+</ul>
+<p>Each grid may be empty (<code>0</code> points) or contain at least two points;
+<code>NCL = 1</code> and <code>NSF = 1</code> are rejected by the control parser.</p>
+<h3 id="surface-treatment">Surface treatment</h3>
+<ul>
+<li><code>SFTYPE</code> <em>(default: <code>2</code>)</em>
+  <code>0</code>: no surface radiance; <code>1</code>: surface thermal emission;
+  <code>2</code>: thermal emission plus simplified reflection of downwelling
+  atmospheric thermal radiance; <code>3</code>: the preceding terms plus a
+  simplified surface-reflected solar term. Reflection uses
+  <code>1 - emissivity</code>. Surface terms apply only when the ray reaches the
+  lowest altitude of the atmospheric profile. The solar option does not
+  include atmospheric solar scattering.</li>
+<li><code>SFSZA</code> <em>(default: <code>-999</code>, degrees)</em>
+  Solar zenith angle at the surface for <code>SFTYPE = 3</code>. A negative value
+  calculates the angle from observation time and surface location;
+  a nonnegative value supplies the angle directly.</li>
+</ul>
 <h3 id="continua">Continua</h3>
 <p>Enable/disable built-in continuum contributions (interpreted as on/off switches).</p>
 <ul>
@@ -1924,36 +1998,84 @@ the rules above.</p>
   Field-of-view configuration string (application-specific). If unused, keep <code>-</code>.</li>
 </ul>
 <h3 id="optional-retrieval-and-inversion-configuration">Optional: retrieval and inversion configuration</h3>
-<p>These keywords are used by applications that perform optimal-estimation retrievals (or compute retrieval-related products).</p>
-<p><strong>Vertical limits (z-min/z-max):</strong></p>
-<ul>
-<li>
-<p><code>RETP_ZMIN</code>, <code>RETP_ZMAX</code> <em>(defaults: <code>-999</code>)</em><br />
-  Pressure-related retrieval limits (application meaning depends on the retrieval setup).</p>
-</li>
-<li>
-<p><code>RETT_ZMIN</code>, <code>RETT_ZMAX</code> <em>(defaults: <code>-999</code>)</em><br />
-  Temperature retrieval limits.</p>
-</li>
-<li>
-<p><code>RETQ_ZMIN[i]</code>, <code>RETQ_ZMAX[i]</code> <em>(array, defaults: <code>-999</code>)</em><br />
-  VMR retrieval limits for emitter <em>i</em>.</p>
-</li>
-<li>
-<p><code>RETK_ZMIN[iw]</code>, <code>RETK_ZMAX[iw]</code> <em>(array, defaults: <code>-999</code>)</em><br />
-  Retrieval limits for aerosol/extinction or window-dependent quantities (indexed by spectral window).</p>
-</li>
-</ul>
-<p><strong>Cloud / surface fit toggles:</strong></p>
-<ul>
-<li><code>RET_CLZ</code> <em>(default: <code>0</code>)</em></li>
-<li><code>RET_CLDZ</code> <em>(default: <code>0</code>)</em></li>
-<li><code>RET_CLK</code> <em>(default: <code>0</code>)</em></li>
-<li><code>RET_SFT</code> <em>(default: <code>0</code>)</em></li>
-<li><code>RET_SFEPS</code> <em>(default: <code>0</code>)</em></li>
-</ul>
-<p>(These switches enable/disable optional retrieval degrees of freedom. Exact interpretation depends on the chosen
-retrieval application and state-vector definition.)</p>
+<p>These keywords select elements of the core optimal-estimation state
+vector. The <code>ZMIN</code>/<code>ZMAX</code> pairs are inclusive altitude bounds in km:
+each profile level within the pair enters the state vector. Both bounds
+default to <code>-999</code>, which selects no ordinary profile levels. Cloud and
+surface <code>RET_*</code> switches default to <code>0</code> (disabled); set one to <code>1</code> to
+retrieve the corresponding quantity.</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Atmospheric field</th>
+<th>Control keyword(s)</th>
+<th>State-vector elements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pressure (hPa)</td>
+<td><code>p[ip]</code></td>
+<td><code>RETP_ZMIN</code>, <code>RETP_ZMAX</code></td>
+<td>One per selected altitude level; pressure itself is retrieved</td>
+</tr>
+<tr>
+<td>Temperature (K)</td>
+<td><code>t[ip]</code></td>
+<td><code>RETT_ZMIN</code>, <code>RETT_ZMAX</code></td>
+<td>One per selected altitude level</td>
+</tr>
+<tr>
+<td>Gas volume mixing ratio (ppv)</td>
+<td><code>q[ig][ip]</code></td>
+<td><code>RETQ_ZMIN[ig]</code>, <code>RETQ_ZMAX[ig]</code></td>
+<td>One per selected level and emitter <code>ig</code></td>
+</tr>
+<tr>
+<td>Atmospheric extinction (km⁻¹)</td>
+<td><code>k[iw][ip]</code></td>
+<td><code>RETK_ZMIN[iw]</code>, <code>RETK_ZMAX[iw]</code></td>
+<td>One per selected level and spectral window <code>iw</code></td>
+</tr>
+<tr>
+<td>Cloud center altitude (km)</td>
+<td><code>clz</code></td>
+<td><code>RET_CLZ</code></td>
+<td>One per profile</td>
+</tr>
+<tr>
+<td>Gaussian cloud vertical width (km)</td>
+<td><code>cldz</code></td>
+<td><code>RET_CLDZ</code></td>
+<td>One per profile</td>
+</tr>
+<tr>
+<td>Cloud extinction (km⁻¹)</td>
+<td><code>clk[icl]</code></td>
+<td><code>RET_CLK</code></td>
+<td>One per <code>CLNU[icl]</code> point when <code>NCL &gt; 0</code></td>
+</tr>
+<tr>
+<td>Surface temperature (K)</td>
+<td><code>sft</code></td>
+<td><code>RET_SFT</code></td>
+<td>One per profile</td>
+</tr>
+<tr>
+<td>Surface emissivity (dimensionless)</td>
+<td><code>sfeps[isf]</code></td>
+<td><code>RET_SFEPS</code></td>
+<td>One per <code>SFNU[isf]</code> point when <code>NSF &gt; 0</code></td>
+</tr>
+</tbody>
+</table>
+<p>The cloud extinction is added to the atmospheric extinction with a
+Gaussian altitude dependence centered at <code>clz</code> and scaled by <code>cldz</code>.
+The surface emissivity elements are interpolated to detector channels.
+Instrument parameters, including spectral shift, gain, pointing, field
+of view, channel response, and offset, are not part of the current core
+retrieval state vector.</p>
 <p><strong>Shared retrieval file mode:</strong></p>
 <ul>
 <li>

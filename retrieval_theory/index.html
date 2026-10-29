@@ -1490,17 +1490,18 @@ address these challenges.</p>
 <hr />
 <h2 id="state-vector-and-measurement-vector">State vector and measurement vector</h2>
 <h3 id="state-vector">State vector</h3>
-<p>The atmospheric state to be retrieved is represented by a <strong>state
-vector</strong> <span class="arithmatex">\(\mathbf{x}\)</span>. Depending on the application, the state
-vector may include:</p>
-<ul>
-<li>temperature at selected altitude levels,</li>
-<li>volume mixing ratios of one or more trace gases,</li>
-<li>additional parameters such as background continua or scaling factors.</li>
-</ul>
-<p>The mapping between the physical atmospheric representation used by
-JURASSIC and the state vector is handled internally by state-mapping
-operators.</p>
+<p>The quantities selected for retrieval form the <strong>state vector</strong>
+<span class="arithmatex">\(\mathbf{x}\)</span>. The current core implementation supports pressure and
+temperature at selected altitude levels, gas volume mixing ratios,
+window-indexed atmospheric extinction, cloud center altitude and
+Gaussian vertical width, cloud spectral extinction, surface temperature,
+and spectral surface emissivity. Altitude bounds select profile levels;
+cloud and surface quantities use separate retrieval switches. The
+<a href="../configuration/#optional-retrieval-and-inversion-configuration">state-vector table</a>
+lists the fields, controls, and indexing.</p>
+<p>State-mapping routines transfer these atmospheric quantities between
+the profile and the state vector. Instrument parameters are not part
+of the current core retrieval state vector.</p>
 <h3 id="measurement-vector">Measurement vector</h3>
 <p>The <strong>measurement vector</strong> <span class="arithmatex">\(\mathbf{y}\)</span> contains the observed
 radiances (or brightness temperatures) for the selected spectral

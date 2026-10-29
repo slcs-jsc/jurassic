@@ -1631,21 +1631,25 @@ EMITTER[1] = H2O
 in the same order.</p>
 <hr />
 <h2 id="aerosol-and-cloud-extinction">Aerosol and cloud extinction</h2>
-<p>Extinction coefficients are provided per spectral window. If aerosol or
-cloud extinction is not used, the corresponding columns should still be
-present and set to zero.</p>
+<p>The vertically resolved <code>k[iw][ip]</code> extinction coefficients are
+provided per spectral window <code>iw</code>. Detector channels use the coefficient
+of their assigned <code>WINDOW[id]</code>. If this extinction is not used, the
+corresponding columns should still be present and set to zero.</p>
 <p>Extinction values are assumed to be vertically distributed and are
 applied along the ray path during radiative transfer calculations.</p>
 <hr />
 <h2 id="optional-cloud-layer-parameters">Optional: cloud layer parameters</h2>
-<p>Some workflows support simplified cloud-layer representations defined
-by a small set of parameters. If enabled via the control file, the
-ASCII format used by JURASSIC appends additional columns such as:</p>
+<p>With <code>NCL &gt; 0</code>, the simplified cloud layer adds these profile-level
+quantities to the ASCII atmospheric data:</p>
 <ul>
-<li>cloud-layer altitude</li>
-<li>cloud-layer thickness</li>
-<li>cloud extinction coefficients</li>
+<li><code>clz</code> (km): cloud center altitude;</li>
+<li><code>cldz</code> (km): Gaussian vertical width, rather than a bounded layer thickness;</li>
+<li><code>clk[icl]</code> (km⁻¹): cloud extinction coefficient at wavenumber
+  <code>CLNU[icl]</code> (cm⁻¹).</li>
 </ul>
+<p>The model interpolates <code>clk</code> to detector channels and multiplies it by
+<code>exp[-0.5 × ((z - clz) / cldz)²]</code> before adding it to the profile
+extinction. This term is active when <code>cldz &gt; 0</code>.</p>
 <p>These cloud-layer values are written on every row in the standard ASCII
 output, even though they represent profile-level parameters. When
 reading ASCII input, JURASSIC uses the values from the first row.</p>
@@ -1653,13 +1657,20 @@ reading ASCII input, JURASSIC uses the values from the first row.</p>
 disabled in the control file and omitted from the atmospheric data.</p>
 <hr />
 <h2 id="optional-surface-parameters">Optional: surface parameters</h2>
-<p>Surface-related parameters (e.g. surface temperature or emissivity) may
-also be specified in the atmospheric data file for certain applications.</p>
+<p>With <code>NSF &gt; 0</code>, the atmospheric data also contain profile-level surface
+temperature <code>sft</code> (K) and dimensionless emissivity <code>sfeps[isf]</code> at
+<code>SFNU[isf]</code> (cm⁻¹). The model linearly interpolates emissivity to
+detector channels. If <code>NSF = 0</code>, channel emissivity is 1 and the surface
+temperature is taken from the atmospheric temperature at the lowest
+profile altitude. With <code>NSF &gt; 0</code>, <code>sft</code> is used when positive; otherwise
+the atmospheric boundary temperature is used.</p>
 <p>As with the cloud-layer parameters, the standard ASCII writer appends
 these values on every row, but the ASCII reader consumes them from the
 first row only.</p>
-<p>If surface effects are not required, the default configuration should
-be used and these fields omitted.</p>
+<p>Surface radiance is controlled separately by <code>SFTYPE</code>; see
+<a href="../configuration/#surface-treatment">Surface treatment</a>. With <code>NSF = 0</code>,
+these surface fields are omitted even though the default <code>SFTYPE = 2</code>
+still allows emission from the lower atmospheric boundary.</p>
 <hr />
 <h2 id="netcdf-format">netCDF format</h2>
 <p>For <code>ATMFMT = 3</code>, JURASSIC expects a netCDF file with a profile
@@ -1783,8 +1794,9 @@ quantities. In particular, <code>NG</code>, <code>EMITTER[i]</code>, <code>NW</c
 <code>NSF</code>, and <code>SFNU[i]</code> determine which netCDF variables JURASSIC will
 look for.</p>
 </div>
-<p>A compact <code>ncdump -h</code>-style skeleton for <code>NG = 2</code>, <code>NW = 1</code>, <code>NCL = 1</code>,
-and <code>NSF = 1</code> could look like:</p>
+<p>A compact <code>ncdump -h</code>-style skeleton for <code>NG = 2</code>, <code>NW = 1</code>, <code>NCL = 2</code>,
+<code>CLNU = [800, 900]</code> cm⁻¹, <code>NSF = 2</code>, and <code>SFNU = [925, 975]</code> cm⁻¹
+could look like:</p>
 <pre><code class="language-text">netcdf atm {
 dimensions:
   profile = UNLIMITED ;
@@ -1822,15 +1834,21 @@ variables:
     cld_dz:units = &quot;km&quot; ;
   double cld_k_800.0000(profile) ;
     cld_k_800.0000:units = &quot;km**-1&quot; ;
+  double cld_k_900.0000(profile) ;
+    cld_k_900.0000:units = &quot;km**-1&quot; ;
 
   double srf_t(profile) ;
     srf_t:units = &quot;K&quot; ;
   double srf_eps_925.0000(profile) ;
     srf_eps_925.0000:units = &quot;1&quot; ;
+  double srf_eps_975.0000(profile) ;
+    srf_eps_975.0000:units = &quot;1&quot; ;
 }
 </code></pre>
 <p>Cloud and surface variables are only required when the corresponding
-options are enabled in the control file.</p>
+options are enabled in the control file. Nonempty <code>CLNU</code> and <code>SFNU</code>
+grids require at least two points; the parser rejects <code>NCL = 1</code> and
+<code>NSF = 1</code>.</p>
 <hr />
 <h2 id="example-schematic">Example (schematic)</h2>
 <p>For <code>NG = 2</code> emitters and <code>NW = 1</code> spectral window, a single profile row

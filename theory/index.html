@@ -458,6 +458,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Numerical integration along the line of sight">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lower-boundary-and-surface-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lower boundary and surface source
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1330,6 +1347,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Numerical integration along the line of sight">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lower-boundary-and-surface-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lower boundary and surface source
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1534,6 +1568,24 @@ applications.</p>
 individual path segments are partly absorbed along the atmospheric path
 between the segment and the observer. Source:
 <a href="https://doi.org/10.5194/gmd-15-1855-2022">Baumeister and Hoffmann (2022)</a>, Fig. 1.</em></p>
+<h3 id="lower-boundary-and-surface-source">Lower boundary and surface source</h3>
+<p>The lowest altitude in the atmospheric profile is the surface boundary.
+When a ray reaches it, the forward model uses the configured surface
+temperature if <code>NSF &gt; 0</code> and <code>sft &gt; 0</code>; otherwise it uses the atmospheric
+temperature at that boundary. With <code>NSF = 0</code>, surface emissivity is 1
+in every channel. Otherwise, emissivity specified at the <code>SFNU</code> grid
+points is linearly interpolated to detector channels.</p>
+<p><code>SFTYPE = 0</code> omits surface radiance. <code>SFTYPE &gt;= 1</code> adds surface thermal
+emission, scaled by channel emissivity and transmission from the surface
+to the observer. The surface thermal source has no angular dependence
+in the core implementation and is therefore treated as isotropic.
+<code>SFTYPE &gt;= 2</code> also adds a simplified reflection of
+downwelling atmospheric thermal radiance, using <code>1 - emissivity</code> as
+surface reflectivity. This is not a full angular integration of the
+reflected radiation field. <code>SFTYPE = 3</code> additionally adds a simplified
+surface-reflected solar contribution when the Sun is above the surface
+horizon. This optional surface term does not include atmospheric solar
+scattering or provide a general short-wave radiative-transfer treatment.</p>
 <hr />
 <h2 id="multiple-absorbers-and-continua">Multiple absorbers and continua</h2>
 <p>JURASSIC supports multiple molecular absorbers and includes continuum

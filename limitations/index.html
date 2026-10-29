@@ -1424,6 +1424,13 @@ many stratospheric and upper-tropospheric applications.</p>
 single- and multiple-scattering by clouds and aerosols, are <strong>not</strong>
 part of the core distribution but have been implemented in dedicated
 extensions.</p>
+<p>The core forward model includes an optional simplified surface-reflected
+solar term with <code>SFTYPE = 3</code>, but does not include atmospheric solar
+scattering. The default <code>SFTYPE = 2</code> omits that solar term. Daytime
+observations near the short-wavelength end of the supported range,
+especially around 3–5 µm, may need a more complete treatment of solar
+radiation and scattering; interpret core-model results there with this
+limitation in mind.</p>
 <div class="admonition warning">
 <p class="admonition-title">Implication</p>
 <p>Applications strongly affected by cloud or aerosol scattering require
