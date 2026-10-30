@@ -52,26 +52,26 @@ set out "plot_rad_diff_abs.png"
 set xla "Radiance difference [nW / (cm^2 sr cm^{-1})]"
 set xra [*:*]
 set key right top
-plot "< paste rad.tab rad.org" u ((\$25-\$11)*1e5):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
-     "< paste rad.tab rad.org" u ((\$26-\$12)*1e5):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
+plot "< paste rad.tab rad.org" u ((\$11-\$25)*1e5):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
+     "< paste rad.tab rad.org" u ((\$12-\$26)*1e5):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
 
 set out "plot_rad_diff_rel.png"
 set xla "Radiance difference [%]"
 set xra [-5:5]
-plot "< paste rad.tab rad.org" u (100.*(\$25-\$11)/\$11):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
-     "< paste rad.tab rad.org" u (100.*(\$26-\$12)/\$12):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
+plot "< paste rad.tab rad.org" u (100.*(\$11-\$25)/\$11):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
+     "< paste rad.tab rad.org" u (100.*(\$12-\$26)/\$12):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
 
 set out "plot_tau_diff_abs.png"
 set xla "Transmittance difference"
 set xra [*:*]
-plot "< paste rad.tab rad.org" u (\$27-\$13):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
-     "< paste rad.tab rad.org" u (\$28-\$14):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
+plot "< paste rad.tab rad.org" u (\$13-\$27):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
+     "< paste rad.tab rad.org" u (\$14-\$28):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
 
 set out "plot_tau_diff_rel.png"
 set xla "Transmittance difference [%]"
 set xra [-5:5]
-plot "< paste rad.tab rad.org" u (100.*(\$27-\$13)/\$13):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
-     "< paste rad.tab rad.org" u (100.*(\$28-\$14)/\$14):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
+plot "< paste rad.tab rad.org" u (100.*(\$13-\$27)/\$13):8 w lp pt 1 t "TEST - REF (792 cm^{-1})", \
+     "< paste rad.tab rad.org" u (100.*(\$14-\$28)/\$14):8 w lp pt 1 t "TEST - REF (832 cm^{-1})"
 EOF
 
 # Plot kernel functions...
