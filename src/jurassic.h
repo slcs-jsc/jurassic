@@ -303,12 +303,12 @@ enum {
 
 /*! Absolute cloud center altitude step [km]. */
 #ifndef KERNEL_CLZ_ABS
-#define KERNEL_CLZ_ABS 1.0
+#define KERNEL_CLZ_ABS 0.1
 #endif
 
 /*! Absolute cloud width step [km]. */
 #ifndef KERNEL_CLDZ_ABS
-#define KERNEL_CLDZ_ABS 1.0
+#define KERNEL_CLDZ_ABS 0.1
 #endif
 
 /*! Absolute cloud extinction step [km^-1]. */
