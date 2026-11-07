@@ -9,5 +9,6 @@ var searchData=
   ['obslat_6',['obslat',['../structobs__t.html#a8b9f2ae531c4d8693c7ce86f0387d290',1,'obs_t']]],
   ['obslon_7',['obslon',['../structobs__t.html#a6623d4c4c139db8c86195751653ea716',1,'obs_t']]],
   ['obsz_8',['obsz',['../structobs__t.html#a992d21aae832400874f3f6bc3e7d1981',1,'obs_t']]],
-  ['optimal_5festimation_9',['optimal_estimation',['../jurassic_8c.html#a881a1d24ae59077428bb4548fdefa2ee',1,'optimal_estimation(ret_t *ret, ctl_t *ctl, tbl_t *tbl, obs_t *obs_meas, obs_t *obs_i, atm_t *atm_apr, atm_t *atm_i, double *chisq):&#160;jurassic.c'],['../jurassic_8h.html#a881a1d24ae59077428bb4548fdefa2ee',1,'optimal_estimation(ret_t *ret, ctl_t *ctl, tbl_t *tbl, obs_t *obs_meas, obs_t *obs_i, atm_t *atm_apr, atm_t *atm_i, double *chisq):&#160;jurassic.c']]]
+  ['optimal_5festimation_9',['optimal_estimation',['../jurassic_8c.html#a881a1d24ae59077428bb4548fdefa2ee',1,'optimal_estimation(ret_t *ret, ctl_t *ctl, tbl_t *tbl, obs_t *obs_meas, obs_t *obs_i, atm_t *atm_apr, atm_t *atm_i, double *chisq):&#160;jurassic.c'],['../jurassic_8h.html#a881a1d24ae59077428bb4548fdefa2ee',1,'optimal_estimation(ret_t *ret, ctl_t *ctl, tbl_t *tbl, obs_t *obs_meas, obs_t *obs_i, atm_t *atm_apr, atm_t *atm_i, double *chisq):&#160;jurassic.c']]],
+  ['overview_10',['Overview',['../index.html#overview',1,'']]]
 ];

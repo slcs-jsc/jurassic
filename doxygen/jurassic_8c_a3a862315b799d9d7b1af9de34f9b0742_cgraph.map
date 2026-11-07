@@ -1,7 +1,12 @@
 <map id="climatology" name="climatology">
-<area shape="rect" id="node1" title="Initializes atmospheric climatology profiles." alt="" coords="5,46,92,73"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#a4db5ac40be288ea359dd270e359525b6" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="140,17,279,43"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="513,67,596,94"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="327,5,465,47"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="517,13,592,39"/>
+<area shape="rect" id="Node000001" title="Initializes atmospheric climatology profiles." alt="" coords="5,45,92,70"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#a4db5ac40be288ea359dd270e359525b6" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="140,17,278,42"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,48,124,42,125,47,93,53"/>
+<area shape="rect" id="Node000005" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="512,66,594,92"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="92,57,497,74,496,79,92,62"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="326,5,464,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="278,26,310,25,310,30,279,31"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="516,13,590,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="465,23,500,23,500,28,465,28"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="458,44,499,58,497,63,457,49"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="intpol_tbl_u" name="intpol_tbl_u">
-<area shape="rect" id="node1" title="Interpolate column amount as a function of emissivity." alt="" coords="5,5,93,32"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#af353b2a27de539a038750c3224d31d8f" title="Locate index for interpolation within emissivity table grids." alt="" coords="141,5,220,32"/>
+<area shape="rect" id="Node000001" title="Interpolate column amount as a function of emissivity." alt="" coords="5,5,93,31"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#af353b2a27de539a038750c3224d31d8f" title="Locate index for interpolation within emissivity table grids." alt="" coords="141,5,218,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,16,125,16,125,21,93,21"/>
 </map>

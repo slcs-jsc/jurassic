@@ -1,52 +1,120 @@
 <map id="main" name="main">
-<area shape="rect" id="node1" title=" " alt="" coords="5,841,56,868"/>
-<area shape="rect" id="node2" href="$kernel_8c.html#ae242cda146bcec84b971f511504e621a" title="Perform kernel calculations in a single directory." alt="" coords="104,411,188,437"/>
-<area shape="rect" id="node40" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="112,841,180,868"/>
-<area shape="rect" id="node43" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="271,791,342,817"/>
-<area shape="rect" id="node44" href="$jurassic_8c.html#accf7b334232cd5dbb8b2b58b0e81f39a" title="Read emissivity lookup tables from disk." alt="" coords="112,943,180,969"/>
-<area shape="rect" id="node50" href="$jurassic_8c.html#a2f19c5549e06e2c15446e464007a7a0b" title="Free lookup table and all internally allocated memory." alt="" coords="113,993,179,1020"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#adfbb04487aa1c1d4175afca6e521e20b" title="Convert atmospheric data to state vector elements." alt="" coords="609,284,667,311"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#ab49799958d13e57af5b20527f0990ce6" title="Compute the Jacobian (kernel) matrix by finite differences." alt="" coords="278,537,335,564"/>
-<area shape="rect" id="node24" href="$jurassic_8c.html#ad6380c9458cf356667952f9651932e27" title="Convert observation radiances into a measurement vector." alt="" coords="610,411,666,437"/>
-<area shape="rect" id="node27" href="$jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c" title="Read atmospheric input data from a file." alt="" coords="269,740,345,767"/>
-<area shape="rect" id="node31" href="$jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980" title="Read observation data from an input file." alt="" coords="269,81,344,108"/>
-<area shape="rect" id="node35" href="$jurassic_8c.html#a5750f44887e4367f7017e4ce7d115f67" title="Write a fully annotated matrix (e.g., Jacobian or gain matrix) to file." alt="" coords="261,335,353,361"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#a5ac332e50178e5439e72634fe03d191f" title="Append a single atmospheric value to the state vector." alt="" coords="738,284,826,311"/>
-<area shape="rect" id="node6" href="$jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1" title="Copy or initialize atmospheric profile data." alt="" coords="446,563,525,589"/>
-<area shape="rect" id="node7" href="$jurassic_8c.html#aa855e52716bd4b479bb0d2446b300a4e" title="Copy or initialize observation geometry and radiance data." alt="" coords="902,736,979,763"/>
-<area shape="rect" id="node8" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute one complete forward&#45;model calculation." alt="" coords="607,613,669,640"/>
-<area shape="rect" id="node23" href="$jurassic_8c.html#aa9d19e596cd81af8cf571118658dd51e" title="Execute the forward model for a batch of independent cases." alt="" coords="435,613,536,640"/>
-<area shape="rect" id="node25" href="$jurassic_8c.html#a59e72c7cead4b4b7aaf096803bc7360c" title="Map retrieval state vector back to atmospheric structure." alt="" coords="457,512,514,539"/>
-<area shape="rect" id="node9" href="$jurassic_8c.html#a9bb3fb765b43dc769ba80f2335bcea2d" title="Apply field&#45;of&#45;view (FOV) convolution to modeled radiances." alt="" coords="739,664,825,691"/>
-<area shape="rect" id="node11" href="$jurassic_8c.html#a4d724c788481e02814218ff749dce8bc" title="Compute line&#45;of&#45;sight radiances using the pencil&#45;beam forward model." alt="" coords="731,407,833,433"/>
-<area shape="rect" id="node20" href="$jurassic_8c.html#a250b8929fb33466876ef15d431e4994a" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="738,613,826,640"/>
-<area shape="rect" id="node22" href="$jurassic_8c.html#ad69ab6edb8f722212fb01e12d8809643" title="Adjust pressure profile using the hydrostatic equation." alt="" coords="739,563,825,589"/>
-<area shape="rect" id="node10" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="1048,584,1123,611"/>
-<area shape="rect" id="node12" href="$jurassic_8c.html#a1c8c72b0bc66d214b4575c13a7a0eb6b" title="Calculates the cosine of the solar zenith angle." alt="" coords="905,331,976,357"/>
-<area shape="rect" id="node13" href="$jurassic_8c.html#a363f5205cd58d7a22133f704f1137181" title="Compute total extinction including gaseous continua." alt="" coords="881,229,1000,256"/>
-<area shape="rect" id="node15" href="$jurassic_8c.html#ac7826de16feb2eb6730b661bf8deba90" title="Interpolate the source function (Planck radiance) at a given temperature." alt="" coords="885,381,997,408"/>
-<area shape="rect" id="node16" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="1049,533,1121,560"/>
-<area shape="rect" id="node17" href="$jurassic_8c.html#a5e22cd63c35ef6e2c9b9023e2c3945d8" title="Interpolate emissivities and transmittances using the Curtis–Godson approximation (CGA)." alt="" coords="889,483,992,509"/>
-<area shape="rect" id="node18" href="$jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="889,432,992,459"/>
-<area shape="rect" id="node19" href="$jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="907,584,975,611"/>
-<area shape="rect" id="node14" href="$jurassic_8c.html#a9a962bab37658297e87de9631c67707b" title="Compute carbon dioxide continuum optical depth." alt="" coords="1053,229,1118,256"/>
-<area shape="rect" id="node21" href="$jurassic_8c.html#a675d14cbd1ae26f72e86f828d8367240" title="Write atmospheric profile in RFM&#45;compatible format." alt="" coords="888,635,993,661"/>
-<area shape="rect" id="node26" href="$jurassic_8c.html#aaeed7544a87d85474e33d05fe0adc992" title="Helper function to extract a single value from the retrieval state vector." alt="" coords="594,512,682,539"/>
-<area shape="rect" id="node28" href="$jurassic_8c.html#abf836e23902ae26464421f94fcb63fa1" title="Read atmospheric data in ASCII format." alt="" coords="433,867,537,893"/>
-<area shape="rect" id="node29" href="$jurassic_8c.html#a20d5963b1fb1797a4c6ffaf3121481f9" title="Read atmospheric data in binary format." alt="" coords="435,765,535,792"/>
-<area shape="rect" id="node30" href="$jurassic_8c.html#ad4969b3e373db7716fe47d9d15ae74e9" title="Read one atmospheric profile from a netCDF file." alt="" coords="437,816,534,843"/>
-<area shape="rect" id="node32" href="$jurassic_8c.html#af6495fc53568fea1f4d90ecbe7ad48f4" title="Read ASCII&#45;formatted observation data from a file." alt="" coords="434,107,537,133"/>
-<area shape="rect" id="node33" href="$jurassic_8c.html#a408b81d78cc2b56cd7722a6ab7f88115" title="Read binary&#45;formatted observation data from a file." alt="" coords="436,5,535,32"/>
-<area shape="rect" id="node34" href="$jurassic_8c.html#ab603dde3a7fca7a74400efb71c9bb03d" title="Read one observation profile from a NetCDF file." alt="" coords="437,56,533,83"/>
-<area shape="rect" id="node36" href="$jurassic_8c.html#a52df7c5b5de89b94dde4b8361ea1daac" title="Write a fully annotated matrix (e.g., Jacobian or gain matrix) to an ASCII file." alt="" coords="425,360,545,387"/>
-<area shape="rect" id="node38" href="$jurassic_8c.html#aa56680536419d84231bf230d86146969" title="Write a numerical matrix to a binary file." alt="" coords="427,208,543,235"/>
-<area shape="rect" id="node39" href="$jurassic_8c.html#a9f6ae358e6c34f8a941344dfca5c4500" title="Write a numerical matrix to a netCDF file." alt="" coords="429,309,542,336"/>
-<area shape="rect" id="node37" href="$jurassic_8c.html#a342f4954ef3678480cae2efb366a7b3e" title="Convert a quantity index to a descriptive name string." alt="" coords="599,360,677,387"/>
-<area shape="rect" id="node41" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="262,841,351,868"/>
-<area shape="rect" id="node42" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="262,892,351,919"/>
-<area shape="rect" id="node45" href="$jurassic_8c.html#ab6852ec1675d0539a21df1fc4ecee1f0" title="Initialize source function lookup tables from emissivity data." alt="" coords="593,853,683,880"/>
-<area shape="rect" id="node46" href="$jurassic_8c.html#ac437f3db65946abc16a2e6776f2d9ce6" title="Read a single ASCII emissivity lookup table." alt="" coords="259,1095,355,1121"/>
-<area shape="rect" id="node47" href="$jurassic_8c.html#a059d22792e64add177ebc6f8ea0a90ed" title="Read a single compact binary emissivity lookup table." alt="" coords="261,993,353,1020"/>
-<area shape="rect" id="node49" href="$jurassic_8c.html#ad1eff24dc83dbbbdbd241aa779dc2d91" title="Read one packed emissivity lookup table from an open NetCDF file." alt="" coords="236,1044,377,1071"/>
-<area shape="rect" id="node48" href="$jurassic_8c.html#a817f0c03c54d6b37180f37b5d4e1512b" title="Unpack a lookup table from a contiguous binary buffer." alt="" coords="443,1019,528,1045"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,835,55,860"/>
+<area shape="rect" id="Node000002" href="$kernel_8c.html#ae242cda146bcec84b971f511504e621a" title="Perform kernel calculations in a single directory." alt="" coords="103,407,186,432"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="32,834,133,447,138,448,37,835"/>
+<area shape="rect" id="Node000051" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="111,835,178,860"/>
+<area shape="poly" id="edge54_Node000001_Node000051" title=" " alt="" coords="55,845,95,845,95,850,55,850"/>
+<area shape="rect" id="Node000054" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="269,784,339,810"/>
+<area shape="poly" id="edge67_Node000001_Node000054" title=" " alt="" coords="54,835,102,820,181,805,253,797,253,803,182,811,103,825,56,840"/>
+<area shape="rect" id="Node000055" href="$jurassic_8c.html#accf7b334232cd5dbb8b2b58b0e81f39a" title="Read emissivity lookup tables from disk." alt="" coords="111,933,178,959"/>
+<area shape="poly" id="edge58_Node000001_Node000055" title=" " alt="" coords="48,859,118,921,115,925,45,863"/>
+<area shape="rect" id="Node000061" href="$jurassic_8c.html#a2f19c5549e06e2c15446e464007a7a0b" title="Free lookup table and all internally allocated memory." alt="" coords="112,983,176,1008"/>
+<area shape="poly" id="edge68_Node000001_Node000061" title=" " alt="" coords="39,860,63,911,82,942,105,970,106,971,102,975,101,973,77,945,58,914,34,862"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#adfbb04487aa1c1d4175afca6e521e20b" title="Convert atmospheric data to state vector elements." alt="" coords="606,269,662,295"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="153,405,191,359,251,296,289,264,330,234,375,209,421,190,455,181,483,177,510,180,543,190,566,203,586,220,618,255,614,259,583,224,563,207,541,195,509,185,483,182,456,186,423,195,377,214,333,239,292,268,255,300,195,362,157,408"/>
+<area shape="rect" id="Node000005" href="$jurassic_8c.html#ab49799958d13e57af5b20527f0990ce6" title="Compute the Jacobian (kernel) matrix by finite differences." alt="" coords="276,533,332,559"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="164,431,276,521,273,525,160,435"/>
+<area shape="rect" id="Node000035" href="$jurassic_8c.html#ad6380c9458cf356667952f9651932e27" title="Convert observation radiances into a measurement vector." alt="" coords="606,407,662,432"/>
+<area shape="poly" id="edge35_Node000002_Node000035" title=" " alt="" coords="186,417,590,417,590,422,186,422"/>
+<area shape="rect" id="Node000038" href="$jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c" title="Read atmospheric input data from a file." alt="" coords="266,735,342,760"/>
+<area shape="poly" id="edge36_Node000002_Node000038" title=" " alt="" coords="154,432,292,719,287,722,150,434"/>
+<area shape="rect" id="Node000042" href="$jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980" title="Read observation data from an input file." alt="" coords="267,80,341,106"/>
+<area shape="poly" id="edge40_Node000002_Node000042" title=" " alt="" coords="145,406,152,361,168,294,194,219,211,182,232,147,248,128,267,113,270,117,252,132,236,150,216,184,199,221,173,296,157,362,150,407"/>
+<area shape="rect" id="Node000046" href="$jurassic_8c.html#a5750f44887e4367f7017e4ce7d115f67" title="Write a fully annotated matrix (e.g., Jacobian or gain matrix) to file." alt="" coords="258,332,350,358"/>
+<area shape="poly" id="edge44_Node000002_Node000046" title=" " alt="" coords="173,404,260,362,262,367,175,409"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#a5ac332e50178e5439e72634fe03d191f" title="Append a single atmospheric value to the state vector." alt="" coords="734,269,821,295"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="663,280,718,280,718,285,663,285"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="308,532,363,399,396,329,421,292,462,273,508,265,552,265,591,270,590,275,552,271,508,271,464,278,424,296,401,332,368,401,313,534"/>
+<area shape="rect" id="Node000006" href="$jurassic_8c.html#ad4d49729d85da58030daa13689c5edd1" title="Copy or initialize atmospheric profile data." alt="" coords="443,557,521,583"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="333,547,428,560,428,566,333,553"/>
+<area shape="rect" id="Node000007" href="$jurassic_8c.html#aa855e52716bd4b479bb0d2446b300a4e" title="Copy or initialize observation geometry and radiance data." alt="" coords="897,769,973,795"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="314,558,329,587,353,625,385,663,424,695,460,711,511,725,638,749,773,765,882,776,881,781,772,771,638,754,510,730,459,716,421,699,381,667,349,628,324,590,309,561"/>
+<area shape="rect" id="Node000008" href="$jurassic_8c.html#aecbc6e7fe6e2994a3b08f5737458da6d" title="Execute one complete forward&#45;model calculation." alt="" coords="603,608,664,634"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="332,557,374,576,423,593,510,609,588,616,587,622,509,615,422,598,372,581,330,562"/>
+<area shape="rect" id="Node000034" href="$jurassic_8c.html#aa9d19e596cd81af8cf571118658dd51e" title="Execute the forward model for a batch of independent cases." alt="" coords="432,659,532,684"/>
+<area shape="poly" id="edge30_Node000005_Node000034" title=" " alt="" coords="322,557,367,595,424,637,442,648,439,653,421,642,363,599,319,561"/>
+<area shape="poly" id="edge32_Node000005_Node000035" title=" " alt="" coords="332,531,421,493,590,431,592,436,423,498,334,536"/>
+<area shape="rect" id="Node000036" href="$jurassic_8c.html#a59e72c7cead4b4b7aaf096803bc7360c" title="Map retrieval state vector back to atmospheric structure." alt="" coords="454,508,510,534"/>
+<area shape="poly" id="edge33_Node000005_Node000036" title=" " alt="" coords="332,540,438,524,439,530,333,545"/>
+<area shape="rect" id="Node000009" href="$jurassic_8c.html#a9bb3fb765b43dc769ba80f2335bcea2d" title="Apply field&#45;of&#45;view (FOV) convolution to modeled radiances." alt="" coords="734,659,820,684"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="666,629,725,650,724,656,664,634"/>
+<area shape="rect" id="Node000011" href="$jurassic_8c.html#a4d724c788481e02814218ff749dce8bc" title="Compute line&#45;of&#45;sight radiances using the pencil&#45;beam forward model." alt="" coords="726,533,828,559"/>
+<area shape="poly" id="edge12_Node000008_Node000011" title=" " alt="" coords="659,605,736,564,738,569,662,610"/>
+<area shape="rect" id="Node000030" href="$jurassic_8c.html#a250b8929fb33466876ef15d431e4994a" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="734,320,821,346"/>
+<area shape="poly" id="edge24_Node000008_Node000030" title=" " alt="" coords="641,607,676,545,725,442,762,359,767,361,730,445,680,547,645,609"/>
+<area shape="rect" id="Node000033" href="$jurassic_8c.html#ad69ab6edb8f722212fb01e12d8809643" title="Adjust pressure profile using the hydrostatic equation." alt="" coords="735,608,819,634"/>
+<area shape="poly" id="edge29_Node000008_Node000033" title=" " alt="" coords="665,618,720,618,720,624,665,624"/>
+<area shape="poly" id="edge10_Node000009_Node000007" title=" " alt="" coords="803,683,830,701,854,725,878,748,895,759,892,764,875,752,850,729,827,706,800,687"/>
+<area shape="rect" id="Node000010" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="1042,668,1116,694"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="809,682,841,694,877,704,935,710,993,704,1026,696,1027,701,994,709,935,715,876,709,839,699,807,687"/>
+<area shape="rect" id="Node000012" href="$jurassic_8c.html#a1c8c72b0bc66d214b4575c13a7a0eb6b" title="Calculates the cosine of the solar zenith angle." alt="" coords="900,471,970,496"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="811,530,885,500,887,505,813,535"/>
+<area shape="rect" id="Node000013" href="$jurassic_8c.html#a363f5205cd58d7a22133f704f1137181" title="Compute total extinction including gaseous continua." alt="" coords="876,520,994,546"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="829,539,861,536,861,542,829,544"/>
+<area shape="rect" id="Node000019" href="$jurassic_8c.html#ac7826de16feb2eb6730b661bf8deba90" title="Interpolate the source function (Planck radiance) at a given temperature." alt="" coords="879,569,991,595"/>
+<area shape="poly" id="edge15_Node000011_Node000019" title=" " alt="" coords="829,555,865,563,863,569,828,560"/>
+<area shape="rect" id="Node000020" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="1043,371,1114,396"/>
+<area shape="poly" id="edge16_Node000011_Node000020" title=" " alt="" coords="781,532,794,504,813,470,841,435,875,407,913,390,953,380,992,377,1028,376,1028,382,993,382,954,386,914,395,878,411,844,439,818,473,798,507,786,534"/>
+<area shape="rect" id="Node000021" href="$jurassic_8c.html#a5e22cd63c35ef6e2c9b9023e2c3945d8" title="Interpolate emissivities and transmittances using the Curtis–Godson approximation (CGA)." alt="" coords="884,668,986,694"/>
+<area shape="poly" id="edge17_Node000011_Node000021" title=" " alt="" coords="795,558,830,594,853,626,862,640,878,655,883,658,879,662,875,659,858,644,848,630,826,597,791,561"/>
+<area shape="rect" id="Node000024" href="$jurassic_8c.html#a2b67aa3affea0dd3c6da502dab26d22d" title="Interpolate emissivities and transmittances using the Emissivity Growth Approximation (EGA)." alt="" coords="884,619,986,644"/>
+<area shape="poly" id="edge19_Node000011_Node000024" title=" " alt="" coords="799,557,878,605,887,610,884,614,875,610,796,562"/>
+<area shape="rect" id="Node000026" href="$jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="901,421,969,447"/>
+<area shape="poly" id="edge21_Node000011_Node000026" title=" " alt="" coords="789,531,825,495,875,456,886,450,889,454,878,460,829,499,793,535"/>
+<area shape="poly" id="edge18_Node000021_Node000010" title=" " alt="" coords="986,678,1026,678,1026,684,986,684"/>
+<area shape="poly" id="edge20_Node000024_Node000010" title=" " alt="" coords="976,642,1028,661,1027,666,974,647"/>
+<area shape="poly" id="edge23_Node000026_Node000010" title=" " alt="" coords="970,440,995,456,1014,479,1030,504,1054,558,1069,610,1077,652,1071,653,1063,611,1049,560,1025,507,1010,482,992,460,967,445"/>
+<area shape="poly" id="edge22_Node000026_Node000020" title=" " alt="" coords="968,420,1028,399,1029,404,970,425"/>
+<area shape="poly" id="edge25_Node000030_Node000020" title=" " alt="" coords="808,317,827,305,840,292,849,279,859,266,875,256,908,244,936,239,963,242,995,256,1022,276,1043,302,1070,355,1066,357,1039,305,1018,280,992,260,962,248,936,244,909,249,878,261,862,270,853,282,844,296,830,310,810,322"/>
+<area shape="poly" id="edge26_Node000030_Node000026" title=" " alt="" coords="800,344,902,410,899,415,797,348"/>
+<area shape="rect" id="Node000031" href="$jurassic_8c.html#a19d63e07e3eb8166cbf65ce079e4d156" title="Read a Reference Forward Model (RFM) ASCII spectrum." alt="" coords="881,320,989,346"/>
+<area shape="poly" id="edge27_Node000030_Node000031" title=" " alt="" coords="821,330,866,330,866,336,821,336"/>
+<area shape="rect" id="Node000032" href="$jurassic_8c.html#a675d14cbd1ae26f72e86f828d8367240" title="Write atmospheric profile in RFM&#45;compatible format." alt="" coords="883,271,987,296"/>
+<area shape="poly" id="edge28_Node000030_Node000032" title=" " alt="" coords="820,317,876,299,878,304,822,322"/>
+<area shape="poly" id="edge31_Node000034_Node000008" title=" " alt="" coords="522,656,587,633,589,638,524,661"/>
+<area shape="rect" id="Node000037" href="$jurassic_8c.html#aaeed7544a87d85474e33d05fe0adc992" title="Helper function to extract a single value from the retrieval state vector." alt="" coords="590,508,678,534"/>
+<area shape="poly" id="edge34_Node000036_Node000037" title=" " alt="" coords="511,518,575,518,575,524,511,524"/>
+<area shape="rect" id="Node000039" href="$jurassic_8c.html#abf836e23902ae26464421f94fcb63fa1" title="Read atmospheric data in ASCII format." alt="" coords="430,859,534,884"/>
+<area shape="poly" id="edge37_Node000038_Node000039" title=" " alt="" coords="344,753,376,769,393,789,401,808,409,827,424,846,428,848,425,853,420,849,404,830,396,810,388,792,373,774,341,758"/>
+<area shape="rect" id="Node000040" href="$jurassic_8c.html#a20d5963b1fb1797a4c6ffaf3121481f9" title="Read atmospheric data in binary format." alt="" coords="432,760,532,786"/>
+<area shape="poly" id="edge38_Node000038_Node000040" title=" " alt="" coords="343,750,417,761,416,766,342,755"/>
+<area shape="rect" id="Node000041" href="$jurassic_8c.html#ad4969b3e373db7716fe47d9d15ae74e9" title="Read one atmospheric profile from a netCDF file." alt="" coords="434,809,530,835"/>
+<area shape="poly" id="edge39_Node000038_Node000041" title=" " alt="" coords="343,757,375,769,424,796,433,800,431,805,421,801,373,774,341,762"/>
+<area shape="rect" id="Node000043" href="$jurassic_8c.html#af6495fc53568fea1f4d90ecbe7ad48f4" title="Read ASCII&#45;formatted observation data from a file." alt="" coords="431,104,533,130"/>
+<area shape="poly" id="edge41_Node000042_Node000043" title=" " alt="" coords="342,95,416,105,415,111,341,100"/>
+<area shape="rect" id="Node000044" href="$jurassic_8c.html#a408b81d78cc2b56cd7722a6ab7f88115" title="Read binary&#45;formatted observation data from a file." alt="" coords="433,5,531,31"/>
+<area shape="poly" id="edge42_Node000042_Node000044" title=" " alt="" coords="335,77,421,40,433,35,435,40,423,45,337,82"/>
+<area shape="rect" id="Node000045" href="$jurassic_8c.html#ab603dde3a7fca7a74400efb71c9bb03d" title="Read one observation profile from a NetCDF file." alt="" coords="434,55,530,80"/>
+<area shape="poly" id="edge43_Node000042_Node000045" title=" " alt="" coords="341,85,418,74,419,79,342,90"/>
+<area shape="rect" id="Node000047" href="$jurassic_8c.html#a52df7c5b5de89b94dde4b8361ea1daac" title="Write a fully annotated matrix (e.g., Jacobian or gain matrix) to an ASCII file." alt="" coords="422,356,542,382"/>
+<area shape="poly" id="edge45_Node000046_Node000047" title=" " alt="" coords="351,348,408,356,407,361,350,354"/>
+<area shape="rect" id="Node000049" href="$jurassic_8c.html#aa56680536419d84231bf230d86146969" title="Write a numerical matrix to a binary file." alt="" coords="424,205,540,231"/>
+<area shape="poly" id="edge49_Node000046_Node000049" title=" " alt="" coords="319,329,363,291,421,248,439,237,442,241,424,252,367,295,322,333"/>
+<area shape="rect" id="Node000050" href="$jurassic_8c.html#a9f6ae358e6c34f8a941344dfca5c4500" title="Write a numerical matrix to a netCDF file." alt="" coords="426,307,538,332"/>
+<area shape="poly" id="edge50_Node000046_Node000050" title=" " alt="" coords="350,336,410,327,411,332,351,341"/>
+<area shape="poly" id="edge46_Node000047_Node000003" title=" " alt="" coords="518,353,540,343,602,302,605,307,543,347,520,358"/>
+<area shape="poly" id="edge48_Node000047_Node000035" title=" " alt="" coords="524,380,593,403,591,408,522,385"/>
+<area shape="rect" id="Node000048" href="$jurassic_8c.html#a342f4954ef3678480cae2efb366a7b3e" title="Convert a quantity index to a descriptive name string." alt="" coords="596,344,672,370"/>
+<area shape="poly" id="edge47_Node000047_Node000048" title=" " alt="" coords="542,361,580,358,581,364,543,367"/>
+<area shape="poly" id="edge51_Node000050_Node000003" title=" " alt="" coords="537,303,590,290,591,295,538,309"/>
+<area shape="poly" id="edge53_Node000050_Node000035" title=" " alt="" coords="522,330,543,341,608,394,604,399,540,346,519,335"/>
+<area shape="poly" id="edge52_Node000050_Node000048" title=" " alt="" coords="538,330,581,341,580,346,537,336"/>
+<area shape="rect" id="Node000052" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="260,833,348,859"/>
+<area shape="poly" id="edge55_Node000051_Node000052" title=" " alt="" coords="179,845,245,844,245,849,179,850"/>
+<area shape="rect" id="Node000053" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="260,883,348,908"/>
+<area shape="poly" id="edge56_Node000051_Node000053" title=" " alt="" coords="179,855,246,875,245,881,178,860"/>
+<area shape="poly" id="edge57_Node000051_Node000054" title=" " alt="" coords="178,834,253,810,255,815,179,839"/>
+<area shape="poly" id="edge61_Node000055_Node000053" title=" " alt="" coords="178,933,246,911,248,916,179,938"/>
+<area shape="rect" id="Node000056" href="$jurassic_8c.html#ab6852ec1675d0539a21df1fc4ecee1f0" title="Initialize source function lookup tables from emissivity data." alt="" coords="590,877,678,903"/>
+<area shape="poly" id="edge59_Node000055_Node000056" title=" " alt="" coords="178,940,374,918,574,895,574,900,375,923,179,945"/>
+<area shape="rect" id="Node000057" href="$jurassic_8c.html#ac437f3db65946abc16a2e6776f2d9ce6" title="Read a single ASCII emissivity lookup table." alt="" coords="256,1083,352,1108"/>
+<area shape="poly" id="edge62_Node000055_Node000057" title=" " alt="" coords="175,958,188,968,205,996,211,1021,218,1046,236,1070,244,1076,241,1080,232,1073,213,1048,206,1023,200,998,184,972,172,962"/>
+<area shape="rect" id="Node000058" href="$jurassic_8c.html#a059d22792e64add177ebc6f8ea0a90ed" title="Read a single compact binary emissivity lookup table." alt="" coords="258,984,350,1010"/>
+<area shape="poly" id="edge63_Node000055_Node000058" title=" " alt="" coords="179,954,248,976,246,981,178,959"/>
+<area shape="rect" id="Node000060" href="$jurassic_8c.html#ad1eff24dc83dbbbdbd241aa779dc2d91" title="Read one packed emissivity lookup table from an open NetCDF file." alt="" coords="234,1033,374,1059"/>
+<area shape="poly" id="edge65_Node000055_Node000060" title=" " alt="" coords="172,957,188,968,202,982,211,996,221,1008,236,1020,242,1024,239,1028,232,1024,217,1011,207,999,198,986,184,972,169,962"/>
+<area shape="poly" id="edge60_Node000056_Node000010" title=" " alt="" coords="678,888,744,883,826,871,912,846,954,828,992,805,1016,784,1037,758,1065,707,1069,709,1041,761,1020,787,995,810,956,833,914,851,827,876,745,889,679,893"/>
+<area shape="rect" id="Node000059" href="$jurassic_8c.html#a817f0c03c54d6b37180f37b5d4e1512b" title="Unpack a lookup table from a contiguous binary buffer." alt="" coords="440,1008,524,1034"/>
+<area shape="poly" id="edge64_Node000058_Node000059" title=" " alt="" coords="351,1000,425,1010,424,1016,350,1006"/>
+<area shape="poly" id="edge66_Node000060_Node000059" title=" " alt="" coords="374,1034,424,1026,424,1032,375,1039"/>
 </map>

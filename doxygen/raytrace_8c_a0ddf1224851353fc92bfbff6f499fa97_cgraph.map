@@ -1,21 +1,43 @@
 <map id="main" name="main">
-<area shape="rect" id="node1" title=" " alt="" coords="5,448,56,475"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="108,119,176,145"/>
-<area shape="rect" id="node8" href="$jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c" title="Read atmospheric input data from a file." alt="" coords="104,321,180,348"/>
-<area shape="rect" id="node12" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="108,448,176,475"/>
-<area shape="rect" id="node15" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="245,499,315,525"/>
-<area shape="rect" id="node16" href="$jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980" title="Read observation data from an input file." alt="" coords="105,575,179,601"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#aaf98f7230de0893b8dc4833d3c83c7a4" title="Converts Cartesian coordinates to geographic coordinates." alt="" coords="381,5,453,32"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="381,68,453,95"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#a82151ea4448e70f46f7f3b770bb77612" title="Interpolate atmospheric state variables at a given altitude." alt="" coords="239,144,321,171"/>
-<area shape="rect" id="node6" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="380,169,455,196"/>
-<area shape="rect" id="node7" href="$jurassic_8c.html#a9020f32787ea7be08486d537a4f5c0fc" title="Determine the tangent point along a line of sight (LOS)." alt="" coords="230,43,330,69"/>
-<area shape="rect" id="node9" href="$jurassic_8c.html#abf836e23902ae26464421f94fcb63fa1" title="Read atmospheric data in ASCII format." alt="" coords="228,245,332,272"/>
-<area shape="rect" id="node10" href="$jurassic_8c.html#a20d5963b1fb1797a4c6ffaf3121481f9" title="Read atmospheric data in binary format." alt="" coords="230,296,330,323"/>
-<area shape="rect" id="node11" href="$jurassic_8c.html#ad4969b3e373db7716fe47d9d15ae74e9" title="Read one atmospheric profile from a netCDF file." alt="" coords="231,347,329,373"/>
-<area shape="rect" id="node13" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="235,397,325,424"/>
-<area shape="rect" id="node14" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="235,448,325,475"/>
-<area shape="rect" id="node17" href="$jurassic_8c.html#af6495fc53568fea1f4d90ecbe7ad48f4" title="Read ASCII&#45;formatted observation data from a file." alt="" coords="229,549,331,576"/>
-<area shape="rect" id="node18" href="$jurassic_8c.html#a408b81d78cc2b56cd7722a6ab7f88115" title="Read binary&#45;formatted observation data from a file." alt="" coords="231,600,329,627"/>
-<area shape="rect" id="node19" href="$jurassic_8c.html#ab603dde3a7fca7a74400efb71c9bb03d" title="Read one observation profile from a NetCDF file." alt="" coords="232,651,328,677"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,433,55,459"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="107,110,174,136"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="33,431,127,150,132,151,38,433"/>
+<area shape="rect" id="Node000008" href="$jurassic_8c.html#a9b53106fcc10a9ec709a6be5ddab4a5c" title="Read atmospheric input data from a file." alt="" coords="103,312,178,337"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="41,431,115,347,119,351,45,434"/>
+<area shape="rect" id="Node000012" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="107,433,174,459"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="55,443,91,443,91,448,55,448"/>
+<area shape="rect" id="Node000015" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="242,484,313,509"/>
+<area shape="poly" id="edge22_Node000001_Node000015" title=" " alt="" coords="56,453,103,469,168,481,227,489,227,495,167,487,102,474,54,458"/>
+<area shape="rect" id="Node000016" href="$jurassic_8c.html#a49673fe5fc307222ab5fc13a62352980" title="Read observation data from an input file." alt="" coords="103,558,178,584"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="45,457,120,545,116,548,41,461"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#aaf98f7230de0893b8dc4833d3c83c7a4" title="Converts Cartesian coordinates to geographic coordinates." alt="" coords="379,9,450,35"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="146,108,175,62,197,38,225,19,260,8,296,4,364,8,364,13,296,9,261,13,227,24,201,42,179,66,150,111"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="379,72,450,97"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="174,116,363,89,364,94,175,121"/>
+<area shape="rect" id="Node000005" href="$jurassic_8c.html#a82151ea4448e70f46f7f3b770bb77612" title="Interpolate atmospheric state variables at a given altitude." alt="" coords="237,136,318,161"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="175,127,222,136,221,141,174,132"/>
+<area shape="rect" id="Node000006" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="377,161,452,187"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="159,134,190,155,227,171,261,178,296,181,362,178,362,184,296,186,260,183,225,176,187,159,156,139"/>
+<area shape="rect" id="Node000007" href="$jurassic_8c.html#a9020f32787ea7be08486d537a4f5c0fc" title="Determine the tangent point along a line of sight (LOS)." alt="" coords="228,34,327,60"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="164,108,238,66,241,70,166,112"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="319,153,362,161,361,167,318,159"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="327,35,363,29,364,34,328,41"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="328,58,365,68,363,73,327,63"/>
+<area shape="rect" id="Node000009" href="$jurassic_8c.html#abf836e23902ae26464421f94fcb63fa1" title="Read atmospheric data in ASCII format." alt="" coords="226,237,329,263"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="161,309,225,271,232,267,235,272,227,276,164,313"/>
+<area shape="rect" id="Node000010" href="$jurassic_8c.html#a20d5963b1fb1797a4c6ffaf3121481f9" title="Read atmospheric data in binary format." alt="" coords="228,286,327,312"/>
+<area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="178,315,212,308,213,314,179,320"/>
+<area shape="rect" id="Node000011" href="$jurassic_8c.html#ad4969b3e373db7716fe47d9d15ae74e9" title="Read one atmospheric profile from a netCDF file." alt="" coords="230,336,326,361"/>
+<area shape="poly" id="edge13_Node000008_Node000011" title=" " alt="" coords="179,328,214,335,213,340,178,334"/>
+<area shape="rect" id="Node000013" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="234,385,322,411"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="174,432,223,414,225,419,176,437"/>
+<area shape="rect" id="Node000014" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="234,434,322,460"/>
+<area shape="poly" id="edge16_Node000012_Node000014" title=" " alt="" coords="175,443,218,444,218,449,175,449"/>
+<area shape="poly" id="edge17_Node000012_Node000015" title=" " alt="" coords="176,456,229,476,227,481,174,461"/>
+<area shape="rect" id="Node000017" href="$jurassic_8c.html#af6495fc53568fea1f4d90ecbe7ad48f4" title="Read ASCII&#45;formatted observation data from a file." alt="" coords="226,533,329,559"/>
+<area shape="poly" id="edge19_Node000016_Node000017" title=" " alt="" coords="178,562,211,555,212,561,179,567"/>
+<area shape="rect" id="Node000018" href="$jurassic_8c.html#a408b81d78cc2b56cd7722a6ab7f88115" title="Read binary&#45;formatted observation data from a file." alt="" coords="228,582,327,608"/>
+<area shape="poly" id="edge20_Node000016_Node000018" title=" " alt="" coords="179,575,214,581,213,586,178,580"/>
+<area shape="rect" id="Node000019" href="$jurassic_8c.html#ab603dde3a7fca7a74400efb71c9bb03d" title="Read one observation profile from a NetCDF file." alt="" coords="230,632,325,657"/>
+<area shape="poly" id="edge21_Node000016_Node000019" title=" " alt="" coords="165,582,227,618,235,622,233,627,225,623,162,587"/>
 </map>

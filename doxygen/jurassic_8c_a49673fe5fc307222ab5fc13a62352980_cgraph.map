@@ -1,6 +1,9 @@
 <map id="read_obs" name="read_obs">
-<area shape="rect" id="node1" title="Read observation data from an input file." alt="" coords="5,56,80,83"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#af6495fc53568fea1f4d90ecbe7ad48f4" title="Read ASCII&#45;formatted observation data from a file." alt="" coords="128,5,231,32"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a408b81d78cc2b56cd7722a6ab7f88115" title="Read binary&#45;formatted observation data from a file." alt="" coords="130,56,229,83"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#ab603dde3a7fca7a74400efb71c9bb03d" title="Read one observation profile from a NetCDF file." alt="" coords="131,107,227,133"/>
+<area shape="rect" id="Node000001" title="Read observation data from an input file." alt="" coords="5,55,80,80"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#af6495fc53568fea1f4d90ecbe7ad48f4" title="Read ASCII&#45;formatted observation data from a file." alt="" coords="128,5,230,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,52,126,34,128,39,81,57"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#a408b81d78cc2b56cd7722a6ab7f88115" title="Read binary&#45;formatted observation data from a file." alt="" coords="130,55,228,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="80,65,114,65,114,70,80,70"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#ab603dde3a7fca7a74400efb71c9bb03d" title="Read one observation profile from a NetCDF file." alt="" coords="131,104,226,130"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="81,78,128,96,126,101,79,83"/>
 </map>

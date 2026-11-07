@@ -1,4 +1,5 @@
 <map id="main" name="main">
-<area shape="rect" id="node1" title=" " alt="" coords="5,5,56,32"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#ab2b4738ae5b57d80da7a4c779c493f1a" title="Convert a day&#45;of&#45;year value to a calendar date." alt="" coords="104,5,173,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,55,31"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#ab2b4738ae5b57d80da7a4c779c493f1a" title="Convert a day&#45;of&#45;year value to a calendar date." alt="" coords="103,5,171,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,16,87,16,87,21,55,21"/>
 </map>

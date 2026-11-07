@@ -1,6 +1,9 @@
 <map id="read_matrix" name="read_matrix">
-<area shape="rect" id="node1" title="Read a numerical matrix from a file." alt="" coords="5,56,95,83"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#acc4cea4b08fbf737203335df5ac014f1" title="Read a numerical matrix from an ASCII file." alt="" coords="143,5,260,32"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#ad0de3ace671297bd12003f2bfd8a059b" title="Read a numerical matrix from a binary file." alt="" coords="145,56,258,83"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#a1c2c3d5de2ca723b41905405ed365441" title="Read a numerical matrix from a netCDF file." alt="" coords="146,107,257,133"/>
+<area shape="rect" id="Node000001" title="Read a numerical matrix from a file." alt="" coords="5,55,94,80"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#acc4cea4b08fbf737203335df5ac014f1" title="Read a numerical matrix from an ASCII file." alt="" coords="142,5,258,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,51,143,34,145,39,92,57"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#ad0de3ace671297bd12003f2bfd8a059b" title="Read a numerical matrix from a binary file." alt="" coords="144,55,256,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="94,65,128,65,128,70,94,70"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#a1c2c3d5de2ca723b41905405ed365441" title="Read a numerical matrix from a netCDF file." alt="" coords="145,104,254,130"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="92,78,145,96,143,101,90,84"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="formod_srcfunc" name="formod_srcfunc">
-<area shape="rect" id="node1" title="Interpolate the source function (Planck radiance) at a given temperature." alt="" coords="5,5,117,32"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="165,5,248,32"/>
+<area shape="rect" id="Node000001" title="Interpolate the source function (Planck radiance) at a given temperature." alt="" coords="5,5,117,31"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="165,5,246,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,16,149,16,149,21,117,21"/>
 </map>

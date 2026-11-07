@@ -1,4 +1,5 @@
 <map id="ctmo2" name="ctmo2">
-<area shape="rect" id="node1" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="5,5,64,32"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="112,5,195,32"/>
+<area shape="rect" id="Node000001" title="Compute O₂ collision&#45;induced absorption coefficient." alt="" coords="5,5,63,31"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="111,5,192,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,16,95,16,95,21,63,21"/>
 </map>

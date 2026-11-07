@@ -1,6 +1,9 @@
 <map id="climatology_external" name="climatology_external">
-<area shape="rect" id="node1" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="5,31,144,57"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="192,23,331,65"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="383,5,457,32"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="379,56,461,83"/>
+<area shape="rect" id="Node000001" title="Overwrites the built&#45;in climatology with a JuMACS climatology." alt="" coords="5,31,144,56"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#ad9e3d314a7cb5d5cf7dcd51fb56ee5a5" title="Interpolates a JuMACS climatology field onto atmospheric profiles." alt="" coords="192,23,330,64"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,41,176,41,176,46,144,46"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="382,5,456,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="330,30,365,24,366,29,331,35"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#a2a3c8ab98f21179741b274439786726d" title="Locate index for interpolation on a regular (uniform) grid." alt="" coords="378,55,459,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="331,51,363,56,362,62,330,57"/>
 </map>

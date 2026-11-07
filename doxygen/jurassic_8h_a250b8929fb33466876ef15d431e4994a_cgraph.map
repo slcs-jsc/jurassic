@@ -1,10 +1,23 @@
 <map id="formod_rfm" name="formod_rfm">
-<area shape="rect" id="node1" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="5,81,93,108"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="444,5,516,32"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="160,81,228,108"/>
-<area shape="rect" id="node8" href="$jurassic_8c.html#a675d14cbd1ae26f72e86f828d8367240" title="Write atmospheric profile in RFM&#45;compatible format." alt="" coords="141,132,247,159"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#aaf98f7230de0893b8dc4833d3c83c7a4" title="Converts Cartesian coordinates to geographic coordinates." alt="" coords="444,81,516,108"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#a82151ea4448e70f46f7f3b770bb77612" title="Interpolate atmospheric state variables at a given altitude." alt="" coords="303,157,386,184"/>
-<area shape="rect" id="node6" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="443,183,517,209"/>
-<area shape="rect" id="node7" href="$jurassic_8c.html#a9020f32787ea7be08486d537a4f5c0fc" title="Determine the tangent point along a line of sight (LOS)." alt="" coords="295,56,395,83"/>
+<area shape="rect" id="Node000001" title="Forward&#45;model radiance and transmittance with the Reference Forward Model (RFM)." alt="" coords="5,107,93,132"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#ae3aea782dfca9019f3f2d169f8cc0f6d" title="Converts geographic coordinates (longitude, latitude, altitude) to Cartesian coordinates." alt="" coords="445,5,516,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,104,139,66,215,33,250,22,296,13,345,10,395,13,429,14,429,19,395,18,345,15,296,18,251,27,217,38,142,71,73,108"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#a1e4c669d0fb6acd286ef83104e83e0a2" title="Perform line&#45;of&#45;sight (LOS) ray tracing through the atmosphere." alt="" coords="161,81,228,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="93,109,145,100,146,105,94,115"/>
+<area shape="rect" id="Node000008" href="$jurassic_8c.html#a19d63e07e3eb8166cbf65ce079e4d156" title="Read a Reference Forward Model (RFM) ASCII spectrum." alt="" coords="141,131,248,156"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="94,124,126,129,125,135,93,129"/>
+<area shape="rect" id="Node000009" href="$jurassic_8c.html#a675d14cbd1ae26f72e86f828d8367240" title="Write atmospheric profile in RFM&#45;compatible format." alt="" coords="142,180,246,206"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="75,131,142,166,150,171,148,175,139,171,73,135"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="216,78,252,59,295,41,365,25,429,18,430,23,366,31,297,46,254,63,218,83"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#aaf98f7230de0893b8dc4833d3c83c7a4" title="Converts Cartesian coordinates to geographic coordinates." alt="" coords="445,81,516,107"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="228,92,429,92,429,97,228,97"/>
+<area shape="rect" id="Node000005" href="$jurassic_8c.html#a82151ea4448e70f46f7f3b770bb77612" title="Interpolate atmospheric state variables at a given altitude." alt="" coords="305,157,386,183"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="227,105,249,116,308,147,306,152,247,121,225,110"/>
+<area shape="rect" id="Node000006" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="443,183,518,208"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="230,103,250,116,266,138,273,159,280,177,297,193,329,205,363,210,397,210,428,206,429,211,397,215,363,215,328,210,295,198,276,180,268,160,261,140,246,120,227,108"/>
+<area shape="rect" id="Node000007" href="$jurassic_8c.html#a9020f32787ea7be08486d537a4f5c0fc" title="Determine the tangent point along a line of sight (LOS)." alt="" coords="296,56,395,82"/>
+<area shape="poly" id="edge8_Node000003_Node000007" title=" " alt="" coords="228,86,280,77,281,82,229,91"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="387,175,428,183,427,188,386,180"/>
+<area shape="poly" id="edge10_Node000007_Node000002" title=" " alt="" coords="381,53,429,34,431,39,383,58"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="396,76,430,82,429,87,395,81"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="read_clim" name="read_clim">
-<area shape="rect" id="node1" title="Reads a JuMACS climatology file into an allocated climatology structure." alt="" coords="5,5,84,32"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#afc9a79d882cc74b4e023beffbe53739c" title="Reads and validates one JuMACS climatology field." alt="" coords="132,5,240,32"/>
+<area shape="rect" id="Node000001" title="Reads a JuMACS climatology file into an allocated climatology structure." alt="" coords="5,5,83,31"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#afc9a79d882cc74b4e023beffbe53739c" title="Reads and validates one JuMACS climatology field." alt="" coords="131,5,238,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,16,115,16,115,21,83,21"/>
 </map>

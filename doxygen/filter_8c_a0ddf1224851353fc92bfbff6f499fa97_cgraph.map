@@ -1,9 +1,16 @@
 <map id="main" name="main">
-<area shape="rect" id="node1" title=" " alt="" coords="5,81,56,108"/>
-<area shape="rect" id="node2" href="$filter_8c.html#a193508b4bad193209d6a5408bd4988ed" title="Compute apodized instrument line shape." alt="" coords="129,5,171,32"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="116,56,184,83"/>
-<area shape="rect" id="node6" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="253,107,324,133"/>
-<area shape="rect" id="node7" href="$jurassic_8c.html#abd649b0cdf3dc23af5ad95a0532c751b" title="Write tabulated shape function data to a text file." alt="" coords="104,157,196,184"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="244,5,333,32"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="244,56,333,83"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,55,106"/>
+<area shape="rect" id="Node000002" href="$filter_8c.html#a193508b4bad193209d6a5408bd4988ed" title="Compute apodized instrument line shape." alt="" coords="128,5,169,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="47,78,101,40,112,33,115,38,104,44,50,82"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="115,55,182,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="55,85,99,75,100,80,56,90"/>
+<area shape="rect" id="Node000006" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="251,105,321,131"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="55,93,236,111,235,116,55,98"/>
+<area shape="rect" id="Node000007" href="$jurassic_8c.html#abd649b0cdf3dc23af5ad95a0532c751b" title="Write tabulated shape function data to a text file." alt="" coords="103,156,194,182"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="53,104,116,145,113,150,50,108"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="242,7,330,32"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="181,53,232,35,234,41,183,58"/>
+<area shape="rect" id="Node000005" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="242,56,330,82"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="182,65,226,66,226,71,182,70"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="183,77,238,98,236,103,181,82"/>
 </map>

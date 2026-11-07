@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['k_0',['k',['../structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3',1,'atm_t::k()'],['../structlos__t.html#acba1f4bef3b96b5412b5fb9b8dea6cba',1,'los_t::k()']]],
+  ['k_0',['k',['../structatm__t.html#a18d3460f12bb187e3ae50e9f2547ede3',1,'atm_t::k'],['../structlos__t.html#acba1f4bef3b96b5412b5fb9b8dea6cba',1,'los_t::k']]],
   ['kb_1',['KB',['../jurassic_8h.html#a1841fd1a462d245d8c73dce55e2f45da',1,'jurassic.h']]],
   ['kernel_2',['kernel',['../jurassic_8c.html#ab49799958d13e57af5b20527f0990ce6',1,'kernel(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm, obs_t *obs, gsl_matrix *k):&#160;jurassic.c'],['../jurassic_8h.html#ab49799958d13e57af5b20527f0990ce6',1,'kernel(const ctl_t *ctl, const tbl_t *tbl, atm_t *atm, obs_t *obs, gsl_matrix *k):&#160;jurassic.c']]],
   ['kernel_2ec_3',['kernel.c',['../kernel_8c.html',1,'']]],
@@ -15,5 +15,6 @@ var searchData=
   ['kernel_5frecomp_12',['kernel_recomp',['../structret__t.html#a9f62c84930d539206014752d3e63b4d0',1,'ret_t']]],
   ['kernel_5fsfeps_5fabs_13',['KERNEL_SFEPS_ABS',['../jurassic_8h.html#af001feff21a29e7826b22f027b3325cf',1,'jurassic.h']]],
   ['kernel_5fsft_5fabs_14',['KERNEL_SFT_ABS',['../jurassic_8h.html#a5aeb0f35c44763646bede87a308c1ebe',1,'jurassic.h']]],
-  ['kernel_5ft_5fabs_15',['KERNEL_T_ABS',['../jurassic_8h.html#a1b1dd0cdb610a2b223f008650121890b',1,'jurassic.h']]]
+  ['kernel_5ft_5fabs_15',['KERNEL_T_ABS',['../jurassic_8h.html#a1b1dd0cdb610a2b223f008650121890b',1,'jurassic.h']]],
+  ['key_20capabilities_16',['Key capabilities',['../index.html#capabilities',1,'']]]
 ];

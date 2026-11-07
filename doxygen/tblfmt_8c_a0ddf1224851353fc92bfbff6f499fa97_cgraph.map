@@ -1,22 +1,45 @@
 <map id="main" name="main">
-<area shape="rect" id="node1" title=" " alt="" coords="5,233,56,260"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="105,81,173,108"/>
-<area shape="rect" id="node6" href="$jurassic_8c.html#accf7b334232cd5dbb8b2b58b0e81f39a" title="Read emissivity lookup tables from disk." alt="" coords="105,208,173,235"/>
-<area shape="rect" id="node13" href="$jurassic_8c.html#a2f19c5549e06e2c15446e464007a7a0b" title="Free lookup table and all internally allocated memory." alt="" coords="107,259,172,285"/>
-<area shape="rect" id="node14" href="$jurassic_8c.html#a78815bfc5643350a3b2d2c04782ad93d" title="Write emissivity lookup tables to disk." alt="" coords="104,411,175,437"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="249,56,338,83"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="249,107,338,133"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="258,5,329,32"/>
-<area shape="rect" id="node7" href="$jurassic_8c.html#ab6852ec1675d0539a21df1fc4ecee1f0" title="Initialize source function lookup tables from emissivity data." alt="" coords="249,157,338,184"/>
-<area shape="rect" id="node9" href="$jurassic_8c.html#ac437f3db65946abc16a2e6776f2d9ce6" title="Read a single ASCII emissivity lookup table." alt="" coords="245,259,341,285"/>
-<area shape="rect" id="node10" href="$jurassic_8c.html#a059d22792e64add177ebc6f8ea0a90ed" title="Read a single compact binary emissivity lookup table." alt="" coords="247,208,339,235"/>
-<area shape="rect" id="node12" href="$jurassic_8c.html#ad1eff24dc83dbbbdbd241aa779dc2d91" title="Read one packed emissivity lookup table from an open NetCDF file." alt="" coords="223,309,364,336"/>
-<area shape="rect" id="node8" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="432,157,507,184"/>
-<area shape="rect" id="node11" href="$jurassic_8c.html#a817f0c03c54d6b37180f37b5d4e1512b" title="Unpack a lookup table from a contiguous binary buffer." alt="" coords="427,259,512,285"/>
-<area shape="rect" id="node15" href="$jurassic_8c.html#abd649b0cdf3dc23af5ad95a0532c751b" title="Write tabulated shape function data to a text file." alt="" coords="247,411,339,437"/>
-<area shape="rect" id="node16" href="$jurassic_8c.html#a2fcee466f0e231a61d06f1d441e03528" title="Write one emissivity lookup table in human&#45;readable ASCII format." alt="" coords="244,461,343,488"/>
-<area shape="rect" id="node17" href="$jurassic_8c.html#a5c7354dd4c45b811f1b8ddf017f11cec" title="Write one emissivity lookup table in compact binary format." alt="" coords="246,360,341,387"/>
-<area shape="rect" id="node20" href="$jurassic_8c.html#a33a2bb4a4da7af5779d6b21120040bea" title="Write one packed lookup table to a NetCDF file." alt="" coords="247,512,339,539"/>
-<area shape="rect" id="node18" href="$jurassic_8c.html#a1a654ed6f5c3a4de1e96ff66f652db49" title="Pack a lookup table into a contiguous binary buffer." alt="" coords="434,385,505,412"/>
-<area shape="rect" id="node19" href="$jurassic_8c.html#aeda53633ce35d9bc75ceb4c050a5b069" title="Compute required buffer size (in bytes) for tbl_pack()." alt="" coords="412,487,527,513"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,228,55,254"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#a3635d1716488dea37d1176c1fb02675f" title="Read model control parameters from command&#45;line and configuration input." alt="" coords="104,80,172,106"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="38,226,116,117,121,120,43,229"/>
+<area shape="rect" id="Node000006" href="$jurassic_8c.html#accf7b334232cd5dbb8b2b58b0e81f39a" title="Read emissivity lookup tables from disk." alt="" coords="104,203,172,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="55,232,88,224,89,230,56,238"/>
+<area shape="rect" id="Node000013" href="$jurassic_8c.html#a2f19c5549e06e2c15446e464007a7a0b" title="Free lookup table and all internally allocated memory." alt="" coords="106,252,170,278"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="56,244,91,252,90,257,55,249"/>
+<area shape="rect" id="Node000014" href="$jurassic_8c.html#a78815bfc5643350a3b2d2c04782ad93d" title="Write emissivity lookup tables to disk." alt="" coords="103,400,173,426"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="42,253,123,385,118,388,37,256"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#a832e63c37527025311d1886a60dff605" title="Find gas species index by name." alt="" coords="247,55,335,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="171,85,231,75,232,80,172,90"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="247,104,335,130"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="172,95,232,105,231,110,171,101"/>
+<area shape="rect" id="Node000005" href="$jurassic_8c.html#abb6ce9b0361afe11cb23b8ac1e0c7fa3" title="Scan control file or command&#45;line arguments for a configuration variable." alt="" coords="256,5,326,31"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="157,77,220,40,240,31,243,36,222,45,159,82"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="149,200,179,170,220,139,231,132,234,137,222,143,182,174,153,204"/>
+<area shape="rect" id="Node000007" href="$jurassic_8c.html#ab6852ec1675d0539a21df1fc4ecee1f0" title="Initialize source function lookup tables from emissivity data." alt="" coords="247,153,335,179"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="171,202,234,182,236,187,173,207"/>
+<area shape="rect" id="Node000009" href="$jurassic_8c.html#ac437f3db65946abc16a2e6776f2d9ce6" title="Read a single ASCII emissivity lookup table." alt="" coords="244,252,339,278"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="173,224,236,244,234,249,171,229"/>
+<area shape="rect" id="Node000010" href="$jurassic_8c.html#a059d22792e64add177ebc6f8ea0a90ed" title="Read a single compact binary emissivity lookup table." alt="" coords="246,203,337,228"/>
+<area shape="poly" id="edge10_Node000006_Node000010" title=" " alt="" coords="172,213,230,213,230,218,172,218"/>
+<area shape="rect" id="Node000012" href="$jurassic_8c.html#ad1eff24dc83dbbbdbd241aa779dc2d91" title="Read one packed emissivity lookup table from an open NetCDF file." alt="" coords="221,301,361,327"/>
+<area shape="poly" id="edge12_Node000006_Node000012" title=" " alt="" coords="161,227,175,238,198,264,208,276,223,288,230,292,227,297,219,292,204,280,194,268,171,241,158,231"/>
+<area shape="rect" id="Node000008" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="429,153,504,179"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="336,164,414,164,414,169,336,169"/>
+<area shape="rect" id="Node000011" href="$jurassic_8c.html#a817f0c03c54d6b37180f37b5d4e1512b" title="Unpack a lookup table from a contiguous binary buffer." alt="" coords="424,252,509,278"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="338,226,410,246,409,251,337,231"/>
+<area shape="poly" id="edge13_Node000012_Node000011" title=" " alt="" coords="339,298,409,278,410,283,340,303"/>
+<area shape="rect" id="Node000015" href="$jurassic_8c.html#abd649b0cdf3dc23af5ad95a0532c751b" title="Write tabulated shape function data to a text file." alt="" coords="246,400,337,426"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="173,410,230,410,230,416,173,416"/>
+<area shape="rect" id="Node000016" href="$jurassic_8c.html#a2fcee466f0e231a61d06f1d441e03528" title="Write one emissivity lookup table in human&#45;readable ASCII format." alt="" coords="242,449,340,475"/>
+<area shape="poly" id="edge17_Node000014_Node000016" title=" " alt="" coords="174,421,235,441,234,447,173,427"/>
+<area shape="rect" id="Node000017" href="$jurassic_8c.html#a5c7354dd4c45b811f1b8ddf017f11cec" title="Write one emissivity lookup table in compact binary format." alt="" coords="244,351,338,376"/>
+<area shape="poly" id="edge18_Node000014_Node000017" title=" " alt="" coords="173,399,234,379,235,384,174,404"/>
+<area shape="rect" id="Node000020" href="$jurassic_8c.html#a33a2bb4a4da7af5779d6b21120040bea" title="Write one packed lookup table to a NetCDF file." alt="" coords="246,499,337,524"/>
+<area shape="poly" id="edge21_Node000014_Node000020" title=" " alt="" coords="153,424,182,455,222,485,232,491,230,495,220,490,179,459,149,428"/>
+<area shape="rect" id="Node000018" href="$jurassic_8c.html#a1a654ed6f5c3a4de1e96ff66f652db49" title="Pack a lookup table into a contiguous binary buffer." alt="" coords="431,375,502,400"/>
+<area shape="poly" id="edge19_Node000017_Node000018" title=" " alt="" coords="339,367,416,378,415,383,338,373"/>
+<area shape="rect" id="Node000019" href="$jurassic_8c.html#aeda53633ce35d9bc75ceb4c050a5b069" title="Compute required buffer size (in bytes) for tbl_pack()." alt="" coords="409,473,524,499"/>
+<area shape="poly" id="edge20_Node000017_Node000019" title=" " alt="" coords="340,374,363,385,410,422,447,460,443,464,406,426,360,390,338,379"/>
+<area shape="poly" id="edge22_Node000020_Node000018" title=" " alt="" coords="336,497,360,485,407,448,443,410,447,414,410,452,363,490,339,501"/>
+<area shape="poly" id="edge23_Node000020_Node000019" title=" " alt="" coords="337,502,393,494,394,499,338,508"/>
 </map>

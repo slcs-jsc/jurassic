@@ -1,10 +1,18 @@
 <map id="read_tbl" name="read_tbl">
-<area shape="rect" id="node1" title="Read emissivity lookup tables from disk." alt="" coords="5,107,73,133"/>
-<area shape="rect" id="node2" href="$jurassic_8c.html#ab6852ec1675d0539a21df1fc4ecee1f0" title="Initialize source function lookup tables from emissivity data." alt="" coords="147,5,237,32"/>
-<area shape="rect" id="node4" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="147,56,237,83"/>
-<area shape="rect" id="node5" href="$jurassic_8c.html#ac437f3db65946abc16a2e6776f2d9ce6" title="Read a single ASCII emissivity lookup table." alt="" coords="144,107,240,133"/>
-<area shape="rect" id="node6" href="$jurassic_8c.html#a059d22792e64add177ebc6f8ea0a90ed" title="Read a single compact binary emissivity lookup table." alt="" coords="146,157,238,184"/>
-<area shape="rect" id="node8" href="$jurassic_8c.html#ad1eff24dc83dbbbdbd241aa779dc2d91" title="Read one packed emissivity lookup table from an open NetCDF file." alt="" coords="121,208,263,235"/>
-<area shape="rect" id="node3" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="316,5,391,32"/>
-<area shape="rect" id="node7" href="$jurassic_8c.html#a817f0c03c54d6b37180f37b5d4e1512b" title="Unpack a lookup table from a contiguous binary buffer." alt="" coords="311,183,396,209"/>
+<area shape="rect" id="Node000001" title="Read emissivity lookup tables from disk." alt="" coords="5,104,73,130"/>
+<area shape="rect" id="Node000002" href="$jurassic_8c.html#ab6852ec1675d0539a21df1fc4ecee1f0" title="Initialize source function lookup tables from emissivity data." alt="" coords="147,5,235,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="50,102,79,71,119,40,131,34,133,38,122,44,83,75,53,105"/>
+<area shape="rect" id="Node000004" href="$jurassic_8c.html#ad6dc7f479ca53ad9866d0e1df8f5ffcd" title="Read a two&#45;column shape function from an ASCII file." alt="" coords="147,55,235,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="72,103,133,83,135,88,74,109"/>
+<area shape="rect" id="Node000005" href="$jurassic_8c.html#ac437f3db65946abc16a2e6776f2d9ce6" title="Read a single ASCII emissivity lookup table." alt="" coords="143,104,238,130"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="73,114,127,114,127,120,73,120"/>
+<area shape="rect" id="Node000006" href="$jurassic_8c.html#a059d22792e64add177ebc6f8ea0a90ed" title="Read a single compact binary emissivity lookup table." alt="" coords="145,153,236,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="74,125,135,145,133,150,72,130"/>
+<area shape="rect" id="Node000008" href="$jurassic_8c.html#ad1eff24dc83dbbbdbd241aa779dc2d91" title="Read one packed emissivity lookup table from an open NetCDF file." alt="" coords="121,203,261,228"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="53,128,83,159,122,189,130,193,127,198,119,194,79,163,50,132"/>
+<area shape="rect" id="Node000003" href="$jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc" title="Locate index for interpolation on an irregular grid." alt="" coords="314,5,388,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="235,16,299,16,299,21,235,21"/>
+<area shape="rect" id="Node000007" href="$jurassic_8c.html#a817f0c03c54d6b37180f37b5d4e1512b" title="Unpack a lookup table from a contiguous binary buffer." alt="" coords="309,177,393,203"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="237,170,294,179,293,184,237,176"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="261,202,293,197,294,202,262,207"/>
 </map>
