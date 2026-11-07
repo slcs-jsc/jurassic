@@ -9,6 +9,11 @@ on:
 permissions:
   contents: write
 
+# Prevent parallel documentation runs from racing to update gh-pages.
+concurrency:
+  group: docs-gh-pages
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
