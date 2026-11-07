@@ -38,7 +38,7 @@ jobs:
           mkdocs build --clean --site-dir ../site
 
       - name: Build Doxygen docs
-        uses: mattnotmitt/doxygen-action@v1.9.4
+        uses: mattnotmitt/doxygen-action@v1.12.0
         with:
           doxyfile-path: Doxyfile
           working-directory: docs
