@@ -50,6 +50,17 @@ retrievals, and gravity-wave analyses. It complements line-by-line
 radiative transfer models by providing a faster modelling option for
 workflows where lookup-table approximations are appropriate.
 
+JURASSIC is particularly useful when high computational throughput is required
+for a well-defined instrument or spectral configuration and when flexibility
+with respect to viewing geometry, atmospheric state, and retrieval setup is
+important. Its efficiency relies on precomputed spectroscopic lookup tables and
+radiative-transfer approximations, so new instrument or channel configurations
+require suitable lookup tables and validation against a line-by-line reference
+model. Established fast-model systems may be preferable for already supported
+operational sensor configurations, whereas line-by-line models remain the
+natural choice when maximum spectroscopic generality or reference-level
+accuracy is required.
+
 ## Features
 
 JURASSIC provides a comprehensive and efficient framework for infrared
