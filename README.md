@@ -249,6 +249,21 @@ to generate plots of the simulated radiances and kernel functions.
   <img src="projects/examples/zenith/plot_kernel_temperature_792.0000.png" alt="zenith temperature kernel function" width="30%"/>
 </p>
 
+### Validation and benchmarks
+
+JURASSIC includes reproducible validation and performance studies in the
+`projects` directory:
+
+- [Forward-model validation](projects/validation/README.md) compares JURASSIC
+  with the RFM line-by-line model for limb, nadir, and zenith geometries and
+  documents accuracy, lookup-table applicability, and single-core runtime.
+- [CPU/OpenMP benchmarks](projects/benchmark/README.md) quantify strong scaling
+  of batched forward calculations across viewing geometries, spectral-channel
+  counts, gas sets, and batch sizes.
+
+A reproducible end-to-end retrieval validation and benchmark will be added as
+part of the remaining JOSS review work.
+
 ### Lookup tables
 
 JURASSIC relies on precomputed spectroscopic lookup tables derived
