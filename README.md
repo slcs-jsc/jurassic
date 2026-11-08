@@ -31,50 +31,35 @@ sensing applications.
 
 ## Statement of need
 
-Infrared limb, nadir, and zenith observations are widely used to study
-temperature, composition, and dynamical variability in the atmosphere.
-Interpreting these measurements requires radiative transfer calculations,
-but full line-by-line models can be too computationally expensive for
-large satellite datasets, sensitivity studies, or iterative retrieval
-workflows.
+Infrared remote sensing observations are widely used to derive atmospheric
+temperature, composition, and dynamical variability from satellite, airborne,
+balloon-borne, and ground-based measurements. These applications require
+radiative transfer calculations that represent the relevant spectroscopy and
+viewing geometry while remaining computationally efficient for large
+observational data sets, sensitivity studies, and iterative retrievals.
 
-JURASSIC addresses this use case by combining radiative transfer
-approximations with precomputed spectroscopic lookup tables. It is
-intended for users who need many infrared radiance or transmittance
-calculations with configurable atmospheric states, instrument settings,
-and observation geometries.
+JURASSIC addresses these applications by combining radiative-transfer
+approximations with precomputed spectroscopic lookup tables. It provides a
+research-oriented framework for fast mid-infrared forward calculations and
+retrievals with configurable atmospheric states, instrument settings, and
+observation geometries.
 
-The model has been used in studies of satellite remote sensing and
-middle-atmosphere dynamics, including temperature retrievals, trace-gas
-retrievals, and gravity-wave analyses. It complements line-by-line
-radiative transfer models by providing a faster modelling option for
-workflows where lookup-table approximations are appropriate.
+The model has been used for temperature and trace-gas retrievals, satellite
+data analysis, and studies of atmospheric dynamics.
 
 ## When should I use JURASSIC?
 
-JURASSIC is a good choice when you need to perform many infrared forward-model
-calculations or iterative retrievals for a well-defined instrument or spectral
-configuration. Typical use cases include the processing of large observational
-data sets, sensitivity and uncertainty studies, retrieval development, ensemble
-calculations, and simulations for new or experimental instrument concepts.
+JURASSIC is intended for applications requiring many repeated infrared
+forward-model calculations or iterative retrievals for a defined instrument or
+spectral configuration. It supports multiple viewing geometries, configurable
+instrument settings, finite-difference Jacobians, and optimal-estimation
+retrievals within the same framework.
 
-Its main strength is the combination of high computational throughput with a
-flexible research-oriented framework. JURASSIC supports multiple viewing
-geometries, configurable atmospheric and instrument settings, finite-difference
-Jacobians, and optimal-estimation retrievals within the same software
-environment.
-
-This flexibility comes with some up-front work. For a new instrument or channel
-configuration, suitable spectroscopic lookup tables must be generated and the
-EGA/CGA approximations should be validated against a line-by-line reference
-model for the intended application.
-
-JURASSIC is therefore most attractive when the cost of this preparation is
-outweighed by the need for many subsequent simulations or retrievals.
-Established fast-model systems may be the more natural choice for already
-supported operational sensor configurations, while line-by-line models remain
-preferable when maximum spectroscopic generality or reference-level accuracy is
-required.
+For new instrument or channel configurations, suitable lookup tables need to
+be generated and the EGA/CGA approximations should be validated against a
+line-by-line reference model. Established fast-model systems may be preferable
+for supported operational sensors, while line-by-line models are appropriate
+when greater spectroscopic generality or reference-level accuracy is required.
 
 ## Features
 
