@@ -24,6 +24,8 @@ CHANNELS = (791, 792, 793, 810, 811, 812, 778, 779, 780,
 QUANTITIES = (("temperature", "TEMPERATURE", 5, 1, "Temperature (K)", "K"),
               ("o3", "O3", 8, 1e6, "O3 (ppmv)", "ppmv"),
               ("hno3", "HNO3", 9, 1e9, "HNO3 (ppbv)", "ppbv"))
+# Representative configured channels for signed kernel slices (cm^-1).
+SLICE_CHANNELS = {"temperature": 792, "o3": 788, "hno3": 867}
 
 
 def rows(path):
@@ -119,11 +121,12 @@ def matrix_diagnostics(prior, final, selected, metrics):
         raise ValueError("Kernel view altitudes differ from limb geometry")
 
     fig_jac, jac_axes = plt.subplots(1, 3, figsize=(13, 5), sharey=True)
+    fig_slice, slice_axes = plt.subplots(1, 3, figsize=(12, 5), sharey=True)
     fig_avk, avk_axes = plt.subplots(1, 3, figsize=(12, 5), sharey=True)
     fig_unc, unc_axes = plt.subplots(1, 3, figsize=(12, 5), sharey=True)
     channels = sorted(CHANNELS)
-    for ax_jac, ax_avk, ax_unc, (key, name, column, scale, _, unit) in zip(
-            jac_axes, avk_axes, unc_axes, QUANTITIES):
+    for ax_jac, ax_slice, ax_avk, ax_unc, (key, name, column, scale, _, unit) in zip(
+            jac_axes, slice_axes, avk_axes, unc_axes, QUANTITIES):
         # State columns carry quantity labels and altitude coordinates. Select
         # one 16-level block and verify it matches the retrieved profile grid.
         state_ids = [j for j, meta in enumerate(states) if meta[0] == name]
@@ -154,6 +157,27 @@ def matrix_diagnostics(prior, final, selected, metrics):
                    xticks=np.arange(len(channels)) + 0.5, title=name)
         ax_jac.set_xticklabels(channels, rotation=90)
         fig_jac.colorbar(image, ax=ax_jac, label=f"W/(m² sr cm⁻¹) per {unit}")
+
+        # Show one signed channel slice directly from measurement rows and
+        # state columns. Transpose to put state altitude on the vertical axis.
+        nu = SLICE_CHANNELS[key]
+        ray_ids = sorted((i for i, meta in enumerate(measurements)
+                          if float(meta[0]) == nu),
+                         key=lambda i: float(measurements[i][2]))
+        view_altitudes = np.array([float(measurements[i][2]) for i in ray_ids])
+        if not np.array_equal(view_altitudes, altitudes):
+            raise ValueError(f"Unexpected limb grid at {nu} cm^-1")
+        view_edges = np.r_[view_altitudes - 1, view_altitudes[-1] + 1]
+        signed = (kernel[np.ix_(ray_ids, state_ids)] / scale).T
+        signed_bound = float(np.max(np.abs(signed)))
+        if signed_bound <= 0:
+            raise ValueError(f"Zero signed kernel slice for {name} at {nu} cm^-1")
+        image = ax_slice.pcolormesh(view_edges, edges, signed, cmap="RdBu_r",
+                                    norm=TwoSlopeNorm(vmin=-signed_bound, vcenter=0,
+                                                      vmax=signed_bound))
+        ax_slice.set(xlabel="Tangent altitude (km)", title=f"{name} · {nu} cm⁻¹",
+                     xlim=(15, 45), ylim=(15, 45))
+        fig_slice.colorbar(image, ax=ax_slice, label=f"W/(m² sr cm⁻¹) per {unit}")
 
         # The within-quantity block shows vertical response in comparable
         # units; cross-quantity blocks remain in the full matrix but are not
@@ -198,6 +222,8 @@ def matrix_diagnostics(prior, final, selected, metrics):
     for fig, axes, filename, ylabel, title in (
             (fig_jac, jac_axes, "jacobians.png", "Retrieval altitude (km)",
              "RMS finite-difference sensitivity over limb observations"),
+            (fig_slice, slice_axes, "kernel_slices.png", "Retrieval altitude (km)",
+             "Signed finite-difference kernel at representative channels"),
             (fig_avk, avk_axes, "averaging_kernels.png", "Retrieval altitude (km)",
              "Averaging kernels (within-quantity blocks)"),
             (fig_unc, unc_axes, "uncertainties.png", "Altitude (km)", None)):
@@ -262,12 +288,19 @@ def main():
     metrics["retrieval_iterate_s"] = timer(log, "RET_ITERATE")
     metrics["retrieval_setup_s"] = timer(log, "RET_SETUP")
     metrics["retrieval_diagnostics_s"] = timer(log, "RET_DIAGNOSTICS")
-    # Plot truth, prior, and retrieved profiles at the discrete 2 km levels.
+    # Keep retrieved open markers above the truth line so their close
+    # agreement remains visible without moving either profile.
     fig, axes = plt.subplots(1, 3, figsize=(12, 5), sharey=True)
     for ax, (_, _, column, scale, title, _) in zip(axes, QUANTITIES):
-        for name, table in (("Truth", truth), ("A priori", prior), ("Retrieved", final)):
+        for name, table, style in (
+                ("Truth", truth, {"linestyle": "-", "linewidth": 2, "zorder": 1}),
+                ("A priori", prior, {"linestyle": "--", "marker": "s",
+                                    "markersize": 3.5, "zorder": 2}),
+                ("Retrieved", final, {"linestyle": ":", "marker": "o",
+                                     "markersize": 6, "markerfacecolor": "white",
+                                     "markeredgewidth": 1.4, "zorder": 3})):
             ax.plot([table[i][column] * scale for i in selected],
-                    [table[i][1] for i in selected], "o-", markersize=3.5, label=name)
+                    [table[i][1] for i in selected], label=name, **style)
         ax.set_xlabel(title)
         ax.grid(alpha=0.3)
         ax.set_ylim(15, 45)

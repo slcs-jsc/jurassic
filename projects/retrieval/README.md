@@ -86,8 +86,9 @@ own metrics and all signed radiance residuals to `work/`.
 ![Truth, a priori, and retrieved temperature, O3, and HNO3 profiles](results/profiles.png)
 
 The three panels compare truth, a priori, and retrieved profiles over
-15–45 km. The retrieval recovers the imposed smooth perturbations in this
-internally consistent synthetic experiment.
+15–45 km. Open retrieved markers sit on top of the truth curves where the
+profiles nearly coincide: the internally consistent synthetic retrieval
+recovers the imposed smooth perturbations very closely.
 
 ### Radiance residuals and convergence
 
@@ -110,6 +111,19 @@ respond to temperature, O3, and HNO3. The last kernel written by retrieval
 need not be evaluated at the exact final state when `KERNEL_RECOMP = 3`.
 Temperature derivatives are shown per K, O3 per ppmv, and HNO3 per ppbv.
 Each panel has its own logarithmic color scale.
+
+![Signed finite-difference kernel slices at representative channels](results/kernel_slices.png)
+
+The complementary `kernel_slices.png` plots actual **signed** entries from
+the same finite-difference kernel at 792 cm⁻¹ (temperature), 788 cm⁻¹ (O3),
+and 867 cm⁻¹ (HNO3). Tangent altitude is horizontal and retrieval altitude
+vertical. Its zero-centered color scales retain derivative sign, whereas
+`jacobians.png` summarizes magnitude across all limb observations by RMS.
+Together they show detailed kernel structure and the broader spectral and
+vertical sensitivity pattern. The chosen channels illustrate this synthetic
+setup; they are not optimized real-instrument channels. The nonzero values
+in these three reference slices are positive, so the negative halves of the
+diverging color scales are unused here.
 
 ### Averaging kernels
 
