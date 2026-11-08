@@ -24,7 +24,7 @@ remote sensing measurements.
 ## Introduction
 
 The Jülich Rapid Spectral Simulation Code (JURASSIC) is a radiative
-transfer model for simulating infrared radiation in the Earth's
+transfer model for simulating infrared radiative transfer in the Earth's
 atmosphere. It combines radiative transfer approximations,
 spectroscopic lookup tables, and retrieval tools for atmospheric remote
 sensing applications.
@@ -38,28 +38,26 @@ radiative transfer calculations that represent the relevant spectroscopy and
 viewing geometry while remaining computationally efficient for large
 observational data sets, sensitivity studies, and iterative retrievals.
 
-JURASSIC addresses these applications by combining radiative-transfer
+JURASSIC addresses these applications by combining radiative transfer
 approximations with precomputed spectroscopic lookup tables. It provides a
-research-oriented framework for fast mid-infrared forward calculations and
+research framework for fast mid-infrared forward calculations and
 retrievals with configurable atmospheric states, instrument settings, and
-observation geometries.
-
-The model has been used for temperature and trace-gas retrievals, satellite
-data analysis, and studies of atmospheric dynamics.
+observation geometries. The model has been used for temperature and trace gas
+retrievals, satellite data analysis, and studies of atmospheric dynamics.
 
 ## When should I use JURASSIC?
 
 JURASSIC is intended for applications requiring many repeated infrared
-forward-model calculations or iterative retrievals for a defined instrument or
+forward model calculations or iterative retrievals for a defined instrument or
 spectral configuration. It supports multiple viewing geometries, configurable
-instrument settings, finite-difference Jacobians, and optimal-estimation
+instrument settings, finite-difference Jacobians, and optimal estimation
 retrievals within the same framework.
 
 For new instrument or channel configurations, suitable lookup tables need to
 be generated and the EGA/CGA approximations should be validated against a
-line-by-line reference model. Established fast-model systems may be preferable
+line-by-line reference model. Established fast model systems may be preferable
 for supported operational sensors, while line-by-line models are appropriate
-when greater spectroscopic generality or reference-level accuracy is required.
+when greater spectroscopic generality or reference model accuracy is required.
 
 ## Features
 
@@ -73,8 +71,8 @@ research, operational, and development workflows:
     methods enable rapid yet accurate simulations of atmospheric
     radiances and transmittances across a broad spectral range.
 
-- **Lookup-table spectroscopy**: Band
-    transmittances are derived from pre-calculated lookup tables based
+- **Lookup table spectroscopy**: Band
+    transmittances are derived from precomputed lookup tables based
     on detailed line-by-line spectroscopy. This approach maintains
     spectroscopic accuracy while largely reducing computational cost,
     making the model suitable for large-scale and near-real-time
@@ -98,15 +96,14 @@ research, operational, and development workflows:
     KOPRA, RFM, and SARTA.
 
 - **Parallel execution for HPC environments**: JURASSIC supports
-    workflow-level parallelism, OpenMP acceleration across the tool
+    parallelism across workflows, OpenMP acceleration across the tool
     suite, and MPI-based task distribution for retrieval workloads.
     This enables efficient execution on multicore CPUs and HPC
-    clusters for large datasets and campaign-style processing.
+    clusters for large datasets and campaign processing.
 
-- **Open source and community-oriented**: JURASSIC is distributed
-    under the GNU General Public License (GPL), fostering
-    transparency, collaboration, and community-driven development
-    within the atmospheric and remote sensing research community.
+- **Open source**: JURASSIC is distributed under the GNU General Public
+    License (GPL), fostering transparency and collaboration within the
+    atmospheric and remote sensing research community.
 
 ## Getting started
 
@@ -163,7 +160,7 @@ the required dependencies manually. Distribution-specific package
 information, optional tools, and version details are collected in the
 [dependencies file](https://github.com/slcs-jsc/jurassic/blob/HEAD/DEPENDENCIES.md).
 
-**3. Optional: adjust the Makefile for non-default setups**
+**3. Optional: adjust the Makefile for custom setups**
 
 Navigate to the source directory and adjust the `Makefile` as needed:
 
@@ -187,7 +184,7 @@ Pay special attention to the following settings:
 
 **4. Compile JURASSIC**
 
-For the default bundled-library build, no changes to the `Makefile` are
+For the default build with bundled libraries, no changes to the `Makefile` are
 usually required:
 
     cd [jurassic_directory]/src
@@ -209,7 +206,7 @@ experiments.
 Running the examples provided in the `projects` directory is a convenient
 way to verify that the installation was successful. Example simulations
 are provided for three observation geometries. The example scripts set
-the runtime library path for the bundled-library build automatically and
+the runtime library path for the build with bundled libraries automatically and
 use `gnuplot` to generate diagnostic plots:
 
     # Limb
@@ -265,12 +262,13 @@ to generate plots of the simulated radiances and kernel functions.
 JURASSIC includes reproducible validation and performance studies in the
 `projects` directory:
 
-- [Forward-model validation](projects/validation/README.md) compares JURASSIC
+- [Forward model validation](projects/validation/README.md) compares JURASSIC
   with the RFM line-by-line model for limb, nadir, and zenith geometries and
-  documents accuracy, lookup-table applicability, and single-core runtime.
+  documents accuracy, applicability of lookup tables, and runtime on a
+  single core.
 - [CPU/OpenMP benchmarks](projects/benchmark/README.md) quantify strong scaling
-  of batched forward calculations across viewing geometries, spectral-channel
-  counts, gas sets, and batch sizes.
+  of batched forward calculations across viewing geometries, numbers of spectral
+  channels, gas sets, and batch sizes.
 
 A reproducible end-to-end retrieval validation and benchmark will be added as
 part of the remaining JOSS review work.
@@ -292,7 +290,7 @@ absorption spectra of a homogeneous gas cell. The lookup tables
 distributed with JURASSIC were generated using the
 [Reference Forward Model (RFM) from the University of Oxford](https://eodg.atm.ox.ac.uk/RFM/).
 Other line-by-line models may be used if they provide the required
-homogeneous-gas-cell absorption spectra.
+absorption spectra for homogeneous gas cells.
 
 ## Further information
 
