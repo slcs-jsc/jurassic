@@ -50,16 +50,31 @@ retrievals, and gravity-wave analyses. It complements line-by-line
 radiative transfer models by providing a faster modelling option for
 workflows where lookup-table approximations are appropriate.
 
-JURASSIC is particularly useful when high computational throughput is required
-for a well-defined instrument or spectral configuration and when flexibility
-with respect to viewing geometry, atmospheric state, and retrieval setup is
-important. Its efficiency relies on precomputed spectroscopic lookup tables and
-radiative-transfer approximations, so new instrument or channel configurations
-require suitable lookup tables and validation against a line-by-line reference
-model. Established fast-model systems may be preferable for already supported
-operational sensor configurations, whereas line-by-line models remain the
-natural choice when maximum spectroscopic generality or reference-level
-accuracy is required.
+## When should I use JURASSIC?
+
+JURASSIC is a good choice when you need to perform many infrared forward-model
+calculations or iterative retrievals for a well-defined instrument or spectral
+configuration. Typical use cases include the processing of large observational
+data sets, sensitivity and uncertainty studies, retrieval development, ensemble
+calculations, and simulations for new or experimental instrument concepts.
+
+Its main strength is the combination of high computational throughput with a
+flexible research-oriented framework. JURASSIC supports multiple viewing
+geometries, configurable atmospheric and instrument settings, finite-difference
+Jacobians, and optimal-estimation retrievals within the same software
+environment.
+
+This flexibility comes with some up-front work. For a new instrument or channel
+configuration, suitable spectroscopic lookup tables must be generated and the
+EGA/CGA approximations should be validated against a line-by-line reference
+model for the intended application.
+
+JURASSIC is therefore most attractive when the cost of this preparation is
+outweighed by the need for many subsequent simulations or retrievals.
+Established fast-model systems may be the more natural choice for already
+supported operational sensor configurations, while line-by-line models remain
+preferable when maximum spectroscopic generality or reference-level accuracy is
+required.
 
 ## Features
 
