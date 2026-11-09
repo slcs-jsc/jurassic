@@ -48,6 +48,11 @@ configuration, timing definition, and hardware.
 
 ### Limb spectra and errors
 
+The limb cases provide the most detailed spectral comparison because they
+sample long slant paths through the atmosphere at four different tangent
+heights. The following figures first compare the spectra directly and then
+quantify the remaining differences relative to RFM.
+
 ![Limb radiance spectra](analysis/limb_radiance_spectra.png)
 
 *Figure 1: Limb radiance spectra from RFM and the JURASSIC EGA and CGA approximations.*
@@ -70,6 +75,9 @@ error statistics for each limb geometry.
 *Figure 3: Summary of limb radiance accuracy for EGA and CGA across the four tangent heights.*
 
 #### Limb error statistics
+
+The summary statistics below quantify the channel-by-channel differences for
+each tangent height and separate typical errors from the largest outliers.
 
 | Height | Method | RMS [%] | Median [%] | 95th percentile [%] | Maximum [%] |
 |---:|:---|---:|---:|---:|---:|
@@ -105,6 +113,11 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 
 ### Nadir and zenith brightness temperature
 
+For the vertical viewing geometries, radiances are expressed as brightness
+temperatures to provide a more intuitive measure of the differences between
+JURASSIC and RFM. Nadir and zenith are shown separately before their error
+statistics are summarized together.
+
 ![Nadir brightness temperature](analysis/nadir_brightness_temperature.png)
 
 *Figure 4: Nadir brightness temperatures from RFM, EGA, and CGA.*
@@ -127,6 +140,10 @@ the brightness temperature errors for both vertical viewing geometries.
 
 #### Brightness temperature error statistics
 
+These statistics condense the spectral comparisons into RMS, median,
+95th-percentile, and maximum brightness temperature differences for each
+geometry and approximation.
+
 | Geometry | Method | RMS [K] | Median [K] | 95th percentile [K] | Maximum [K] |
 |:---|:---|---:|---:|---:|---:|
 | Nadir | EGA | 0.411 | 0.113 | 0.780 | 3.906 |
@@ -141,6 +158,10 @@ The final comparison addresses the complementary question of computational
 cost on the documented reference system.
 
 ### Runtime
+
+Accuracy is only one part of the validation. This section compares the model
+runtime of EGA and CGA with the line-by-line RFM reference using the same
+validation configurations and the timing definition described below.
 
 ![Single-core model runtime](analysis/runtime_summary.png)
 
@@ -165,6 +186,11 @@ workflow.
 
 ## Interpreting approximation errors
 
+The numerical differences above arise from the approximations used to reduce
+the cost of radiative transfer calculations. Their magnitude therefore depends
+on both the approximation itself and the atmospheric and spectral configuration
+being tested.
+
 EGA follows the growth of channel-mean emissivity along an inhomogeneous ray,
 while CGA represents the path by equivalent homogeneous conditions. Both are
 band approximations. They do not exactly retain correlations between the
@@ -188,6 +214,11 @@ References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807),
 [Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).
 
 ## Lookup table applicability
+
+The accuracy results are only meaningful for atmospheric states that are
+represented adequately by the lookup tables. This section documents the
+relevant table ranges and where the validation atmosphere requires
+extrapolation.
 
 This validation applies to the lookup table set and atmospheric state used
 here. The following details show how that state relates to the tabulated
@@ -220,6 +251,10 @@ from this validation.
 
 ## Inspect and reproduce the analysis
 
+The committed reference spectra and timing files are sufficient to reproduce
+the figures and accuracy statistics without rerunning the expensive RFM
+calculations.
+
 The supplied spectra are sufficient to reproduce every accuracy metric and
 figure without installing RFM or obtaining the external lookup tables:
 
@@ -251,6 +286,11 @@ kelvin. Accuracy and runtime summaries are separate figures. The principal
 accuracy and timing results are tabulated above.
 
 ## Repeat the calculations
+
+To regenerate the complete validation from scratch, both the external RFM
+environment and the full JURASSIC lookup table collection are required. The
+steps below reproduce the reference calculation and the two JURASSIC
+approximations.
 
 Build the CPU executables with capacity for all 36 gases:
 
@@ -302,6 +342,11 @@ and each of the 20 chunks forms one contiguous RFM block. RFM is therefore
 started 20 times per geometry.
 
 ## Timing interpretation
+
+The runtime comparison separates model execution from initialization and other
+setup costs so that the reported speed-up reflects repeated forward model
+evaluations in a persistent workflow. The details below define exactly which
+timers enter the comparison.
 
 `timings.csv` records the summed single-process times across spectral chunks.
 JURASSIC model time is `TIMER_FORMOD`. Instrumented RFM model time is the
