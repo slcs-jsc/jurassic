@@ -268,9 +268,11 @@ JURASSIC includes reproducible validation and performance studies in the
 - [CPU/OpenMP benchmarks](projects/benchmark/README.md) quantify strong scaling
   of batched forward calculations across viewing geometries, numbers of spectral
   channels, gas sets, and batch sizes.
-
-A reproducible end-to-end retrieval validation and benchmark will be added as
-part of the remaining JOSS review work.
+- [Retrieval validation and benchmark](projects/retrieval/README.md) provides a
+  reproducible synthetic end-to-end limb retrieval for temperature, O3, and HNO3,
+  including finite-difference Jacobians, convergence and runtime diagnostics,
+  averaging kernels, degrees of freedom for signal, and formal retrieval
+  uncertainties.
 
 ### Lookup tables
 
