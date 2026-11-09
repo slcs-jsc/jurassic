@@ -203,15 +203,15 @@ these residual correlation terms are described by
 Errors therefore depend on the spectral interval, instrument response,
 atmospheric state, gas overlap, and viewing geometry. Published results for
 other configurations are useful context rather than general error bounds.
-Gordley and Russell (1981) reported about 0.5% for a single-gas broadband limb
-case, and Francis et al. (2006) reported channel-dependent radiance accuracies
-of 0.5-1.0% or better for the HIRDLS fast model, which combined CGA, EGA, and
-statistical regression. Each instrument or application must be validated
-against line-by-line calculations using its own spectral response functions.
-
-References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807),
-[Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4), and
-[Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).
+[Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807) reported
+about 0.5% for a single-gas broadband limb case. The Curtis–Godson
+approximation is described in more detail by
+[Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4), while
+[Francis et al. (2006)](https://doi.org/10.1029/2005JD006270) reported
+channel-dependent radiance accuracies of 0.5-1.0% or better for the HIRDLS
+fast model, which combined CGA, EGA, and statistical regression. Each
+instrument or application must be validated against line-by-line calculations
+using its own spectral response functions.
 
 ## Lookup table applicability
 
