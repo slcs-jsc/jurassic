@@ -42,6 +42,8 @@ JURASSIC only computes a gas in a channel if a lookup table exists for that gas 
 
 ![Active gases per channel in channels_alt3.tsv](figures/channels_alt3_gas_matrix.png)
 
+*Figure 1: Active gases for each spectral channel in the benchmark channel list.*
+
 The script picks ND channels evenly spaced in the list, including the first and the last one (for ND = 32 every 4th or 5th channel), so they cover the whole range from 587 to 739 cm⁻¹. Each column in the figure is one channel of the list. The reference setting has 458 active channel-gas pairs.
 
 The gas sets are defined in `configs/gas_sets/`. The name gives the number of gases, and each set contains the previous one plus some more gases:
@@ -52,6 +54,8 @@ The gas sets are defined in `configs/gas_sets/`. The name gives the number of ga
 | `ng08` | `ng04` + CH4, N2O, NH3, SO2 |
 | `ng13` | `ng08` + C2H2, H2O2, HCN, HF, NO2 |
 | `ng18` | `ng13` + C2H6, COF2, N2O5, HCl, ClO |
+
+*Table 1: Gas sets used in the scaling experiments.*
 
 `ng13` contains exactly the 13 gases that are active in all 128 channels, so up to `ng13` the number of active pairs is NG × ND. `ng18` adds the 5 gases that are only active in parts of the range (+42 pairs at ND = 32) and is the full gas list.
 
@@ -80,12 +84,18 @@ up to 32 threads. On 64 cores they reach about 52–53× speedup, or about
 
 ![Speedup of the formod batch per geometry](figures/e4_geometry_strong_speedup.png)
 
+*Figure 2: Strong-scaling speed-up of the timed forward model batch for the three viewing geometries.*
+
 ![Efficiency over threads for different gas sets, per geometry](figures/e4_gases_strong_efficiency.png)
+
+*Figure 3: Parallel efficiency for different gas sets and viewing geometries.*
 
 Within the tested gas sets, the number of gases has no clear effect on parallel
 efficiency.
 
 ![Efficiency over threads for different channel counts, per geometry](figures/e4_channels_strong_efficiency.png)
+
+*Figure 4: Parallel efficiency as a function of spectral channel count and viewing geometry.*
 
 Up to 32 channels, no clear dependence of parallel efficiency on ND is visible.
 With 64 and 128 channels, it starts to decrease at 4 threads (128 channels:
@@ -93,6 +103,8 @@ With 64 and 128 channels, it starts to decrease at 4 threads (128 channels:
 lookup tables grow from 29 MB (ND = 32) to 118 MB (ND = 128).
 
 ![Speedup of the whole application per geometry](figures/e4_geometry_app_speedup.png)
+
+*Figure 5: Strong-scaling speed-up of the complete benchmark application, including initialization and I/O.*
 
 For completeness, we also report process-level timings that include lookup-table
 initialization, the single reference calculation, and file I/O. These costs are
@@ -115,4 +127,24 @@ scenes) shows why:
 | zenith | 1 | 33.0 s | 10.6 s | 0.1 s | 1366 s | 1409 s |
 | zenith | 64 | 14.1 s | 10.7 s | 0.2 s | 25.7 s | 51 s |
 
+*Table 2: Runtime contributions for the 32-channel reference configuration.*
+
 Table read is `TIMER_READ_TBL`, reference run is `TIMER_FORMOD_REFERENCE` (one scene, computed on a single thread), other I/O is the remaining `TIMER_READ_*` plus `TIMER_WRITE_OBS` and `TIMER_FINALIZE`. The formod batch is the mean time of one batch from the `RUNTIME` line; on 1 thread it is the estimated `T1` (see above).
+
+
+## Conclusions
+
+For the 32-channel reference configuration, JURASSIC's batched forward model
+shows near-ideal OpenMP strong scaling up to 32 threads on one JURECA-DC CPU
+socket. At 64 threads, the three viewing geometries reach about 52–53× speed-up,
+corresponding to roughly 81–83% parallel efficiency for the timed forward model
+batch.
+
+The scaling behavior is largely insensitive to the tested gas sets, whereas
+larger spectral channel counts reduce parallel efficiency at higher thread
+counts, consistent with increasing memory demands from the lookup tables.
+Initialization and I/O become increasingly important when the forward model
+itself is strongly accelerated, which explains why whole-application speed-up
+is lower than the isolated batch scaling. The benchmark therefore separates
+forward model scaling from setup and I/O costs so that both persistent
+retrieval workflows and standalone applications can be assessed consistently.
