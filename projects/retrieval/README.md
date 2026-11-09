@@ -178,31 +178,47 @@ uncertainties describe the assumed error model of this controlled synthetic
 retrieval, not a particular real instrument.
 
 The analysis reads each matrix's 13-column ASCII format using explicit
-zero-based matrix indices and checks its row/column metadata. The committed
-reference output is a reproducibility aid, not a claim of real-instrument
-retrieval accuracy.
+zero-based matrix indices and checks its row/column metadata.
 
-## Finite differences and interpretation
+## Finite-difference Jacobians
 
-`src/jurassic.c` computes forward-difference columns from a baseline
-radiance and a positively perturbed state. The temperature step is fixed at
-1 K (`KERNEL_T_ABS`); the gas step is the greater of 1% of the current
-mixing ratio (`KERNEL_Q_REL`) and `1e-15` (`KERNEL_Q_MIN`). These values are
-compile-time constants in `src/jurassic.h`, not control file parameters.
-This example uses the standard JURASSIC steps and writes the resulting
-Jacobian for inspection. A 0.5×/1×/2× control file step study is therefore
-not available without separate builds, and the core algorithm is unchanged.
+JURASSIC computes the retrieval Jacobians by forward finite differences.
+Starting from the baseline radiance, temperature is perturbed by 1 K
+(`KERNEL_T_ABS`), while trace gas perturbations use the greater of 1% of the
+current mixing ratio (`KERNEL_Q_REL`) and `1e-15` (`KERNEL_Q_MIN`). These
+step sizes are compile-time constants in `src/jurassic.h`; the example uses
+the standard JURASSIC settings without modifying the core algorithm.
 
-Improved profile and radiance RMSE demonstrate that the numerical workflow
-recovers information from this internally consistent, noise-free experiment.
-The Jacobians, averaging kernels, DOFS, and posterior covariances diagnose
-the chosen synthetic setup; they do not predict performance for a specific
-real instrument. There is no calibration, pointing, spectroscopy,
-representativeness, or forward model mismatch test. The small channel set
-and fixed background gases are illustrative choices.
+The resulting Jacobian is written explicitly and analyzed above in two
+complementary ways. `jacobians.png` summarizes sensitivity magnitude over all
+limb observations, while `kernel_slices.png` shows the signed kernel structure
+for representative channels. The averaging kernels and posterior covariance
+then show how these sensitivities propagate into the retrieved state and its
+formal uncertainty.
 
-`tests/ret_test` is a small retrieval regression and I/O infrastructure
-test. `projects/validation` tests forward model spectra against RFM.
-`projects/benchmark` measures forward model CPU/OpenMP scaling.
-`projects/retrieval` demonstrates and validates the synthetic end-to-end
-retrieval workflow using the same TRIA table family as the latter two projects.
+## Conclusions
+
+The synthetic experiment demonstrates that the complete JURASSIC retrieval
+workflow is numerically consistent. Starting from the unperturbed
+climatological a priori, the retrieval recovers the imposed temperature, O3,
+and HNO3 perturbations within three iterations and substantially reduces both
+profile errors and radiance residuals.
+
+The finite-difference Jacobians provide sensitivity throughout the retrieval
+altitude range and lead to well-behaved averaging kernels and reduced
+posterior uncertainties. Together with the convergence and runtime results,
+this provides a reproducible validation of the numerical retrieval workflow,
+including the finite-difference Jacobian calculation and optimal estimation
+inversion.
+
+Because the same forward model is used to generate and retrieve the synthetic
+observations, this experiment primarily validates numerical consistency rather
+than absolute retrieval accuracy for a particular real instrument.
+Instrument-specific applications require additional validation of spectroscopy,
+measurement errors, pointing, calibration, and other forward model assumptions.
+
+`tests/ret_test` provides a compact retrieval regression and I/O
+infrastructure test, `projects/validation` evaluates forward model accuracy
+against RFM, and `projects/benchmark` measures CPU/OpenMP forward model
+scaling. This project complements them by exercising the complete synthetic
+end-to-end retrieval workflow.
