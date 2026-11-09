@@ -1,30 +1,34 @@
 # JURASSIC examples
 
-JURASSIC simulates thermal infrared radiative transfer through the atmosphere.
-Along a line of sight, atmospheric layers both emit thermal radiation and
-absorb radiation emitted elsewhere along the path. The resulting radiance
-depends on atmospheric temperature, absorber concentrations, spectral channel,
-and optical path length, while the observation geometry determines which layers
-contribute most strongly to the signal and its sensitivity to atmospheric
-parameters.
+The examples in this directory provide small, self-contained introductions to
+JURASSIC radiative transfer calculations for three common observation
+geometries. They are intended as tutorials, installation checks, and starting
+points for configuration experiments.
 
-For details of the radiative-transfer method, see the
+JURASSIC simulates thermal infrared radiative transfer through the atmosphere.
+Along a line of sight, atmospheric layers emit and absorb radiation, while the
+observation geometry determines which parts of the atmosphere contribute most
+strongly to the measured signal and its sensitivity to atmospheric parameters.
+
+For details of the radiative transfer method, see the
 [physical background and theory](../../docs/manual/theory.md) section
 in the user manual.
 
-The examples in this directory provide small, self-contained introductions
-showing how to run radiative transfer calculations with JURASSIC for three common
-observation geometries:
+The three examples are:
 
 - `limb/` simulates atmospheric limb sounding along tangent paths.
 - `nadir/` simulates downward-looking observations from above the atmosphere.
 - `zenith/` simulates upward-looking observations from the surface.
 
-The examples use the small set of lookup tables under `tests/data/` and are
-intended for installation checks, tutorials, and configuration experiments.
-Numerical validation across broader spectral and gas configurations is provided
-separately under `projects/validation/`; performance measurements are under
-`projects/benchmark/`.
+The examples use the small lookup table set included under `tests/data/`, so
+they can be run directly from the repository without downloading the larger
+external lookup table collection.
+
+For broader scientific and performance evaluation, see:
+- [forward model validation](../validation/README.md) for comparisons with RFM;
+- [CPU/OpenMP benchmarks](../benchmark/README.md) for scaling measurements;
+- [retrieval validation and benchmark](../retrieval/README.md) for the complete
+  synthetic retrieval workflow.
 
 ## Installation and running the examples
 
@@ -75,12 +79,13 @@ the diagnostic plots.
 
 Each example generates an atmosphere (`atm.tab`), observation geometry
 (`obs.tab`), radiative transfer result (`rad.tab`), kernel functions
-(`kernel.tab`), and diagnostic plots. The scripts overwrite these generated
-files in place.
+(`kernel.tab`), and diagnostic plots. These generated files are written into
+the corresponding example directory and are overwritten by subsequent runs.
 
-At the end of each run, `rad.tab` is compared exactly with the checked-in
-`rad.org` reference file and the script returns a nonzero status if they differ.
-Run `make check` from `src/` for the full regression test suite.
+As a regression check, the generated `rad.tab` is compared exactly with the
+checked-in `rad.org` reference file. The script returns a nonzero status if
+the files differ. Run `make check` from `src/` for the complete regression
+test suite.
 
 ## Limb example
 
@@ -97,8 +102,7 @@ cd projects/examples/limb
 
 ![Limb radiance profiles](limb/plot_rad.png)
 
-*Simulated limb radiances at 792 and 832 cm<sup>-1</sup> as a function of
-tangent altitude.*
+*Figure 1: Simulated limb radiances at 792 and 832 cm<sup>-1</sup> as a function of tangent altitude.*
 
 The radiance profiles show the simulated signal at 792 and 832 cm<sup>-1</sup>
 as a function of tangent height. Their channel-dependent shapes are physically
@@ -111,7 +115,7 @@ region.
 
 ![Limb temperature kernel at 792 cm-1](limb/plot_kernel_temperature_792.png)
 
-*Temperature kernel profiles for the limb geometry at 792 cm<sup>-1</sup>.*
+*Figure 2: Temperature kernel profiles for the limb geometry at 792 cm<sup>-1</sup>.*
 
 The temperature kernels or weighting functions show the sensitivity of
 simulated radiance to a local temperature perturbation. Each coloured profile
@@ -136,8 +140,7 @@ cd projects/examples/nadir
 
 ![Nadir brightness temperatures](nadir/plot_rad.png)
 
-*Simulated nadir brightness temperatures in three nearby spectral channels
-across the latitude scan.*
+*Figure 3: Simulated nadir brightness temperatures in three nearby spectral channels across the latitude scan.*
 
 Brightness temperature is the temperature a blackbody would need to reproduce
 the simulated channel radiance. The CO<sub>2</sub> channels at 667.7820,
@@ -148,7 +151,7 @@ brightness temperatures.
 
 ![Nadir temperature kernel at 668.5410 cm-1](nadir/plot_kernel_temperature_668.5410.png)
 
-*Temperature kernel profiles for the nadir scan at 668.5410 cm<sup>-1</sup>.*
+*Figure 4: Temperature kernel profiles for the nadir scan at 668.5410 cm<sup>-1</sup>.*
 
 The kernel shows the sensitivity of simulated brightness temperature to local
 temperature perturbations. Its vertical structure shows the thermal emission
@@ -171,8 +174,7 @@ cd projects/examples/zenith
 
 ![Zenith brightness temperatures](zenith/plot_rad.png)
 
-*Simulated zenith-viewing brightness temperatures at 792 and 832 cm<sup>-1</sup>
-across the angular scan.*
+*Figure 5: Simulated zenith viewing brightness temperatures at 792 and 832 cm<sup>-1</sup> across the angular scan.*
 
 The brightness temperature curves are approximately symmetric around the
 vertical view because opposite viewing directions traverse equivalent model
@@ -183,10 +185,23 @@ physically expected.
 
 ![Zenith temperature kernel at 792 cm-1](zenith/plot_kernel_temperature_792.0000.png)
 
-*Temperature kernel profiles for the zenith geometry at 792 cm<sup>-1</sup>.*
+*Figure 6: Temperature kernel profiles for the zenith geometry at 792 cm<sup>-1</sup>.*
 
 The temperature kernel is the sensitivity of simulated brightness temperature
 to a local temperature perturbation. Its vertical structure describes the
 weighting of downwelling thermal emission: compared with the shorter vertical
 path, more oblique rays generally give greater weight to the lower, denser
 atmosphere.
+
+
+## What these examples demonstrate
+
+Together, the three examples show how the same JURASSIC forward model is used
+for limb, nadir, and zenith viewing geometries, how radiances or brightness
+temperatures depend on the observation geometry, and how finite-difference
+temperature kernels describe the corresponding vertical sensitivity.
+
+They are intentionally compact and use the small lookup table set distributed
+with the repository. For quantitative accuracy studies, performance scaling,
+or the full optimal estimation retrieval workflow, use the dedicated projects
+linked above.
