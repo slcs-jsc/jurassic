@@ -52,9 +52,18 @@ configuration, timing definition, and hardware.
 
 *Figure 1: Limb radiance spectra from RFM and the JURASSIC EGA and CGA approximations.*
 
+The spectra show the overall agreement between JURASSIC and RFM across the
+full channel range. To make the remaining differences visible on the scale
+relevant for validation, the next figure shows the relative radiance errors
+directly.
+
 ![Relative limb radiance differences](analysis/limb_relative_errors.png)
 
 *Figure 2: Relative limb radiance differences between JURASSIC and RFM.*
+
+The channel-by-channel differences vary strongly with spectral region and
+tangent height. The following summary condenses this information into robust
+error statistics for each limb geometry.
 
 ![Limb accuracy summary](analysis/limb_accuracy_summary.png)
 
@@ -100,9 +109,17 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 
 *Figure 4: Nadir brightness temperatures from RFM, EGA, and CGA.*
 
+The nadir comparison shows how the two JURASSIC approximations reproduce the
+line-by-line reference for a downward-looking geometry. The corresponding
+upward-looking case provides a complementary test with a different optical
+path through the atmosphere.
+
 ![Zenith brightness temperature](analysis/zenith_brightness_temperature.png)
 
 *Figure 5: Zenith brightness temperatures from RFM, EGA, and CGA.*
+
+Rather than comparing individual channels visually, the next figure summarizes
+the brightness temperature errors for both vertical viewing geometries.
 
 ![Brightness temperature accuracy summary](analysis/brightness_temperature_accuracy_summary.png)
 
@@ -118,6 +135,10 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 | Zenith | CGA | 0.452 | 0.065 | 0.874 | 4.191 |
 
 *Table 3: Brightness temperature error statistics relative to RFM.*
+
+The accuracy results above establish how closely EGA and CGA reproduce RFM.
+The final comparison addresses the complementary question of computational
+cost on the documented reference system.
 
 ### Runtime
 
