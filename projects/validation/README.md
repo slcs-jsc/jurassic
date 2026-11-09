@@ -107,10 +107,10 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 
 The table shows total model time for each validation case. The timing definition
 and reference hardware are described below. The reported JURASSIC runtime
-refers to the forward-model calculation itself. Lookup-table reading and
+refers to the forward model calculation itself. Lookup table reading and
 initialization (`READ_TBL`) are measured separately and are not included in
-the JURASSIC model-time values or RFM/JURASSIC speed-up ratios. The comparison
-represents repeated forward-model evaluations after the precomputed JURASSIC
+the JURASSIC model time values or RFM/JURASSIC speed-up ratios. The comparison
+represents repeated forward model evaluations after the precomputed JURASSIC
 lookup tables have been initialized, as in a retrieval or other persistent
 workflow.
 
@@ -144,9 +144,9 @@ References: [Gordley and Russell (1981)](https://doi.org/10.1364/AO.20.000807),
 [Marshall et al. (1994)](https://doi.org/10.1016/0022-4073(94)90026-4), and
 [Francis et al. (2006)](https://doi.org/10.1029/2005JD006270).
 
-## Lookup-table applicability
+## Lookup table applicability
 
-This validation applies to the lookup-table set and atmospheric state used
+This validation applies to the lookup table set and atmospheric state used
 here. The following details show how that state relates to the tabulated
 parameter ranges and where extrapolation occurs.
 
@@ -217,7 +217,7 @@ make clean
 make DEFINES=-DNG=40 -j
 ```
 
-Supply the external JURASSIC lookup-table directory with `JURASSIC_TBL_DIR` or
+Supply the external JURASSIC lookup table directory with `JURASSIC_TBL_DIR` or
 `--tbl-dir`.
 It must contain `tria_<gas>.nc` for all gases recorded in the manifests. The
 lookup tables are not part of this repository. Its H2O table must have been
