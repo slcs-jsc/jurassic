@@ -259,20 +259,28 @@ to generate plots of the simulated radiances and kernel functions.
 ### Validation and benchmarks
 
 JURASSIC includes reproducible validation and performance studies in the
-`projects` directory:
+`projects` directory. Together, these examples cover forward-model accuracy,
+computational performance, and the complete retrieval workflow.
 
 - [Forward model validation](projects/validation/README.md) compares JURASSIC
-  with the RFM line-by-line model for limb, nadir, and zenith geometries and
-  documents accuracy, applicability of lookup tables, and runtime on a
-  single core.
-- [CPU/OpenMP benchmarks](projects/benchmark/README.md) quantify strong scaling
-  of batched forward calculations across viewing geometries, numbers of spectral
-  channels, gas sets, and batch sizes.
+  with the RFM line-by-line reference model for limb, nadir, and zenith viewing
+  geometries. It evaluates spectral accuracy for representative configurations,
+  documents the applicability and limitations of the precomputed lookup tables,
+  and provides reference runtime measurements on a single CPU core.
+
+- [CPU/OpenMP benchmarks](projects/benchmark/README.md) evaluate the computational
+  performance of the forward model for batched calculations. The benchmarks
+  quantify strong scaling with OpenMP across different viewing geometries,
+  numbers of spectral channels, gas combinations, and batch sizes, and provide
+  reproducible reference results for assessing performance on multicore systems.
+
 - [Retrieval validation and benchmark](projects/retrieval/README.md) provides a
-  reproducible synthetic end-to-end limb retrieval for temperature, O3, and HNO3,
-  including finite-difference Jacobians, convergence and runtime diagnostics,
-  averaging kernels, degrees of freedom for signal, and formal retrieval
-  uncertainties.
+  reproducible synthetic end-to-end limb retrieval for temperature, O3, and HNO3.
+  It tests the forward model, finite-difference Jacobians, and optimal-estimation
+  retrieval together and documents convergence, accuracy, runtime, averaging
+  kernels, and formal retrieval uncertainties. The controlled experiment is
+  intended as a numerical validation of the retrieval workflow rather than as a
+  performance assessment for a specific real instrument.
 
 ### Lookup tables
 
