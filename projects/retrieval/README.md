@@ -9,13 +9,15 @@ it does not reproduce CRISTA, MIPAS, or any other instrument.
 
 ## Setup
 
-The example uses the existing 1 cm⁻¹ TRIA tables in
-`tab/tria_1cm/nc_1e-6` (`TBLFMT = 3`). Its four emitters are CO2, H2O, O3,
-and HNO3, indexed 0–3. It uses 15 channels: 791–793 and 810–812 cm⁻¹ for
-the CO2 region, 778–780 and 787–788 cm⁻¹ for the O3 region, and 863, 864,
-867, and 869 cm⁻¹ for the HNO3 region. All channels were checked against
-the four table files. The `limb` utility generates 16 rays with tangent
-altitudes 15, 17, …, 45 km from a 780 km observer.
+The example uses the 1 cm⁻¹ TRIA lookup tables from the external JURASSIC
+data collection in `tab/tria_1cm/nc_1e-6` (`TBLFMT = 3`). These tables are
+not included in the source repository and must be downloaded separately before
+running the example. Its four emitters are CO2, H2O, O3, and HNO3, indexed
+0–3. It uses 15 channels: 791–793 and 810–812 cm⁻¹ for the CO2 region,
+778–780 and 787–788 cm⁻¹ for the O3 region, and 863, 864, 867, and 869 cm⁻¹
+for the HNO3 region. All channels were checked against the four table files.
+The `limb` utility generates 16 rays with tangent altitudes from 15 to 45 km
+in 2 km steps for an observer at 780 km altitude.
 
 `climatology` creates a 1–71 km atmosphere on a 2 km grid. `perturb.py`
 creates the truth by adding a +5 K Gaussian centered at 25 km, multiplying
@@ -62,12 +64,15 @@ four core ASCII matrices, figures, and `metrics.json` document the state
 and diagnostics without the temporary logs and intermediate products.
 
 The reference run used one OpenMP thread on an Intel Core i7-1365U with core
-source revision `4bc60a03`. It converged in **three iterations** and took
-about 65 s through retrieval, including 18.84 s for the initial
-finite-difference kernel. Timing ends before plotting. The iteration timer
-also includes optimization and later Jacobian recomputation, so it is not a
-pure Jacobian timer. These times are reference measurements, not speed
-claims for other hardware.
+source revision `4bc60a03`. It converged in **three iterations** and required
+about 65 s through completion of the retrieval; plotting is not included in
+this wall-clock value. JURASSIC reports 0.36 s for retrieval setup, 18.84 s
+for the initial finite-difference Jacobian, 18.08 s for the iteration phase,
+and 0.06 s for retrieval diagnostics. The iteration timer includes both
+optimization work and later Jacobian recomputations and should therefore not
+be interpreted as pure optimization time. These timings are reference
+measurements for the documented system rather than performance claims for
+other hardware.
 
 | Diagnostic (15–45 km unless noted) | A priori / initial | Retrieved / final |
 | --- | ---: | ---: |
@@ -75,6 +80,8 @@ claims for other hardware.
 | O3 relative RMSE vs truth | 10.957% | 0.159% |
 | HNO3 relative RMSE vs truth | 16.593% | 0.504% |
 | Radiance residual RMS, all 240 ray/channel pairs [W/(m² sr cm⁻¹)] | 5.053e-4 | 7.418e-7 |
+
+*Table 1: Profile and radiance accuracy for the reference retrieval.*
 
 Gas profile errors are the RMS of levelwise percent errors relative to
 synthetic truth. The radiance residual is observation minus model.
@@ -85,6 +92,8 @@ own metrics and all signed radiance residuals to `work/`.
 
 ![Truth, a priori, and retrieved temperature, O3, and HNO3 profiles](results/profiles.png)
 
+*Figure 1: Synthetic truth, a priori, and retrieved temperature, O3, and HNO3 profiles.*
+
 The three panels compare truth, a priori, and retrieved profiles over
 15–45 km. Open retrieved markers sit on top of the truth curves where the
 profiles nearly coincide: the internally consistent synthetic retrieval
@@ -94,13 +103,17 @@ recovers the imposed smooth perturbations very closely.
 
 ![Radiance residual RMS by tangent altitude and cost by iteration](results/residuals_convergence.png)
 
+*Figure 2: Radiance residuals by tangent altitude and normalized retrieval cost by iteration.*
+
 The left panel shows residual RMS over all 15 channels at each tangent
-altitude. The right panel shows JURASSIC's cost per measurement by iteration;
-the retrieval converged in three iterations.
+altitude. The right panel shows the normalized retrieval cost (`chi^2/m`) as
+a function of iteration; the retrieval converged in three iterations.
 
 ### Finite-difference sensitivities
 
 ![RMS finite-difference sensitivity by channel and retrieval altitude](results/jacobians.png)
+
+*Figure 3: RMS finite-difference sensitivity by spectral channel and retrieval altitude.*
 
 The heatmaps derive from the actual retrieval kernel in
 `results/matrix_kernel.tab`, which has 240 measurement rows and 48 state
@@ -113,6 +126,8 @@ Temperature derivatives are shown per K, O3 per ppmv, and HNO3 per ppbv.
 Each panel has its own logarithmic color scale.
 
 ![Signed finite-difference kernel slices at representative channels](results/kernel_slices.png)
+
+*Figure 4: Signed finite-difference kernel slices for representative temperature, O3, and HNO3 channels.*
 
 The complementary `kernel_slices.png` plots actual **signed** entries from
 the same finite-difference kernel at 792 cm⁻¹ (temperature), 788 cm⁻¹ (O3),
@@ -129,6 +144,8 @@ diverging color scales are unused here.
 
 ![Within-quantity averaging kernel blocks for temperature, O3, and HNO3](results/averaging_kernels.png)
 
+*Figure 5: Within quantity averaging kernel blocks for temperature, O3, and HNO3.*
+
 The within quantity blocks of `results/matrix_avk.tab` diagnose vertical
 retrieval response and information content. The trace of each block gives
 degrees of freedom for signal (DOFS); its row sums give measurement response.
@@ -139,6 +156,8 @@ degrees of freedom for signal (DOFS); its row sums give measurement response.
 | O3 | 10.375 | 0.992 |
 | HNO3 | 7.810 | 0.763 |
 
+*Table 2: Degrees of freedom for signal and mean measurement response.*
+
 The lower HNO3 response indicates less uniform information over its 16
 retrieved levels in this configuration. The full matrix also contains
 cross quantity blocks, which these three panels do not display.
@@ -146,6 +165,8 @@ cross quantity blocks, which these three panels do not display.
 ### Formal uncertainties
 
 ![A priori and posterior formal one-sigma uncertainty profiles](results/uncertainties.png)
+
+*Figure 6: A priori and posterior formal one-sigma uncertainty profiles.*
 
 Square roots of the diagonals of `results/matrix_cov_apr.tab` and
 `results/matrix_cov_ret.tab` give formal 1σ uncertainties. The panels compare
