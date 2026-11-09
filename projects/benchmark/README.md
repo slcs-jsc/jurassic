@@ -24,11 +24,11 @@ one-thread reference time is estimated as described below. It is the only
 setting used for the batch-size sweep. All other settings are timed
 on 1, 4, 16, and 64 threads. Each setting is built for its own `ND` and `NG`.
 
-The reported strong-scaling times cover only one timed `formod_batch`
+The reported strong scaling times cover only one timed `formod_batch`
 calculation over 128 independent scenes, distributed across the available
 OpenMP threads. Lookup tables are read during program initialization and timed
 separately; the reference calculation and file I/O are also excluded from the
-forward-model scaling result. If `T1` is the one-thread batch time and `Tn` is
+forward model scaling result. If `T1` is the one-thread batch time and `Tn` is
 the time on `n` threads, speedup is `T1 / Tn` and parallel efficiency is
 `T1 / (n × Tn)`.
 
@@ -96,9 +96,9 @@ lookup tables grow from 29 MB (ND = 32) to 118 MB (ND = 128).
 
 For completeness, we also report process-level timings that include lookup-table
 initialization, the single reference calculation, and file I/O. These costs are
-outside the forward-model scaling result. In a persistent application or
+outside the forward model scaling result. In a persistent application or
 retrieval workflow, lookup tables are initialized once and reused for many
-forward-model evaluations, so their initialization cost is amortized.
+forward model evaluations, so their initialization cost is amortized.
 
 When table initialization, the reference run, and output are included in the
 process-level timing,
