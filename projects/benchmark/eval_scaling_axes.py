@@ -33,6 +33,7 @@ RUN_TXT_RE = re.compile(
 
 
 def load_runs(run_dir: Path) -> list:
+    """Read per-repetition timing logs and retain measured and serial times."""
     out_dir = run_dir / "out" if (run_dir / "out").is_dir() else run_dir
     runs = []
     for txt in sorted(out_dir.glob("*.txt")):
@@ -51,6 +52,7 @@ def load_runs(run_dir: Path) -> list:
             "batch_size": int(m.group("batch")),
             "rep": int(m.group("rep")),
             "mean_s": float(mean.group(1)),
+            # Older full logs show each table read; stripped logs carry its count.
             "tables": (int(m_t.group(1)) if (m_t := TABLES_READ_RE.search(text))
                        else len(TABLE_RE.findall(text))),
             "serial_s": sum(v for k, v in timers.items()
@@ -61,12 +63,14 @@ def load_runs(run_dir: Path) -> list:
 
 
 def read_kv(path: Path) -> dict:
+    """Read optional key=value topology metadata from a completed run."""
     if not path.is_file():
         return {}
     return dict(line.split("=", 1) for line in path.read_text().splitlines() if "=" in line)
 
 
 def main():
+    """Aggregate repetitions, compare scaling axes, and write summary plots."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--out", type=Path, default=None, help="output directory (default: <run_dir>/plots)")
@@ -75,7 +79,7 @@ def main():
     res_dir = args.out or (args.run_dir / "plots")
     res_dir.mkdir(parents=True, exist_ok=True)
 
-    # single run or array run (one subdirectory per case)
+    # A local run has settings.tsv here; an array run has one case per subdirectory.
     run_dirs = ([args.run_dir] if (args.run_dir / "settings.tsv").is_file()
                 else sorted(d for d in args.run_dir.iterdir() if (d / "settings.tsv").is_file()))
     if not run_dirs:
@@ -89,6 +93,7 @@ def main():
     per_socket = int(read_kv(run_dirs[0] / "topology.txt").get("phys_cores_per_socket", 0)) or None
 
     tables: dict[str, int] = {}
+    # Placement distinguishes compact cores from runs spread across sockets.
     # (setting, placement, threads) -> throughput, serial time
     thr: dict[tuple, list] = {}
     serial: dict[tuple, list] = {}
@@ -114,17 +119,19 @@ def main():
         print(f"No usable runs under {args.run_dir}.")
         sys.exit(1)
     thr = {k: float(np.median(v)) for k, v in thr.items()}
-    # min: first run of a setting reads the tables from a cold cache
+    # Use the minimum serial time so cold-cache table reads do not dominate.
     serial = {k: float(np.min(v)) for k, v in serial.items()}
     bthr = {k: float(np.median(v)) for k, v in bthr.items()}
     bserial = {k: float(np.min(v)) for k, v in bserial.items()}
 
     def eff(setting, placement, n):
+        """Compute formod throughput efficiency relative to one compact thread."""
         base = thr.get((setting, "compact", 1))
         t = thr.get((setting, placement, n))
         return t / (n * base) if base and t else None
 
     def app_eff(setting, n, batch):
+        """Include measured serial work in whole-application efficiency."""
         t1, tn = thr.get((setting, "compact", 1)), thr.get((setting, "strongcompact", n))
         s1, sn = serial.get((setting, "compact", 1)), serial.get((setting, "strongcompact", n))
         if None in (t1, tn, s1, sn):
@@ -156,6 +163,7 @@ def main():
     panels: dict[tuple, list] = {}
 
     def add_panel(axis, ref, plot, series, batch=None):
+        """Collect related channel/gas curves into one cross-geometry panel."""
         kind, _, geom = axis.partition("@")
         fixed = f"NG={ref['ng']}" if kind == "channels" else f"ND={ref['nd']}"
         panels.setdefault((kind, plot), []).append((geom or "all", fixed, batch, series))

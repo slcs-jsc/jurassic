@@ -20,6 +20,7 @@ apply_style()
 
 
 def main():
+    """Show channel gas coverage and the subset selected for a given ND."""
     here = Path(__file__).resolve().parent
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("channels", type=Path, nargs="?", default=here / "configs/channels_alt3.tsv")
@@ -47,13 +48,13 @@ def main():
     ax.legend(loc="lower right")
     save_figure(fig, args.out / f"{stem}_active_gases.png")
 
-    # gases sorted by the number of channels they are active in
+    # Order gases by coverage so the most widely active species appear first.
     gases = sorted({g for _, gs in rows for g in gs},
                    key=lambda g: (-sum(g in gs for _, gs in rows), g))
     active = np.array([[g in gs for _, gs in rows] for g in gases], dtype=int)
 
-    # one equal-width column per channel of the list; the picks are evenly spaced in this
-    # order, not in wavenumber (the list has 1 and 2 cm^-1 gaps)
+    # Equal-width cells follow list order: selected rows are evenly spaced in
+    # that order, while adjacent wavenumbers can differ by 1 or 2 cm^-1.
     edges = np.arange(len(nu) + 1)
     cell = dict(edgecolors=CELL_EDGE, linewidth=0.4, vmin=0, vmax=1)
 

@@ -1,5 +1,6 @@
 # Shared helpers for the benchmark scripts: paths, modules, build, pinned runs.
 
+# Record physical-core and socket topology for reproducible CPU placement.
 bench_analyse_topology() {
 JR_TOPO_MAP="$JR_RUN_DIR/cpu_topology.csv"
   lscpu -p=CPU,CORE,SOCKET,NODE | grep -v '^#' > "$JR_TOPO_MAP"
@@ -21,6 +22,7 @@ JR_TOPO_MAP="$JR_RUN_DIR/cpu_topology.csv"
   } | tee "$JR_RUN_DIR/topology.txt"
 }
 
+# Find the checkout from either a local invocation or a scheduler work directory.
 find_repo_root() {
     local dir="$1"
     while [ "$dir" != "/" ] && [ -n "$dir" ]; do
@@ -33,6 +35,7 @@ find_repo_root() {
     return 1
 }
 
+# Resolve the selected baseline and prepare a private run directory and control file.
 bench_init() {
 
     if [ -n "${JR_SCRIPTS_DIR_OVERRIDE:-}" ] && [ -f "$JR_SCRIPTS_DIR_OVERRIDE/base.sh" ]; then

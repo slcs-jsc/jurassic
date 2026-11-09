@@ -8,6 +8,7 @@ from run_ega import add_common_arguments, execute, make_parser
 
 
 def main():
+    """Run the instrumented RFM reference with its external spectroscopy inputs."""
     parser = make_parser(__doc__)
     add_common_arguments(parser)
     parser.add_argument("--rfm-bin", type=Path,

@@ -171,6 +171,7 @@ def execute(method, target_name, args, extra=()):
 
 
 def main():
+    """Run EGA with the shared validation options and compact result layout."""
     parser = make_parser(__doc__)
     add_common_arguments(parser)
     if len(sys.argv) == 1:

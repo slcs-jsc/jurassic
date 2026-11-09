@@ -1,3 +1,5 @@
+"""Shared colors, typography, and export settings for benchmark figures."""
+
 from __future__ import annotations
 
 import textwrap

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Plot benchmark throughput, efficiency, speedup, and cost summaries."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -24,6 +25,7 @@ def _value_text(v: float) -> str:
 
 
 def _thread_axis(ax, ticks, xlabel: str = "Threads (physical cores)") -> None:
+    """Use a base-two thread axis while displaying physical-core counts."""
     ax.set_xscale("log", base=2)
     ax.set_xticks(ticks)
     ax.xaxis.set_major_formatter(ScalarFormatter())

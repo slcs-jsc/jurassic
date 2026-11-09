@@ -7,11 +7,13 @@ import sys
 
 
 def block_range(lines, pattern):
+    """Locate a contiguous control-file block so it can be replaced in place."""
     idxs = [i for i, l in enumerate(lines) if re.match(pattern, l)]
     return (min(idxs), max(idxs) + 1) if idxs else None
 
 
 def read_gases(path):
+    """Read the selected emitter names, ignoring blank and comment lines."""
     with open(path) as f:
         return [l.strip() for l in f if l.strip() and not l.lstrip().startswith("#")]
 
@@ -38,6 +40,7 @@ def pick_channels(rows, nd):
 
 
 def replace_gases(lines, gases):
+    """Update emitters and any gas retrieval bounds in the control template."""
     r = block_range(lines, r"^\s*(NG|EMITTER\[\d+\])\s*=")
     block = [f"NG = {len(gases)}\n"]
     block += [f"EMITTER[{i}] = {g}\n" for i, g in enumerate(gases)]
@@ -46,6 +49,7 @@ def replace_gases(lines, gases):
     zmin_r = block_range(lines, r"^\s*RETQ_ZMIN\[\d+\]\s*=")
     zmax_r = block_range(lines, r"^\s*RETQ_ZMAX\[\d+\]\s*=")
     if zmin_r and zmax_r:
+        # Keep the template's gas altitude range when changing the gas count.
         zmin = lines[zmin_r[0]].split("=", 1)[1].strip()
         zmax = lines[zmax_r[0]].split("=", 1)[1].strip()
         start, end = min(zmin_r[0], zmax_r[0]), max(zmin_r[1], zmax_r[1])
@@ -57,6 +61,7 @@ def replace_gases(lines, gases):
 
 
 def replace_channels(lines, nus):
+    """Replace the detector count and wavenumbers with the selected channels."""
     r = block_range(lines, r"^\s*(ND|NU\[\d+\])\s*=")
     block = [f"ND = {len(nus)}\n"]
     block += [f"NU[{i}] = {nu}\n" for i, nu in enumerate(nus)]
@@ -64,6 +69,7 @@ def replace_channels(lines, nus):
 
 
 def main():
+    """Write one benchmark control file and report active channel/gas pairs."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("template")
     p.add_argument("out")

@@ -155,6 +155,7 @@ def merge_limb_observations(paths, view_heights, output):
 
 
 def main():
+    """Run channel-matched model chunks and record spectra, inputs, and timers."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--tbl-dir", type=Path, default=os.environ.get("JURASSIC_TBL_DIR"),
                         help="external directory containing tria_<gas>.nc for all 36 gases")
@@ -299,6 +300,7 @@ def main():
                   for index in range(0, len(nus), args.chunk_size)]
 
         def process_chunk(channels):
+            """Run one channel block in an isolated working directory."""
             # Every worker has its own directory because FORMOD=2 writes RFM
             # driver, spectrum, and log files in its current working directory.
             chunk = geom_dir / f"{channels[0]:04d}_{channels[-1]:04d}"

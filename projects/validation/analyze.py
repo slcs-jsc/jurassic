@@ -8,6 +8,7 @@ from pathlib import Path
 
 HEIGHTS = (5, 10, 20, 50)
 METHODS = (("ega", "EGA", "#0072B2"), ("cga", "CGA", "#E69F00"))
+# Constants used by JURASSIC's inverse Planck conversion for cm^-1 channels.
 C1 = 1.19104259e-8
 C2 = 1.43877506
 
@@ -18,6 +19,7 @@ def load_spectrum(path, geometry):
     if not path.is_file():
         raise FileNotFoundError(f"missing spectrum: {path}")
     with path.open(newline="") as stream:
+        # The compact spectra.csv uses one row per geometry, ray, and channel.
         for row in csv.DictReader(stream):
             if row["geometry"] == geometry:
                 values[(int(row["ray"]), float(row["nu_cm-1"]))] = float(
@@ -37,6 +39,7 @@ def read_rows(root, geometry, method):
     for (ray, nu), rfm in sorted(reference.items()):
         value = candidate[ray, nu]
         difference = value - rfm
+        # RFM is the denominator; a zero reference cannot define relative error.
         relative = math.nan if rfm == 0 else 100 * difference / rfm
         rows.append({"nu_cm-1": str(nu), "ray": str(ray),
                      "jurassic_radiance": str(value), "rfm_radiance": str(rfm),
@@ -64,6 +67,7 @@ def percentile(values, fraction):
 
 def statistics(values):
     """Summarize finite absolute errors without discarding large values."""
+    # Accuracy summaries use magnitudes; signed differences remain in the plots.
     absolute = [abs(value) for value in values if math.isfinite(value)]
     return {
         "count": len(absolute),
@@ -75,6 +79,7 @@ def statistics(values):
 
 
 def limb_data(root, method):
+    """Group limb channel errors by the four geometric tangent heights."""
     rows = read_rows(root, "limb", method)
     return [[row for row in rows if int(row["ray"]) == ray] for ray in range(len(HEIGHTS))]
 
@@ -83,6 +88,7 @@ def limb_statistics(rows):
     """Summarize relative errors and retain context for the largest value."""
     result = statistics(float(row["relative_difference_percent"]) for row in rows)
     maximum = max(rows, key=lambda row: abs(float(row["relative_difference_percent"])))
+    # A large percentage can come from a weak RFM radiance; retain its scale.
     result.update({
         "maximum_channel_cm-1": float(maximum["nu_cm-1"]),
         "reference_at_maximum": float(maximum["rfm_radiance"]),
@@ -92,6 +98,7 @@ def limb_statistics(rows):
 
 
 def bt_data(root, geometry, method):
+    """Convert matched radiances to brightness-temperature differences in K."""
     rows = read_rows(root, geometry, method)
     result = []
     for row in rows:
@@ -103,6 +110,7 @@ def bt_data(root, geometry, method):
 
 
 def plot_limb_radiance(root, output, plt):
+    """Compare absolute RFM and JURASSIC limb spectra at each tangent height."""
     data = {method: limb_data(root, method) for method, _, _ in METHODS}
     fig, axes = plt.subplots(4, 1, figsize=(11, 9), sharex=True, constrained_layout=True)
     for ray, (ax, height) in enumerate(zip(axes, HEIGHTS)):
@@ -126,6 +134,7 @@ def plot_limb_radiance(root, output, plt):
 
 
 def plot_limb_relative(root, output, plt):
+    """Show signed JURASSIC-minus-RFM limb radiance differences in percent."""
     data = {method: limb_data(root, method) for method, _, _ in METHODS}
     fig, axes = plt.subplots(4, 1, figsize=(11, 9), sharex=True, constrained_layout=True)
     for ray, (ax, height) in enumerate(zip(axes, HEIGHTS)):
@@ -146,6 +155,7 @@ def plot_limb_relative(root, output, plt):
 
 
 def plot_bt(root, geometry, output, plt):
+    """Plot nadir or zenith temperatures and signed JURASSIC-minus-RFM differences."""
     method_data = {method: bt_data(root, geometry, method) for method, _, _ in METHODS}
     reference = method_data["ega"]
     nu = [row[0] for row in reference]
@@ -172,6 +182,7 @@ def plot_bt(root, geometry, output, plt):
 
 
 def write_metrics(root, output):
+    """Write per-method accuracy summaries for all validation geometries."""
     rows = []
     for method, label, _ in METHODS:
         for ray, height in enumerate(HEIGHTS):
@@ -194,6 +205,7 @@ def write_metrics(root, output):
 
 
 def plot_limb_summary(metrics, output, plt):
+    """Compare typical and tail relative limb errors across tangent heights."""
     fig, ax = plt.subplots(figsize=(6.2, 4.4), constrained_layout=True)
     x_limb = list(range(4))
     for method, label, color in METHODS:
@@ -212,6 +224,7 @@ def plot_limb_summary(metrics, output, plt):
 
 
 def plot_bt_summary(metrics, output, plt):
+    """Compare RMS and 95th-percentile brightness-temperature errors."""
     fig, ax = plt.subplots(figsize=(6.2, 4.4), constrained_layout=True)
     x_bt = [0, 1]
     width = 0.25
@@ -232,6 +245,8 @@ def plot_bt_summary(metrics, output, plt):
 
 
 def plot_runtime_summary(root, output, plt):
+    """Compare recorded model times for complete single-core validation cases."""
+    # timings.csv records model_s separately from job setup and analysis time.
     timings = {}
     for method in ("ega", "rfm"):
         directory = "test_ega" if method == "ega" else "rfm_reference"
@@ -265,6 +280,7 @@ def plot_runtime_summary(root, output, plt):
 
 
 def main():
+    """Build the accuracy table and figures from completed validation runs."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path,
                         help="output directory (default: projects/validation/analysis)")

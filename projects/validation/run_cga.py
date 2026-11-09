@@ -6,6 +6,7 @@ from run_ega import add_common_arguments, execute, make_parser
 
 
 def main():
+    """Run CGA through the same setup and result checks as EGA."""
     parser = make_parser(__doc__)
     add_common_arguments(parser)
     if len(sys.argv) == 1:
