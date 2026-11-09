@@ -61,6 +61,10 @@ The gas sets are defined in `configs/gas_sets/`. The name gives the number of ga
 
 ### Execution
 
+The benchmark script supports separate modes for strong scaling, validation of
+the estimated single-thread reference time, and the batch-size sweep. These
+modes use the same configurations but answer different performance questions.
+
 * `strong` (default): fixed batch size, 1 thread up to one socket.
 * `t1check`: 1 thread on the full batch, to check the estimated `T1`
   (results in `jureca_scaling_axes_res/t1check/`).
