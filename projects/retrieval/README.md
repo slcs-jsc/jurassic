@@ -90,6 +90,9 @@ own metrics and all signed radiance residuals to `work/`.
 
 ### Retrieved profiles
 
+The profile comparison is the most direct test of whether the retrieval
+recovers the imposed synthetic perturbations from the climatological a priori.
+
 ![Truth, a priori, and retrieved temperature, O3, and HNO3 profiles](results/profiles.png)
 
 *Figure 1: Synthetic truth, a priori, and retrieved temperature, O3, and HNO3 profiles.*
@@ -101,6 +104,10 @@ recovers the imposed smooth perturbations very closely.
 
 ### Radiance residuals and convergence
 
+Profile agreement alone does not show how well the retrieved atmosphere
+reproduces the synthetic measurements. The next diagnostics therefore examine
+the radiance residuals and the evolution of the retrieval cost.
+
 ![Radiance residual RMS by tangent altitude and cost by iteration](results/residuals_convergence.png)
 
 *Figure 2: Radiance residuals by tangent altitude and normalized retrieval cost by iteration.*
@@ -110,6 +117,11 @@ altitude. The right panel shows the normalized retrieval cost (`chi^2/m`) as
 a function of iteration; the retrieval converged in three iterations.
 
 ### Finite-difference sensitivities
+
+The retrieval depends on finite-difference Jacobians to connect changes in the
+atmospheric state to changes in radiance. The following diagnostics show both
+their broader spectral and vertical sensitivity and representative signed
+kernel structure.
 
 ![RMS finite-difference sensitivity by channel and retrieval altitude](results/jacobians.png)
 
@@ -142,6 +154,10 @@ diverging color scales are unused here.
 
 ### Averaging kernels
 
+The averaging kernels diagnose how the retrieval maps information from the
+measurements back onto the atmospheric state and provide a compact measure of
+vertical response and information content.
+
 ![Within-quantity averaging kernel blocks for temperature, O3, and HNO3](results/averaging_kernels.png)
 
 *Figure 5: Within quantity averaging kernel blocks for temperature, O3, and HNO3.*
@@ -163,6 +179,10 @@ retrieved levels in this configuration. The full matrix also contains
 cross quantity blocks, which these three panels do not display.
 
 ### Formal uncertainties
+
+The posterior covariance provides a complementary view of retrieval quality by
+showing how the assumed a priori uncertainties are reduced by the synthetic
+measurements.
 
 ![A priori and posterior formal one-sigma uncertainty profiles](results/uncertainties.png)
 
