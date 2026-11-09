@@ -50,9 +50,15 @@ configuration, timing definition, and hardware.
 
 ![Limb radiance spectra](analysis/limb_radiance_spectra.png)
 
+*Figure 1: Limb radiance spectra from RFM and the JURASSIC EGA and CGA approximations.*
+
 ![Relative limb radiance differences](analysis/limb_relative_errors.png)
 
+*Figure 2: Relative limb radiance differences between JURASSIC and RFM.*
+
 ![Limb accuracy summary](analysis/limb_accuracy_summary.png)
+
+*Figure 3: Summary of limb radiance accuracy for EGA and CGA across the four tangent heights.*
 
 #### Limb error statistics
 
@@ -66,6 +72,8 @@ configuration, timing definition, and hardware.
 | 10 km geometric | CGA | 2.009 | 0.750 | 4.496 | 19.071 |
 | 20 km geometric | CGA | 1.742 | 0.672 | 3.881 | 15.895 |
 | 50 km geometric | CGA | 1.056 | 0.246 | 2.368 | 8.883 |
+
+*Table 1: Limb radiance error statistics relative to RFM.*
 
 The maximum percentages are retained for completeness. Their radiance context
 is listed below; the absolute difference is not suppressed when the reference
@@ -84,13 +92,21 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 | 20 km geometric | CGA | 1923 | 9.082896e-05 | 1.443728e-05 |
 | 50 km geometric | CGA | 2197 | 3.058876e-06 | 2.717155e-07 |
 
+*Table 2: Spectral context for the largest relative limb radiance differences.*
+
 ### Nadir and zenith brightness temperature
 
 ![Nadir brightness temperature](analysis/nadir_brightness_temperature.png)
 
+*Figure 4: Nadir brightness temperatures from RFM, EGA, and CGA.*
+
 ![Zenith brightness temperature](analysis/zenith_brightness_temperature.png)
 
+*Figure 5: Zenith brightness temperatures from RFM, EGA, and CGA.*
+
 ![Brightness temperature accuracy summary](analysis/brightness_temperature_accuracy_summary.png)
+
+*Figure 6: Summary of nadir and zenith brightness temperature accuracy.*
 
 #### Brightness temperature error statistics
 
@@ -101,9 +117,13 @@ channels, while the 20 km maximum occurs at a larger radiance. Median and
 | Nadir | CGA | 0.561 | 0.102 | 1.030 | 4.171 |
 | Zenith | CGA | 0.452 | 0.065 | 0.874 | 4.191 |
 
+*Table 3: Brightness temperature error statistics relative to RFM.*
+
 ### Runtime
 
 ![Single-core model runtime](analysis/runtime_summary.png)
+
+*Figure 7: Single-core model runtime for the RFM, EGA, and CGA validation cases.*
 
 The table shows total model time for each validation case. The timing definition
 and reference hardware are described below. The reported JURASSIC runtime
@@ -119,6 +139,8 @@ workflow.
 | Limb (4 rays) | 112.03 | 65.66 | 11375.76 | 102× | 173× |
 | Nadir (1 ray) | 14.50 | 8.93 | 11495.12 | 793× | 1287× |
 | Zenith (1 ray) | 22.99 | 10.91 | 11285.60 | 491× | 1034× |
+
+*Table 4: Reference model runtimes and RFM/JURASSIC speed-up ratios.*
 
 ## Interpreting approximation errors
 
@@ -281,3 +303,20 @@ restricted to logical CPU 0.
 its HITRAN initialization and binary-read measurements separately. Hardware,
 thread count, external-data provenance, and the timing definition must remain
 with any reported speed-up.
+
+
+## Conclusions
+
+For the tested atmosphere, spectral responses, and viewing geometries, both
+JURASSIC approximations reproduce the RFM reference with useful accuracy while
+reducing the forward model runtime by roughly two to three orders of magnitude
+on the documented single-thread system. Typical limb radiance differences are
+at the percent level or below, while nadir and zenith RMS brightness
+temperature differences are about 0.4–0.6 K.
+
+The results also show that approximation errors depend on spectral region,
+viewing geometry, atmospheric state, and lookup table coverage. The validation
+therefore provides a reproducible reference for the supplied configuration,
+rather than a universal accuracy bound for JURASSIC. New instruments, channel
+sets, atmospheres, or lookup tables should be validated separately against an
+appropriate line-by-line reference calculation.
