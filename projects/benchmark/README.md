@@ -86,12 +86,19 @@ up to 32 threads. On 64 cores they reach about 52–53× speedup, or about
 
 *Figure 2: Strong-scaling speed-up of the timed forward model batch for the three viewing geometries.*
 
+The geometry comparison establishes the baseline scaling behavior. To test
+whether this behavior depends strongly on the chemical workload, the next
+comparison varies the number of active gases while keeping the other benchmark
+settings fixed.
+
 ![Efficiency over threads for different gas sets, per geometry](figures/e4_gases_strong_efficiency.png)
 
 *Figure 3: Parallel efficiency for different gas sets and viewing geometries.*
 
 Within the tested gas sets, the number of gases has no clear effect on parallel
-efficiency.
+efficiency. We next vary the spectral workload, which changes both the number
+of channel calculations and the amount of lookup table data accessed during
+the batch.
 
 ![Efficiency over threads for different channel counts, per geometry](figures/e4_channels_strong_efficiency.png)
 
@@ -101,6 +108,10 @@ Up to 32 channels, no clear dependence of parallel efficiency on ND is visible.
 With 64 and 128 channels, it starts to decrease at 4 threads (128 channels:
 43–55 % on 64 threads). This is likely related to memory effects, since the
 lookup tables grow from 29 MB (ND = 32) to 118 MB (ND = 128).
+
+The figures above isolate the timed forward model batch. For practical use, it
+is also important to understand how much of this speed-up remains once lookup
+table initialization, the reference calculation, and file I/O are included.
 
 ![Speedup of the whole application per geometry](figures/e4_geometry_app_speedup.png)
 
