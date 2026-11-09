@@ -1,7 +1,7 @@
 # Synthetic limb retrieval
 
 This controlled end-to-end example tests JURASSIC's EGA forward model,
-finite-difference Jacobians, and optimal-estimation retrieval together. It is
+finite-difference Jacobians, and optimal estimation retrieval together. It is
 an illustrative numerical validation, not a realistic or optimized retrieval
 for a particular instrument. The hypothetical limb sounder uses spectral
 regions loosely associated with CO2 temperature, O3, and HNO3 sensitivity;
@@ -121,15 +121,15 @@ vertical. Its zero-centered color scales retain derivative sign, whereas
 `jacobians.png` summarizes magnitude across all limb observations by RMS.
 Together they show detailed kernel structure and the broader spectral and
 vertical sensitivity pattern. The chosen channels illustrate this synthetic
-setup; they are not optimized real-instrument channels. The nonzero values
+setup; they are not optimized real instrument channels. The nonzero values
 in these three reference slices are positive, so the negative halves of the
 diverging color scales are unused here.
 
 ### Averaging kernels
 
-![Within-quantity averaging-kernel blocks for temperature, O3, and HNO3](results/averaging_kernels.png)
+![Within-quantity averaging kernel blocks for temperature, O3, and HNO3](results/averaging_kernels.png)
 
-The within-quantity blocks of `results/matrix_avk.tab` diagnose vertical
+The within quantity blocks of `results/matrix_avk.tab` diagnose vertical
 retrieval response and information content. The trace of each block gives
 degrees of freedom for signal (DOFS); its row sums give measurement response.
 
@@ -141,7 +141,7 @@ degrees of freedom for signal (DOFS); its row sums give measurement response.
 
 The lower HNO3 response indicates less uniform information over its 16
 retrieved levels in this configuration. The full matrix also contains
-cross-quantity blocks, which these three panels do not display.
+cross quantity blocks, which these three panels do not display.
 
 ### Formal uncertainties
 
@@ -167,9 +167,9 @@ retrieval accuracy.
 radiance and a positively perturbed state. The temperature step is fixed at
 1 K (`KERNEL_T_ABS`); the gas step is the greater of 1% of the current
 mixing ratio (`KERNEL_Q_REL`) and `1e-15` (`KERNEL_Q_MIN`). These values are
-compile-time constants in `src/jurassic.h`, not control-file parameters.
+compile-time constants in `src/jurassic.h`, not control file parameters.
 This example uses the standard JURASSIC steps and writes the resulting
-Jacobian for inspection. A 0.5×/1×/2× control-file step study is therefore
+Jacobian for inspection. A 0.5×/1×/2× control file step study is therefore
 not available without separate builds, and the core algorithm is unchanged.
 
 Improved profile and radiance RMSE demonstrate that the numerical workflow
@@ -177,11 +177,11 @@ recovers information from this internally consistent, noise-free experiment.
 The Jacobians, averaging kernels, DOFS, and posterior covariances diagnose
 the chosen synthetic setup; they do not predict performance for a specific
 real instrument. There is no calibration, pointing, spectroscopy,
-representativeness, or forward-model mismatch test. The small channel set
+representativeness, or forward model mismatch test. The small channel set
 and fixed background gases are illustrative choices.
 
 `tests/ret_test` is a small retrieval regression and I/O infrastructure
-test. `projects/validation` tests forward-model spectra against RFM.
-`projects/benchmark` measures forward-model CPU/OpenMP scaling.
+test. `projects/validation` tests forward model spectra against RFM.
+`projects/benchmark` measures forward model CPU/OpenMP scaling.
 `projects/retrieval` demonstrates and validates the synthetic end-to-end
 retrieval workflow using the same TRIA table family as the latter two projects.
