@@ -259,7 +259,7 @@ to generate plots of the simulated radiances and kernel functions.
 ### Validation and benchmarks
 
 JURASSIC includes reproducible validation and performance studies in the
-`projects` directory. Together, these examples cover forward-model accuracy,
+`projects` directory. Together, these examples cover forward model accuracy,
 computational performance, and the complete retrieval workflow.
 
 - [Forward model validation](projects/validation/README.md) compares JURASSIC
@@ -276,7 +276,7 @@ computational performance, and the complete retrieval workflow.
 
 - [Retrieval validation and benchmark](projects/retrieval/README.md) provides a
   reproducible synthetic end-to-end limb retrieval for temperature, O3, and HNO3.
-  It tests the forward model, finite-difference Jacobians, and optimal-estimation
+  It tests the forward model, finite-difference Jacobians, and optimal estimation
   retrieval together and documents convergence, accuracy, runtime, averaging
   kernels, and formal retrieval uncertainties. The controlled experiment is
   intended as a numerical validation of the retrieval workflow rather than as a
