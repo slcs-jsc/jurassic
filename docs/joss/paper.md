@@ -20,7 +20,7 @@ authors:
     orcid: 0000-0002-2005-4474
   - name: Stjepan Požgaj
     affiliation: 2
-    orcid: 0009-0002-4799-9493
+    orcid: 0009-0002-4799-3911
   - name: Yiran Zhang
     affiliation: 1
     orcid: 0009-0009-9539-9598
