@@ -83,6 +83,8 @@ int main(
       if (++nf >= MAXNF)
 	ERRMSG("Too many points in filter function");
   fclose(in);
+  if (nf < 2)
+    ERRMSG("Filter function needs at least two points!");
 
   /* Read spectrum... */
   if (!(in = fopen(argv[3], "r")))

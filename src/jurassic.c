@@ -5221,6 +5221,9 @@ int locate_irr(
   const int n,
   const double x) {
 
+  if (n < 2)
+    ERRMSG("Irregular grid needs at least two points!");
+
   int ilo = 0;
   int ihi = n - 1;
   int i = (ihi + ilo) >> 1;
@@ -5720,6 +5723,7 @@ int raytrace(
   los_t *los,
   const int ir) {
 
+  /* Cartesian gradient step and refraction cutoff [km]. */
   const double h = 0.02, zrefrac = 60;
 
   double ex0[3], ex1[3], k[NW], lat, lon, n, ng[3], norm, p, q[NG], t,
@@ -5792,6 +5796,8 @@ int raytrace(
 
     /* Check if LOS hits the ground or has left atmosphere... */
     if (z < zmin || z > zmax) {
+      if (los->np == 0)
+	return FORMOD_STATUS_NO_ATMOSPHERE_INTERSECTION;
       stop = (z < zmin ? 2 : 1);
       const double frac =
 	((z <
@@ -6306,8 +6312,14 @@ void read_ctl(
   ctl->nw = (int) scan_ctl(argc, argv, "NW", -1, "1", NULL);
   if (ctl->nw < 0 || ctl->nw > NW)
     ERRMSG("Set 0 <= NW <= MAX!");
-  for (int id = 0; id < ctl->nd; id++)
-    ctl->window[id] = (int) scan_ctl(argc, argv, "WINDOW", id, "0", NULL);
+  if (ctl->nd > 0 && ctl->nw == 0)
+    ERRMSG("Set NW > 0 when ND > 0!");
+  for (int id = 0; id < ctl->nd; id++) {
+    const double window = scan_ctl(argc, argv, "WINDOW", id, "0", NULL);
+    if (!(window >= 0 && window < ctl->nw) || window != (int) window)
+      ERRMSG("Set WINDOW[%d] to an integer in [0, NW)!", id);
+    ctl->window[id] = (int) window;
+  }
 
   /* Cloud data... */
   ctl->ncl = (int) scan_ctl(argc, argv, "NCL", -1, "0", NULL);

@@ -66,4 +66,34 @@ while IFS= read -r tool ; do
 # source of truth as the build and installation rules.
 done < <(make --no-print-directory -C ../../src print-exc)
 
+# Spectral windows must identify an existing integer window for each channel.
+check_window_error() {
+    local name=$1 expected=$2
+    shift 2
+    if "$jurassic/filter" - "data/${name}.filt" "$@" > "data/${name}.log" 2>&1; then
+        echo "Invalid window configuration was accepted: $name"
+        error=1
+    elif ! grep -Fq "$expected" "data/${name}.log"; then
+        echo "Missing window error: $name"
+        error=1
+    fi
+}
+check_window_error zero_windows 'NW > 0' ND 1 'NU[0]' 700 NW 0
+check_window_error negative_window 'WINDOW[0]' ND 1 'NU[0]' 700 NW 1 'WINDOW[0]' -1
+check_window_error high_window 'WINDOW[0]' ND 1 'NU[0]' 700 NW 1 'WINDOW[0]' 1
+check_window_error fractional_window 'WINDOW[0]' ND 1 'NU[0]' 700 NW 2 'WINDOW[0]' 1.5
+"$jurassic/filter" - data/no_windows.filt NW 0 > data/no_windows.log 2>&1
+"$jurassic/filter" - data/last_window.filt ND 1 'NU[0]' 700 NW 2 \
+    'WINDOW[0]' 1 > data/last_window.log 2>&1
+
+# A one-point filter cannot provide an interpolation interval.
+echo '700 1' > data/one_point.filt
+if "$jurassic/tblgen" 1000 285 - data/one_point.filt > data/one_point.log 2>&1; then
+    echo 'One-point filter was accepted'
+    error=1
+elif ! grep -q 'Filter function needs at least two points!' data/one_point.log; then
+    echo 'Missing one-point filter error'
+    error=1
+fi
+
 exit $error

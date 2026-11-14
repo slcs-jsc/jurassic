@@ -62,6 +62,45 @@ if grep -Eq 'AddressSanitizer|runtime error:' data/obs_boundary_over.log; then
     exit 1
 fi
 
+# Exercise ray entry and exit at the atmospheric boundaries.
+printf '0 0 0 0 1000 280 0\n0 100 0 0 1 220 0\n' > data/ray_boundary_atm.tab
+for case in inside bottom top above_enter; do
+    case "$case" in
+        inside) obsz=50; vpz=100 ;;
+        bottom) obsz=0; vpz=10 ;;
+        top) obsz=100; vpz=150 ;;
+        above_enter) obsz=150; vpz=0 ;;
+    esac
+    printf '0 %s 0 0 %s 0 0 0 0 0\n' "$obsz" "$vpz" > "data/ray_${case}_obs.tab"
+    "$jurassic/raytrace" - "data/ray_${case}_obs.tab" data/ray_boundary_atm.tab \
+        "data/ray_${case}.tab" LOSBASE "data/los_${case}" REFRAC 0 \
+        RAYDS 10 RAYDZ 0 > "data/ray_${case}.log" 2>&1
+    awk '!/^#/ && NF { found=1 } END { exit(!found) }' "data/los_${case}.0.tab"
+done
+
+# Rays starting below the surface or missing the atmosphere must fail.
+for case in below above_miss; do
+    if [ "$case" = below ]; then obsz=-1; vpz=10; else obsz=150; vpz=200; fi
+    printf '0 %s 0 0 %s 0 0 0 0 0\n' "$obsz" "$vpz" > "data/ray_${case}_obs.tab"
+    if "$jurassic/raytrace" - "data/ray_${case}_obs.tab" data/ray_boundary_atm.tab \
+        "data/ray_${case}.tab" LOSBASE "data/los_${case}" REFRAC 0 \
+        RAYDS 10 RAYDZ 0 > "data/ray_${case}.log" 2>&1; then
+        echo "Invalid ray geometry was accepted: $case" >&2
+        exit 1
+    fi
+    grep -q 'Ray tracing failed!' "data/ray_${case}.log"
+done
+
+# One atmospheric level is accepted by the file reader but cannot be interpolated.
+head -n 1 data/ray_boundary_atm.tab > data/ray_one_level_atm.tab
+if "$jurassic/raytrace" - data/ray_bottom_obs.tab data/ray_one_level_atm.tab \
+    data/ray_one_level.tab LOSBASE data/los_one_level REFRAC 0 \
+    RAYDS 10 RAYDZ 0 > data/ray_one_level.log 2>&1; then
+    echo 'One-level atmospheric interpolation was accepted' >&2
+    exit 1
+fi
+grep -q 'Irregular grid needs at least two points!' data/ray_one_level.log
+
 
 
 # Compare files...

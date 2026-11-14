@@ -160,7 +160,8 @@ enum {
   FORMOD_STATUS_RFM_UNSUPPORTED = 1,
   FORMOD_STATUS_FOV_DATA_MISSING = 2,
   FORMOD_STATUS_OBSERVER_BELOW_SURFACE = 3,
-  FORMOD_STATUS_TOO_MANY_LOS_POINTS = 4
+  FORMOD_STATUS_TOO_MANY_LOS_POINTS = 4,
+  FORMOD_STATUS_NO_ATMOSPHERE_INTERSECTION = 5
 };
 
 /* ------------------------------------------------------------
@@ -3406,7 +3407,7 @@ void kernel(
  * or wavenumber profiles that are not evenly spaced.
  *
  * @param[in] xx  Array of monotonic grid values (increasing or decreasing).
- * @param[in] n   Number of grid points.
+ * @param[in] n   Number of grid points (at least two).
  * @param[in] x   Target value to locate within the grid range.
  * @return Index `ilo` of the lower grid point surrounding `x`.
  *
@@ -3418,8 +3419,8 @@ void kernel(
  *
  * @see LIN, LOGY, locate_reg, locate_tbl
  *
- * @warning Assumes `x` lies within the range of `xx`; no bounds checking
- *          beyond the first and last grid points is performed.
+ * @warning Aborts if `n < 2`. Values of `x` outside the grid are clamped
+ *          to the first or last interpolation interval.
  *
  * @author Lars Hoffmann
  */
@@ -3691,8 +3692,9 @@ void optimal_estimation(
  *
  * @return @ref FORMOD_STATUS_OK on success,
  *         @ref FORMOD_STATUS_OBSERVER_BELOW_SURFACE if the observer lies below
- *         the surface, or @ref FORMOD_STATUS_TOO_MANY_LOS_POINTS if the number
- *         of LOS points would exceed `NLOS`.
+ *         the surface, @ref FORMOD_STATUS_NO_ATMOSPHERE_INTERSECTION if no
+ *         atmospheric point is reached, or @ref FORMOD_STATUS_TOO_MANY_LOS_POINTS
+ *         if the number of LOS points would exceed `NLOS`.
  *
  * @details
  * - Integrates along the viewing ray starting at the observer position.
@@ -3714,8 +3716,8 @@ void optimal_estimation(
  * @see intpol_atm, tangent_point, formod_pencil, hydrostatic
  *
  * @warning
- * - Returns an error status if the observer is below the surface or the
- *   number of LOS points exceeds `NLOS`.
+ * - Returns an error status if the observer is below the surface, no
+ *   atmospheric point is reached, or the number of LOS points exceeds `NLOS`.
  * - Requires that the atmosphere includes z = 0.
  * - Assumes monotonic altitude ordering in atmospheric data.
  *
