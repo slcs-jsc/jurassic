@@ -169,7 +169,7 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  sscanf(argv[2], <span class="stringliteral">&quot;%lg&quot;</span>, &amp;temp);</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="comment">/* Compute column density [molec/cm^2] (1 km path length, 1 ppmv)... */</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  u = 1e-6 * press * 100 / (1.380658e-23 * temp) * 1000 / 1e4;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  u = 1e-6 * press * 100 / (<a class="code hl_define" href="jurassic_8h.html#a1841fd1a462d245d8c73dce55e2f45da">KB</a> * temp) * 1000 / 1e4;</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="comment">/* Read filter function... */</span></div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keywordflow">if</span> (!(in = fopen(argv[4], <span class="stringliteral">&quot;r&quot;</span>)))</div>
@@ -263,8 +263,9 @@ $(function(){ initResizable(false); });
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  printf(<span class="stringliteral">&quot;  Manual: https://slcs-jsc.github.io/jurassic/\n&quot;</span>);</div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>}</div>
 <div class="ttc" id="aformod_8c_html_ad96d407a911fbb914fa8e4cfbf2faf0f"><div class="ttname"><a href="formod_8c.html#ad96d407a911fbb914fa8e4cfbf2faf0f">usage</a></div><div class="ttdeci">void usage(void)</div><div class="ttdoc">Print command-line help.</div><div class="ttdef"><b>Definition</b> <a href="formod_8c_source.html#l00273">formod.c:273</a></div></div>
-<div class="ttc" id="ajurassic_8c_html_a4e1b87dc3c93a23c89f739adf10b60dc"><div class="ttname"><a href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc">locate_irr</a></div><div class="ttdeci">int locate_irr(const double *xx, const int n, const double x)</div><div class="ttdoc">Locate index for interpolation on an irregular grid.</div><div class="ttdef"><b>Definition</b> <a href="jurassic_8c_source.html#l05218">jurassic.c:5218</a></div></div>
+<div class="ttc" id="ajurassic_8c_html_a4e1b87dc3c93a23c89f739adf10b60dc"><div class="ttname"><a href="jurassic_8c.html#a4e1b87dc3c93a23c89f739adf10b60dc">locate_irr</a></div><div class="ttdeci">int locate_irr(const double *xx, const int n, const double x)</div><div class="ttdoc">Locate index for interpolation on an irregular grid.</div><div class="ttdef"><b>Definition</b> <a href="jurassic_8c_source.html#l05219">jurassic.c:5219</a></div></div>
 <div class="ttc" id="ajurassic_8h_html"><div class="ttname"><a href="jurassic_8h.html">jurassic.h</a></div><div class="ttdoc">JURASSIC library declarations.</div></div>
+<div class="ttc" id="ajurassic_8h_html_a1841fd1a462d245d8c73dce55e2f45da"><div class="ttname"><a href="jurassic_8h.html#a1841fd1a462d245d8c73dce55e2f45da">KB</a></div><div class="ttdeci">#define KB</div><div class="ttdoc">Boltzmann constant [kg m^2/(K s^2)].</div><div class="ttdef"><b>Definition</b> <a href="jurassic_8h_source.html#l00202">jurassic.h:202</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a3e0ae69dee4a8bb2e616526b5ebe6875"><div class="ttname"><a href="jurassic_8h.html#a3e0ae69dee4a8bb2e616526b5ebe6875">ERRMSG</a></div><div class="ttdeci">#define ERRMSG(...)</div><div class="ttdoc">Print an error message with contextual information and terminate the program.</div><div class="ttdef"><b>Definition</b> <a href="jurassic_8h_source.html#l01450">jurassic.h:1450</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_a56fe9bff0a1be75aae2da3e593053e2c"><div class="ttname"><a href="jurassic_8h.html#a56fe9bff0a1be75aae2da3e593053e2c">USAGE</a></div><div class="ttdeci">#define USAGE</div><div class="ttdoc">Print usage information on -h or --help.</div><div class="ttdef"><b>Definition</b> <a href="jurassic_8h_source.html#l01331">jurassic.h:1331</a></div></div>
 <div class="ttc" id="ajurassic_8h_html_aebaef4a0f8136be064bf1d29ce1ced83"><div class="ttname"><a href="jurassic_8h.html#aebaef4a0f8136be064bf1d29ce1ced83">LIN</a></div><div class="ttdeci">#define LIN(x0, y0, x1, y1, x)</div><div class="ttdoc">Compute linear interpolation.</div><div class="ttdef"><b>Definition</b> <a href="jurassic_8h_source.html#l00726">jurassic.h:726</a></div></div>
@@ -274,7 +275,7 @@ $(function(){ initResizable(false); });
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 14 2026 08:31:30 for JURASSIC by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0
+Generated on Sat Nov 14 2026 12:27:05 for JURASSIC by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0
 </small></address>
 </div><!-- doc-content -->
 </body>
