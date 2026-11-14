@@ -30,6 +30,25 @@ $jurassic/obs2spec obs.ctl data/obs.tab data/spec.tab
 $jurassic/obsfmt obs.ctl data/obs.tab 1 data/obs_asc2bin.bin 2
 $jurassic/obsfmt obs.ctl data/obs_asc2bin.bin 2 data/obs_bin2asc.tab 1
 
+# Check binary ray capacity by raising the 64-bit record count by 2^32...
+cp data/obs_asc2bin.bin data/obs_boundary_bin.bin
+nr_bin=$(od -An -t u8 -j 8 -N 8 data/obs_boundary_bin.bin | tr -d ' ')
+count_bytes=""
+for shift in 0 8 16 24 32 40 48 56; do
+    count_bytes+=$(printf '\\%03o' $((((nr_bin + 4294967296) >> shift) & 255)))
+done
+printf "$count_bytes" | dd of=data/obs_boundary_bin.bin bs=1 seek=8 conv=notrunc 2>/dev/null
+if $jurassic/obsfmt obs.ctl data/obs_boundary_bin.bin 2 data/obs_boundary_bin_out.tab 1 \
+    > data/obs_boundary_bin.log 2>&1; then
+    echo 'Oversized binary observation file was accepted' >&2
+    exit 1
+fi
+grep -q 'Too many ray paths!' data/obs_boundary_bin.log
+if grep -Eq 'AddressSanitizer|runtime error:' data/obs_boundary_bin.log; then
+    echo 'Memory error in oversized binary observation file' >&2
+    exit 1
+fi
+
 # Test netCDF file-I/O...
 $jurassic/obsfmt obs.ctl data/obs.tab 1 data/obs_asc2nc.nc 3
 $jurassic/obsfmt obs.ctl data/obs_asc2nc.nc 3 data/obs_nc2asc.tab 1

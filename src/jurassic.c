@@ -6197,9 +6197,9 @@ void read_atm_bin(
   FREAD(&np, size_t,
 	1,
 	in);
-  atm->np = (int) np;
-  if (atm->np > NP)
+  if (np > (size_t) NP)
     ERRMSG("Too many data points!");
+  atm->np = (int) np;
   FREAD(atm->time, double,
 	np,
 	in);
@@ -6814,9 +6814,9 @@ void read_obs_bin(
   FREAD(&nr, size_t,
 	1,
 	in);
-  obs->nr = (int) nr;
-  if (obs->nr > NR)
+  if (nr > (size_t) NR)
     ERRMSG("Too many ray paths!");
+  obs->nr = (int) nr;
   FREAD(obs->time, double,
 	nr,
 	in);

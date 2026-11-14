@@ -27,6 +27,25 @@ $jurassic/hydrostatic atm.ctl data/atm.tab data/atm_hyd.tab HYDZ 0.0
 $jurassic/atmfmt atm.ctl data/atm.tab 1 data/atm_asc2bin.bin 2
 $jurassic/atmfmt atm.ctl data/atm_asc2bin.bin 2 data/atm_bin2asc.tab 1
 
+# Check binary profile capacity by raising the 64-bit record count by 2^32...
+cp data/atm_asc2bin.bin data/atm_boundary_bin.bin
+np_bin=$(od -An -t u8 -j 20 -N 8 data/atm_boundary_bin.bin | tr -d ' ')
+count_bytes=""
+for shift in 0 8 16 24 32 40 48 56; do
+    count_bytes+=$(printf '\\%03o' $((((np_bin + 4294967296) >> shift) & 255)))
+done
+printf "$count_bytes" | dd of=data/atm_boundary_bin.bin bs=1 seek=20 conv=notrunc 2>/dev/null
+if $jurassic/atmfmt atm.ctl data/atm_boundary_bin.bin 2 data/atm_boundary_bin_out.tab 1 \
+    > data/atm_boundary_bin.log 2>&1; then
+    echo 'Oversized binary atmospheric profile was accepted' >&2
+    exit 1
+fi
+grep -q 'Too many data points!' data/atm_boundary_bin.log
+if grep -Eq 'AddressSanitizer|runtime error:' data/atm_boundary_bin.log; then
+    echo 'Memory error in oversized binary atmospheric profile' >&2
+    exit 1
+fi
+
 # Test netCDF file-I/O...
 $jurassic/atmfmt atm.ctl data/atm.tab 1 data/atm_asc2nc.nc 3
 $jurassic/atmfmt atm.ctl data/atm_asc2nc.nc 3 data/atm_nc2asc.tab 1
