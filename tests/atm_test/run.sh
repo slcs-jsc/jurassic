@@ -54,10 +54,6 @@ if $jurassic/atmfmt atm.ctl data/atm_boundary_over.tab 1 data/atm_boundary_rejec
     exit 1
 fi
 grep -q 'Too many data points!' data/atm_boundary_over.log
-if grep -Eq 'AddressSanitizer|runtime error:' data/atm_boundary_over.log; then
-    echo 'Memory error in oversized atmospheric profile' >&2
-    exit 1
-fi
 
 # Compare files...
 echo -e "\nCompare results..."

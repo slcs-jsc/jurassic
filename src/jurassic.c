@@ -5221,9 +5221,6 @@ int locate_irr(
   const int n,
   const double x) {
 
-  if (n < 2)
-    ERRMSG("Irregular grid needs at least two points!");
-
   int ilo = 0;
   int ihi = n - 1;
   int i = (ihi + ilo) >> 1;

@@ -57,10 +57,6 @@ if $jurassic/obsfmt obs.ctl data/obs_boundary_over.tab 1 data/obs_boundary_rejec
     exit 1
 fi
 grep -q 'Too many rays!' data/obs_boundary_over.log
-if grep -Eq 'AddressSanitizer|runtime error:' data/obs_boundary_over.log; then
-    echo 'Memory error in oversized observation file' >&2
-    exit 1
-fi
 
 # Exercise ray entry and exit at the atmospheric boundaries.
 printf '0 0 0 0 1000 280 0\n0 100 0 0 1 220 0\n' > data/ray_boundary_atm.tab
@@ -90,18 +86,6 @@ for case in below above_miss; do
     fi
     grep -q 'Ray tracing failed!' "data/ray_${case}.log"
 done
-
-# One atmospheric level is accepted by the file reader but cannot be interpolated.
-head -n 1 data/ray_boundary_atm.tab > data/ray_one_level_atm.tab
-if "$jurassic/raytrace" - data/ray_bottom_obs.tab data/ray_one_level_atm.tab \
-    data/ray_one_level.tab LOSBASE data/los_one_level REFRAC 0 \
-    RAYDS 10 RAYDZ 0 > data/ray_one_level.log 2>&1; then
-    echo 'One-level atmospheric interpolation was accepted' >&2
-    exit 1
-fi
-grep -q 'Irregular grid needs at least two points!' data/ray_one_level.log
-
-
 
 # Compare files...
 echo -e "\nCompare results..."

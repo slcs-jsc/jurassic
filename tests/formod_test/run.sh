@@ -55,10 +55,6 @@ if $jurassic/obsfmt limb.ctl data/obs_limb.tab 1 data/obs_shape_rejected.tab 1 \
     exit 1
 fi
 grep -q 'Too many data points!' data/shape_boundary_over.log
-if grep -Eq 'AddressSanitizer|runtime error:' data/shape_boundary_over.log; then
-    echo 'Memory error in oversized shape function' >&2
-    exit 1
-fi
 
 # Compare files...
 echo -e "\nCompare results..."

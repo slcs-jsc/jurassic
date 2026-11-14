@@ -3410,6 +3410,7 @@ void kernel(
  * @param[in] n   Number of grid points (at least two).
  * @param[in] x   Target value to locate within the grid range.
  * @return Index `ilo` of the lower grid point surrounding `x`.
+ * @pre `n >= 2`; callers must provide at least two grid points.
  *
  * @details
  * - Uses a binary search algorithm with \f$ O(\log n) \f$ complexity.  
@@ -3419,8 +3420,8 @@ void kernel(
  *
  * @see LIN, LOGY, locate_reg, locate_tbl
  *
- * @warning Aborts if `n < 2`. Values of `x` outside the grid are clamped
- *          to the first or last interpolation interval.
+ * @warning Values of `x` outside the grid are clamped to the first or last
+ *          interpolation interval.
  *
  * @author Lars Hoffmann
  */
