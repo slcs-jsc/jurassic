@@ -73,7 +73,7 @@ int main(
   sscanf(argv[2], "%lg", &temp);
 
   /* Compute column density [molec/cm^2] (1 km path length, 1 ppmv)... */
-  u = 1e-6 * press * 100 / (1.380658e-23 * temp) * 1000 / 1e4;
+  u = 1e-6 * press * 100 / (KB * temp) * 1000 / 1e4;
 
   /* Read filter function... */
   if (!(in = fopen(argv[4], "r")))

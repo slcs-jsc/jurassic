@@ -4296,6 +4296,7 @@ int formod_pencil(
 	  /* Ratio of incident direction to solar zenith direction... */
 	  const double rcos = cosa / cos_sza_val;
 
+	  /* 6.764e-5 sr approximates the solid angle of the solar disk. */
 	  /* Add solar radiance contribution... */
 	  for (int id = 0; id < ctl->nd; id++)
 	    rad[id] += 6.764e-5 / (2. * M_PI) * PLANCK(TSUN, ctl->nu[id])
