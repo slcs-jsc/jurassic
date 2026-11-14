@@ -2135,6 +2135,13 @@ RFM ASCII spectra read by JURASSIC must contain at least two spectral points.</p
   Path to the RFM binary (if used).</p>
 </li>
 <li>
+<p><code>RFMTMP</code> <em>(default: <code>-</code>)</em>
+  Base directory for RFM working directories. <code>-</code> uses JURASSIC's current
+  working directory. Each RFM interface call creates a unique
+  <code>jurassic-rfm-XXXXXX</code> subdirectory there. Successful calls remove it;
+  failed RFM executions retain it for diagnostics.</p>
+</li>
+<li>
 <p><code>RFMHIT</code> <em>(default: <code>-</code>)</em><br />
   Path to the HITRAN file used by RFM (if used).</p>
 </li>
@@ -2143,6 +2150,11 @@ RFM ASCII spectra read by JURASSIC must contain at least two spectral points.</p
   Per-emitter cross-section file (if used).</p>
 </li>
 </ul>
+<p>RFM runs in its private directory, so relative paths in <code>RFMBIN</code>, <code>RFMHIT</code>,
+and <code>RFMXSC[i]</code> must resolve from that directory. Absolute paths are
+recommended. A bare <code>RFMBIN</code> executable name can still be found through
+<code>PATH</code>. Separate JURASSIC processes can run RFM from the same original
+working directory without sharing RFM files.</p>
 <hr />
 <h2 id="minimal-examples">Minimal examples</h2>
 <h3 id="forward-simulation-single-window">Forward simulation (single window)</h3>

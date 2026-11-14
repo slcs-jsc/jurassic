@@ -52,6 +52,7 @@ var searchData=
   ['rfmbin_49',['rfmbin',['../structctl__t.html#a342dfe238de9dfcb389b07477f8ef527',1,'ctl_t']]],
   ['rfmhit_50',['rfmhit',['../structctl__t.html#a32f95b8c7a13422eb1614bc86261d8f2',1,'ctl_t']]],
   ['rfmnpts_51',['RFMNPTS',['../jurassic_8h.html#a4afe3221b6cc7d990b27a05a924ee2a2',1,'jurassic.h']]],
-  ['rfmxsc_52',['rfmxsc',['../structctl__t.html#a6ea477ad330f7edacbef53573d224d9b',1,'ctl_t']]],
-  ['ri_53',['RI',['../jurassic_8h.html#a7e71def3baefc10ec36f1dd48da4050e',1,'jurassic.h']]]
+  ['rfmtmp_52',['rfmtmp',['../structctl__t.html#a0886605580f7a4f69c82ce489fb64874',1,'ctl_t']]],
+  ['rfmxsc_53',['rfmxsc',['../structctl__t.html#a6ea477ad330f7edacbef53573d224d9b',1,'ctl_t']]],
+  ['ri_54',['RI',['../jurassic_8h.html#a7e71def3baefc10ec36f1dd48da4050e',1,'jurassic.h']]]
 ];
