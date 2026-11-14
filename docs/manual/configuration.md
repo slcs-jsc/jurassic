@@ -339,11 +339,23 @@ RFM ASCII spectra read by JURASSIC must contain at least two spectral points.
 - `RFMBIN` *(default: `-`)*  
   Path to the RFM binary (if used).
 
+- `RFMTMP` *(default: `-`)*
+  Base directory for RFM working directories. `-` uses JURASSIC's current
+  working directory. Each RFM interface call creates a unique
+  `jurassic-rfm-XXXXXX` subdirectory there. Successful calls remove it;
+  failed RFM executions retain it for diagnostics.
+
 - `RFMHIT` *(default: `-`)*  
   Path to the HITRAN file used by RFM (if used).
 
 - `RFMXSC[i]` *(array, default: `-`)*  
   Per-emitter cross-section file (if used).
+
+RFM runs in its private directory, so relative paths in `RFMBIN`, `RFMHIT`,
+and `RFMXSC[i]` must resolve from that directory. Absolute paths are
+recommended. A bare `RFMBIN` executable name can still be found through
+`PATH`. Separate JURASSIC processes can run RFM from the same original
+working directory without sharing RFM files.
 
 ---
 

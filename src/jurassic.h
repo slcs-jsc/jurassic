@@ -1745,6 +1745,9 @@ typedef struct {
   /*! Path to RFM binary. */
   char rfmbin[LEN];
 
+  /*! Base directory for temporary RFM working directories. */
+  char rfmtmp[LEN];
+
   /*! HITRAN file for RFM. */
   char rfmhit[LEN];
 
@@ -2929,8 +2932,10 @@ int formod_pencil(
  * Limitations:
  * - Requires identical observer positions for all rays.
  * - Does not support extinction input data (atm->k must be zero everywhere).
- * - Uses temporary files in the current working directory (e.g., @c rfm.atm, @c rfm.drv,
- *   @c rad_*.asc, @c tra_*.asc) and removes them on completion.
+ * - Creates one private working directory per invocation beneath @c RFMTMP (or the
+ *   current directory if @c RFMTMP is @c -). Successful calls remove this directory;
+ *   failed RFM executions retain it for diagnostics.
+ * - RFM resolves relative executable and database paths from its working directory.
  *
  * @param[in]  ctl  Control and configuration parameters (RFM binary path, HITRAN/XSC settings,
  *                  channel definitions, flags such as refraction and continua).
@@ -2949,8 +2954,7 @@ int formod_pencil(
  * @note The surface temperature is taken as the temperature at the lowest altitude level
  *       of the atmospheric grid.
  *
- * @warning This function executes external commands via @c system(), and creates/removes files
- *          in the current working directory.
+ * @warning Absolute paths are recommended for @c RFMBIN, @c RFMHIT, and @c RFMXSC[i].
  *
  * @par Reference
  *   Dudhia, A., "The Reference Forward Model (RFM)", JQSRT 186, 243–253 (2017)

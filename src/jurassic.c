@@ -23,6 +23,8 @@
 */
 
 #include "jurassic.h"
+#include <dirent.h>
+#include <sys/wait.h>
 
 /*****************************************************************************/
 
@@ -4353,7 +4355,7 @@ static void find_rfm_file(
   if (!(in = fopen(filename, "r"))) {
     sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000) + 1);
     if (!(in = fopen(filename, "r")))
-      ERRMSG("Cannot find RFM data file!");
+      ERRMSG("Cannot find RFM data file! Tried %s", filename);
   }
   fclose(in);
 }
@@ -4368,7 +4370,8 @@ void formod_rfm(
 
   los_t *los;
 
-  char cmd[2 * LEN], filename[LEN], rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
+  char filename[3 * LEN], tmpdir[2 * LEN], cwd[LEN];
+  char rfmflg[LEN] = { "RAD TRA MIX LIN SFC" };
 
   double lower[ND], upper[ND], nu0, nu1, obsz = -999, *nurfm, *spec, tsurf,
     xd[3], xo[3], xv[3], z[NR], zmin, zmax;
@@ -4458,9 +4461,6 @@ void formod_rfm(
   if (ctl->ctm_co2 || ctl->ctm_h2o || ctl->ctm_n2 || ctl->ctm_o2)
     strcat(rfmflg, " CTM");
 
-  /* Write atmospheric data file... */
-  write_atm_rfm("rfm.atm", ctl, atm);
-
   /* Check filter functions and initialize channel order... */
   for (int id = 0; id < ctl->nd; id++) {
     const int n = tbl->filt_n[id];
@@ -4485,6 +4485,29 @@ void formod_rfm(
     order[j] = id;
   }
 
+  /* Create a private RFM working directory... */
+  const char *base = strcmp(ctl->rfmtmp, "-") == 0 ? "." : ctl->rfmtmp;
+  int n;
+  if (base[0] == '/')
+    n = snprintf(tmpdir, sizeof(tmpdir), "%s/jurassic-rfm-XXXXXX", base);
+  else {
+    if (!getcwd(cwd, sizeof(cwd)))
+      ERRMSG("Cannot determine current working directory!");
+    n = snprintf(tmpdir, sizeof(tmpdir), "%s/%s/jurassic-rfm-XXXXXX",
+		 cwd, base);
+  }
+  if (n < 0 || (size_t) n >= sizeof(tmpdir) || !mkdtemp(tmpdir))
+    ERRMSG("Cannot create RFM working directory!");
+
+  snprintf(filename, sizeof(filename), "%s/rfm.atm", tmpdir);
+  write_atm_rfm(filename, ctl, atm);
+
+  /* Supply the blank input line used by the previous RFM command... */
+  snprintf(filename, sizeof(filename), "%s/rfm.stdin", tmpdir);
+  FILE *input = fopen(filename, "w");
+  if (!input || fputs("\n", input) == EOF || fclose(input) != 0)
+    ERRMSG("Cannot create RFM input in %s!", tmpdir);
+
   /* Loop over overlapping spectral blocks... */
   for (int ib = 0; ib < ctl->nd;) {
     int ie = ib + 1;
@@ -4497,7 +4520,8 @@ void formod_rfm(
 
     /* Create RFM driver file... */
     FILE *out;
-    if (!(out = fopen("rfm.drv", "w")))
+    snprintf(filename, sizeof(filename), "%s/rfm.drv", tmpdir);
+    if (!(out = fopen(filename, "w")))
       ERRMSG("Cannot create file!");
     fprintf(out, "*HDR\nRFM call by JURASSIC.\n");
     fprintf(out, "*FLG\n%s\n", rfmflg);
@@ -4520,18 +4544,53 @@ void formod_rfm(
     fprintf(out, "*END\n");
     fclose(out);
 
-    /* Remove temporary files... */
-    if (system("rm -f rfm.runlog rad_*.asc tra_*.asc"))
-      ERRMSG("Cannot remove temporary files!");
+    /* Remove spectra from the previous spectral block... */
+    DIR *dir = opendir(tmpdir);
+    if (!dir)
+      ERRMSG("Cannot open RFM working directory %s!", tmpdir);
+    struct dirent *entry;
+    while ((entry = readdir(dir)))
+      if (strncmp(entry->d_name, "rad_", 4) == 0
+	  || strncmp(entry->d_name, "tra_", 4) == 0) {
+	snprintf(filename, sizeof(filename), "%s/%s", tmpdir, entry->d_name);
+	if (unlink(filename))
+	  ERRMSG("Cannot remove old RFM spectrum in %s!", tmpdir);
+      }
+    closedir(dir);
 
-    /* Call RFM... */
-    sprintf(cmd, "echo | %s", ctl->rfmbin);
-    if (system(cmd))
-      ERRMSG("Error while calling RFM!");
+    /* Run RFM in the child without changing the parent's directory... */
+    char program[LEN];
+    strcpy(program, ctl->rfmbin);
+    pid_t pid = fork();
+    if (pid == 0) {
+      if (chdir(tmpdir))
+	_exit(126);
+      int fd = open("rfm.stdin", O_RDONLY);
+      if (fd < 0 || dup2(fd, STDIN_FILENO) < 0)
+	_exit(126);
+      close(fd);
+      char *const args[] = { program, NULL };
+      execvp(program, args);
+      _exit(127);
+    }
+    if (pid < 0)
+      ERRMSG("Cannot launch RFM; files retained in %s!", tmpdir);
+    int status;
+    while (waitpid(pid, &status, 0) < 0)
+      if (errno != EINTR)
+	ERRMSG("Cannot wait for RFM; files retained in %s!", tmpdir);
+    if (WIFSIGNALED(status))
+      ERRMSG("RFM terminated by signal %d; files retained in %s!",
+	     WTERMSIG(status), tmpdir);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+      ERRMSG("RFM exited with status %d; files retained in %s!",
+	     WIFEXITED(status) ? WEXITSTATUS(status) : -1, tmpdir);
 
     /* Read and convolute each spectrum once... */
     for (int ir = 0; ir < obs->nr; ir++) {
-      find_rfm_file(filename, "rad", z[ir]);
+      char basename[3 * LEN];
+      snprintf(basename, sizeof(basename), "%s/rad", tmpdir);
+      find_rfm_file(filename, basename, z[ir]);
       read_rfm_spec(filename, nurfm, spec, &npts);
       for (int i = ib; i < ie; i++) {
 	const int id = order[i];
@@ -4540,7 +4599,8 @@ void formod_rfm(
 					tbl->filt_n[id]) * 1e-5;
       }
 
-      find_rfm_file(filename, "tra", z[ir]);
+      snprintf(basename, sizeof(basename), "%s/tra", tmpdir);
+      find_rfm_file(filename, basename, z[ir]);
       read_rfm_spec(filename, nurfm, spec, &npts);
       for (int i = ib; i < ie; i++) {
 	const int id = order[i];
@@ -4552,9 +4612,21 @@ void formod_rfm(
     ib = ie;
   }
 
-  /* Remove temporary files... */
-  if (system("rm -f rfm.drv rfm.atm rfm.runlog rad_*.asc tra_*.asc"))
-    ERRMSG("Error while removing temporary files!");
+  /* Remove files from this invocation's private directory... */
+  DIR *dir = opendir(tmpdir);
+  if (!dir)
+    ERRMSG("Cannot open RFM working directory %s!", tmpdir);
+  struct dirent *entry;
+  while ((entry = readdir(dir))) {
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+      continue;
+    snprintf(filename, sizeof(filename), "%s/%s", tmpdir, entry->d_name);
+    if (unlink(filename))
+      ERRMSG("Cannot remove RFM file in %s!", tmpdir);
+  }
+  closedir(dir);
+  if (rmdir(tmpdir))
+    ERRMSG("Cannot remove RFM working directory %s!", tmpdir);
 
   /* Free... */
   free(los);
@@ -6406,6 +6478,7 @@ void read_ctl(
   /* External forward models... */
   ctl->formod = (int) scan_ctl(argc, argv, "FORMOD", -1, "1", NULL);
   scan_ctl(argc, argv, "RFMBIN", -1, "-", ctl->rfmbin);
+  scan_ctl(argc, argv, "RFMTMP", -1, "-", ctl->rfmtmp);
   scan_ctl(argc, argv, "RFMHIT", -1, "-", ctl->rfmhit);
   for (int ig = 0; ig < ctl->ng; ig++)
     scan_ctl(argc, argv, "RFMXSC", ig, "-", ctl->rfmxsc[ig]);
