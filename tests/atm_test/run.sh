@@ -37,6 +37,28 @@ $jurassic/atmfmt atm.ctl data/atm_hyd.tab 1 data/atm_append.nc 3 PROF_OUT 1
 $jurassic/atmfmt atm.ctl data/atm_append.nc 3 data/atm_append_p0.tab 1
 $jurassic/atmfmt atm.ctl data/atm_append.nc 3 data/atm_append_p1.tab 1 PROF_IN 1
 
+# Check ASCII profile capacity, including a comment after the final point...
+np_limit=$(awk '$1 == "#define" && $2 == "NP" { print $3; exit }' "$jurassic/jurassic.h")
+awk -v n="$np_limit" '!/^#/ && NF { for (i = 0; i < n; i++) print; exit }' \
+    data.ref/atm.tab > data/atm_boundary_max.tab
+echo '# trailing comment' >> data/atm_boundary_max.tab
+$jurassic/atmfmt atm.ctl data/atm_boundary_max.tab 1 data/atm_boundary_out.tab 1 \
+    > data/atm_boundary_max.log 2>&1
+awk -v n="$np_limit" '!/^#/ && NF { count++ } END { exit(count != n) }' \
+    data/atm_boundary_out.tab
+cp data/atm_boundary_max.tab data/atm_boundary_over.tab
+awk '!/^#/ && NF { print; exit }' data.ref/atm.tab >> data/atm_boundary_over.tab
+if $jurassic/atmfmt atm.ctl data/atm_boundary_over.tab 1 data/atm_boundary_rejected.tab 1 \
+    > data/atm_boundary_over.log 2>&1; then
+    echo 'Oversized atmospheric profile was accepted' >&2
+    exit 1
+fi
+grep -q 'Too many data points!' data/atm_boundary_over.log
+if grep -Eq 'AddressSanitizer|runtime error:' data/atm_boundary_over.log; then
+    echo 'Memory error in oversized atmospheric profile' >&2
+    exit 1
+fi
+
 # Compare files...
 echo -e "\nCompare results..."
 error=0

@@ -6037,8 +6037,14 @@ void read_atm_asc(
   char line[LEN], *tok;
   while (fgets(line, LEN, in)) {
 
+    /* Check capacity before writing a valid data point... */
+    double time;
+    TOK(line, tok, "%lg", time);
+    if (atm->np >= NP)
+      ERRMSG("Too many data points!");
+
     /* Read data... */
-    TOK(line, tok, "%lg", atm->time[atm->np]);
+    atm->time[atm->np] = time;
     TOK(NULL, tok, "%lg", atm->z[atm->np]);
     TOK(NULL, tok, "%lg", atm->lon[atm->np]);
     TOK(NULL, tok, "%lg", atm->lat[atm->np]);
@@ -6061,8 +6067,7 @@ void read_atm_asc(
     }
 
     /* Increment data point counter... */
-    if ((++atm->np) > NP)
-      ERRMSG("Too many data points!");
+    ++atm->np;
   }
 
   /* Close file... */
@@ -6658,8 +6663,14 @@ void read_obs_asc(
   char line[LEN], *tok;
   while (fgets(line, LEN, in)) {
 
+    /* Check capacity before writing a valid ray... */
+    double time;
+    TOK(line, tok, "%lg", time);
+    if (obs->nr >= NR)
+      ERRMSG("Too many rays!");
+
     /* Read data... */
-    TOK(line, tok, "%lg", obs->time[obs->nr]);
+    obs->time[obs->nr] = time;
     TOK(NULL, tok, "%lg", obs->obsz[obs->nr]);
     TOK(NULL, tok, "%lg", obs->obslon[obs->nr]);
     TOK(NULL, tok, "%lg", obs->obslat[obs->nr]);
@@ -6675,8 +6686,7 @@ void read_obs_asc(
       TOK(NULL, tok, "%lg", obs->tau[id][obs->nr]);
 
     /* Increment counter... */
-    if ((++obs->nr) > NR)
-      ERRMSG("Too many rays!");
+    ++obs->nr;
   }
 
   /* Close file... */
@@ -7044,10 +7054,16 @@ void read_shape(
 
   /* Read data... */
   *n = 0;
-  while (fgets(line, LEN, in))
-    if (sscanf(line, "%lg %lg", &x[*n], &y[*n]) == 2)
-      if ((++(*n)) > NSHAPE)
+  while (fgets(line, LEN, in)) {
+    double xval, yval;
+    if (sscanf(line, "%lg %lg", &xval, &yval) == 2) {
+      if (*n >= NSHAPE)
 	ERRMSG("Too many data points!");
+      x[*n] = xval;
+      y[*n] = yval;
+      ++(*n);
+    }
+  }
 
   /* Close file... */
   fclose(in);

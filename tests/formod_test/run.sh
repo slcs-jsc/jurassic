@@ -39,6 +39,27 @@ for geo in limb nadir zenith ; do
     
 done
 
+# Check the field-of-view shape reader at and beyond its capacity...
+nshape_limit=$(awk '$1 == "#define" && $2 == "NSHAPE" { print $3; exit }' "$jurassic/jurassic.h")
+awk -v n="$nshape_limit" 'BEGIN { for (i = 0; i < n; i++) print i, 1 }' \
+    > data/shape_boundary_max.tab
+echo '# trailing comment' >> data/shape_boundary_max.tab
+$jurassic/obsfmt limb.ctl data/obs_limb.tab 1 data/obs_shape_boundary.tab 1 \
+    FOV data/shape_boundary_max.tab > data/shape_boundary_max.log 2>&1
+grep -q "Number of data points: $nshape_limit" data/shape_boundary_max.log
+cp data/shape_boundary_max.tab data/shape_boundary_over.tab
+echo "$nshape_limit 1" >> data/shape_boundary_over.tab
+if $jurassic/obsfmt limb.ctl data/obs_limb.tab 1 data/obs_shape_rejected.tab 1 \
+    FOV data/shape_boundary_over.tab > data/shape_boundary_over.log 2>&1; then
+    echo 'Oversized shape function was accepted' >&2
+    exit 1
+fi
+grep -q 'Too many data points!' data/shape_boundary_over.log
+if grep -Eq 'AddressSanitizer|runtime error:' data/shape_boundary_over.log; then
+    echo 'Memory error in oversized shape function' >&2
+    exit 1
+fi
+
 # Compare files...
 echo -e "\nCompare results..."
 error=0
