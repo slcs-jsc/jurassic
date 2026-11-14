@@ -37,7 +37,7 @@ Please open a [GitHub issue](https://github.com/slcs-jsc/jurassic/issues) with:
    ```bash
    git diff --check
    git status
-   git add <changed-files>
+   git add path/to/changed-file
    git commit -m "Describe the change"
    ```
 
