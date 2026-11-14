@@ -4346,14 +4346,21 @@ static double convolve_rfm(
 
 static void find_rfm_file(
   char *filename,
+  const size_t filename_size,
   const char *basename,
   const double z) {
 
   /* Search RFM spectrum... */
   FILE *in;
-  sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000));
+  int n = snprintf(filename, filename_size, "%s_%05d.asc",
+                   basename, (int) (z * 1000));
+  if (n < 0 || (size_t) n >= filename_size)
+    ERRMSG("RFM spectrum filename too long!");
   if (!(in = fopen(filename, "r"))) {
-    sprintf(filename, "%s_%05d.asc", basename, (int) (z * 1000) + 1);
+    n = snprintf(filename, filename_size, "%s_%05d.asc",
+                 basename, (int) (z * 1000) + 1);
+    if (n < 0 || (size_t) n >= filename_size)
+      ERRMSG("RFM spectrum filename too long!");
     if (!(in = fopen(filename, "r")))
       ERRMSG("Cannot find RFM data file! Tried %s", filename);
   }
@@ -4590,7 +4597,7 @@ void formod_rfm(
     for (int ir = 0; ir < obs->nr; ir++) {
       char basename[3 * LEN];
       snprintf(basename, sizeof(basename), "%s/rad", tmpdir);
-      find_rfm_file(filename, basename, z[ir]);
+      find_rfm_file(filename, sizeof(filename), basename, z[ir]);
       read_rfm_spec(filename, nurfm, spec, &npts);
       for (int i = ib; i < ie; i++) {
 	const int id = order[i];
@@ -4600,7 +4607,7 @@ void formod_rfm(
       }
 
       snprintf(basename, sizeof(basename), "%s/tra", tmpdir);
-      find_rfm_file(filename, basename, z[ir]);
+      find_rfm_file(filename, sizeof(filename), basename, z[ir]);
       read_rfm_spec(filename, nurfm, spec, &npts);
       for (int i = ib; i < ie; i++) {
 	const int id = order[i];
@@ -6953,7 +6960,7 @@ double read_obs_rfm(
 
   /* Search and read RFM spectrum... */
   char filename[LEN];
-  find_rfm_file(filename, basename, z);
+  find_rfm_file(filename, sizeof(filename), basename, z);
   read_rfm_spec(filename, nurfm, spec, &npts);
 
   /* Convolute... */
