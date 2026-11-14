@@ -106,7 +106,7 @@ The code base includes automated tests and documented example configurations for
 
 # AI usage disclosure
 
-We used ChatGPT (OpenAI, GPT-5.6 Sol) and Codex (OpenAI, GPT-6-Sol) to assist with software development, code review, testing, documentation, and manuscript revision. All AI-assisted outputs were reviewed, edited, and validated by the authors. The authors made all core scientific and software design decisions and remain fully responsible for the submitted software and manuscript.
+We used ChatGPT (OpenAI, GPT-5.6 Sol), Codex (OpenAI, GPT-6-Sol), and Claude (Anthropic) to assist with software development, code review, testing, documentation, and manuscript revision. All AI-assisted outputs were reviewed, edited, and validated by the authors. The authors made all core scientific and software design decisions and remain fully responsible for the submitted software and manuscript.
 
 # Acknowledgements
 
