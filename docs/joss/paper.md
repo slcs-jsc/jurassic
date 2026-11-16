@@ -62,7 +62,7 @@ JURASSIC addresses a common need in atmospheric remote sensing. Line-by-line rad
 
 Infrared remote sensing observations are widely used to derive atmospheric temperature, trace gas abundances, aerosols, and cloud properties from satellite, airborne, balloon-borne, and ground-based instruments. These applications require radiative transfer software that is accurate enough to represent the relevant spectroscopy and viewing geometry, while also being fast enough for large observational datasets and iterative inverse methods.
 
-JURASSIC is designed for researchers working in atmospheric infrared remote sensing, especially those processing large ensembles of atmospheric scenarios, performing sensitivity and uncertainty analyses, or developing retrieval schemes. It provides a general research framework for fast mid-infrared radiative transfer and retrieval that is not restricted to a single instrument or observing configuration.
+JURASSIC is designed for researchers working in atmospheric infrared remote sensing, especially those processing large ensembles of atmospheric scenarios, performing sensitivity and uncertainty analyses, or developing retrieval schemes. It provides a research framework for fast mid-infrared radiative transfer and retrieval that is not restricted to a single instrument or observing configuration.
 
 # State of the field
 
