@@ -76,7 +76,7 @@ The core version of JURASSIC has been used for limb and nadir radiative transfer
 
 JURASSIC is organized into modular components for ray tracing, spectroscopy, radiative transfer, and retrieval. This modular design facilitates code reuse, maintenance, and adaptation to different applications. The software is written in C and supports OpenMP parallelization and optional MPI task distribution for retrieval workflows. JURASSIC supports NetCDF input and output for atmospheric data, observation data, and lookup tables.
 
-The radiative transfer formulation assumes a vertically stratified atmosphere and curved ray paths including refraction. The software supports limb, nadir, zenith, and occultation viewing geometries for sensors located inside or outside the atmosphere. \autoref{fig:spectra} shows example mid-infrared limb and nadir radiance spectra for a midlatitude reference atmosphere, including contributions of selected trace gases.
+The radiative transfer formulation assumes a vertically stratified atmosphere and curved ray paths accounting for atmospheric refraction. The software supports limb, nadir, zenith, and occultation viewing geometries for sensors located inside or outside the atmosphere. \autoref{fig:spectra} shows example mid-infrared limb and nadir radiance spectra for a midlatitude reference atmosphere, including contributions from selected trace gases.
 
 ![Simulated mid-infrared limb (a) and nadir (b) spectra from JURASSIC for a midlatitude atmosphere at 1 cm$^{-1}$ resolution. Coloured curves show contributions from individual gases, and the black curve shows the total spectrum.\label{fig:spectra}](fig_spectra.pdf){ width=80% }
 
