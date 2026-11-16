@@ -170,6 +170,12 @@ This is a list of papers in which JURASSIC was applied:
   aircraft campaign, Atmospheric Measurement Techniques, 3, 1437–1455,
   <https://doi.org/10.5194/amt-3-1437-2010>, 2010.
 
+- Eckermann, S. D., Hoffmann, L., Höpfner, M., Wu, D. L., and
+  Alexander, M. J.: Antarctic NAT PSC belt of June 2003: Observational
+  validation of the mountain wave seeding hypothesis, Geophysical
+  Research Letters, 36, L02807,
+  <https://doi.org/10.1029/2008GL036629>, 2009.
+
 - Preusse, P., Schroeder, S., Hoffmann, L., Ern, M.,
   Friedl-Vallon, F., Ungermann, J., Oelhaf, H., Fischer, H., and
   Riese, M.: New perspectives on gravity wave remote sensing by
