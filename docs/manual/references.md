@@ -36,6 +36,14 @@ for citation metadata.
 
 This is a list of papers in which JURASSIC was applied:
 
+- Kruse, C. G., Alexander, M. J., Hoffmann, L., van Niekerk, A.,
+  Polichtchouk, I., Bacmeister, J. T., Holt, L., Plougonven, R.,
+  Šácha, P., Wright, C. J., Sato, K., Shibuya, R., Gisinger, S.,
+  Ern, M., Meyer, C. I., and Stein, O.: Observed and Modeled Mountain
+  Waves from the Surface to the Mesosphere near the Drake Passage,
+  Journal of the Atmospheric Sciences, 79, 909–932,
+  <https://doi.org/10.1175/JAS-D-21-0252.1>, 2022.
+
 - Kalicinsky, C., Griessbach, S., and Spang, R.: A new method to detect
   and classify polar stratospheric nitric acid trihydrate clouds derived
   from radiative transfer simulations and its first application to
