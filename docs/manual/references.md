@@ -70,6 +70,12 @@ This is a list of papers in which JURASSIC was applied:
   is Everywhere, 32, 369,
   <https://doi.org/10.3233/978-1-61499-843-3-369>, 2018.
 
+- Hoffmann, L., Spang, R., Orr, A., Alexander, M. J., Holt, L. A.,
+  and Stein, O.: A decadal satellite record of gravity wave activity in
+  the lower stratosphere to study polar stratospheric cloud formation,
+  Atmospheric Chemistry and Physics, 17, 2901–2920,
+  <https://doi.org/10.5194/acp-17-2901-2017>, 2017.
+
 - Griessbach, S., Hoffmann, L., Spang, R., von Hobe, M.,
   Müller, R., and Riese, M.: Infrared limb emission measurements of
   aerosol in the troposphere and stratosphere, Atmospheric Measurement
@@ -100,6 +106,12 @@ This is a list of papers in which JURASSIC was applied:
   detection with infrared limb sounding: MIPAS observations and
   radiative transfer simulations, Atmospheric Measurement Techniques,
   7, 1487–1507, <https://doi.org/10.5194/amt-7-1487-2014>, 2014.
+
+- Hoffmann, L., Alexander, M. J., Clerbaux, C., Grimsdell, A. W.,
+  Meyer, C. I., Rößler, T., and Tournier, B.: Intercomparison of
+  stratospheric gravity wave observations with AIRS and IASI,
+  Atmospheric Measurement Techniques, 7, 4517–4537,
+  <https://doi.org/10.5194/amt-7-4517-2014>, 2014.
 
 - Kalicinsky, C., Grooß, J.-U., Günther, G., Ungermann, J.,
   Blank, J., Höfer, S., Hoffmann, L., Knieling, P., Olschewski, F.,
