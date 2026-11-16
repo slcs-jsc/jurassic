@@ -64,10 +64,10 @@ This is a list of papers in which JURASSIC was applied:
   215–232,
   <https://doi.org/10.5194/amt-11-215-2018>, 2018.
 
-- Baumeister, P., Hater, T., Griessbach, S., Hoffmann, L.,
-  Pleiter, D., Rombach, B., and Bühler, M.: Strategies for forward
+- Baumeister, P. F., Rombach, B., Hater, T., Griessbach, S.,
+  Hoffmann, L., Bühler, M., and Pleiter, D.: Strategies for forward
   modelling of infrared radiative transfer on GPUs, Parallel Computing
-  is Everywhere, 32, 369,
+  is Everywhere, 32, 369–380,
   <https://doi.org/10.3233/978-1-61499-843-3-369>, 2018.
 
 - Hoffmann, L., Spang, R., Orr, A., Alexander, M. J., Holt, L. A.,
@@ -128,12 +128,6 @@ This is a list of papers in which JURASSIC was applied:
   Transfer, 127, 102–118,
   <https://doi.org/10.1016/j.jqsrt.2013.05.004>, 2013.
 
-- Ungermann, J., Blank, J., Lotz, J., Leppkes, K., Hoffmann, L.,
-  Guggenmoser, T., Kaufmann, M., Preusse, P., Naumann, U., and Riese, M.:
-  A 3-D tomographic retrieval approach with advection compensation for
-  the air-borne limb-imager GLORIA, Atmospheric Measurement Techniques,
-  4, 2509–2529, <https://doi.org/10.5194/amt-4-2509-2011>, 2011.
-
 - Ungermann, J., Kalicinsky, C., Olschewski, F., Knieling, P.,
   Hoffmann, L., Blank, J., Woiwode, W., Oelhaf, H., Hösen, E.,
   Volk, C. M., Ulanovsky, A., Ravegnani, F., Weigel, K., Stroh, F.,
@@ -141,6 +135,12 @@ This is a list of papers in which JURASSIC was applied:
   resolution during the RECONCILE aircraft campaign, Atmospheric
   Measurement Techniques, 5, 1173–1191,
   <https://doi.org/10.5194/amt-5-1173-2012>, 2012.
+
+- Ungermann, J., Blank, J., Lotz, J., Leppkes, K., Hoffmann, L.,
+  Guggenmoser, T., Kaufmann, M., Preusse, P., Naumann, U., and Riese, M.:
+  A 3-D tomographic retrieval approach with advection compensation for
+  the air-borne limb-imager GLORIA, Atmospheric Measurement Techniques,
+  4, 2509–2529, <https://doi.org/10.5194/amt-4-2509-2011>, 2011.
 
 - Ungermann, J., Kaufmann, M., Hoffmann, L., Preusse, P., Oelhaf, H.,
   Friedl-Vallon, F., and Riese, M.: Towards a 3-D tomographic retrieval
@@ -153,6 +153,11 @@ This is a list of papers in which JURASSIC was applied:
   observations by the PREMIER infrared limb-sounder, Atmospheric
   Measurement Techniques, 3, 339–354,
   <https://doi.org/10.5194/amt-3-339-2010>, 2010.
+
+- Hoffmann, L. and Riese, M.: Tomographic Retrievals for High
+  Spatial Resolution Measurements of the PREMIER Infrared Limb
+  Sounder, Proceedings of the ESA Living Planet Symposium 2010,
+  ESA Special Publication SP-686, 2010.
 
 - Hoffmann, L. and Alexander, M. J.: Occurrence frequency of convective
   gravity waves during the North American thunderstorm season, Journal
@@ -189,10 +194,22 @@ This is a list of papers in which JURASSIC was applied:
   aircraft campaign, Advances in Space Research, 43, 74–81,
   <https://doi.org/10.1016/j.asr.2008.03.018>, 2009.
 
+- Hoffmann, L., Spang, R., Kaufmann, M., and Riese, M.: Envisat
+  MIPAS measurements of CFC-11 and CFC-12: an add-on to ESA operational
+  data, Proceedings of the First Atmospheric Science Conference,
+  Frascati, Italy, ESA Special Publication SP-628, 2006.
+
 - Hoffmann, L., Spang, R., Kaufmann, M., and Riese, M.: Retrieval of
   CFC-11 and CFC-12 from Envisat MIPAS observations by means of rapid
   radiative transfer calculations, Advances in Space Research, 36,
   915–921, <https://doi.org/10.1016/j.asr.2005.03.112>, 2005.
+
+- Hoffmann, L., Ern, M., Kaufmann, M., Preusse, P., Spang, R.,
+  and Riese, M.: Retrieval of atmospheric trace constituents from
+  Envisat MIPAS observations by means of rapid radiative transfer
+  calculations: First results for CFC-11, Proceedings of the
+  Envisat & ERS Symposium 2004, Salzburg, Austria,
+  ESA Special Publication SP-572, 2004.
 
 - Hoffmann, L., Spang, R., and Riese, M.: Retrieval of chlorofluorocarbon
   distributions from Envisat MIPAS measurements, in: Remote Sensing of
