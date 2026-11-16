@@ -116,6 +116,12 @@ This is a list of papers in which JURASSIC was applied:
   Transfer, 127, 102–118,
   <https://doi.org/10.1016/j.jqsrt.2013.05.004>, 2013.
 
+- Ungermann, J., Blank, J., Lotz, J., Leppkes, K., Hoffmann, L.,
+  Guggenmoser, T., Kaufmann, M., Preusse, P., Naumann, U., and Riese, M.:
+  A 3-D tomographic retrieval approach with advection compensation for
+  the air-borne limb-imager GLORIA, Atmospheric Measurement Techniques,
+  4, 2509–2529, <https://doi.org/10.5194/amt-4-2509-2011>, 2011.
+
 - Ungermann, J., Kalicinsky, C., Olschewski, F., Knieling, P.,
   Hoffmann, L., Blank, J., Woiwode, W., Oelhaf, H., Hösen, E.,
   Volk, C. M., Ulanovsky, A., Ravegnani, F., Weigel, K., Stroh, F.,
