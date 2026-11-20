@@ -1397,26 +1397,26 @@ clim_t *read_clim(
   int dim_month, dim_alt, dim_lat;
   size_t len;
   if (nc_inq_dimid(ncid, "month", &dim_month) != NC_NOERR ||
-      nc_inq_dimlen(ncid, dim_month, &len) != NC_NOERR || (int) len != 12)
+      nc_inq_dimlen(ncid, dim_month, &len) != NC_NOERR || len != (size_t) CT)
     ERRMSG("Climatology file %s has no dimension 'month' of length 12 - "
 	   "not a JuMACS climatology file?", ctl->climfile);
   if (nc_inq_dimid(ncid, "altitude", &dim_alt) != NC_NOERR ||
-      nc_inq_dimlen(ncid, dim_alt, &len) != NC_NOERR || (int) len < 2)
+      nc_inq_dimlen(ncid, dim_alt, &len) != NC_NOERR || len < 2)
     ERRMSG("Climatology file %s has no dimension 'altitude' - "
 	   "not a JuMACS climatology file?", ctl->climfile);
-  if ((int) len > CZ)
-    ERRMSG("Climatology file %s has %d altitude levels, exceeding the "
+  if (len > (size_t) CZ)
+    ERRMSG("Climatology file %s has %zu altitude levels, exceeding the "
 	   "maximum of %d supported by this version of JURASSIC!",
-	   ctl->climfile, (int) len, CZ);
+	   ctl->climfile, len, CZ);
   clim->nalt = (int) len;
   if (nc_inq_dimid(ncid, "lat", &dim_lat) != NC_NOERR ||
-      nc_inq_dimlen(ncid, dim_lat, &len) != NC_NOERR || (int) len < 2)
+      nc_inq_dimlen(ncid, dim_lat, &len) != NC_NOERR || len < 2)
     ERRMSG("Climatology file %s has no dimension 'lat' - "
 	   "not a JuMACS climatology file?", ctl->climfile);
-  if ((int) len > CLAT)
-    ERRMSG("Climatology file %s has %d latitude bands, exceeding the "
+  if (len > (size_t) CLAT)
+    ERRMSG("Climatology file %s has %zu latitude bands, exceeding the "
 	   "maximum of %d supported by this version of JURASSIC!",
-	   ctl->climfile, (int) len, CLAT);
+	   ctl->climfile, len, CLAT);
   clim->nlat = (int) len;
 
   /* Read and check coordinates... */
@@ -6197,9 +6197,9 @@ void read_atm_bin(
   FREAD(&np, size_t,
 	1,
 	in);
-  atm->np = (int) np;
-  if (atm->np > NP)
+  if (np > (size_t) NP)
     ERRMSG("Too many data points!");
+  atm->np = (int) np;
   FREAD(atm->time, double,
 	np,
 	in);
@@ -6814,9 +6814,9 @@ void read_obs_bin(
   FREAD(&nr, size_t,
 	1,
 	in);
-  obs->nr = (int) nr;
-  if (obs->nr > NR)
+  if (nr > (size_t) NR)
     ERRMSG("Too many ray paths!");
+  obs->nr = (int) nr;
   FREAD(obs->time, double,
 	nr,
 	in);
