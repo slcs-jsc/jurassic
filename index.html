@@ -278,10 +278,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#key-features" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        Key features
       
     </span>
   </a>
@@ -300,10 +300,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#citation" class="md-nav__link">
+  <a href="#explore-the-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Citation
+        Explore the documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation-and-contributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Citation and contributions
       
     </span>
   </a>
@@ -1298,10 +1309,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#key-features" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        Key features
       
     </span>
   </a>
@@ -1320,10 +1331,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#citation" class="md-nav__link">
+  <a href="#explore-the-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Citation
+        Explore the documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation-and-contributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Citation and contributions
       
     </span>
   </a>
@@ -1362,87 +1384,50 @@
 
 
 <h1 id="welcome-to-jurassic">Welcome to JURASSIC!</h1>
-<p>The Juelich Rapid Spectral Simulation Code (JURASSIC) is a fast
-infrared radiative transfer model for the analysis of atmospheric
-remote sensing measurements.</p>
-<p>Designed specifically for atmospheric scientists and remote-sensing
-experts, JURASSIC delivers fast, accurate, and scalable infrared
-radiative transfer simulations. It is particularly well suited for
-large data volumes and high-performance computing (HPC) environments,
-enabling efficient processing without compromising physical accuracy.</p>
-<p>JURASSIC supports the simulation and interpretation of infrared
-spectra across a wide range of atmospheric conditions, making it a
-powerful tool for both research and operational applications.</p>
+<p>The Jülich Rapid Spectral Simulation Code (JURASSIC) is an open-source
+infrared radiative transfer and retrieval model for atmospheric remote
+sensing. It simulates radiances and transmittances in the mid-infrared
+(approximately 3–20 µm) and supports applications ranging from satellite
+data analysis to retrieval development and sensitivity studies.</p>
 <p><img alt="Infrared limb spectra for mid-latitude atmospheric conditions simulated with JURASSIC" src="img/spectra.png" /></p>
-<h2 id="features">Features</h2>
-<p>JURASSIC provides a comprehensive and efficient framework for infrared
-radiative transfer simulations, offering key capabilities to support
-research, operational, and development workflows:</p>
+<h2 id="key-features">Key features</h2>
 <ul>
-<li>
-<p><strong>Efficient radiative transfer approximations</strong>: JURASSIC implements
-    the Emissivity Growth Approximation (EGA) and the Curtis–Godson
-    Approximation (CGA) to model infrared radiative transfer. These
-    methods enable rapid yet accurate simulations of atmospheric
-    radiances and transmittances across a broad spectral range.</p>
-</li>
-<li>
-<p><strong>High-fidelity spectroscopy via lookup tables</strong>: Band
-    transmittances are derived from pre-calculated lookup tables based
-    on detailed line-by-line spectroscopy. This approach maintains
-    spectroscopic accuracy while largely reducing computational cost,
-    making the model suitable for large-scale and near-real-time
-    applications.</p>
-</li>
-<li>
-<p><strong>Optimal estimation retrieval framework</strong>: In addition to forward
-    modelling, JURASSIC includes an optimal estimation retrieval
-    module for inverse modelling of atmospheric state variables. This
-    enables the derivation of geophysical parameters such as
-    temperature or trace gas volume mixing ratios from observed
-    radiances, providing a complete forward–inverse modelling system
-    within the same framework.</p>
-</li>
-<li>
-<p><strong>Flexible configuration and modular design</strong>: The model supports
-    customizable spectral bands, instrument configurations, and
-    atmospheric input fields, allowing users to integrate JURASSIC
-    into diverse workflows and existing analysis pipelines.</p>
-</li>
-<li>
-<p><strong>Validated against established reference models</strong>: The model has
-    undergone extensive benchmarking and intercomparison studies with
-    leading radiative transfer codes such as KOPRA, RFM, and SARTA,
-    ensuring reliable performance and scientific credibility across a
-    wide range of atmospheric conditions.</p>
-</li>
-<li>
-<p><strong>Parallel execution for HPC environments</strong>: JURASSIC supports
-    workflow-level parallelism, OpenMP acceleration across the tool
-    suite, and MPI-based task distribution for retrieval workloads.
-    This enables efficient execution on multicore CPUs and HPC
-    clusters for large datasets and campaign-style processing.</p>
-</li>
-<li>
-<p><strong>Open source and community oriented</strong>: JURASSIC is distributed
-    under the GNU General Public License (GPL), fostering
-    transparency, collaboration, and community-driven development
-    within the atmospheric and remote sensing research community.</p>
-</li>
+<li><strong>Radiative transfer:</strong> Fast simulations for limb, nadir, zenith, and
+  occultation viewing geometries using spectral approximations and
+  precomputed emissivity lookup tables.</li>
+<li><strong>Atmospheric retrievals:</strong> Integrated optimal estimation framework
+  with finite-difference Jacobians for atmospheric state variables.</li>
+<li><strong>Flexible applications:</strong> Configurable atmospheric inputs, spectral
+  channels, and instrument geometries.</li>
+<li><strong>Parallel computing:</strong> OpenMP acceleration and optional MPI task
+  distribution for retrieval workflows.</li>
+<li><strong>Open source:</strong> C implementation released under the GNU GPL v3.</li>
 </ul>
+<p>For the model's assumptions, accuracy, and applicable spectral
+configurations, see <a href="limitations/">Model assumptions and limitations</a>
+and <a href="validation/">Scientific validation</a>.</p>
 <h2 id="getting-started">Getting started</h2>
-<p>If you are new to JURASSIC, start with the
-<a href="quickstart/">Quickstart</a>, which walks you through installation,
-basic configuration, and a first simulation.</p>
-<h2 id="citation">Citation</h2>
-<p>If you use JURASSIC in your research, please cite the relevant
-publications listed in the <a href="references/">References</a>.</p>
+<p>Begin with the <a href="quickstart/">Quickstart</a> for a first simulation, or
+consult <a href="installation/">Installation</a> and
+<a href="configuration/">Configuration files</a> for setup details.</p>
+<h2 id="explore-the-documentation">Explore the documentation</h2>
+<ul>
+<li><strong>Scientific background:</strong> <a href="overview/">Overview</a>,
+  <a href="theory/">Physical background</a>, and <a href="retrieval_theory/">Retrieval theory</a>.</li>
+<li><strong>Using the model:</strong> <a href="running/">Running JURASSIC</a>,
+  <a href="atmospheric_data/">Atmospheric data</a>, and
+  <a href="lookup_tables/">Spectroscopic data and lookup tables</a>.</li>
+<li><strong>HPC and development:</strong> <a href="hpc_workflows/">HPC workflows</a>,
+  <a href="code-development/">Code development</a>, and
+  <a href="testing/">Testing and code quality</a>.</li>
+</ul>
+<h2 id="citation-and-contributions">Citation and contributions</h2>
+<p>Please consult <a href="references/">References</a> for scientific publications
+and the <a href="https://github.com/slcs-jsc/jurassic/blob/master/CONTRIBUTING.md">contribution guidelines</a>
+if you would like to report an issue or contribute.</p>
 <h2 id="contact">Contact</h2>
-<p>We are interested in sharing JURASSIC for research
-applications. Please do not hesitate to contact us, if you have any
-questions or need support.</p>
-<p>Dr. Lars Hoffmann, <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#46;&#104;&#111;&#102;&#102;&#109;&#97;&#110;&#110;&#64;&#102;&#122;&#45;&#106;&#117;&#101;&#108;&#105;&#99;&#104;&#46;&#100;&#101;">&#108;&#46;&#104;&#111;&#102;&#102;&#109;&#97;&#110;&#110;&#64;&#102;&#122;&#45;&#106;&#117;&#101;&#108;&#105;&#99;&#104;&#46;&#100;&#101;</a></p>
-<p>Jülich Supercomputing Centre, Forschungszentrum Jülich</p>
+<p>Dr. Lars Hoffmann, <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#46;&#104;&#111;&#102;&#102;&#109;&#97;&#110;&#110;&#64;&#102;&#122;&#45;&#106;&#117;&#101;&#108;&#105;&#99;&#104;&#46;&#100;&#101;">&#108;&#46;&#104;&#111;&#102;&#102;&#109;&#97;&#110;&#110;&#64;&#102;&#122;&#45;&#106;&#117;&#101;&#108;&#105;&#99;&#104;&#46;&#100;&#101;</a><br />
+Jülich Supercomputing Centre, Forschungszentrum Jülich, Germany</p>
 
 
 
