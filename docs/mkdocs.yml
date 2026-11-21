@@ -39,6 +39,7 @@ nav:
         - Performance tuning: performance.md
 
     - Developer documentation:
+        - Code development & releases: code-development.md
         - Code structure: code_structure.md
         - Building from source: building.md
         - Testing & validation: validation.md
