@@ -345,6 +345,9 @@ and the
 [code of conduct](https://github.com/slcs-jsc/jurassic/blob/HEAD/CODE_OF_CONDUCT.md)
 before contributing.
 
+For architecture, builds, testing, and release procedures, see the
+[Developer manual](https://slcs-jsc.github.io/jurassic/code-development/).
+
 ## License
 
 JURASSIC is distributed under the
