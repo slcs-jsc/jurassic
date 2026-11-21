@@ -113,45 +113,18 @@ and similarly for other configurations.
 
 ---
 
-## Automated test suite
+## Automated regression tests
 
-In addition to example projects, the build system provides a test
-target. From the `src/` directory, run:
+The build system provides a default regression suite, run with `make check`
+from the `src/` directory. These tests detect unintended changes in
+numerical results, file formats, and command-line behavior in controlled
+configurations. Passing them does not, by itself, establish scientific
+accuracy for other applications.
 
-```bash
-make check
-```
-
-This target runs a predefined set of tests and reports pass/fail
-status. These tests are intended to catch regressions caused by code
-changes or build-system issues.
-
-The default `make check` target currently runs the following suites from
-`tests/`:
-
-- `cli_test` - command-line behavior and help output for all executables
-- `tools_test` - small utility programs such as time conversion and
-  Planck/brightness-temperature tools
-- `atm_test` - atmospheric-profile generation, interpolation, hydrostatic
-  adjustment, and format conversion
-- `mat_test` - matrix input/output and format conversion
-- `obs_test` - observation geometry, ray tracing, and observation format
-  conversion
-- `tbl_test` - filter functions, lookup tables, and table format
-  conversion
-- `formod_test` - limb, nadir, and zenith forward-model calculations and
-  kernels
-- `ret_test` - retrieval workflow checks, including shared netCDF input
-  and output
-
-Most regression tests generate fresh output files and compare them with
-checked-in reference files under the corresponding `data.ref/`
-directory. This makes the test suite useful for detecting unintended
-changes in numerical output, file-format behavior, and command-line
-interfaces.
-
-An additional `mpi_test` suite is available for MPI-enabled retrieval
-checks, but it is not part of the default `make check` target.
+For the current test catalog, reference-data handling, optional MPI and
+ARM checks, continuous integration, and code-quality tools, see
+[Testing and code quality](testing.md) and the
+[test catalog](https://github.com/slcs-jsc/jurassic/blob/master/tests/README.md).
 
 ---
 
@@ -205,3 +178,4 @@ application-specific validation as needed.
 - [Performance considerations](performance.md)
 - [Quickstart examples](quickstart.md)
 - [Model assumptions & limitations](limitations.md)
+- [Testing and code quality](testing.md)
