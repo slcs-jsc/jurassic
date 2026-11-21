@@ -17,22 +17,39 @@ atmospheric state variables from measured radiances.
 
 ## Key features
 
-- **Infrared radiative transfer:** Simulates radiances and transmittances
-  for limb, nadir, zenith, and occultation viewing geometries.
-- **Fast spectroscopic calculations:** Uses the Emissivity Growth
-  Approximation (EGA), the Curtis–Godson Approximation (CGA), and
-  precomputed emissivity lookup tables to accelerate repeated
-  calculations for defined spectral configurations.
-- **Atmospheric retrievals:** Provides optimal estimation retrievals
-  with finite-difference Jacobians for atmospheric quantities such
-  as temperature and trace gas abundances.
-- **Flexible research workflows:** Supports configurable atmospheric
-  inputs, instrument channels, and NetCDF-based data exchange for
-  forward simulations and retrieval studies.
-- **Parallel execution:** Uses OpenMP for shared-memory parallelism
-  and optional MPI task distribution for retrieval workloads.
-- **Open-source development:** Written in C and distributed under
-  the GNU General Public License (GPL v3).
+- **Infrared radiative transfer:** JURASSIC simulates atmospheric
+  radiances and transmittances for limb, nadir, zenith, and occultation
+  viewing geometries. The model supports satellite and other remote
+  sensing applications with different observation geometries.
+
+- **Fast spectroscopic calculations:** The Emissivity Growth
+  Approximation (EGA) and Curtis–Godson Approximation (CGA) are
+  combined with precomputed emissivity lookup tables derived from
+  line-by-line spectroscopy. This approach reduces the cost of
+  repeated calculations for specified instrument channels and
+  atmospheric conditions.
+
+- **Atmospheric retrievals:** An integrated optimal estimation
+  framework retrieves atmospheric state variables, including
+  temperature and trace gas abundances, from radiance measurements.
+  Finite-difference Jacobians connect the forward model to iterative
+  inversion and sensitivity analysis.
+
+- **Flexible research workflows:** Users can configure atmospheric
+  profiles, spectral channels, and observation geometries for
+  instrument-specific studies. NetCDF input and output support
+  exchange of atmospheric, radiance, and lookup-table data with
+  existing analysis workflows.
+
+- **Parallel execution:** OpenMP accelerates suitable calculations
+  on multicore systems, including independent forward-model and
+  Jacobian evaluations. Optional MPI task distribution supports
+  retrieval workloads with multiple independent cases on HPC systems.
+
+- **Open-source development:** The C implementation is distributed
+  under the GNU General Public License (GPL v3). Public source code,
+  tests, documentation, and versioned releases support reproducible
+  research and contributions from other developers.
 
 The core model focuses on thermal-infrared radiative transfer.
 Accuracy and applicability depend on the chosen approximations,
