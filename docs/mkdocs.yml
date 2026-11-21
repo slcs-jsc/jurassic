@@ -37,12 +37,13 @@ nav:
         - Parallelization (MPI/OpenMP): parallelization.md
         - HPC workflows: hpc_workflows.md
         - Performance tuning: performance.md
+        - Scientific validation: validation.md
 
-    - Developer documentation:
-        - Code development & releases: code-development.md
+    - Developer manual:
+        - Code development & contributions: code-development.md
         - Code structure: code_structure.md
         - Building from source: building.md
-        - Testing & validation: validation.md
+        - Release management: releases.md
 
     - Further information:
         - References: references.md
