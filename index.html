@@ -1386,45 +1386,71 @@
 <h1 id="welcome-to-jurassic">Welcome to JURASSIC!</h1>
 <p>The Jülich Rapid Spectral Simulation Code (JURASSIC) is an open-source
 infrared radiative transfer and retrieval model for atmospheric remote
-sensing. It simulates radiances and transmittances in the mid-infrared
-(approximately 3–20 µm) and supports applications ranging from satellite
-data analysis to retrieval development and sensitivity studies.</p>
+sensing. It simulates atmospheric radiances and transmittances in the
+mid-infrared spectral region (approximately 3–20 µm) and is designed
+for research applications that require many repeated forward-model
+calculations, including satellite data analysis, retrieval development,
+and sensitivity studies.</p>
+<p>JURASSIC combines efficient radiative transfer approximations with
+precomputed spectroscopic lookup tables. It supports several viewing
+geometries and includes an integrated framework for retrieving
+atmospheric state variables from measured radiances.</p>
 <p><img alt="Infrared limb spectra for mid-latitude atmospheric conditions simulated with JURASSIC" src="img/spectra.png" /></p>
 <h2 id="key-features">Key features</h2>
 <ul>
-<li><strong>Radiative transfer:</strong> Fast simulations for limb, nadir, zenith, and
-  occultation viewing geometries using spectral approximations and
-  precomputed emissivity lookup tables.</li>
-<li><strong>Atmospheric retrievals:</strong> Integrated optimal estimation framework
-  with finite-difference Jacobians for atmospheric state variables.</li>
-<li><strong>Flexible applications:</strong> Configurable atmospheric inputs, spectral
-  channels, and instrument geometries.</li>
-<li><strong>Parallel computing:</strong> OpenMP acceleration and optional MPI task
-  distribution for retrieval workflows.</li>
-<li><strong>Open source:</strong> C implementation released under the GNU GPL v3.</li>
+<li><strong>Infrared radiative transfer:</strong> Simulates radiances and transmittances
+  for limb, nadir, zenith, and occultation viewing geometries.</li>
+<li><strong>Fast spectroscopic calculations:</strong> Uses the Emissivity Growth
+  Approximation (EGA), the Curtis–Godson Approximation (CGA), and
+  precomputed emissivity lookup tables to accelerate repeated
+  calculations for defined spectral configurations.</li>
+<li><strong>Atmospheric retrievals:</strong> Provides optimal estimation retrievals
+  with finite-difference Jacobians for atmospheric quantities such
+  as temperature and trace gas abundances.</li>
+<li><strong>Flexible research workflows:</strong> Supports configurable atmospheric
+  inputs, instrument channels, and NetCDF-based data exchange for
+  forward simulations and retrieval studies.</li>
+<li><strong>Parallel execution:</strong> Uses OpenMP for shared-memory parallelism
+  and optional MPI task distribution for retrieval workloads.</li>
+<li><strong>Open-source development:</strong> Written in C and distributed under
+  the GNU General Public License (GPL v3).</li>
 </ul>
-<p>For the model's assumptions, accuracy, and applicable spectral
-configurations, see <a href="limitations/">Model assumptions and limitations</a>
-and <a href="validation/">Scientific validation</a>.</p>
+<p>The core model focuses on thermal-infrared radiative transfer.
+Accuracy and applicability depend on the chosen approximations,
+lookup tables, and observing configuration. See
+<a href="limitations/">Model assumptions and limitations</a> and
+<a href="validation/">Scientific validation</a> for details.</p>
 <h2 id="getting-started">Getting started</h2>
-<p>Begin with the <a href="quickstart/">Quickstart</a> for a first simulation, or
-consult <a href="installation/">Installation</a> and
-<a href="configuration/">Configuration files</a> for setup details.</p>
+<p>New users can begin with the <a href="quickstart/">Quickstart</a>, which
+introduces a first simulation. The <a href="installation/">Installation</a>
+guide covers the software requirements and setup. The
+<a href="configuration/">Configuration files</a> and
+<a href="running/">Running JURASSIC</a> chapters explain how to prepare
+and execute further calculations.</p>
 <h2 id="explore-the-documentation">Explore the documentation</h2>
-<ul>
-<li><strong>Scientific background:</strong> <a href="overview/">Overview</a>,
-  <a href="theory/">Physical background</a>, and <a href="retrieval_theory/">Retrieval theory</a>.</li>
-<li><strong>Using the model:</strong> <a href="running/">Running JURASSIC</a>,
-  <a href="atmospheric_data/">Atmospheric data</a>, and
-  <a href="lookup_tables/">Spectroscopic data and lookup tables</a>.</li>
-<li><strong>HPC and development:</strong> <a href="hpc_workflows/">HPC workflows</a>,
-  <a href="code-development/">Code development</a>, and
-  <a href="testing/">Testing and code quality</a>.</li>
-</ul>
+<p><strong>Understand the model.</strong> The <a href="overview/">Overview</a> introduces
+the software and its applications. <a href="theory/">Physical background</a>
+explains the radiative transfer approach, while
+<a href="retrieval_theory/">Retrieval theory</a> covers the inverse modelling
+framework.</p>
+<p><strong>Prepare and analyze simulations.</strong> The user manual describes
+<a href="atmospheric_data/">Atmospheric data</a>,
+<a href="radiance_data/">Radiance data</a>, and
+<a href="lookup_tables/">Spectroscopic data and lookup tables</a>.
+For larger workloads, consult <a href="hpc_workflows/">HPC workflows</a>
+and <a href="performance/">Performance tuning</a>.</p>
+<p><strong>Develop or extend JURASSIC.</strong> The
+<a href="code-development/">Developer manual</a> links to
+<a href="code_structure/">Code structure</a>,
+<a href="building/">Building from source</a>, and
+<a href="testing/">Testing and code quality</a>.</p>
 <h2 id="citation-and-contributions">Citation and contributions</h2>
-<p>Please consult <a href="references/">References</a> for scientific publications
-and the <a href="https://github.com/slcs-jsc/jurassic/blob/master/CONTRIBUTING.md">contribution guidelines</a>
-if you would like to report an issue or contribute.</p>
+<p>If you use JURASSIC in research, please consult the
+<a href="references/">References</a> for relevant publications.
+Source code, releases, and contribution guidelines are available in
+the <a href="https://github.com/slcs-jsc/jurassic">GitHub repository</a>.
+The JURASSIC JOSS manuscript is still under review and should not
+yet be cited as a published article.</p>
 <h2 id="contact">Contact</h2>
 <p>Dr. Lars Hoffmann, <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#46;&#104;&#111;&#102;&#102;&#109;&#97;&#110;&#110;&#64;&#102;&#122;&#45;&#106;&#117;&#101;&#108;&#105;&#99;&#104;&#46;&#100;&#101;">&#108;&#46;&#104;&#111;&#102;&#102;&#109;&#97;&#110;&#110;&#64;&#102;&#122;&#45;&#106;&#117;&#101;&#108;&#105;&#99;&#104;&#46;&#100;&#101;</a><br />
 Jülich Supercomputing Centre, Forschungszentrum Jülich, Germany</p>
