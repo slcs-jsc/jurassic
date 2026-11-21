@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://slcs-jsc.github.io/jurassic/code-development/">
       
       
-        <link rel="prev" href="../performance/">
+        <link rel="prev" href="../validation/">
       
       
         <link rel="next" href="../code_structure/">
@@ -25,7 +25,7 @@
     
     
       
-        <title>Code development & releases - JURASSIC</title>
+        <title>Code development & contributions - JURASSIC</title>
       
     
     
@@ -101,7 +101,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Code development & releases
+              Code development & contributions
             
           </span>
         </div>
@@ -815,6 +815,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scientific validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -849,7 +877,7 @@
   <span class="md-ellipsis">
     
   
-    Developer documentation
+    Developer manual
   
 
     
@@ -865,7 +893,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Developer documentation
+    Developer manual
   
 
           </label>
@@ -894,7 +922,7 @@
   <span class="md-ellipsis">
     
   
-    Code development & releases
+    Code development & contributions
   
 
     
@@ -912,7 +940,7 @@
   <span class="md-ellipsis">
     
   
-    Code development & releases
+    Code development & contributions
   
 
     
@@ -938,30 +966,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#releases" class="md-nav__link">
+  <a href="#development-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Releases
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Releases">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#release-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Release checklist
+        Development workflow
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#formatting-analysis-and-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Formatting, analysis, and documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developer-manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Developer manual
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1037,14 +1070,70 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/" class="md-nav__link">
+      <a href="../testing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Testing & validation
+    Testing & code quality
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../profiling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiling & benchmarking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release management
   
 
     
@@ -1202,30 +1291,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#releases" class="md-nav__link">
+  <a href="#development-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Releases
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Releases">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#release-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Release checklist
+        Development workflow
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#formatting-analysis-and-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Formatting, analysis, and documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developer-manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Developer manual
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1250,48 +1344,48 @@
 
 
 <h1 id="code-development">Code development</h1>
-<p>For contribution guidelines, coding standards, and build and test
-instructions, see <a href="https://github.com/slcs-jsc/jurassic/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
-<h2 id="releases">Releases</h2>
-<p>JURASSIC and MPTRAC follow a coordinated, lightweight release process.
-Both projects aim for approximately two regular releases per year,
-preferably in January and July, when development activity is relatively low.
-Release dates are flexible; the projects may also publish additional
-releases after major development or validation milestones, such as a
-comprehensive code review. The two projects should normally be released
-around the same time, but a release of one project does not depend on the
-readiness of the other.</p>
-<p>Version numbers reflect the changes made, not the release date. Existing
-Git tags use the historical <code>vX.Y</code> convention. These two-component tags
-are retained for compatibility with previous releases; they are not full
-three-component Semantic Versioning (<code>MAJOR.MINOR.PATCH</code>) identifiers.
-For new versions, choose the appropriate change level based on compatibility
-and functionality, and document the versioning convention consistently.
-Do not rename historical tags.</p>
-<p>A release normally needs only a short maintenance window of approximately
-one or two days. Keep this focused on small fixes and cleanup rather than
-introducing substantial new features.</p>
-<h3 id="release-checklist">Release checklist</h3>
-<ol>
-<li>Review outstanding issues, resolve suitable small bugs, and record any
-   known limitations that remain open.</li>
-<li>Run the project's regression tests and check the GitHub Actions results.
-   Run additional scientific or HPC validation when the changes warrant it.</li>
-<li>Check documentation, citation metadata, and release-relevant version
-   references. Confirm that the intended commit is ready for publication.</li>
-<li>Select a version and create an annotated Git tag on the reviewed commit,
-   for example <code>git tag -a vX.Y -m "Release vX.Y"</code>. Push the specific tag
-   with <code>git push origin vX.Y</code>.</li>
-<li>Summarize changes since the previous tag with
-   <code>git log &lt;previous-tag&gt;..vX.Y --oneline</code>. Publish a GitHub Release
-   from that tag with concise release notes and known limitations.</li>
-<li>Check that Zenodo has archived the new release and provides a
-   version-specific DOI. Use the project's concept DOI for references to
-   the software across versions.</li>
-<li>Register the new release in the JuSER publication database if applicable.</li>
-</ol>
-<p>Release publication is a manual decision. A scheduled release window does
-not require publishing code that is not ready.</p>
+<p>This page provides an entry point for developers contributing to JURASSIC.</p>
+<h2 id="development-workflow">Development workflow</h2>
+<p>Follow the existing C style and naming conventions. Keep changes focused
+and avoid unrelated formatting changes. New or modified public functions
+and data structures should be documented in <code>src/jurassic.h</code> as appropriate;
+the <a href="https://slcs-jsc.github.io/jurassic/doxygen/">Doxygen reference</a>
+provides source-level API documentation.</p>
+<p>Before committing, inspect the diff and run the relevant tests:</p>
+<pre><code class="language-bash">git diff --check
+git status
+</code></pre>
+<p>Use the project's <a href="https://github.com/slcs-jsc/jurassic/blob/master/CONTRIBUTING.md">contribution guidelines</a>
+for issue reports, feature branches, pull requests, and review expectations.
+Small maintainer documentation changes may be committed directly to the
+default branch; substantial or externally contributed changes generally
+benefit from review.</p>
+<h2 id="formatting-analysis-and-documentation">Formatting, analysis, and documentation</h2>
+<p>The <code>src/Makefile</code> provides developer utilities, including:</p>
+<pre><code class="language-bash">cd src
+make cppcheck
+make lizard
+make indent
+make mkdocs
+make doxygen
+</code></pre>
+<p>The <code>indent</code> target changes source formatting; review its diff carefully
+and avoid broad unrelated reformatting. Static analysis and documentation
+targets may require optional tools to be installed.</p>
+<p>Update the relevant MkDocs page when behavior, configuration, or user
+workflows change. For tests, reference data, CI, and coverage, see
+<a href="../testing/">Testing and code quality</a>.</p>
+<h2 id="developer-manual">Developer manual</h2>
+<ul>
+<li><a href="../code_structure/">Code structure</a>: C library, public API, and tools.</li>
+<li><a href="../building/">Building from source</a>: compilation and build options.</li>
+<li><a href="../testing/">Testing and code quality</a>: regression tests, reference
+  data, automated checks, and static analysis.</li>
+<li><a href="../profiling/">Profiling and benchmarking</a>: performance investigations.</li>
+<li><a href="../releases/">Release management</a>: coordinated release policy and checklist.</li>
+</ul>
+<p>For scientific validation beyond regression tests, see
+<a href="../validation/">Validation and verification</a>.</p>
 
 
 
