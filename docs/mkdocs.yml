@@ -43,6 +43,8 @@ nav:
         - Code development & contributions: code-development.md
         - Code structure: code_structure.md
         - Building from source: building.md
+        - Testing & code quality: testing.md
+        - Profiling & benchmarking: profiling.md
         - Release management: releases.md
 
     - Further information:
