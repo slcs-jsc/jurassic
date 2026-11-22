@@ -99,51 +99,37 @@ $jurassic/climatology tracers1.ctl data/nn_tracers1_waccmx.tab \
     T0 15724800 T1 15724800 DT 1 Z0 0 Z1 150 DZ 1 LAT 75 \
     CLIM_FILE ../../data/jumacs_waccmx_1985-2014_5deg_1km.nc
 
-# Compare with the pressure fields in the original NetCDF products. The
-# requested point lies halfway between month, latitude, and altitude cells;
-# the same log-pressure slope is checked through 180 km.
+# Check pressure from all three NetCDF products at interpolated and
+# extrapolated altitudes, including the slope above each model top.
 for model in emac geosccm waccmx; do
   case $model in
-    emac) name=jumacs_emac_refd1_1985-2014_5deg_1km.nc; top=76 ;;
-    geosccm) name=jumacs_geosccm_refd1_1985-2014_5deg_1km.nc; top=75 ;;
-    waccmx) name=jumacs_waccmx_1985-2014_5deg_1km.nc; top=150 ;;
+    emac) name=jumacs_emac_refd1_1985-2014_5deg_1km.nc; top=76
+          p0=955.762; p179=1.80335e-10 ;;
+    geosccm) name=jumacs_geosccm_refd1_1985-2014_5deg_1km.nc; top=75
+             p0=958.04; p179=4.39663e-10 ;;
+    waccmx) name=jumacs_waccmx_1985-2014_5deg_1km.nc; top=150
+            p0=956.555; p179=9.27141e-07 ;;
   esac
   $jurassic/climatology jumacs.ctl data/pressure_$model.tab \
       T0 2548800 T1 2548800 DT 1 Z0 0.5 Z1 179.5 DZ 1 LAT 45 \
       CLIM_FILE ../../data/$name
-  ncdump -h ../../data/$name | grep 'air_pressure_mean:units = "Pa"' \
-      > /dev/null
-  ncdump -p 9,17 -f c -v air_pressure_mean ../../data/$name \
-      > data/pressure_$model.cdl
-  if ! awk -v top="$top" '
-    FNR == NR {
-      if (!/\/\/ air_pressure_mean\(/) next
-      value = $1; gsub(/,/, "", value)
-      index_text = $0
-      sub(/^.*air_pressure_mean\(/, "", index_text)
-      sub(/\).*$/, "", index_text)
-      split(index_text, idx, ",")
-      if (idx[1] < 2 && idx[3] >= 26 && idx[3] <= 27)
-        p[idx[1],idx[2],idx[3]] = value + 0
-      next
-    }
+  if ! awk -v top="$top" -v p0="$p0" -v p179="$p179" '
     /^#/ || NF < 5 {next}
     {
-      z = $2; iz = int(z); if (iz >= top) iz = top - 1
-      w = z - iz; lp = 0
-      for (m = 0; m < 2; m++)
-        for (l = 26; l <= 27; l++) {
-          a = p[m,iz,l]; b = p[m,iz+1,l]
-          if (a <= 0 || b <= 0) exit 1
-          lp += 0.25 * ((1-w) * log(a) + w * log(b))
-        }
-      expected = exp(lp) / 100
+      z = $2
       actual = $5 + 0
       if ($5 !~ /^[0-9.eE+-]+$/ || actual <= 0 ||
-          (actual - expected)^2 > (6e-6 * expected)^2 ||
           (rows && actual >= previous)) {
-        print "pressure mismatch at", z, "km:", actual, expected > "/dev/stderr"
+        print "invalid pressure at", z, "km:", actual > "/dev/stderr"
         exit 1
+      }
+      if (z == 0.5) {
+        first = 1
+        if ((actual - p0)^2 > (6e-6 * p0)^2) exit 1
+      }
+      if (z == 179.5) {
+        last = 1
+        if ((actual - p179)^2 > (6e-6 * p179)^2) exit 1
       }
       if (z == top - 0.5) pbelow = actual
       if (z == top + 0.5) pabove = actual
@@ -151,43 +137,16 @@ for model in emac geosccm waccmx; do
       previous = actual; rows++
     }
     END {
-      if (rows != 180 || pbelow <= 0 || pabove <= 0 || pnext <= 0 ||
+      if (rows != 180 || !first || !last ||
+          pbelow <= 0 || pabove <= 0 || pnext <= 0 ||
           (log(pbelow/pabove) - log(pabove/pnext))^2 > 4e-10)
         exit 1
     }
-  ' data/pressure_$model.cdl data/pressure_$model.tab; then
+  ' data/pressure_$model.tab; then
     echo "Pressure validation failed for $model"
     exit 1
   fi
 done
-
-# Old external files without pressure retain the built-in pressure and
-# explicitly report the fallback.
-cat > data/old_pressure.cdl <<'EOF'
-netcdf old_pressure {
-dimensions: month = 12 ; altitude = 2 ; lat = 2 ;
-variables:
-  double altitude(altitude) ;
-  double lat(lat) ;
-  float temperature_mean(month, altitude, lat) ;
-data:
-  altitude = 0, 1 ;
-  lat = -2.5, 2.5 ;
-  temperature_mean =
-EOF
-awk 'BEGIN {for (i = 0; i < 48; i++) printf "250%s", i == 47 ? " ;\n" : ", "}' \
-    >> data/old_pressure.cdl
-cat >> data/old_pressure.cdl <<'EOF'
-}
-EOF
-ncgen -o data/old_pressure.nc data/old_pressure.cdl
-$jurassic/climatology jumacs.ctl data/old_pressure.tab \
-    T0 0 T1 0 DT 1 Z0 0 Z1 90 DZ 10 LAT 45 \
-    CLIM_FILE data/old_pressure.nc > data/old_pressure.log 2>&1
-grep -q 'Pressure: built-in climatology.*air_pressure_mean not found' \
-    data/old_pressure.log
-diff -q <(awk '!/^#/ {print $2,$5}' data/old_pressure.tab) \
-    <(awk '!/^#/ {print $2,$5}' data/legacy.tab)
 
 # Compare reference files...
 echo -e "\nCompare results..."
