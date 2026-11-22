@@ -500,9 +500,10 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define ALLOC(ptr, type, n)				 \
+#define ALLOC(ptr, type, n)				 do { \
   if((ptr=calloc((size_t)(n), sizeof(type)))==NULL)      \
-    ERRMSG("Out of memory!");
+    ERRMSG("Out of memory!"); \
+  } while (0)
 
 /**
  * @brief Compute brightness temperature from radiance.
@@ -678,10 +679,10 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define FREAD(ptr, type, size, out) { \
+#define FREAD(ptr, type, size, out) do { \
     if(fread(ptr, sizeof(type), size, out)!=size) \
       ERRMSG("Error while reading!"); \
-  }
+  } while (0)
 
 /**
  * @brief Write binary data to a file.
@@ -701,10 +702,10 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define FWRITE(ptr, type, size, out) { \
+#define FWRITE(ptr, type, size, out) do { \
     if(fwrite(ptr, sizeof(type), size, out)!=size) \
       ERRMSG("Error while writing!"); \
-  }
+  } while (0)
 
 /**
  * @brief Compute linear interpolation.
@@ -797,11 +798,11 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC(cmd) {				     \
+#define NC(cmd) do {				     \
     int nc_result=(cmd);			     \
     if(nc_result!=NC_NOERR)			     \
       ERRMSG("%s", nc_strerror(nc_result));	     \
-  }
+  } while (0)
 
 /**
  * @brief Define a NetCDF variable with attributes.
@@ -827,7 +828,7 @@ enum {
  * @author Lars Hoffmann
  */
 
-#define NC_DEF_VAR(varname, type, ndims, dims, long_name, units, level, quant) { \
+#define NC_DEF_VAR(varname, type, ndims, dims, long_name, units, level, quant) do { \
     NC(nc_def_var(ncid, varname, type, ndims, dims, &varid));		\
     NC(nc_put_att_text(ncid, varid, "long_name", strnlen(long_name, LEN), long_name)); \
     NC(nc_put_att_text(ncid, varid, "units", strnlen(units, LEN), units)); \
@@ -837,7 +838,7 @@ enum {
       /* unsigned int ulevel = (unsigned int)level; */			\
       /* NC(nc_def_var_filter(ncid, varid, 32015, 1, (unsigned int[]){ulevel})); */ \
     }									\
-  }
+  } while (0)
 
 /**
  * @brief Enable quantization for the current NetCDF variable.
@@ -879,7 +880,7 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC_GET_DOUBLE(varname, ptr, force) {			\
+#define NC_GET_DOUBLE(varname, ptr, force) do {			\
     if(force) {							\
       NC(nc_inq_varid(ncid, varname, &varid));			\
       NC(nc_get_var_double(ncid, varid, ptr));			\
@@ -889,7 +890,7 @@ enum {
       } else							\
 	WARN("netCDF variable %s is missing!", varname);	\
     }								\
-  }
+  } while (0)
 
 /**
  * @brief Inquire the length of a dimension in a NetCDF file.
@@ -908,7 +909,7 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC_INQ_DIM(dimname, ptr, min, max, check) {       \
+#define NC_INQ_DIM(dimname, ptr, min, max, check) do {       \
     int dimid; size_t naux;				  \
     NC(nc_inq_dimid(ncid, dimname, &dimid));		  \
     NC(nc_inq_dimlen(ncid, dimid, &naux));		  \
@@ -916,7 +917,7 @@ enum {
     if (check)		                                  \
       if ((*ptr) < (min) || (*ptr) > (max))		  \
         ERRMSG("Dimension %s is out of range!", dimname); \
-  }
+  } while (0)
 
 /**
  * @brief Write double precision data to a NetCDF variable.
@@ -932,14 +933,14 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC_PUT_DOUBLE(varname, ptr, hyperslab) {		\
+#define NC_PUT_DOUBLE(varname, ptr, hyperslab) do {		\
     NC(nc_inq_varid(ncid, varname, &varid));			\
     if(hyperslab) {						\
       NC(nc_put_vara_double(ncid, varid, start, count, ptr));	\
     } else {							\
       NC(nc_put_var_double(ncid, varid, ptr));			\
     }								\
-  }
+  } while (0)
 
 /**
  * @brief Write a float array to a NetCDF file.
@@ -956,14 +957,14 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC_PUT_FLOAT(varname, ptr, hyperslab) {			\
+#define NC_PUT_FLOAT(varname, ptr, hyperslab) do {			\
     NC(nc_inq_varid(ncid, varname, &varid));			\
     if(hyperslab) {						\
       NC(nc_put_vara_float(ncid, varid, start, count, ptr));	\
     } else {							\
       NC(nc_put_var_float(ncid, varid, ptr));			\
     }								\
-  }
+  } while (0)
 
 /**
  * @brief Write integer data to a NetCDF variable.
@@ -979,14 +980,14 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC_PUT_INT(varname, ptr, hyperslab) {			\
+#define NC_PUT_INT(varname, ptr, hyperslab) do {			\
     NC(nc_inq_varid(ncid, varname, &varid));			\
     if(hyperslab) {						\
       NC(nc_put_vara_int(ncid, varid, start, count, ptr));	\
     } else {							\
       NC(nc_put_var_int(ncid, varid, ptr));			\
     }								\
-  }
+  } while (0)
 
 /**
  * @brief Add a text attribute to a NetCDF variable.
@@ -1001,10 +1002,10 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC_PUT_ATT(varname, attname, text) {				\
+#define NC_PUT_ATT(varname, attname, text) do {				\
     NC(nc_inq_varid(ncid, varname, &varid));				\
     NC(nc_put_att_text(ncid, varid, attname, strnlen(text, LEN), text)); \
-  }
+  } while (0)
 
 /**
  * @brief Add a global text attribute to a NetCDF file.
@@ -1018,8 +1019,9 @@ enum {
  *
  * @author Lars Hoffmann
  */
-#define NC_PUT_ATT_GLOBAL(attname, text)				\
-  NC(nc_put_att_text(ncid, NC_GLOBAL, attname, strnlen(text, LEN), text));
+#define NC_PUT_ATT_GLOBAL(attname, text)				do { \
+  NC(nc_put_att_text(ncid, NC_GLOBAL, attname, strnlen(text, LEN), text)); \
+  } while (0)
 
 /**
  * @brief Convert noise-equivalent spectral radiance (NESR) to
@@ -1282,7 +1284,7 @@ enum {
  * @see timer_group, PRINT_TIMERS
  */
 #define SELECT_TIMER(id, group) \
-  {timer_group(id, group, 0);}
+  do {timer_group(id, group, 0);} while (0)
 
 /**
  * @brief Print aggregated timer statistics.
@@ -1292,7 +1294,7 @@ enum {
  * @see timer_group, SELECT_TIMER
  */
 #define PRINT_TIMERS \
-  {timer_group("END", "END", 1);}
+  do {timer_group("END", "END", 1);} while (0)
 
 /**
  * @brief Tokenize a string and parse a variable.
@@ -1378,14 +1380,14 @@ enum {
  * 
  * @author Lars Hoffmann
  */
-#define LOG(level, ...) {						\
+#define LOG(level, ...) do {						\
     if(level >= 2)							\
       printf("  ");							\
     if(level <= LOGLEV) {						\
       printf(__VA_ARGS__);						\
       printf("\n");							\
     }									\
-  }
+  } while (0)
 
 /*!
  * \brief Print a warning message with contextual information.
@@ -1415,10 +1417,10 @@ enum {
  * 
  * @author Lars Hoffmann
  */
-#define WARN(...) {							\
+#define WARN(...) do {							\
     printf("\nWarning (%s, %s, l%d): ", __FILE__, __func__, __LINE__);	\
     LOG(0, __VA_ARGS__);						\
-  }
+  } while (0)
 
 /*!
  * \brief Print an error message with contextual information and terminate the program.
@@ -1448,11 +1450,11 @@ enum {
  * 
  * @author Lars Hoffmann
  */
-#define ERRMSG(...) {							\
+#define ERRMSG(...) do {							\
     printf("\nError (%s, %s, l%d): ", __FILE__, __func__, __LINE__);	\
     LOG(0, __VA_ARGS__);						\
     exit(EXIT_FAILURE);							\
-  }
+  } while (0)
 
 /*!
  * \brief Print the value of a variable with contextual information.
@@ -1483,9 +1485,10 @@ enum {
  * 
  * @author Lars Hoffmann
  */
-#define PRINT(format, var)						\
+#define PRINT(format, var)						do { \
   printf("Print (%s, %s, l%d): %s= "format"\n",				\
-	 __FILE__, __func__, __LINE__, #var, var);
+	 __FILE__, __func__, __LINE__, #var, var); \
+  } while (0)
 
 /* ------------------------------------------------------------
    Structs...
