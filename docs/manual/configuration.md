@@ -197,18 +197,36 @@ Enable/disable built-in continuum contributions (interpreted as on/off switches)
 
 - `CLIM_FILE` *(default: `-`)*  
   Climatological data source for the `climatology` tool. `-` uses the
-  built-in JURASSIC climatology. A JuMACS netCDF file provides temperature
-  and mapped trace gases from JuMACS, while quantities not supplied by
-  JuMACS retain built-in behavior.
+  built-in JURASSIC climatology. A JuMACS netCDF file provides model
+  pressure, temperature, and mapped trace gases from JuMACS, while
+  quantities not supplied by JuMACS retain built-in behavior.
 
 !!! note
     JuMACS products are monthly zonal-mean climatologies, and the
     `climatology` tool interpolates them in climatological time, latitude,
     and altitude. Harmonized JuMACS products provide 12 monthly means on
     36 area-weighted 5-degree latitude bands; their upper altitude is
-    model-dependent. Pressure always remains based on the built-in
-    JURASSIC climatology, because the harmonized JuMACS products do not
-    provide a pressure field.
+    model-dependent. The validated products contain `air_pressure_mean`
+    on the same monthly, geometric-altitude, and latitude grid as the other
+    fields, in Pa. JURASSIC requires the `units = Pa` attribute and converts
+    it to hPa for atmospheric profiles.
+    It interpolates the logarithm of pressure in altitude, latitude, and
+    cyclic climatological time, clamping latitude at the outer band centers
+    and altitude below the lowest grid level. This preserves positive,
+    vertically decreasing pressure when the source profiles have those
+    properties; the reader validates them before interpolation.
+
+    Above the model top, pressure continues exponentially from its top
+    value using `H = -(z_top-z_below)/ln(p_top/p_below)` and
+    `p(z) = p_top exp(-(z-z_top)/H)`. The logarithmic pressure slope is
+    interpolated for the requested latitude and month, so each model
+    profile supplies its own upper-atmosphere scale height. JURASSIC checks
+    that every source scale height is finite and positive. Pressure never
+    transitions to built-in values above the external model top. An older
+    external file without `air_pressure_mean` retains built-in pressure
+    throughout, with an explicit diagnostic. `CLIM_FILE = -` retains the
+    unchanged built-in pressure profile. No hydrostatic reconstruction is
+    applied.
 
     JuMACS values are used unchanged up to and including the model top of
     the product. Above the model top, temperature and most mapped gases

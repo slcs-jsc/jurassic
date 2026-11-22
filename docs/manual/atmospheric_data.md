@@ -380,8 +380,8 @@ JURASSIC atmospheric file that can subsequently be used by `formod`,
 atmospheric profiles.
 
 - By default (`CLIM_FILE = -`) the built-in JURASSIC climatology is used.
-- Setting `CLIM_FILE` to a JuMACS netCDF file overlays the available
-  JuMACS temperature and mapped trace-gas fields on the built-in profile.
+- Setting `CLIM_FILE` to a JuMACS netCDF file uses its model pressure,
+  temperature, and mapped trace-gas fields where available.
 
 See [Configuration](configuration.md) for the detailed climatology
 behavior, including gas mapping and the treatment of altitudes above the

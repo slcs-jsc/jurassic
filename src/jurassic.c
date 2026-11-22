@@ -1236,6 +1236,7 @@ int read_clim_field(
    altitude... */
 #define CLIM_TOP_CONSTANT 1
 #define CLIM_TOP_LOG      2
+#define CLIM_TOP_PRESSURE 3
 
 static int climatology_external_top_policy(
   const char *emitter) {
@@ -1279,7 +1280,7 @@ void climatology_external_interp(
 
     /* Keep built-in climatology above the transition region, except for
        fields with constant extrapolation... */
-    if (top_policy != CLIM_TOP_CONSTANT &&
+    if (top_policy != CLIM_TOP_CONSTANT && top_policy != CLIM_TOP_PRESSURE &&
         atm->z[ip] >= ztop + CLIM_TRANSITION)
       continue;
 
@@ -1319,25 +1320,39 @@ void climatology_external_interp(
     double zq = atm->z[ip];
     if (zq < alt[0])
       zq = alt[0];
-    else if (zq > ztop)
+    else if (zq > ztop && top_policy != CLIM_TOP_PRESSURE)
       zq = ztop;
-    const int iz = locate_reg(alt, nalt, zq);
+    const int iz = zq >= ztop ? nalt - 2 : locate_reg(alt, nalt, zq);
+
+    /* For pressure, interpolation of logarithms gives a positive profile
+       whose uppermost slope supplies the model-specific scale height. */
+#define CLIM_VALUE(m, z, l) (top_policy == CLIM_TOP_PRESSURE \
+                            ? log(field[m][z][l]) : field[m][z][l])
 
     /* Trilinear interpolation (linear in all directions)... */
     const double v0 = LIN(alt[iz],
-			  LIN(latg[il], field[it][iz][il], latg[il + 1],
-			      field[it][iz][il + 1], latq),
+			  LIN(latg[il], CLIM_VALUE(it, iz, il), latg[il + 1],
+			      CLIM_VALUE(it, iz, il + 1), latq),
 			  alt[iz + 1],
-			  LIN(latg[il], field[it][iz + 1][il], latg[il + 1],
-			      field[it][iz + 1][il + 1], latq), zq);
+			  LIN(latg[il], CLIM_VALUE(it, iz + 1, il), latg[il + 1],
+			      CLIM_VALUE(it, iz + 1, il + 1), latq), zq);
     const double v1 = LIN(alt[iz],
-			  LIN(latg[il], field[it2][iz][il], latg[il + 1],
-			      field[it2][iz][il + 1], latq),
+			  LIN(latg[il], CLIM_VALUE(it2, iz, il), latg[il + 1],
+			      CLIM_VALUE(it2, iz, il + 1), latq),
 			  alt[iz + 1],
-			  LIN(latg[il], field[it2][iz + 1][il], latg[il + 1],
-			      field[it2][iz + 1][il + 1], latq), zq);
+			  LIN(latg[il], CLIM_VALUE(it2, iz + 1, il), latg[il + 1],
+			      CLIM_VALUE(it2, iz + 1, il + 1), latq), zq);
+#undef CLIM_VALUE
 
     const double jumacs = LIN(t0, v0, t1, v1, sec);
+
+    if (top_policy == CLIM_TOP_PRESSURE) {
+      /* Atmospheric files and atm->p use hPa; JuMACS stores Pa. */
+      out[ip] = exp(jumacs) * 0.01;
+      if (!isfinite(out[ip]) || out[ip] <= 0.)
+        ERRMSG("Invalid interpolated JuMACS pressure at z=%g km!", atm->z[ip]);
+      continue;
+    }
 
     /* Blend smoothly towards the built-in climatology above the model
        top, using a cosine taper over the transition region; before
@@ -1498,6 +1513,50 @@ clim_t *read_clim(
   clim->has_t = 1;
   LOG(2, "Temperature: JuMACS temperature_mean, %g ... %g K", vmin, vmax);
 
+  /* Pressure is optional for older harmonized products. Validate each
+     monthly latitude profile before using its uppermost scale height. */
+  clim->has_p = read_clim_field(ctl->climfile, "air_pressure_mean", ncid,
+				    dim_month, dim_alt, dim_lat, clim->nalt,
+				    clim->nlat, clim->p, &vmin, &vmax);
+  if (clim->has_p) {
+    int pressure_varid;
+    nc_type units_type;
+    size_t units_len;
+    NC(nc_inq_varid(ncid, "air_pressure_mean", &pressure_varid));
+    if (nc_inq_att(ncid, pressure_varid, "units", &units_type,
+		   &units_len) != NC_NOERR || units_type != NC_CHAR ||
+	units_len != 2)
+      ERRMSG("Pressure variable air_pressure_mean in climatology file %s "
+	     "must declare units = Pa!", ctl->climfile);
+    char units[3];
+    NC(nc_get_att_text(ncid, pressure_varid, "units", units));
+    units[2] = '\0';
+    if (strcmp(units, "Pa") != 0)
+      ERRMSG("Pressure variable air_pressure_mean in climatology file %s "
+	     "must declare units = Pa!", ctl->climfile);
+
+    for (int m = 0; m < CT; m++)
+      for (int il = 0; il < clim->nlat; il++) {
+	for (int iz = 0; iz < clim->nalt; iz++) {
+	  const double p = clim->p[m][iz][il];
+	  if (p <= 0. || (iz > 0 && p >= clim->p[m][iz - 1][il]))
+	    ERRMSG("Pressure in climatology file %s must be positive and "
+		   "strictly decreasing (month %d, lat %d, altitude %d)!",
+		   ctl->climfile, m, il, iz);
+	}
+	const int top = clim->nalt - 1;
+	const double h = -(clim->alt[top] - clim->alt[top - 1]) /
+	  log(clim->p[m][top][il] / clim->p[m][top - 1][il]);
+	if (!isfinite(h) || h <= 0.)
+	  ERRMSG("Invalid upper pressure scale height in climatology file %s "
+		 "(month %d, lat %d)!", ctl->climfile, m, il);
+      }
+    LOG(2, "Pressure: JuMACS air_pressure_mean, %g ... %g Pa", vmin, vmax);
+  } else {
+    WARN("Pressure: built-in climatology (JuMACS variable "
+	 "air_pressure_mean not found in %s)", ctl->climfile);
+  }
+
   /* Read trace gases... */
   /* Mapping of JURASSIC emitter names to JuMACS climatology variable base
      names. Species without an entry keep their built-in climatological
@@ -1566,8 +1625,6 @@ clim_t *read_clim(
     }
   }
 
-  LOG(2, "Pressure: built-in climatology");
-
   /* Close climatology file... */
   NC(nc_close(ncid));
 
@@ -1581,6 +1638,11 @@ void climatology_external(
   const ctl_t *ctl,
   const clim_t *clim,
   atm_t *atm) {
+
+  /* Overwrite pressure with the model profile, including above its top. */
+  if (clim->has_p)
+    climatology_external_interp(clim, atm, clim->p, CLIM_TOP_PRESSURE,
+				atm->p);
 
   /* Overwrite temperature... */
   if (clim->has_t)

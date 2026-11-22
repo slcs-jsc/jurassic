@@ -1572,11 +1572,17 @@ typedef struct {
   /*! Temperature [K]. */
   double t[CT][CZ][CLAT];
 
+  /*! Model pressure [Pa]. */
+  double p[CT][CZ][CLAT];
+
   /*! Volume mixing ratio [ppv]. */
   double q[NG][CT][CZ][CLAT];
 
   /*! Set if a temperature field was read. */
   int has_t;
+
+  /*! Set if a pressure field was read. */
+  int has_p;
 
   /*! Set for each emitter with a field read. */
   int has_q[NG];
@@ -2341,8 +2347,8 @@ int read_clim_field(
  * and January.
  * Latitude is clamped at the outermost JuMACS band centers, altitude at
  * the lowest JuMACS level. Profile points above the top of the JuMACS
- * grid are either held at the top-level JuMACS value or blended smoothly
- * towards the built-in climatology, according to the top-boundary policy.
+ * grid are held, blended towards the built-in climatology, or extrapolated
+ * exponentially from the uppermost pressure levels, according to the policy.
  *
  * @param[in]  clim         JuMACS climatology providing the altitude and
  *                          latitude grids.
@@ -2355,7 +2361,10 @@ int read_clim_field(
  *                          keeps the JuMACS top-level value constant,
  *                          2 blends towards the built-in climatology in
  *                          logarithmic space where both values are
- *                          strictly positive.
+ *                          strictly positive, 3 interpolates pressure in
+ *                          log space in all three coordinates and extrapolates
+ *                          it above the model top with the top-level scale
+ *                          height.
  * @param[out] out          Output array of atm->np values to be
  *                          overwritten.
  *
@@ -2378,7 +2387,9 @@ void climatology_external_interp(
  * altitude, and lat as well as coordinate variables of the same name.
  * Fields are taken from NetCDF variables named after the quantity with
  * a @c _mean suffix. A missing temperature field is an error, trace gas
- * fields missing from the file are flagged by clim->has_q.
+ * fields missing from the file are flagged by clim->has_q. Optional
+ * air_pressure_mean must declare units of Pa; when absent, built-in pressure
+ * is retained.
  *
  * @param[in] ctl  Control parameters providing the climatology file name
  *                 and the emitter list.
@@ -2405,7 +2416,8 @@ clim_t *read_clim(
  * mixing ratios of all atmospheric profile points by the interpolated
  * values of the given JuMACS climatology. Species not mapped to a JuMACS
  * variable, and fields missing from the climatology, retain their
- * built-in values. The climatological pressure is never overwritten.
+ * built-in values. Model pressure overwrites built-in pressure where
+ * available and extends exponentially above the model top.
  *
  * @param[in]  ctl  Control parameters providing the emitter list.
  * @param[in]  clim JuMACS climatology to interpolate from.
