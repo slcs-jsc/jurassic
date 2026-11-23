@@ -104,7 +104,7 @@ Further developments expanded its scientific scope. Extensions for aerosols and 
 
 # AI usage disclosure
 
-We used ChatGPT and Codex (OpenAI), and Claude (Anthropic) to assist with software development, code review, testing, documentation, and manuscript revision. All AI-assisted outputs were reviewed, edited, and validated by the authors. The authors made all core scientific and software design decisions and remain fully responsible for the submitted software and manuscript.
+We used OpenAI's ChatGPT and Codex, as well as Anthropic's Claude, to assist with software development, code review, testing, documentation, and manuscript revision. All AI-assisted outputs were reviewed, edited, and validated by the authors. The authors made all core scientific and software design decisions and remain fully responsible for the submitted software and manuscript.
 
 # Acknowledgements
 
