@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jurassic-web-runner"
+version = "0.1.0"
+description = "Scientific GUI and safe Python wrapper for JURASSIC"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+dependencies = ["Flask>=3.0,<4", "numpy>=1.24,<3", "matplotlib>=3.7,<4", "waitress>=3.0,<4"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.8"]
+
+[project.scripts]
+jurassic-web = "jurassic_web.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+jurassic_web = ["templates/*.html", "static/css/*.css", "static/js/*.js", "static/vendor/*.js", "static/*.svg", "static/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

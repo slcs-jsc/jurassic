@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-shell">
+  <aside class="sidebar neo-raised" aria-label="Main navigation">
+    <div class="brand" aria-label="JURASSIC Web Runner">
+      <div class="brand-icon">🦖</div>
+      <div class="brand-main">JURASSIC</div>
+      <div class="brand-pill">Web Runner</div>
+    </div>
+    <nav class="nav-stack">
+      <button class="nav-item active" data-section="simulation"><svg><use href="#i-home"/></svg>Simulation</button>
+      <button class="nav-item" data-section="datasets"><svg><use href="#i-layer"/></svg>Datasets</button>
+      <button class="nav-item" data-section="configurations"><svg><use href="#i-sliders"/></svg>Configurations</button>
+      <button class="nav-item" data-section="compare"><svg><use href="#i-chart"/></svg>Compare Runs</button>
+      <button class="nav-item" data-section="history"><svg><use href="#i-clock"/></svg>Run History</button>
+      <button class="nav-item" data-section="datasets"><svg><use href="#i-db"/></svg>Data Manager <span class="nav-arrow">⌄</span></button>
+      <div class="nav-submenu">
+        <button data-section="datasets">Gases</button>
+        <button data-section="datasets">Channels</button>
+        <button data-section="datasets">Lookup Tables</button>
+      </div>
+      <button class="nav-item" data-section="settings"><svg><use href="#i-gear"/></svg>Settings</button>
+    </nav>
+    <div class="sidebar-bottom"><span class="status-dot"></span><span id="sidebar-status">Checking installation…</span><small>Scientific engine · v0.1</small></div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topline"><span class="topline-bar"></span>Atmospheric Radiative Transfer Simulation Interface</div>
+      <div class="workflow" aria-label="Workflow steps">
+        <button class="flow-step active" data-flow="setup"><svg><use href="#i-sliders"/></svg>Setup</button>
+        <span class="flow-arrow">›</span>
+        <button class="flow-step" data-flow="run"><svg><use href="#i-play"/></svg>Run</button>
+        <span class="flow-arrow">›</span>
+        <button class="flow-step" data-flow="results"><svg><use href="#i-chart"/></svg>Results</button>
+      </div>
+      <div class="theme-switch neo-raised" aria-label="Theme selection">
+        <button id="light-btn" class="selected" title="Light mode" aria-label="Light mode"><svg><use href="#i-sun"/></svg></button>
+        <button id="dark-btn" title="Dark mode" aria-label="Dark mode"><svg><use href="#i-moon"/></svg></button>
+      </div>
+    </header>
+
+    <div id="simulation-section" class="section active-section">
+      <div class="workspace">
+        <section class="setup-panel neo-panel" aria-labelledby="setup-title">
+          <div class="panel-heading"><div class="title-with-icon"><svg class="accent-icon"><use href="#i-sliders"/></svg><h1 id="setup-title">Simulation Setup</h1></div>
+            <div class="segmented compact"><button class="selected" id="basic-mode" type="button">Basic Mode</button><button id="advanced-mode" type="button">Advanced</button></div>
+          </div>
+          <div class="inner-card geometry-card"><label class="section-label">Observation Geometry</label>
+            <div class="segmented geometry-segment" id="geometry-options">
+              <button class="selected" data-geometry="nadir" type="button"><span class="geom-icon">◎</span>Nadir</button>
+              <button data-geometry="limb" type="button"><span class="geom-icon">⌢</span>Limb</button>
+              <button data-geometry="zenith" type="button"><span class="geom-icon">↟</span>Zenith</button>
+            </div>
+          </div>
+          <div class="dataset-line"><label for="dataset-select">Spectroscopic Dataset</label><div class="select-wrap neo-inset"><svg><use href="#i-layer"/></svg><select id="dataset-select" aria-label="Spectroscopic dataset"><option>Loading…</option></select></div></div>
+          <div class="form-grid">
+            <div class="inner-card selection-card"><div class="card-title">Atmospheric Gases <span title="Available from the selected lookup-table dataset" class="hint">ⓘ</span></div><div id="gases-list" class="checks"><p class="subtle">Loading gases…</p></div></div>
+            <div class="inner-card selection-card"><div class="card-title">Spectral Channels <span title="Availability depends on dataset" class="hint">ⓘ</span></div><div id="channels-list" class="checks"></div><button id="add-channel-shortcut" class="btn small full" type="button"><svg><use href="#i-plus"/></svg>Add Channel</button></div>
+            <div class="inner-card"><div class="card-title">Output Quantity</div>
+              <label class="radio-line"><input type="radio" name="output" value="radiance" checked>Radiance <span class="unit">(W / m² sr cm⁻¹)</span></label>
+              <label class="radio-line"><input type="radio" name="output" value="bbt">Brightness Temperature <span class="unit">(K)</span></label>
+            </div>
+            <div class="inner-card"><div class="card-title">Execution Options <span class="hint" title="Kernel calculations can be much slower">ⓘ</span></div>
+              <label class="field-line" for="rayds">Ray Step (RAYDS)<input id="rayds" class="neo-inset number-field" type="number" min="0.1" max="100" step="0.1" value="10"></label>
+              <label class="checkbox-line"><input type="checkbox" id="kernel">Calculate Kernels</label>
+            </div>
+          </div>
+          <div class="advanced-fields" id="advanced-fields" hidden>
+            <label>Vertical step (RAYDZ) <input id="raydz" class="neo-inset" type="number" value="0.1" min="0.01" max="5" step="0.01"></label>
+            <label class="checkbox-line"><input id="refrac" type="checkbox" checked>Enable atmospheric refraction</label>
+            <label>Custom atmosphere (.tab) <input type="file" id="atmosphere-file" accept=".tab,text/plain"></label>
+            <p class="subtle">New/custom gases require a matching atmospheric file containing the selected gas columns.</p>
+          </div>
+          <div class="validation-note" id="compatibility-note" role="status"></div>
+          <div class="button-row"><label class="btn file-button"><svg><use href="#i-upload"/></svg>Upload Configuration<input id="config-file" type="file" accept=".ctl,text/plain" hidden></label>
+            <button class="btn" id="preview-btn" type="button"><svg><use href="#i-eye"/></svg>Preview (.ctl)</button>
+            <button class="btn" id="save-config-btn" type="button"><svg><use href="#i-file"/></svg>Save As…</button>
+          </div>
+          <button class="primary-btn run-btn" id="run-button"><svg><use href="#i-play"/></svg><span>Run Simulation</span></button>
+        </section>
+
+        <section class="results-panel neo-panel" aria-labelledby="results-title">
+          <div class="results-head panel-heading"><div class="title-with-icon"><svg class="accent-icon"><use href="#i-file"/></svg><h2 id="results-title">Results</h2><span class="status-pill" id="run-status-pill">Preview</span></div>
+            <div class="run-meta"><span>◷ <span id="run-duration">—</span></span><span class="vertical-divider"></span><span>▦ <span id="run-date">—</span></span></div>
+          </div>
+          <div class="segmented content-tabs" id="content-tabs">
+            <button class="selected" data-view="plots"><svg><use href="#i-chart"/></svg>Plots</button>
+            <button data-view="table"><svg><use href="#i-grid"/></svg>Results Table</button>
+            <button data-view="atmosphere"><svg><use href="#i-layer"/></svg>Atmosphere</button>
+            <button data-view="config"><svg><use href="#i-file"/></svg>Configuration</button>
+            <button data-view="logs"><svg><use href="#i-sliders"/></svg>Logs</button>
+          </div>
+          <div class="plot-container" id="plots-view">
+            <div class="segmented metric-tabs" id="metric-tabs">
+              <button class="selected" data-metric="radiance">Radiance / BBT</button>
+              <button data-metric="transmittance">Transmittance</button>
+              <button data-metric="atmosphere">Atmospheric Profile</button>
+              <button data-metric="kernels">Kernels</button>
+            </div>
+            <div class="chart-card neo-inset"><div class="chart-head"><h3 id="chart-title"><svg class="accent-icon"><use href="#i-chart"/></svg> Radiance vs. Viewing Geometry</h3>
+              <div class="icon-actions"><button type="button" id="chart-interactive" class="btn chart-mode-btn" aria-pressed="false" title="Switch between saved PNG and interactive graph">Interactive</button><button id="chart-expand" class="icon-btn" title="Expand chart">⛶</button><button id="chart-download" class="icon-btn" title="Export PNG"><svg><use href="#i-download"/></svg></button></div>
+              </div>
+              <div id="plot" role="img" aria-label="Scientific results chart"></div>
+              <div id="chart-note" class="chart-note">Illustrative preview · Run a simulation to display actual data.</div>
+            </div>
+          </div>
+          <div id="table-view" class="tab-panel" hidden><div class="pane-heading"><h3>Measurement data</h3><button id="csv-download" class="btn small">Export CSV</button></div><div class="table-scroll" id="results-table"><div class="empty-state">Complete a simulation to view numerical data.</div></div></div>
+          <div id="atmosphere-view" class="tab-panel" hidden><h3>Atmospheric profile</h3><div id="atmosphere-plot" class="minor-plot"></div><p class="subtle">Atmospheric variables are plotted against altitude; values may have different scales and units.</p></div>
+          <div id="config-view" class="tab-panel" hidden><div class="pane-heading"><h3>Generated configuration</h3><button id="copy-ctl" class="btn small">Copy text</button></div><pre id="config-text" class="text-preview">No configuration loaded.</pre></div>
+          <div id="logs-view" class="tab-panel" hidden><div class="pane-heading"><h3>Execution logs</h3><select id="log-step" class="neo-inset"><option value="formod">Forward model</option><option value="climatology">Climatology</option><option value="geometry">Geometry</option><option value="kernel">Kernel</option><option value="web_runner">Runner diagnostics</option></select></div><pre id="log-text" class="text-preview">No execution logs yet.</pre></div>
+          <div class="results-bottom"><div class="summary-card inner-card"><div class="mini-heading"><svg><use href="#i-file"/></svg>Run Summary</div><dl id="run-summary"><div><dt>Geometry</dt><dd>—</dd></div><div><dt>Dataset</dt><dd>—</dd></div><div><dt>Gases</dt><dd>—</dd></div><div><dt>Channels</dt><dd>—</dd></div></dl></div>
+            <div class="download-card inner-card"><div class="mini-heading"><svg><use href="#i-download"/></svg>Downloads</div><div class="download-grid" id="downloads">
+              <button class="btn small" disabled>rad.tab</button><button class="btn small" disabled>atm.tab</button><button class="btn small" disabled>obs.tab</button><button class="btn small" disabled>config.ctl</button><button class="btn small" disabled>Plots (ZIP)</button><button class="btn small primary-mini" disabled>All Results (ZIP)</button>
+            </div></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section id="datasets-section" class="section subpage" hidden><div class="subpage-header"><div><h1>Data Manager</h1><p>Discover built-in lookup tables and register compatible dataset packages.</p></div><span class="badge">Local & uploaded</span></div>
+      <div class="subpage-grid"><div class="neo-panel side-card"><h2>Register a Dataset</h2><p class="subtle">Upload a ZIP of JURASSIC-compatible <code>family_792.0000_GAS.tab</code> and <code>family_792.0000.filt</code> files. This registers supplied spectroscopy; it does not generate new physical data.</p>
+        <label class="stack-label">Dataset display name<input id="dataset-label" class="neo-inset" placeholder="e.g. My spectroscopic set" maxlength="55"></label>
+        <label class="stack-label">Lookup-table bundle (.zip)<input id="dataset-upload" type="file" accept=".zip"></label>
+        <button id="upload-dataset-button" class="primary-btn">Register Dataset</button><p id="dataset-upload-message" class="subtle"></p>
+        <div class="notice">Custom gases require a compatible atmospheric profile at simulation time. Header-only lookup tables are labeled and may have no effect at that channel.</div>
+      </div><div class="neo-panel side-card"><h2>Lookup Table Catalog</h2><div id="catalog-table" class="table-scroll"></div></div></div>
+    </section>
+
+    <section id="configurations-section" class="section subpage" hidden><div class="subpage-header"><div><h1>Configuration Studio</h1><p>Inspect, import and export supported JURASSIC control settings.</p></div></div>
+      <div class="neo-panel side-card"><p>Control-file imports use a safe allowlist. Unknown directives and uploaded paths are ignored rather than executed.</p>
+        <div class="button-row"><button class="btn" id="config-studio-preview">Preview Current Configuration</button><button class="btn" id="config-studio-save">Download .ctl</button></div><pre id="config-studio-text" class="text-preview">Select a dataset and preview the configuration.</pre></div>
+    </section>
+
+    <section id="compare-section" class="section subpage" hidden><div class="subpage-header"><div><h1>Compare Runs</h1><p>Overlay completed simulations to inspect changes across gases, channels or parameters.</p></div></div>
+      <div class="neo-panel side-card"><div class="pane-heading"><h2>Select 2–4 completed runs</h2><div><select class="neo-inset" id="compare-metric"><option value="radiance">Radiance / BBT</option><option value="transmittance">Transmittance</option></select><button id="compare-button" class="btn primary-mini">Compare</button></div></div>
+        <div id="compare-picker" class="history-list"></div><div id="compare-plot" class="compare-plot"></div><p id="compare-note" class="subtle"></p>
+      </div>
+    </section>
+
+    <section id="history-section" class="section subpage" hidden><div class="subpage-header"><div><h1>Run History</h1><p>Inspect previous simulations and reopen stored results.</p></div><button class="btn" id="history-refresh">Refresh</button></div><div class="neo-panel side-card"><div id="run-history" class="history-list"></div></div></section>
+    <section id="settings-section" class="section subpage" hidden><div class="subpage-header"><div><h1>Settings & System Status</h1><p>Check the scientific toolchain and runtime environment.</p></div></div><div class="neo-panel side-card"><h2>JURASSIC Engine</h2><div id="system-overview" class="system-info">Checking…</div><div class="notice">The application has no user accounts. It is intended for local development first. Before public VM deployment, configure TLS, a reverse proxy, request rate limits, resource isolation, persistent external job workers and storage quotas.</div></div></section>
+  </main>
+</div>
+{% endblock %}

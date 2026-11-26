@@ -1,0 +1,46 @@
+.venv/
+instance/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.env
+.venv_pre_move_*/
+uploads/
+.coverage
+
+# Python virtual environments
+.venv/
+.venv_pre_move_*/
+venv/
+
+# Python temporary files
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Local application data
+instance/
+runs/
+uploads/
+
+# Build artifacts
+build/
+dist/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local logs
+*.log
+
+# Local repair backups
+.plot_fix_backups/
+*.py.backup_*

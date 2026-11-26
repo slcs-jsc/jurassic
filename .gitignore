@@ -38,3 +38,6 @@ src/time2jsec
 src/zenith
 tab/
 tests/*/data/
+
+# Allow the Flask Web Runner project
+!projects/web_runner/
